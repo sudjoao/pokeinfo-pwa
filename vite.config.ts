@@ -60,12 +60,32 @@ export default defineConfig({
             },
           },
           {
-            // Detalhes individuais (cada resposta tem ~200 KB, por isso o limite baixo)
+            // Espécies e cadeias de evolução (respostas pequenas, ~2 a 50 KB)
+            urlPattern: /^https:\/\/pokeapi\.co\/api\/v2\/(pokemon-species|evolution-chain)\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'pokeapi-species',
+              expiration: { maxEntries: 100, maxAgeSeconds: 7 * DAY },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
+            // Detalhes individuais (cada resposta tem ~300 KB, por isso o limite baixo)
             urlPattern: /^https:\/\/pokeapi\.co\/api\/v2\/.*/i,
             handler: 'CacheFirst',
             options: {
               cacheName: 'pokeapi-detail',
               expiration: { maxEntries: 60, maxAgeSeconds: 7 * DAY },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
+            // Gritos (cries) dos Pokémon, ~7 KB cada
+            urlPattern: /^https:\/\/raw\.githubusercontent\.com\/PokeAPI\/cries\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'pokeapi-cries',
+              expiration: { maxEntries: 60, maxAgeSeconds: 30 * DAY },
               cacheableResponse: { statuses: [0, 200] },
             },
           },

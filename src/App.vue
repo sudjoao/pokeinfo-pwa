@@ -4,6 +4,11 @@ import { RouterView } from 'vue-router'
 
 <template>
   <v-app>
-    <RouterView />
+    <!-- A Home fica em KeepAlive para preservar o scroll infinito e a busca ao voltar do detalhe. -->
+    <RouterView v-slot="{ Component }">
+      <KeepAlive :include="['HomeView']">
+        <component :is="Component" />
+      </KeepAlive>
+    </RouterView>
   </v-app>
 </template>

@@ -1,7 +1,7 @@
 # PokéInfo
 
 Pokédex em formato de **PWA** (Progressive Web App) para consultar informações sobre Pokémon:
-tipos, número na Pokédex e, em breve, detalhes e cadeias de evolução. Feita para ser instalada
+tipos, número na Pokédex, stats, habilidades e cadeias de evolução. Feita para ser instalada
 na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéAPI](https://pokeapi.co/).
 
 ## Funcionalidades
@@ -9,14 +9,29 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
 - Listagem de todos os Pokémon com **scroll infinito** (lotes de 24).
 - **Busca** por nome (parcial, ex.: `pika`) ou por número da Pokédex (ex.: `25`), refletida na URL (`?q=pika`).
 - Cards no padrão **Material Design 3** com artwork oficial, número, nome e tipos traduzidos.
+- **Tela de detalhes** (`/pokemon/:id`, aceita número ou nome): artwork, categoria da espécie,
+  descrição da Pokédex, altura/peso, gênero, grupos de ovo, habilidades (com a oculta marcada),
+  stats base com barras, formas alternativas e navegação anterior/próximo.
+- **Cadeia de evolução** com o "como evoluir" em português para todos os gatilhos da PokéAPI
+  (nível, item, troca, amizade, local, hora do dia, golpe conhecido, stats, formas regionais…).
+  O método padrão dos jogos atuais fica em destaque; métodos de jogos antigos ficam recolhidos.
+- **Grito do Pokémon** ao abrir a tela de detalhes (com botão para repetir e para silenciar).
 - Tema claro/escuro seguindo a preferência do sistema.
 - **Offline**: índice e resumos ficam em cache local; artworks e respostas recentes ficam no service worker.
 - Instalável no iOS/Android como app (manifest + service worker).
 
+### Limitações conhecidas
+
+- A PokéAPI não tem textos em português: descrição da Pokédex, categoria da espécie, nomes de
+  habilidades, golpes e locais aparecem em inglês. Itens de evolução comuns são traduzidos no app.
+- Os gritos vêm só em `.ogg` (Vorbis). Safari toca a partir do macOS 14.1 / iOS 17.4 (suporte
+  completo no 18.4); em navegadores sem suporte o botão de som não aparece. No iOS o áudio só
+  toca depois de um toque do usuário, por isso o grito é disparado no toque do card.
+
 ### Roadmap
 
-- Página de detalhes do Pokémon (stats, habilidades, altura/peso).
-- Cadeia de evolução e como evoluir.
+- Fraquezas e resistências por tipo.
+- Descrição das habilidades.
 - Favoritos.
 
 ## Tecnologias
@@ -44,17 +59,30 @@ src/
   plugins/vuetify.ts          # tema (cores, ícones, defaults do Material)
   types/pokemon.ts            # tipos de domínio (PokemonSummary, PokemonType…)
   services/pokeapi/           # cliente HTTP, DTOs da PokéAPI e mapeamento para o domínio
-  utils/                      # helpers puros (formatação, URLs de artwork, cores dos tipos, storage)
-  stores/pokedex.ts           # Pinia: índice da Pokédex + cache de resumos (persistido)
+    pokemon.service.ts        #   índice, resumo e detalhe do Pokémon
+    species.service.ts        #   espécie (descrição, gênero, grupos de ovo, formas)
+    evolution.service.ts      #   cadeia de evolução -> árvore com métodos descritos
+  utils/
+    pokemon.ts                # formatação, URLs de artwork e de grito, cores dos tipos, stats
+    evolution.ts              # regras "como evoluir" em pt-BR (gatilhos + condições)
+    storage.ts
+  stores/
+    pokedex.ts                # Pinia: índice da Pokédex + cache de resumos (persistido)
+    pokemonDetail.ts          # Pinia: detalhes, espécies e cadeias (só em memória)
   composables/
     usePokemonList.ts         # busca + lotes do scroll infinito
+    usePokemonDetail.ts       # carrega detalhe -> espécie -> cadeia, reage à rota
+    useCry.ts                 # áudio único compartilhado, desbloqueado no gesto do usuário
     useDebouncedRef.ts
   components/
-    atoms/                    # TypeChip, PokemonArtwork, DexNumber
-    molecules/                # PokemonCard, PokemonCardSkeleton, SearchField, EmptyState
-    organisms/                # AppHeader, PokemonGrid (scroll infinito)
-    templates/                # DefaultLayout (app bar + área de conteúdo)
-  views/HomeView.vue          # página inicial: orquestra busca, lista e estados vazios/erro
+    atoms/                    # TypeChip, PokemonArtwork, DexNumber, StatBar, InfoTile, CryButton
+    molecules/                # PokemonCard, SearchField, EmptyState, PokemonHero, AboutGrid,
+                              # AbilityList, StatsList, EvolutionStage, EvolutionMethod, VarietyChips
+    organisms/                # AppHeader, PokemonGrid, EvolutionChain, EvolutionBranch (recursivo)
+    templates/                # DefaultLayout (home) e DetailLayout (voltar + ações)
+  views/
+    HomeView.vue              # página inicial (fica em KeepAlive para preservar o scroll)
+    PokemonDetailView.vue     # página de detalhes
 ```
 
 ### Fluxo de dados
@@ -63,6 +91,9 @@ src/
 2. A busca filtra esse índice localmente, sem novas requisições.
 3. O scroll infinito pede os resumos do próximo lote (`/pokemon/{id}`) apenas para os que ainda não estão em cache, e guarda só um objeto enxuto (`id`, `name`, `types`).
 4. O artwork é montado a partir do id, sem depender do JSON de detalhe.
+5. A tela de detalhes busca `/pokemon/{id}`, depois `/pokemon-species/{id}` e
+   `/evolution-chain/{id}`; os tipos dos estágios da evolução vêm do cache de resumos.
+   A URL do grito também é derivada do id, o que permite tocá-lo ainda no toque do card.
 
 ### Estratégia de cache
 
@@ -72,8 +103,13 @@ O objetivo é funcionar offline sem inflar o armazenamento do usuário:
 | --- | --- | --- |
 | `localStorage` | índice (`pokeinfo:index:v1`) e resumos enxutos (`pokeinfo:summaries:v1`) | ~200 KB para a Pokédex inteira |
 | Service worker `pokeapi-index` | resposta do índice | 3 entradas, 7 dias |
-| Service worker `pokeapi-detail` | respostas de detalhe da PokéAPI (~200 KB cada) | 60 entradas, 7 dias |
+| Service worker `pokeapi-species` | espécies e cadeias de evolução (~2 a 50 KB) | 100 entradas, 7 dias |
+| Service worker `pokeapi-detail` | respostas de detalhe da PokéAPI (~300 KB cada) | 60 entradas, 7 dias |
 | Service worker `pokeapi-artwork` | artworks oficiais | 200 entradas, 30 dias |
+| Service worker `pokeapi-cries` | gritos dos Pokémon (~7 KB cada) | 60 entradas, 30 dias |
+
+Detalhes, espécies e cadeias ficam só em memória durante a sessão (store `pokemonDetail`);
+não são persistidos no `localStorage`.
 
 ## Como rodar
 

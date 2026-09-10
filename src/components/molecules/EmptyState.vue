@@ -25,3 +25,12 @@ const emit = defineEmits<{ action: [] }>()
     </template>
   </v-empty-state>
 </template>
+
+<style scoped>
+/* O headline padrão do v-empty-state é grande demais para telas de celular. */
+:deep(.v-empty-state__headline) {
+  font-size: clamp(1.5rem, 7vw, 2.5rem);
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+</style>

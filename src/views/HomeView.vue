@@ -1,5 +1,8 @@
 <script setup lang="ts">
+import { useRouter } from 'vue-router'
 import { usePokemonList } from '@/composables/usePokemonList'
+import { useCry } from '@/composables/useCry'
+import type { PokemonSummary } from '@/types/pokemon'
 import DefaultLayout from '@/components/templates/DefaultLayout.vue'
 import SearchField from '@/components/molecules/SearchField.vue'
 import EmptyState from '@/components/molecules/EmptyState.vue'
@@ -18,6 +21,15 @@ const {
   loadMore,
   retry,
 } = usePokemonList()
+
+const router = useRouter()
+const cry = useCry()
+
+/** O grito toca aqui, dentro do toque, porque o iOS bloqueia áudio fora de um gesto do usuário. */
+function openPokemon(pokemon: PokemonSummary): void {
+  cry.play(pokemon.id)
+  router.push({ name: 'pokemon', params: { id: pokemon.id } })
+}
 </script>
 
 <template>
@@ -55,6 +67,7 @@ const {
       :error-message="errorMessage"
       @load="loadMore"
       @retry="retry"
+      @select="openPokemon"
     />
   </DefaultLayout>
 </template>

@@ -1,4 +1,4 @@
-import type { PokemonType } from '@/types/pokemon'
+import type { PokemonType, StatName } from '@/types/pokemon'
 
 const ARTWORK_BASE_URL =
   'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork'
@@ -53,4 +53,94 @@ export const TYPE_STYLES: Record<PokemonType, TypeStyle> = {
   fairy: { label: 'Fada', color: '#EE99AC' },
   stellar: { label: 'Estelar', color: '#40B5A5' },
   unknown: { label: 'Desconhecido', color: '#68A090' },
+}
+
+const CRY_BASE_URL = 'https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest'
+
+/** URL do grito (cry) mais recente, derivada só do id. Arquivo .ogg (Vorbis), ~7 KB. */
+export function cryUrl(id: number): string {
+  return `${CRY_BASE_URL}/${id}.ogg`
+}
+
+const decimalFormatter = new Intl.NumberFormat('pt-BR', {
+  minimumFractionDigits: 1,
+  maximumFractionDigits: 1,
+})
+
+/** 0.4 -> "0,4 m" */
+export function formatHeight(meters: number): string {
+  return `${decimalFormatter.format(meters)} m`
+}
+
+/** 6 -> "6,0 kg" */
+export function formatWeight(kilograms: number): string {
+  return `${decimalFormatter.format(kilograms)} kg`
+}
+
+export const STAT_LABELS: Record<StatName, { label: string; short: string }> = {
+  hp: { label: 'HP', short: 'HP' },
+  attack: { label: 'Ataque', short: 'ATK' },
+  defense: { label: 'Defesa', short: 'DEF' },
+  'special-attack': { label: 'Ataque Especial', short: 'SpA' },
+  'special-defense': { label: 'Defesa Especial', short: 'SpD' },
+  speed: { label: 'Velocidade', short: 'SPD' },
+}
+
+/** Valor máximo de um stat base na série principal (Blissey, HP 255). */
+export const MAX_BASE_STAT = 255
+
+/** Cor da barra de stat conforme o valor (escala parecida com a de sites de Pokédex). */
+export function statColor(value: number): string {
+  if (value < 50) return '#ef4444'
+  if (value < 80) return '#f97316'
+  if (value < 100) return '#eab308'
+  if (value < 120) return '#84cc16'
+  return '#22c55e'
+}
+
+const EGG_GROUP_LABELS: Record<string, string> = {
+  monster: 'Monstro',
+  water1: 'Água 1',
+  water2: 'Água 2',
+  water3: 'Água 3',
+  bug: 'Inseto',
+  flying: 'Voador',
+  ground: 'Campo',
+  fairy: 'Fada',
+  plant: 'Planta',
+  humanshape: 'Humanoide',
+  mineral: 'Mineral',
+  indeterminate: 'Amorfo',
+  ditto: 'Ditto',
+  dragon: 'Dragão',
+  'no-eggs': 'Sem ovos',
+}
+
+export function formatEggGroup(name: string): string {
+  return EGG_GROUP_LABELS[name] ?? formatPokemonName(name)
+}
+
+/** "generation-iv" -> 4 */
+export function generationNumber(name: string): number | null {
+  const roman = name.replace(/^generation-/, '').toUpperCase()
+  const values: Record<string, number> = { I: 1, V: 5, X: 10 }
+  let total = 0
+  for (let i = 0; i < roman.length; i++) {
+    const current = values[roman[i]!] ?? 0
+    const next = values[roman[i + 1] ?? ''] ?? 0
+    total += current < next ? -current : current
+  }
+  return total > 0 ? total : null
+}
+
+export interface GenderRatio {
+  female: number
+  male: number
+}
+
+/** gender_rate da PokéAPI: -1 = sem gênero, 0..8 = chance de fêmea em oitavos. */
+export function genderRatio(rate: number): GenderRatio | null {
+  if (rate < 0) return null
+  const female = (rate / 8) * 100
+  return { female, male: 100 - female }
 }
