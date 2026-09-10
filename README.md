@@ -13,7 +13,8 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
   Jogos com mais de uma Pokédex (Kalos, ilhas de Alola, DLCs de Galar e Paldea…) ganham chips para
   alternar entre elas. Nas regiões com formas regionais (Alola, Galar, Hisui, Paldea) o card já
   mostra a forma daquela região. A busca numérica passa a usar o número regional. Tudo fica na URL
-  (`?game=sword-shield&dex=crown-tundra&q=snom`).
+  (`?game=sword-shield&dex=crown-tundra&q=snom`). Ao abrir um Pokémon a partir de um jogo, a tela
+  de detalhes mostra o número regional e o anterior/próximo seguem a ordem da Pokédex daquele jogo.
 - Cards no padrão **Material Design 3** com artwork oficial, número, nome e tipos traduzidos.
 - **Tela de detalhes** (`/pokemon/:id`, aceita número ou nome): artwork, categoria da espécie,
   descrição da Pokédex, altura/peso, gênero, grupos de ovo, habilidades (com a oculta marcada),
@@ -29,7 +30,7 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
 ### Limitações conhecidas
 
 - A PokéAPI não tem textos em português: descrição da Pokédex, categoria da espécie, nomes de
-  habilidades, golpes e locais aparecem em inglês. Itens de evolução comuns são traduzidos no app.
+  habilidades, golpes, itens e locais ficam em inglês (como nos jogos), o que facilita a busca.
 - A lista de jogos é estática (`src/data/games.ts`): quando a PokéAPI incluir um jogo novo, é preciso
   adicioná-lo ali. Versões japonesas, Colosseum/XD (sem Pokédex) e jogos fora da série principal
   ficam de fora; DLCs aparecem como Pokédex do jogo base.
@@ -88,7 +89,7 @@ src/
     pokemonDetail.ts          # Pinia: detalhes, espécies e cadeias (só em memória)
   composables/
     usePokemonList.ts         # busca + filtro por jogo + lotes do scroll infinito
-    usePokemonDetail.ts       # carrega detalhe -> espécie -> cadeia, reage à rota
+    usePokemonDetail.ts       # carrega detalhe -> espécie -> cadeia, reage à rota e ao jogo (?game=)
     useCry.ts                 # áudio único compartilhado, desbloqueado no gesto do usuário
     useDebouncedRef.ts
   components/

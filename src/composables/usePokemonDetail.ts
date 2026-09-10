@@ -3,6 +3,7 @@ import { ApiError } from '@/services/pokeapi/client'
 import { collectSpeciesIds } from '@/services/pokeapi/evolution.service'
 import { usePokedexStore } from '@/stores/pokedex'
 import { usePokemonDetailStore } from '@/stores/pokemonDetail'
+import { buildDexList, buildRegionalFormIndex, type GameContext } from '@/utils/games'
 import type {
   EvolutionChain,
   PokemonDetail,
@@ -14,6 +15,11 @@ import type {
 export type DetailStatus = 'loading' | 'ready' | 'not-found' | 'error'
 export type SectionStatus = 'loading' | 'ready' | 'error'
 
+/** Vizinho na navegação anterior/próximo; `dexNumber` só existe com um jogo selecionado. */
+export interface NeighborEntry extends PokemonIndexEntry {
+  dexNumber?: number
+}
+
 function errorMessageOf(error: unknown, fallback: string): string {
   return error instanceof Error ? error.message : fallback
 }
@@ -21,8 +27,9 @@ function errorMessageOf(error: unknown, fallback: string): string {
 /**
  * Orquestra o carregamento da tela de detalhe: primeiro o Pokémon (libera o topo da
  * tela), depois espécie + cadeia de evolução em paralelo. Reage à troca do id na rota.
+ * Com um jogo selecionado (`context`), a navegação anterior/próximo segue a Pokédex dele.
  */
-export function usePokemonDetail(idOrName: Ref<string>) {
+export function usePokemonDetail(idOrName: Ref<string>, context: Ref<GameContext | null>) {
   const store = usePokemonDetailStore()
   const pokedex = usePokedexStore()
 
@@ -116,17 +123,55 @@ export function usePokemonDetail(idOrName: Ref<string>) {
     await loadSpecies(generation, detail.value.speciesId)
   }
 
-  // Navegação anterior/próximo pelo índice da Pokédex (que já fica em cache).
-  const indexPosition = computed(() => {
-    const id = detail.value?.id
-    return id === undefined ? -1 : pokedex.index.findIndex((entry) => entry.id === id)
+  // Pokédex do jogo selecionado (se houver). Falhas aqui não bloqueiam a tela:
+  // sem as entradas, a navegação simplesmente volta a seguir a ordem nacional.
+  const regionalForms = computed(() => buildRegionalFormIndex(pokedex.index))
+  const dexList = computed(() => {
+    const dex = context.value?.dex
+    const entries = dex ? pokedex.dexEntries[dex.slug] : undefined
+    return dex && entries ? buildDexList(entries, dex, regionalForms.value) : null
   })
-  const previous = computed<PokemonIndexEntry | null>(() =>
-    indexPosition.value > 0 ? (pokedex.index[indexPosition.value - 1] ?? null) : null,
+
+  watch(
+    () => context.value?.dex.slug,
+    (slug) => {
+      if (slug) pokedex.ensureDexEntries(slug).catch(() => {})
+    },
+    { immediate: true },
   )
-  const next = computed<PokemonIndexEntry | null>(() =>
-    indexPosition.value >= 0 ? (pokedex.index[indexPosition.value + 1] ?? null) : null,
+
+  /** Posição do Pokémon atual na Pokédex do jogo: pela forma exata ou, se não houver, pela espécie. */
+  const dexPosition = computed(() => {
+    const list = dexList.value
+    const current = detail.value
+    if (!list || !current) return -1
+    const byForm = list.findIndex((entry) => entry.id === current.id)
+    return byForm >= 0 ? byForm : list.findIndex((entry) => entry.speciesId === current.speciesId)
+  })
+
+  /** Número do Pokémon atual na Pokédex do jogo selecionado (null fora dela). */
+  const dexNumber = computed(() =>
+    dexPosition.value >= 0 ? (dexList.value?.[dexPosition.value]?.dexNumber ?? null) : null,
   )
+
+  // Navegação anterior/próximo: pela Pokédex do jogo quando o Pokémon está nela,
+  // senão pelo índice nacional (que já fica em cache).
+  const neighbors = computed<{ list: readonly NeighborEntry[]; position: number }>(() => {
+    if (dexPosition.value >= 0 && dexList.value) {
+      return { list: dexList.value, position: dexPosition.value }
+    }
+    const id = detail.value?.id
+    const position = id === undefined ? -1 : pokedex.index.findIndex((entry) => entry.id === id)
+    return { list: pokedex.index, position }
+  })
+  const previous = computed<NeighborEntry | null>(() => {
+    const { list, position } = neighbors.value
+    return position > 0 ? (list[position - 1] ?? null) : null
+  })
+  const next = computed<NeighborEntry | null>(() => {
+    const { list, position } = neighbors.value
+    return position >= 0 ? (list[position + 1] ?? null) : null
+  })
 
   watch(idOrName, load, { immediate: true })
   pokedex.loadIndex()
@@ -140,6 +185,7 @@ export function usePokemonDetail(idOrName: Ref<string>) {
     speciesStatus,
     chainStatus,
     errorMessage,
+    dexNumber,
     previous,
     next,
     retry,

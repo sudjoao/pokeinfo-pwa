@@ -33,62 +33,13 @@ export interface EvolutionRequirement {
   minDamageTaken: number | null
 }
 
-/** Nomes pt-BR dos itens de evolução mais comuns; os demais caem no inglês formatado. */
+/**
+ * Itens ficam com o nome em inglês (como nos jogos), para facilitar a busca.
+ * Só ajustamos slugs que perdem o apóstrofo na PokéAPI.
+ */
 const ITEM_LABELS: Record<string, string> = {
-  'fire-stone': 'Pedra do Fogo',
-  'water-stone': 'Pedra da Água',
-  'thunder-stone': 'Pedra do Trovão',
-  'leaf-stone': 'Pedra da Folha',
-  'moon-stone': 'Pedra da Lua',
-  'sun-stone': 'Pedra do Sol',
-  'shiny-stone': 'Pedra Brilhante',
-  'dusk-stone': 'Pedra do Crepúsculo',
-  'dawn-stone': 'Pedra da Alvorada',
-  'ice-stone': 'Pedra do Gelo',
-  'oval-stone': 'Pedra Oval',
-  'kings-rock': 'Rocha do Rei',
-  'metal-coat': 'Revestimento Metálico',
-  'dragon-scale': 'Escama de Dragão',
-  'up-grade': 'Melhoria',
-  'dubious-disc': 'Disco Duvidoso',
-  protector: 'Protetor',
-  electirizer: 'Eletrizador',
-  magmarizer: 'Magmarizador',
-  'razor-fang': 'Presa Navalha',
-  'razor-claw': 'Garra Navalha',
-  'prism-scale': 'Escama Prisma',
-  'reaper-cloth': 'Manto Ceifador',
-  'deep-sea-tooth': 'Dente do Fundo do Mar',
-  'deep-sea-scale': 'Escama do Fundo do Mar',
-  'whipped-dream': 'Chantilly dos Sonhos',
-  sachet: 'Sachê',
-  'tart-apple': 'Maçã Azeda',
-  'sweet-apple': 'Maçã Doce',
-  'syrupy-apple': 'Maçã Melada',
-  'cracked-pot': 'Bule Rachado',
-  'chipped-pot': 'Bule Lascado',
-  'galarica-cuff': 'Bracelete Galárica',
-  'galarica-wreath': 'Coroa Galárica',
-  'black-augurite': 'Augurita Negra',
-  'peat-block': 'Bloco de Turfa',
-  'linking-cord': 'Cabo de Conexão',
-  'auspicious-armor': 'Armadura Auspiciosa',
-  'malicious-armor': 'Armadura Maliciosa',
-  'scroll-of-darkness': 'Pergaminho das Trevas',
-  'scroll-of-waters': 'Pergaminho das Águas',
-  'leaders-crest': 'Brasão do Líder',
-  'metal-alloy': 'Liga Metálica',
-  'masterpiece-teacup': 'Xícara Obra-prima',
-  'unremarkable-teacup': 'Xícara Comum',
-  'odd-incense': 'Incenso Estranho',
-  'rock-incense': 'Incenso de Rocha',
-  'rose-incense': 'Incenso de Rosa',
-  'pure-incense': 'Incenso Puro',
-  'luck-incense': 'Incenso da Sorte',
-  'wave-incense': 'Incenso da Onda',
-  'sea-incense': 'Incenso do Mar',
-  'lax-incense': 'Incenso Relaxante',
-  'full-incense': 'Incenso Cheio',
+  'kings-rock': "King's Rock",
+  'leaders-crest': "Leader's Crest",
 }
 
 export function formatItemName(name: string): string {
@@ -160,9 +111,9 @@ function baseSentence(r: EvolutionRequirement): string {
     case 'use-move':
       return `Usar ${move} ${times}`
     case 'three-defeated-bisharp':
-      return 'Derrotar 3 Bisharp que lideram um bando, segurando Brasão do Líder'
+      return "Derrotar 3 Bisharp que lideram um bando, segurando Leader's Crest"
     case 'gimmighoul-coins':
-      return 'Subir de nível com 999 Moedas Gimmighoul'
+      return 'Subir de nível com 999 Gimmighoul Coins'
     case 'other':
       return r.minLevel ? `Nível ${r.minLevel} (condição especial)` : 'Condição especial'
     default:
@@ -188,7 +139,7 @@ function extraConditions(r: EvolutionRequirement): string[] {
   if (r.partySpecies) parts.push(`com ${formatPokemonName(r.partySpecies)} no time`)
   if (r.partyType) parts.push(`com um Pokémon do tipo ${typeLabel(r.partyType)} no time`)
   if (r.location) parts.push(`em ${formatPokemonName(r.location)}`)
-  if (r.nearSpecialRock) parts.push('perto de uma pedra especial (Pedra Musgosa ou Pedra Gelada)')
+  if (r.nearSpecialRock) parts.push('perto de uma Moss Rock ou Icy Rock')
   if (r.needsOverworldRain) parts.push('com chuva no mapa')
   if (r.needsMultiplayer) parts.push('em Union Circle (multijogador)')
   if (r.turnUpsideDown) parts.push('com o console de cabeça para baixo')

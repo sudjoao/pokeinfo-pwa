@@ -1,15 +1,23 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { PokemonDetail } from '@/types/pokemon'
-import { artworkUrl, formatPokemonName, TYPE_STYLES } from '@/utils/pokemon'
+import { artworkUrl, formatDexNumber, formatPokemonName, TYPE_STYLES } from '@/utils/pokemon'
 import PokemonArtwork from '@/components/atoms/PokemonArtwork.vue'
 import DexNumber from '@/components/atoms/DexNumber.vue'
 import TypeChip from '@/components/atoms/TypeChip.vue'
 import CryButton from '@/components/atoms/CryButton.vue'
 
+/** Número do Pokémon na Pokédex de um jogo, mostrado no lugar do nacional quando há jogo selecionado. */
+export interface RegionalNumber {
+  number: number
+  dexLabel: string
+  gameTitle: string
+}
+
 const props = defineProps<{
   pokemon: PokemonDetail
   genus?: string | null
+  regional?: RegionalNumber | null
   showCry?: boolean
   cryPlaying?: boolean
   cryMuted?: boolean
@@ -18,6 +26,7 @@ const props = defineProps<{
 const emit = defineEmits<{ playCry: [] }>()
 
 const name = computed(() => formatPokemonName(props.pokemon.name))
+const nationalLabel = computed(() => formatDexNumber(props.pokemon.speciesId))
 const image = computed(() => artworkUrl(props.pokemon.id))
 const accent = computed(() => TYPE_STYLES[props.pokemon.types[0] ?? 'unknown'].color)
 </script>
@@ -30,9 +39,18 @@ const accent = computed(() => TYPE_STYLES[props.pokemon.types[0] ?? 'unknown'].c
     <v-card-item>
       <div class="d-flex align-start justify-space-between ga-2">
         <div>
-          <DexNumber :id="pokemon.id" />
+          <div class="d-flex align-baseline flex-wrap ga-1">
+            <DexNumber v-if="regional" :id="regional.number" :digits="3" />
+            <DexNumber v-else :id="pokemon.id" />
+            <span v-if="regional" class="pokemon-hero__national text-label-small">
+              Nac. {{ nationalLabel }}
+            </span>
+          </div>
           <v-card-title class="text-headline-small pa-0">{{ name }}</v-card-title>
           <v-card-subtitle v-if="genus" class="pa-0">{{ genus }}</v-card-subtitle>
+          <p v-if="regional" class="text-body-small opacity-70 mt-1 mb-0">
+            Pokédex de {{ regional.dexLabel }} · {{ regional.gameTitle }}
+          </p>
         </div>
         <CryButton v-if="showCry" :playing="cryPlaying" :muted="cryMuted" @play="emit('playCry')" />
       </div>
@@ -46,6 +64,11 @@ const accent = computed(() => TYPE_STYLES[props.pokemon.types[0] ?? 'unknown'].c
 <style scoped>
 .pokemon-hero {
   overflow: hidden;
+}
+
+.pokemon-hero__national {
+  opacity: 0.45;
+  font-variant-numeric: tabular-nums;
 }
 
 .pokemon-hero__art {

@@ -3,7 +3,7 @@ import { useRoute, useRouter, type LocationQueryRaw } from 'vue-router'
 import { GAMES, type Game, type GameDex } from '@/data/games'
 import { usePokedexStore } from '@/stores/pokedex'
 import { useDebouncedRef } from '@/composables/useDebouncedRef'
-import { buildRegionalFormIndex, findGame, resolveDex } from '@/utils/games'
+import { buildDexList, buildRegionalFormIndex, findGame, resolveDex } from '@/utils/games'
 import type { PokemonIndexEntry, PokemonListItem } from '@/types/pokemon'
 
 export const PAGE_SIZE = 24
@@ -87,17 +87,7 @@ export function usePokemonList() {
   const source = computed<ListSource[]>(() => {
     if (!dex.value) return store.index
     const entries = store.dexEntries[dex.value.slug]
-    if (!entries) return []
-    const forms = dex.value.formRegion ? regionalForms.value[dex.value.formRegion] : null
-    return entries.map((entry) => {
-      const form = forms?.get(entry.speciesName)
-      return {
-        id: form?.id ?? entry.speciesId,
-        name: form?.name ?? entry.speciesName,
-        dexNumber: entry.entryNumber,
-        speciesId: entry.speciesId,
-      }
-    })
+    return entries ? buildDexList(entries, dex.value, regionalForms.value) : []
   })
 
   const filtered = computed(() =>

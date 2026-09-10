@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { gameContextQuery } from '@/utils/games'
 import { usePokemonList } from '@/composables/usePokemonList'
 import { useCry } from '@/composables/useCry'
 import type { PokemonSummary } from '@/types/pokemon'
@@ -45,10 +46,14 @@ const emptyMessage = computed(() =>
     : 'Tente buscar por outro nome ou número da Pokédex.',
 )
 
-/** O grito toca aqui, dentro do toque, porque o iOS bloqueia áudio fora de um gesto do usuário. */
+/**
+ * O grito toca aqui, dentro do toque, porque o iOS bloqueia áudio fora de um gesto do usuário.
+ * O jogo selecionado vai junto na URL para o detalhe mostrar o número regional e navegar pela dex.
+ */
 function openPokemon(pokemon: PokemonSummary): void {
   cry.play(pokemon.id)
-  router.push({ name: 'pokemon', params: { id: pokemon.id } })
+  const context = game.value && dex.value ? { game: game.value, dex: dex.value } : null
+  router.push({ name: 'pokemon', params: { id: pokemon.id }, query: gameContextQuery(context) })
 }
 </script>
 

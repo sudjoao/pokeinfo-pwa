@@ -2,8 +2,9 @@
 import { computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { mdiChevronLeft, mdiChevronRight, mdiVolumeHigh, mdiVolumeOff } from '@mdi/js'
-import { usePokemonDetail } from '@/composables/usePokemonDetail'
+import { usePokemonDetail, type NeighborEntry } from '@/composables/usePokemonDetail'
 import { useCry } from '@/composables/useCry'
+import { gameContextFromQuery, gameContextQuery } from '@/utils/games'
 import { formatDexNumber, formatPokemonName } from '@/utils/pokemon'
 import DetailLayout from '@/components/templates/DetailLayout.vue'
 import EmptyState from '@/components/molecules/EmptyState.vue'
@@ -19,6 +20,8 @@ const route = useRoute()
 const router = useRouter()
 
 const idParam = computed(() => String(route.params.id ?? ''))
+/** Jogo selecionado na Home, preservado na URL (`?game=&dex=`). */
+const context = computed(() => gameContextFromQuery(route.query))
 
 const {
   detail,
@@ -29,10 +32,28 @@ const {
   speciesStatus,
   chainStatus,
   errorMessage,
+  dexNumber,
   previous,
   next,
   retry,
-} = usePokemonDetail(idParam)
+} = usePokemonDetail(idParam, context)
+
+const regional = computed(() =>
+  context.value && dexNumber.value !== null
+    ? {
+        number: dexNumber.value,
+        dexLabel: context.value.dex.label,
+        gameTitle: context.value.game.title,
+      }
+    : null,
+)
+
+/** Rótulo dos vizinhos: número regional quando a navegação segue a Pokédex do jogo. */
+function neighborNumber(entry: NeighborEntry): string {
+  return entry.dexNumber === undefined
+    ? formatDexNumber(entry.id)
+    : formatDexNumber(entry.dexNumber, 3)
+}
 
 const cry = useCry()
 
@@ -45,15 +66,15 @@ watch(detail, (value) => {
   if (value) cry.autoPlay(value.id, value.cryUrl)
 })
 
-/** Navega para outro Pokémon tocando o grito ainda dentro do gesto do usuário. */
+/** Navega para outro Pokémon tocando o grito ainda dentro do gesto do usuário; mantém o jogo na URL. */
 function goTo(id: number): void {
   cry.play(id)
-  router.push({ name: 'pokemon', params: { id } })
+  router.push({ name: 'pokemon', params: { id }, query: gameContextQuery(context.value) })
 }
 
 function goBack(): void {
   if (window.history.state?.back) router.back()
-  else router.push({ name: 'home' })
+  else router.push({ name: 'home', query: gameContextQuery(context.value) })
 }
 
 const showVarieties = computed(() => (species.value?.varieties.length ?? 0) > 1)
@@ -76,7 +97,7 @@ const showVarieties = computed(() => (species.value?.varieties.length ?? 0) > 1)
       title="Pokémon não encontrado"
       message="Confira o número ou o nome e tente de novo."
       action-label="Voltar à Pokédex"
-      @action="router.push({ name: 'home' })"
+      @action="goBack"
     />
 
     <EmptyState
@@ -97,7 +118,7 @@ const showVarieties = computed(() => (species.value?.varieties.length ?? 0) > 1)
           class="text-none"
           @click="goTo(previous.id)"
         >
-          {{ formatDexNumber(previous.id) }} {{ formatPokemonName(previous.name) }}
+          {{ neighborNumber(previous) }} {{ formatPokemonName(previous.name) }}
         </v-btn>
         <span v-else />
         <v-btn
@@ -107,7 +128,7 @@ const showVarieties = computed(() => (species.value?.varieties.length ?? 0) > 1)
           class="text-none"
           @click="goTo(next.id)"
         >
-          {{ formatPokemonName(next.name) }} {{ formatDexNumber(next.id) }}
+          {{ formatPokemonName(next.name) }} {{ neighborNumber(next) }}
         </v-btn>
       </nav>
 
@@ -116,6 +137,7 @@ const showVarieties = computed(() => (species.value?.varieties.length ?? 0) > 1)
           <PokemonHero
             :pokemon="detail"
             :genus="species?.genus"
+            :regional="regional"
             :show-cry="cry.supported"
             :cry-playing="cry.playing.value"
             :cry-muted="cry.muted.value"

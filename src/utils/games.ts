@@ -1,5 +1,5 @@
 import { GAMES, type FormRegion, type Game, type GameDex } from '@/data/games'
-import type { PokemonIndexEntry } from '@/types/pokemon'
+import type { PokedexEntry, PokemonIndexEntry } from '@/types/pokemon'
 
 export function findGame(slug: string | null | undefined): Game | null {
   if (!slug) return null
@@ -9,6 +9,26 @@ export function findGame(slug: string | null | undefined): Game | null {
 /** Pokédex do jogo com o slug informado; cai na primeira quando o slug é inválido. */
 export function resolveDex(game: Game, slug: string | null | undefined): GameDex {
   return game.dexes.find((dex) => dex.slug === slug) ?? game.dexes[0]!
+}
+
+export interface GameContext {
+  game: Game
+  dex: GameDex
+}
+
+/** Jogo + Pokédex a partir da query da rota (`?game=...&dex=...`); null quando não há jogo válido. */
+export function gameContextFromQuery(query: Record<string, unknown>): GameContext | null {
+  const game = findGame(typeof query.game === 'string' ? query.game : null)
+  if (!game) return null
+  return { game, dex: resolveDex(game, typeof query.dex === 'string' ? query.dex : null) }
+}
+
+/** Query da rota que preserva o jogo selecionado (o `dex` só quando o jogo tem mais de uma). */
+export function gameContextQuery(context: GameContext | null): Record<string, string> {
+  if (!context) return {}
+  const query: Record<string, string> = { game: context.game.slug }
+  if (context.game.dexes.length > 1) query.dex = context.dex.slug
+  return query
 }
 
 export interface GameGroup {
@@ -55,4 +75,28 @@ export function buildRegionalFormIndex(index: readonly PokemonIndexEntry[]): Reg
   }
 
   return result
+}
+
+/** Entrada da Pokédex de um jogo já resolvida para a forma que aparece nele. */
+export interface DexListEntry extends PokemonIndexEntry {
+  dexNumber: number
+  speciesId: number
+}
+
+/** Troca cada espécie da Pokédex pela forma regional, quando a região tiver uma. */
+export function buildDexList(
+  entries: readonly PokedexEntry[],
+  dex: GameDex,
+  forms: RegionalFormIndex,
+): DexListEntry[] {
+  const regional = dex.formRegion ? forms[dex.formRegion] : null
+  return entries.map((entry) => {
+    const form = regional?.get(entry.speciesName)
+    return {
+      id: form?.id ?? entry.speciesId,
+      name: form?.name ?? entry.speciesName,
+      dexNumber: entry.entryNumber,
+      speciesId: entry.speciesId,
+    }
+  })
 }
