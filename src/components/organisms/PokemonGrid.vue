@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { mdiRefresh } from '@mdi/js'
-import type { PokemonSummary } from '@/types/pokemon'
+import type { PokemonListItem } from '@/types/pokemon'
 import PokemonCard from '@/components/molecules/PokemonCard.vue'
 import PokemonCardSkeleton from '@/components/molecules/PokemonCardSkeleton.vue'
 
 export type GridStatus = 'idle' | 'loading' | 'error' | 'done'
 
 const props = defineProps<{
-  items: PokemonSummary[]
+  items: PokemonListItem[]
   status: GridStatus
   errorMessage?: string | null
   skeletonCount?: number
@@ -17,7 +17,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   load: []
   retry: []
-  select: [pokemon: PokemonSummary]
+  select: [pokemon: PokemonListItem]
 }>()
 
 const sentinelVisible = ref(false)

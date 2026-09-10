@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia'
 import { computed, ref, watch } from 'vue'
-import type { PokemonIndexEntry, PokemonSummary } from '@/types/pokemon'
+import type { PokedexEntry, PokemonIndexEntry, PokemonSummary } from '@/types/pokemon'
 import { getPokemonIndex, getPokemonSummary } from '@/services/pokeapi/pokemon.service'
+import { getPokedexEntries } from '@/services/pokeapi/pokedex.service'
 import { readStorage, writeStorage } from '@/utils/storage'
 
 const INDEX_KEY = 'pokeinfo:index:v1'
@@ -10,6 +11,7 @@ const SUMMARIES_KEY = 'pokeinfo:summaries:v1'
 /**
  * Cache em memória + localStorage do índice da Pokédex e dos resumos dos Pokémon.
  * Só resumos enxutos são guardados (~120 bytes cada), para não inflar o storage do usuário.
+ * As Pokédex regionais ficam só em memória; offline fica por conta do service worker.
  */
 export const usePokedexStore = defineStore('pokedex', () => {
   const index = ref<PokemonIndexEntry[]>(readStorage<PokemonIndexEntry[]>(INDEX_KEY) ?? [])
@@ -69,6 +71,28 @@ export const usePokedexStore = defineStore('pokedex', () => {
     return Promise.all(ids.map(fetchSummary))
   }
 
+  /** Entradas das Pokédex regionais já carregadas, por slug (ex.: "galar"). */
+  const dexEntries = ref<Record<string, PokedexEntry[]>>({})
+  const dexInFlight = new Map<string, Promise<PokedexEntry[]>>()
+
+  /** Garante que as entradas da Pokédex informada estejam em memória (uma requisição por dex). */
+  function ensureDexEntries(slug: string): Promise<PokedexEntry[]> {
+    const cached = dexEntries.value[slug]
+    if (cached) return Promise.resolve(cached)
+
+    const pending = dexInFlight.get(slug)
+    if (pending) return pending
+
+    const request = getPokedexEntries(slug)
+      .then((entries) => {
+        dexEntries.value[slug] = entries
+        return entries
+      })
+      .finally(() => dexInFlight.delete(slug))
+    dexInFlight.set(slug, request)
+    return request
+  }
+
   return {
     index,
     summaries,
@@ -77,5 +101,7 @@ export const usePokedexStore = defineStore('pokedex', () => {
     hasIndex,
     loadIndex,
     ensureSummaries,
+    dexEntries,
+    ensureDexEntries,
   }
 })

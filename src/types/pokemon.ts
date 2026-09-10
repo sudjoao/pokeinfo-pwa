@@ -34,6 +34,21 @@ export interface PokemonSummary extends PokemonIndexEntry {
   types: PokemonType[]
 }
 
+/** Entrada de uma Pokédex regional: número no jogo + espécie. Fica só em memória. */
+export interface PokedexEntry {
+  entryNumber: number
+  speciesId: number
+  speciesName: string
+}
+
+/** Item da listagem. Com um jogo selecionado, traz o número na Pokédex dele e a espécie. */
+export interface PokemonListItem extends PokemonSummary {
+  /** Número na Pokédex regional selecionada (ausente na Pokédex Nacional). */
+  dexNumber?: number
+  /** Id da espécie (= número nacional), útil quando o card mostra uma forma regional. */
+  speciesId?: number
+}
+
 export const STAT_NAMES = [
   'hp',
   'attack',

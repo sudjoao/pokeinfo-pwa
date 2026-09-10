@@ -8,9 +8,9 @@ export function artworkUrl(id: number): string {
   return `${ARTWORK_BASE_URL}/${id}.png`
 }
 
-/** 25 -> "#0025" */
-export function formatDexNumber(id: number): string {
-  return `#${String(id).padStart(4, '0')}`
+/** 25 -> "#0025"; com `digits` 3 (Pokédex regionais): 25 -> "#025" */
+export function formatDexNumber(id: number, digits = 4): string {
+  return `#${String(id).padStart(digits, '0')}`
 }
 
 /** "https://pokeapi.co/api/v2/pokemon/25/" -> 25 */

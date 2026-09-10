@@ -18,3 +18,12 @@ body {
   --safe-left: env(safe-area-inset-left, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
 }
+
+/*
+ * O AppHeader ganha padding-top de --safe-top pra cobrir o notch, mas o Vuetify dimensiona
+ * o v-main só pelas props height/extension-height da v-app-bar. Sem isso, o conteúdo fica
+ * escondido atrás do cabeçalho no iPhone. `.v-application` na frente vence o CSS do Vuetify.
+ */
+.v-application .v-main {
+  padding-top: calc(var(--v-layout-top) + var(--safe-top));
+}

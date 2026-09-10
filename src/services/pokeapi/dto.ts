@@ -129,3 +129,15 @@ export interface EvolutionChainDto {
   baby_trigger_item: NamedApiResource | null
   chain: ChainLinkDto
 }
+
+export interface PokedexEntryDto {
+  entry_number: number
+  pokemon_species: NamedApiResource
+}
+
+export interface PokedexDto {
+  id: number
+  name: string
+  is_main_series: boolean
+  pokemon_entries: PokedexEntryDto[]
+}

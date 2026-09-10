@@ -2,9 +2,13 @@
 import { computed } from 'vue'
 import { formatDexNumber } from '@/utils/pokemon'
 
-const props = defineProps<{ id: number }>()
+const props = defineProps<{
+  id: number
+  /** Casas com zero à esquerda: 4 na Pokédex Nacional, 3 nas regionais. */
+  digits?: number
+}>()
 
-const label = computed(() => formatDexNumber(props.id))
+const label = computed(() => formatDexNumber(props.id, props.digits ?? 4))
 </script>
 
 <template>

@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import AppHeader from '@/components/organisms/AppHeader.vue'
+
+defineProps<{ extensionHeight?: number }>()
 </script>
 
 <template>
-  <AppHeader title="PokéInfo">
+  <AppHeader title="PokéInfo" :extension-height="extensionHeight">
     <template v-if="$slots.header" #extension>
       <slot name="header" />
     </template>

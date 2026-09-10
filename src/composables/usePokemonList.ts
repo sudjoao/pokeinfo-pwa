@@ -1,46 +1,127 @@
 import { computed, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute, useRouter, type LocationQueryRaw } from 'vue-router'
+import { GAMES, type Game, type GameDex } from '@/data/games'
 import { usePokedexStore } from '@/stores/pokedex'
 import { useDebouncedRef } from '@/composables/useDebouncedRef'
-import type { PokemonIndexEntry, PokemonSummary } from '@/types/pokemon'
+import { buildRegionalFormIndex, findGame, resolveDex } from '@/utils/games'
+import type { PokemonIndexEntry, PokemonListItem } from '@/types/pokemon'
 
 export const PAGE_SIZE = 24
 
 export type ListStatus = 'idle' | 'loading' | 'error' | 'done'
 
-function matches(entry: PokemonIndexEntry, query: string): boolean {
+/** Entrada da fonte da lista: o índice nacional ou a Pokédex do jogo, já resolvida para a forma. */
+interface ListSource extends PokemonIndexEntry {
+  dexNumber?: number
+  speciesId?: number
+}
+
+function matches(entry: ListSource, query: string): boolean {
   if (!query) return true
-  if (/^\d+$/.test(query)) return entry.id === Number(query)
+  if (/^\d+$/.test(query)) {
+    const number = Number(query)
+    return entry.dexNumber === undefined ? entry.id === number : entry.dexNumber === number
+  }
   return entry.name.includes(query)
 }
 
+function queryParam(value: unknown): string | null {
+  return typeof value === 'string' && value ? value : null
+}
+
 /**
- * Orquestra busca + scroll infinito sobre o índice da Pokédex.
- * A busca filtra o índice localmente; os lotes carregam só os resumos necessários.
+ * Orquestra busca + filtro por jogo + scroll infinito sobre a Pokédex.
+ * A fonte da lista é o índice nacional ou a Pokédex regional do jogo escolhido;
+ * a busca filtra a fonte localmente e os lotes carregam só os resumos necessários.
  */
 export function usePokemonList() {
   const store = usePokedexStore()
   const route = useRoute()
   const router = useRouter()
 
-  const query = ref(typeof route.query.q === 'string' ? route.query.q : '')
+  const query = ref(queryParam(route.query.q) ?? '')
   const debouncedQuery = useDebouncedRef(query, 300)
   const normalizedQuery = computed(() => debouncedQuery.value.trim().toLowerCase())
 
-  const filtered = computed(() =>
-    store.index.filter((entry) => matches(entry, normalizedQuery.value)),
+  const gameSlug = ref<string | null>(queryParam(route.query.game))
+  const dexSlug = ref<string | null>(queryParam(route.query.dex))
+
+  const game = computed<Game | null>(() => findGame(gameSlug.value))
+  const dex = computed<GameDex | null>(() =>
+    game.value ? resolveDex(game.value, dexSlug.value) : null,
   )
 
-  const items = ref<PokemonSummary[]>([])
+  function setGame(slug: string | null): void {
+    gameSlug.value = slug
+    dexSlug.value = null
+  }
+
+  function setDex(slug: string): void {
+    dexSlug.value = slug
+  }
+
+  // Carregamento das entradas da Pokédex do jogo (uma requisição por dex, cacheada na store).
+  const dexLoading = ref(false)
+  const dexError = ref<string | null>(null)
+
+  async function loadDex(): Promise<void> {
+    const current = dex.value
+    dexError.value = null
+    if (!current || store.dexEntries[current.slug]) {
+      dexLoading.value = false
+      return
+    }
+    dexLoading.value = true
+    try {
+      await store.ensureDexEntries(current.slug)
+    } catch (error) {
+      if (dex.value?.slug !== current.slug) return
+      dexError.value = error instanceof Error ? error.message : 'Erro ao carregar a Pokédex'
+    } finally {
+      if (dex.value?.slug === current.slug) dexLoading.value = false
+    }
+  }
+
+  const regionalForms = computed(() => buildRegionalFormIndex(store.index))
+
+  const source = computed<ListSource[]>(() => {
+    if (!dex.value) return store.index
+    const entries = store.dexEntries[dex.value.slug]
+    if (!entries) return []
+    const forms = dex.value.formRegion ? regionalForms.value[dex.value.formRegion] : null
+    return entries.map((entry) => {
+      const form = forms?.get(entry.speciesName)
+      return {
+        id: form?.id ?? entry.speciesId,
+        name: form?.name ?? entry.speciesName,
+        dexNumber: entry.entryNumber,
+        speciesId: entry.speciesId,
+      }
+    })
+  })
+
+  const filtered = computed(() =>
+    source.value.filter((entry) => matches(entry, normalizedQuery.value)),
+  )
+
+  const items = ref<PokemonListItem[]>([])
   const status = ref<ListStatus>('idle')
   const errorMessage = ref<string | null>(null)
   /** Muda a cada reset; usado como :key para reiniciar o scroll infinito. */
   const listKey = ref(0)
 
-  const hasMore = computed(() => items.value.length < filtered.value.length)
-  const isEmpty = computed(
-    () => store.hasIndex && !store.indexLoading && filtered.value.length === 0,
+  const sourceLoading = computed(() => store.indexLoading || dexLoading.value)
+  const sourceError = computed(() => store.indexError ?? dexError.value)
+  const sourceReady = computed(
+    () =>
+      store.hasIndex &&
+      !sourceLoading.value &&
+      !sourceError.value &&
+      (!dex.value || Boolean(store.dexEntries[dex.value.slug])),
   )
+
+  const hasMore = computed(() => items.value.length < filtered.value.length)
+  const isEmpty = computed(() => sourceReady.value && filtered.value.length === 0)
 
   let generation = 0
 
@@ -55,14 +136,18 @@ export function usePokemonList() {
     status.value = 'loading'
     errorMessage.value = null
 
-    const nextIds = filtered.value
-      .slice(items.value.length, items.value.length + PAGE_SIZE)
-      .map((entry) => entry.id)
+    const batch = filtered.value.slice(items.value.length, items.value.length + PAGE_SIZE)
 
     try {
-      const summaries = await store.ensureSummaries(nextIds)
+      const summaries = await store.ensureSummaries(batch.map((entry) => entry.id))
       if (current !== generation) return status.value
-      items.value.push(...summaries)
+      items.value.push(
+        ...summaries.map((summary, i) => ({
+          ...summary,
+          dexNumber: batch[i]?.dexNumber,
+          speciesId: batch[i]?.speciesId,
+        })),
+      )
       status.value = hasMore.value ? 'idle' : 'done'
     } catch (error) {
       if (current !== generation) return status.value
@@ -85,24 +170,46 @@ export function usePokemonList() {
       await store.loadIndex(true)
       return
     }
+    if (dexError.value) {
+      await loadDex()
+      return
+    }
     status.value = 'idle'
     await loadMore()
   }
 
-  watch(normalizedQuery, (value) => {
-    router.replace({ query: value ? { q: value } : {} })
-    reset()
+  function buildQuery(): LocationQueryRaw {
+    const result: LocationQueryRaw = {}
+    if (normalizedQuery.value) result.q = normalizedQuery.value
+    if (game.value) {
+      result.game = game.value.slug
+      if (game.value.dexes.length > 1 && dex.value) result.dex = dex.value.slug
+    }
+    return result
+  }
+
+  watch([normalizedQuery, () => game.value?.slug, () => dex.value?.slug], () => {
+    router.replace({ query: buildQuery() })
   })
 
-  watch(
-    () => store.index,
-    () => reset(),
-  )
+  // Troca de jogo/dex volta ao topo; a busca só reinicia a lista.
+  watch(dex, () => {
+    window.scrollTo({ top: 0 })
+    loadDex()
+  })
+
+  watch([source, normalizedQuery], () => reset())
 
   store.loadIndex()
+  loadDex()
 
   return {
     query,
+    games: GAMES,
+    game,
+    dex,
+    setGame,
+    setDex,
     filtered,
     items,
     status,
@@ -110,8 +217,8 @@ export function usePokemonList() {
     listKey,
     hasMore,
     isEmpty,
-    indexLoading: computed(() => store.indexLoading),
-    indexError: computed(() => store.indexError),
+    sourceLoading,
+    sourceError,
     loadMore,
     retry,
   }

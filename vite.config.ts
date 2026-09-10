@@ -60,6 +60,16 @@ export default defineConfig({
             },
           },
           {
+            // Pokédex regionais por jogo (12 a 45 KB cada; poucas, mudam quase nunca)
+            urlPattern: /^https:\/\/pokeapi\.co\/api\/v2\/pokedex\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'pokeapi-pokedex',
+              expiration: { maxEntries: 12, maxAgeSeconds: 30 * DAY },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
             // Espécies e cadeias de evolução (respostas pequenas, ~2 a 50 KB)
             urlPattern: /^https:\/\/pokeapi\.co\/api\/v2\/(pokemon-species|evolution-chain)\/.*/i,
             handler: 'CacheFirst',
@@ -80,13 +90,15 @@ export default defineConfig({
             },
           },
           {
-            // Gritos (cries) dos Pokémon, ~7 KB cada
+            // Gritos (cries) dos Pokémon, ~7 KB cada. O app baixa com fetch (sem Range) e toca
+            // por blob: só respostas 200 completas entram no cache. Não aceitar status 0 aqui:
+            // o Safari pede áudio por faixas e uma resposta parcial opaca envenenaria o cache.
             urlPattern: /^https:\/\/raw\.githubusercontent\.com\/PokeAPI\/cries\/.*/i,
             handler: 'CacheFirst',
             options: {
-              cacheName: 'pokeapi-cries',
+              cacheName: 'pokeapi-cries-v2',
               expiration: { maxEntries: 60, maxAgeSeconds: 30 * DAY },
-              cacheableResponse: { statuses: [0, 200] },
+              cacheableResponse: { statuses: [200] },
             },
           },
           {
