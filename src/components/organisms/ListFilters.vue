@@ -8,7 +8,7 @@ import GameFilterChip from '@/components/molecules/GameFilterChip.vue'
 import TypeFilterChip from '@/components/molecules/TypeFilterChip.vue'
 import DexChips from '@/components/molecules/DexChips.vue'
 import CaughtFilterChips from '@/components/molecules/CaughtFilterChips.vue'
-import VersionFilterChips from '@/components/molecules/VersionFilterChips.vue'
+import VersionFilterChip from '@/components/molecules/VersionFilterChip.vue'
 
 /** Linha de chips de filtro da listagem (jogo, tipo, Pokédex do jogo, captura e exclusivos de versão). */
 defineProps<{
@@ -18,10 +18,10 @@ defineProps<{
   caughtFilter: CaughtFilter
   caughtCount: number
   missingCount: number
-  /** Versões do jogo com exclusivos; vazio esconde as chips. */
+  /** Versões do jogo com exclusivos; vazio esconde a chip de versão. */
   versions: readonly ExclusiveVersion[]
-  versionFilter: string | null
-  exclusiveCounts: Record<string, number>
+  /** Grupos marcados no filtro de versão ("both" e/ou slugs de versão); vazio = todos. */
+  availability: readonly string[]
 }>()
 
 const emit = defineEmits<{
@@ -29,7 +29,7 @@ const emit = defineEmits<{
   openTypes: []
   selectDex: [slug: string]
   selectCaught: [filter: CaughtFilter]
-  selectVersion: [slug: string | null]
+  openVersions: []
 }>()
 
 const { t } = useI18n()
@@ -42,6 +42,12 @@ const { t } = useI18n()
     :aria-label="t('home.gameFilterLabel')"
   >
     <GameFilterChip :label="game?.title ?? null" @click="emit('openGame')" />
+    <VersionFilterChip
+      v-if="game && versions.length"
+      :versions="versions"
+      :selected="availability"
+      @click="emit('openVersions')"
+    />
     <TypeFilterChip :types="types" @click="emit('openTypes')" />
     <template v-if="game && dex && game.dexes.length > 1">
       <v-divider vertical class="list-filters__divider" />
@@ -54,15 +60,6 @@ const { t } = useI18n()
         :caught-count="caughtCount"
         :missing-count="missingCount"
         @select="emit('selectCaught', $event)"
-      />
-    </template>
-    <template v-if="game && versions.length">
-      <v-divider vertical class="list-filters__divider" />
-      <VersionFilterChips
-        :versions="versions"
-        :selected="versionFilter"
-        :counts="exclusiveCounts"
-        @select="emit('selectVersion', $event)"
       />
     </template>
   </div>

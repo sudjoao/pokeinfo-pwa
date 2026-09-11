@@ -9,7 +9,9 @@
     "retry": "Tentar novamente",
     "back": "Voltar",
     "national": "Nac.",
-    "less": "Menos"
+    "less": "Menos",
+    "clear": "Limpar",
+    "done": "Pronto"
   },
   "language": {
     "title": "Idioma",
@@ -220,9 +222,7 @@
     "chip": "Tipo",
     "label": "Filtro por tipo",
     "title": "Filtrar por tipo",
-    "hint": "Até 2 tipos: o Pokémon precisa ter os dois.",
-    "clear": "Limpar",
-    "done": "Pronto"
+    "hint": "Até 2 tipos: o Pokémon precisa ter os dois."
   },
   "team": {
     "title": "Montar time",
@@ -252,5 +252,16 @@
     "gaps": "Sem cobertura",
     "noGaps": "O time acerta todos os tipos de forma super efetiva.",
     "chartNote": "Usa a tabela de tipos atual (6ª geração em diante) e os tipos atuais de cada Pokémon, mesmo em jogos antigos."
+  },
+  "versionFilter": {
+    "chip": "Versão",
+    "label": "Filtro por versão",
+    "title": "Filtrar por versão",
+    "hint": "Marque um ou mais grupos. Sem marcação, aparecem todos os Pokémon de {game}.",
+    "both": "{a} e {b}",
+    "bothHint": "Disponível nas duas versões",
+    "bothShort": "Ambas",
+    "only": "Só {version}",
+    "onlyHint": "Exclusivo de {version}: não existe em {other}"
   }
 }

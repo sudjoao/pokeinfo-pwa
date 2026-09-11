@@ -34,11 +34,11 @@ const { t } = useI18n()
       </v-card-text>
       <v-card-actions class="type-picker__actions">
         <v-btn variant="text" :disabled="selected.length === 0" @click="emit('clear')">
-          {{ t('typeFilter.clear') }}
+          {{ t('common.clear') }}
         </v-btn>
         <v-spacer />
         <v-btn color="primary" variant="flat" @click="open = false">
-          {{ t('typeFilter.done') }}
+          {{ t('common.done') }}
         </v-btn>
       </v-card-actions>
     </v-card>

@@ -16,6 +16,7 @@ import ListFilters from '@/components/organisms/ListFilters.vue'
 import PokemonGrid from '@/components/organisms/PokemonGrid.vue'
 import GamePickerSheet from '@/components/organisms/GamePickerSheet.vue'
 import TypePickerSheet from '@/components/organisms/TypePickerSheet.vue'
+import VersionPickerSheet from '@/components/organisms/VersionPickerSheet.vue'
 import TeamBench from '@/components/organisms/TeamBench.vue'
 import TeamAnalysis from '@/components/organisms/TeamAnalysis.vue'
 
@@ -32,9 +33,10 @@ const {
   toggleType,
   clearTypes,
   versions,
-  version,
-  setVersionFilter,
-  exclusiveCounts,
+  availability,
+  toggleAvailability,
+  clearAvailability,
+  availabilityCounts,
   caughtIds,
   caughtCount,
   missingCount,
@@ -58,6 +60,7 @@ const { t } = useI18n()
 
 const pickerOpen = ref(false)
 const typesOpen = ref(false)
+const versionsOpen = ref(false)
 const tab = ref<'pick' | 'analysis'>('pick')
 const fullNotice = ref(false)
 
@@ -101,13 +104,12 @@ function goBack(): void {
         :caught-count="caughtCount"
         :missing-count="missingCount"
         :versions="versions"
-        :version-filter="version?.slug ?? null"
-        :exclusive-counts="exclusiveCounts"
+        :availability="availability"
         @open-game="pickerOpen = true"
         @open-types="typesOpen = true"
+        @open-versions="versionsOpen = true"
         @select-dex="setDex"
         @select-caught="setCaughtFilter"
-        @select-version="setVersionFilter"
       />
     </template>
 
@@ -205,6 +207,17 @@ function goBack(): void {
       :selected="typeFilter"
       @toggle="toggleType"
       @clear="clearTypes"
+    />
+
+    <VersionPickerSheet
+      v-if="game"
+      v-model="versionsOpen"
+      :game-title="game.title"
+      :versions="versions"
+      :selected="availability"
+      :counts="availabilityCounts"
+      @toggle="toggleAvailability"
+      @clear="clearAvailability"
     />
 
     <v-snackbar v-model="fullNotice" :timeout="2500">{{ t('team.full') }}</v-snackbar>

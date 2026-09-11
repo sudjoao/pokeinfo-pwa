@@ -17,6 +17,7 @@ import ListFilters from '@/components/organisms/ListFilters.vue'
 import PokemonGrid from '@/components/organisms/PokemonGrid.vue'
 import GamePickerSheet from '@/components/organisms/GamePickerSheet.vue'
 import TypePickerSheet from '@/components/organisms/TypePickerSheet.vue'
+import VersionPickerSheet from '@/components/organisms/VersionPickerSheet.vue'
 import LanguageSheet from '@/components/organisms/LanguageSheet.vue'
 
 const {
@@ -32,9 +33,10 @@ const {
   toggleType,
   clearTypes,
   versions,
-  version,
-  setVersionFilter,
-  exclusiveCounts,
+  availability,
+  toggleAvailability,
+  clearAvailability,
+  availabilityCounts,
   caughtIds,
   caughtCount,
   missingCount,
@@ -58,6 +60,7 @@ const { dexLabel } = useDexLabel()
 
 const pickerOpen = ref(false)
 const typesOpen = ref(false)
+const versionsOpen = ref(false)
 const languageOpen = ref(false)
 
 /** Altura do cabeçalho: busca (48) + linha de chips (32) + espaçamentos. */
@@ -69,7 +72,7 @@ const emptyTitle = computed(() => {
     !caughtFilter.value ||
     query.value.trim() ||
     typeFilter.value.length ||
-    version.value
+    availability.value.length
   ) {
     return t('home.emptyTitle')
   }
@@ -77,7 +80,7 @@ const emptyTitle = computed(() => {
 })
 
 const emptyMessage = computed(() => {
-  if (typeFilter.value.length || version.value) return t('home.emptyFiltered')
+  if (typeFilter.value.length || availability.value.length) return t('home.emptyFiltered')
   const params = { dex: dex.value ? dexLabel(dex.value) : '', game: game.value?.title }
   if (game.value && dex.value && caughtFilter.value && !query.value.trim()) {
     return caughtFilter.value === 'caught'
@@ -126,13 +129,12 @@ function openTeamBuilder(): void {
         :caught-count="caughtCount"
         :missing-count="missingCount"
         :versions="versions"
-        :version-filter="version?.slug ?? null"
-        :exclusive-counts="exclusiveCounts"
+        :availability="availability"
         @open-game="pickerOpen = true"
         @open-types="typesOpen = true"
+        @open-versions="versionsOpen = true"
         @select-dex="setDex"
         @select-caught="setCaughtFilter"
-        @select-version="setVersionFilter"
       />
     </template>
 
@@ -178,6 +180,17 @@ function openTeamBuilder(): void {
       :selected="typeFilter"
       @toggle="toggleType"
       @clear="clearTypes"
+    />
+
+    <VersionPickerSheet
+      v-if="game"
+      v-model="versionsOpen"
+      :game-title="game.title"
+      :versions="versions"
+      :selected="availability"
+      :counts="availabilityCounts"
+      @toggle="toggleAvailability"
+      @clear="clearAvailability"
     />
 
     <LanguageSheet

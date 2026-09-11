@@ -8,7 +8,7 @@ import { useDebouncedRef } from '@/composables/useDebouncedRef'
 import { buildDexList, findGame, resolveDex } from '@/utils/games'
 import { describeError } from '@/utils/errors'
 import { isPokemonType } from '@/utils/pokemon'
-import { exclusiveVersionOf, exclusiveVersions, findExclusiveVersion } from '@/utils/exclusives'
+import { exclusiveVersionOf, exclusiveVersions } from '@/utils/exclusives'
 import type { ExclusiveVersion } from '@/data/exclusives'
 import type { PokemonIndexEntry, PokemonListItem, PokemonType } from '@/types/pokemon'
 
@@ -61,8 +61,22 @@ function queryParam(value: unknown): string | null {
   return typeof value === 'string' && value ? value : null
 }
 
+/** `?versions=both,sword` -> ['both', 'sword'] (a validação contra o jogo é feita depois). */
+function listParam(value: unknown): string[] {
+  if (typeof value !== 'string' || !value) return []
+  return [...new Set(value.split(',').filter(Boolean))]
+}
+
+/** Chave do grupo "disponível nas duas versões" no filtro de versão. */
+export const BOTH_VERSIONS = 'both'
+
+/** Grupo de disponibilidade da espécie no jogo: o slug da versão exclusiva ou "both". */
+function availabilityOf(gameSlug: string | undefined, speciesId: number): string {
+  return exclusiveVersionOf(gameSlug, speciesId)?.slug ?? BOTH_VERSIONS
+}
+
 /** Parâmetros da URL que esta lista controla; os demais (ex.: `team`) são preservados. */
-const OWN_QUERY_KEYS = ['q', 'game', 'dex', 'caught', 'type', 'only'] as const
+const OWN_QUERY_KEYS = ['q', 'game', 'dex', 'caught', 'type', 'versions'] as const
 
 function foreignQuery(query: LocationQuery): LocationQueryRaw {
   const result: LocationQueryRaw = {}
@@ -99,24 +113,39 @@ export function usePokemonList() {
   const caughtFilter = ref<CaughtFilter>(caughtFilterParam(route.query.caught))
   const typeFilter = ref<PokemonType[]>(typeFilterParam(route.query.type))
 
-  /** Slug da versão cujos exclusivos a lista mostra (`?only=sword`); null = todos. */
-  const versionSlug = ref<string | null>(queryParam(route.query.only))
   /** Versões do jogo atual que têm exclusivos (vazio em jogos de versão única). */
   const versions = computed<readonly ExclusiveVersion[]>(() => exclusiveVersions(game.value?.slug))
-  /** Filtro de versão já validado contra o jogo atual. */
-  const version = computed<ExclusiveVersion | null>(() =>
-    findExclusiveVersion(game.value?.slug, versionSlug.value),
+  /** Chaves válidas do filtro de versão: "both" (nas duas) + o slug de cada versão. */
+  const availabilityKeys = computed<string[]>(() => [
+    BOTH_VERSIONS,
+    ...versions.value.map((item) => item.slug),
+  ])
+  /**
+   * Filtro de disponibilidade (`?versions=both,sword`): quais grupos aparecem. Vazio = todos.
+   * Os três grupos cobrem a Pokédex inteira, então marcar os três equivale a não filtrar.
+   */
+  const availability = ref<string[]>(listParam(route.query.versions))
+  /** Filtro já validado contra o jogo atual (chaves de outro jogo são ignoradas). */
+  const activeAvailability = computed(() =>
+    game.value ? availability.value.filter((key) => availabilityKeys.value.includes(key)) : [],
   )
 
   function setGame(slug: string | null): void {
     gameSlug.value = slug
     dexSlug.value = null
     caughtFilter.value = null
-    versionSlug.value = null
+    availability.value = []
   }
 
-  function setVersionFilter(slug: string | null): void {
-    versionSlug.value = slug
+  function toggleAvailability(key: string): void {
+    const current = activeAvailability.value
+    availability.value = current.includes(key)
+      ? current.filter((item) => item !== key)
+      : [...current, key]
+  }
+
+  function clearAvailability(): void {
+    availability.value = []
   }
 
   function setCaughtFilter(filter: CaughtFilter): void {
@@ -183,26 +212,26 @@ export function usePokemonList() {
     const caught = caughtStore.caughtInRaw(game.value?.slug)
     const types = typeFilter.value
     const gameKey = game.value?.slug
-    const only = version.value?.slug
+    const groups = activeAvailability.value
     return source.value.filter((entry) => {
       if (!matches(entry)) return false
       if (status !== null && caught.has(speciesOf(entry)) !== (status === 'caught')) return false
-      if (only && exclusiveVersionOf(gameKey, speciesOf(entry))?.slug !== only) return false
+      if (groups.length && !groups.includes(availabilityOf(gameKey, speciesOf(entry)))) return false
       if (types.length === 0) return true
       const own = store.typesOf(entry.id)
       return own !== undefined && types.every((type) => own.includes(type))
     })
   })
 
-  /** Quantos exclusivos de cada versão existem na Pokédex atual, por slug da versão. */
-  const exclusiveCounts = computed<Record<string, number>>(() => {
+  /** Quantos Pokémon da Pokédex atual há em cada grupo ("both" e cada versão). */
+  const availabilityCounts = computed<Record<string, number>>(() => {
     const counts: Record<string, number> = {}
     const gameKey = game.value?.slug
     if (!gameKey || versions.value.length === 0) return counts
-    for (const item of versions.value) counts[item.slug] = 0
+    for (const key of availabilityKeys.value) counts[key] = 0
     for (const entry of source.value) {
-      const exclusive = exclusiveVersionOf(gameKey, speciesOf(entry))
-      if (exclusive) counts[exclusive.slug] = (counts[exclusive.slug] ?? 0) + 1
+      const key = availabilityOf(gameKey, speciesOf(entry))
+      counts[key] = (counts[key] ?? 0) + 1
     }
     return counts
   })
@@ -317,7 +346,7 @@ export function usePokemonList() {
       result.game = game.value.slug
       if (game.value.dexes.length > 1 && dex.value) result.dex = dex.value.slug
       if (caughtFilter.value) result.caught = caughtFilter.value === 'caught' ? '1' : '0'
-      if (version.value) result.only = version.value.slug
+      if (activeAvailability.value.length) result.versions = activeAvailability.value.join(',')
     }
     if (typeFilter.value.length) result.type = typeFilter.value.join(',')
     return result
@@ -330,7 +359,7 @@ export function usePokemonList() {
       () => dex.value?.slug,
       caughtFilter,
       typeFilter,
-      () => version.value?.slug,
+      activeAvailability,
     ],
     () => {
       router.replace({ query: { ...foreignQuery(route.query), ...buildQuery() } })
@@ -343,7 +372,7 @@ export function usePokemonList() {
     loadDex()
   })
 
-  watch([source, normalizedQuery, caughtFilter, typeFilter, version], () => reset())
+  watch([source, normalizedQuery, caughtFilter, typeFilter, activeAvailability], () => reset())
 
   store.load()
   loadDex()
@@ -361,9 +390,10 @@ export function usePokemonList() {
     toggleType,
     clearTypes,
     versions,
-    version,
-    setVersionFilter,
-    exclusiveCounts,
+    availability: activeAvailability,
+    toggleAvailability,
+    clearAvailability,
+    availabilityCounts,
     caughtIds,
     caughtCount,
     missingCount,

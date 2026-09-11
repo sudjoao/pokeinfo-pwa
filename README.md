@@ -34,9 +34,10 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
   e permite compartilhar o link. A tabela de tipos é a atual (6ª geração em diante) e fica em
   `src/data/typeChart.ts`.
 - **Exclusivos de versão**: com um jogo de duas versões selecionado (Sword/Shield, Scarlet/Violet…),
-  o card mostra um selo "Só Sword" quando a espécie só existe naquela versão, e as chips "Só Sword" /
-  "Só Shield" filtram a lista (com a contagem da Pokédex atual, `?only=sword`). A tela de detalhes
-  mostra a mesma informação no hero. Funciona também no team builder. A lista é estática
+  o card mostra um selo "Só Sword" quando a espécie só existe naquela versão, e a chip "Versão" abre
+  um seletor com três grupos que cobrem a Pokédex inteira: "Sword e Shield", "Só Sword" e "Só Shield",
+  cada um com a contagem da Pokédex atual. Dá para marcar um ou mais grupos; sem marcação aparecem
+  todos (`?versions=both,sword`). A tela de detalhes mostra a mesma informação no hero. Funciona também no team builder. A lista é estática
   (`src/data/exclusives.ts`, gerada a partir da Bulbapedia), porque a PokéAPI não tem esse dado:
   os encontros por área são incompletos nas gerações 8 e 9 e não cobrem presentes, fósseis e evoluções.
 - **Capturados por jogo**: com um jogo selecionado, cada card ganha uma Poké Bola para marcar o
@@ -135,9 +136,9 @@ src/
     atoms/                    # TypeChip, TypeToggle, MultiplierBadge, PokemonArtwork, PokemonAvatar,
                               # DexNumber, StatBar, InfoTile, CryButton, CatchToggle
     molecules/                # PokemonCard, SearchField, GameFilterChip, TypeFilterChip, DexChips,
-                              # CaughtFilterChips, VersionFilterChips, TeamSlot, EmptyState, PokemonHero, AboutGrid,
+                              # CaughtFilterChips, VersionFilterChip, TeamSlot, EmptyState, PokemonHero, AboutGrid,
                               # AbilityList, StatsList, EvolutionStage, EvolutionMethod, VarietyChips
-    organisms/                # AppHeader, ListFilters, PokemonGrid, GamePickerSheet, TypePickerSheet,
+    organisms/                # AppHeader, ListFilters, PokemonGrid, GamePickerSheet, TypePickerSheet, VersionPickerSheet,
                               # LanguageSheet, TeamBench, TeamAnalysis, TeamDefenseTable, TeamCoverage,
                               # EvolutionChain, EvolutionBranch (recursivo)
     templates/                # DefaultLayout (home) e DetailLayout (voltar + ações + filtros)

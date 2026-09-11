@@ -9,7 +9,9 @@
     "retry": "Try again",
     "back": "Back",
     "national": "Nat.",
-    "less": "Less"
+    "less": "Less",
+    "clear": "Clear",
+    "done": "Done"
   },
   "language": {
     "title": "Language",
@@ -220,9 +222,7 @@
     "chip": "Type",
     "label": "Type filter",
     "title": "Filter by type",
-    "hint": "Up to 2 types: the Pokémon must have both.",
-    "clear": "Clear",
-    "done": "Done"
+    "hint": "Up to 2 types: the Pokémon must have both."
   },
   "team": {
     "title": "Team builder",
@@ -252,5 +252,16 @@
     "gaps": "Not covered",
     "noGaps": "The team hits every type super effectively.",
     "chartNote": "Uses the current type chart (Generation VI onwards) and the current types of each Pokémon, even for older games."
+  },
+  "versionFilter": {
+    "chip": "Version",
+    "label": "Version filter",
+    "title": "Filter by version",
+    "hint": "Check one or more groups. With nothing checked, every Pokémon in {game} is shown.",
+    "both": "{a} and {b}",
+    "bothHint": "Available in both versions",
+    "bothShort": "Both",
+    "only": "{version} only",
+    "onlyHint": "Exclusive to {version}: not found in {other}"
   }
 }
