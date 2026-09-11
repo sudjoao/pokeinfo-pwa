@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { mdiCheckCircle } from '@mdi/js'
 import { useI18n } from 'vue-i18n'
 import type { PokemonListItem } from '@/types/pokemon'
 import { artworkUrl, formatDexNumber, formatPokemonName, TYPE_COLORS } from '@/utils/pokemon'
@@ -12,6 +13,8 @@ const props = defineProps<{
   pokemon: PokemonListItem
   /** Estado de captura no jogo selecionado; undefined esconde o botão (Pokédex Nacional). */
   caught?: boolean
+  /** Card escolhido (ex.: já está no time); undefined quando a lista não tem seleção. */
+  selected?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -34,12 +37,21 @@ const speciesId = computed(() => props.pokemon.speciesId ?? props.pokemon.id)
 <template>
   <v-card
     class="pokemon-card"
+    :class="{ 'pokemon-card--selected': selected }"
     :style="{ '--accent': accent }"
     hover
+    :aria-pressed="selected"
     @click="emit('select', pokemon)"
   >
     <div class="pokemon-card__art pa-2">
       <PokemonArtwork :src="image" :alt="name" :size="120" />
+      <v-icon
+        v-if="selected"
+        :icon="mdiCheckCircle"
+        color="primary"
+        class="pokemon-card__check"
+        :aria-label="t('team.inTeam')"
+      />
       <CatchToggle
         v-if="caught !== undefined"
         :caught="caught"
@@ -81,6 +93,19 @@ const speciesId = computed(() => props.pokemon.speciesId ?? props.pokemon.id)
   position: absolute;
   top: 4px;
   right: 4px;
+}
+
+.pokemon-card--selected {
+  outline: 2px solid rgb(var(--v-theme-primary));
+  outline-offset: -2px;
+}
+
+.pokemon-card__check {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: rgb(var(--v-theme-surface));
+  border-radius: 50%;
 }
 
 .pokemon-card__national {

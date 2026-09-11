@@ -16,6 +16,11 @@ const router = createRouter({
       // Carregado sob demanda: a Home continua leve.
       component: () => import('@/views/PokemonDetailView.vue'),
     },
+    {
+      path: '/team',
+      name: 'team',
+      component: () => import('@/views/TeamView.vue'),
+    },
   ],
   // Ao voltar, restaura a posição da lista (a Home fica viva via KeepAlive);
   // ao abrir um detalhe, começa do topo.
@@ -26,6 +31,7 @@ const router = createRouter({
 
 router.afterEach((to) => {
   if (to.name === 'home') document.title = i18n.global.t('app.dexTitle')
+  if (to.name === 'team') document.title = i18n.global.t('app.teamTitle')
 })
 
 export default router

@@ -2,7 +2,8 @@
   "app": {
     "name": "PokéInfo",
     "dexTitle": "Pokédex",
-    "detailTitle": "{name} · Pokédex"
+    "detailTitle": "{name} · Pokédex",
+    "teamTitle": "Montar time · PokéInfo"
   },
   "common": {
     "retry": "Tentar novamente",
@@ -37,7 +38,9 @@
     "completeMessage": "Você já capturou todos os Pokémon da Pokédex de {dex} em {game}.",
     "loadErrorTitle": "Não foi possível carregar a Pokédex",
     "loadMoreError": "Erro ao carregar Pokémon",
-    "endOfList": "Você chegou ao fim da lista."
+    "endOfList": "Você chegou ao fim da lista.",
+    "teamBuilder": "Montar time",
+    "emptyFiltered": "Nenhum Pokémon combina com os filtros. Tente outro tipo ou outra busca."
   },
   "dex": {
     "crown-tundra": "Tundra da Coroa",
@@ -209,5 +212,42 @@
     "network": "Não foi possível conectar à PokéAPI",
     "http": "PokéAPI respondeu com status {status}",
     "loadDex": "Erro ao carregar a Pokédex"
+  },
+  "typeFilter": {
+    "chip": "Tipo",
+    "label": "Filtro por tipo",
+    "title": "Filtrar por tipo",
+    "hint": "Até 2 tipos: o Pokémon precisa ter os dois.",
+    "clear": "Limpar",
+    "done": "Pronto"
+  },
+  "team": {
+    "title": "Montar time",
+    "heading": "Time",
+    "count": "{n} de {max}",
+    "clear": "Limpar time",
+    "emptySlot": "Vazio",
+    "addSlot": "Adicionar Pokémon ao time",
+    "remove": "Remover {name} do time",
+    "open": "Ver detalhes de {name}",
+    "inTeam": "No time",
+    "full": "Time completo: remova um Pokémon para adicionar outro.",
+    "tabPick": "Escolher",
+    "tabAnalysis": "Análise",
+    "pickHint": "Toque em um card para adicionar ao time; toque de novo para remover.",
+    "analysisEmpty": "Adicione Pokémon ao time para ver fraquezas e cobertura.",
+    "defense": "Defesa",
+    "defenseHint": "Dano que cada tipo de ataque causa em cada membro: vermelho é fraqueza, verde é resistência.",
+    "threats": "Fraquezas do time",
+    "noThreats": "Nenhum tipo de ataque acerta dois ou mais membros de forma super efetiva sem que o time o resista na mesma medida.",
+    "weakMembers": "{n} fraco | {n} fracos",
+    "attack": "Ataque",
+    "weak": "Fracos",
+    "resist": "Resistem",
+    "coverage": "Cobertura ofensiva",
+    "coverageHint": "Tipos que o time acerta de forma super efetiva com golpes do próprio tipo (STAB).",
+    "gaps": "Sem cobertura",
+    "noGaps": "O time acerta todos os tipos de forma super efetiva.",
+    "chartNote": "Usa a tabela de tipos atual (6ª geração em diante) e os tipos atuais de cada Pokémon, mesmo em jogos antigos."
   }
 }

@@ -23,6 +23,16 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
   (nível, item, troca, amizade, local, hora do dia, golpe conhecido, stats, formas regionais…).
   O método padrão dos jogos atuais fica em destaque; métodos de jogos antigos ficam recolhidos.
 - **Grito do Pokémon** ao abrir a tela de detalhes (com botão para repetir e para silenciar).
+- **Filtro por tipo**: chip "Tipo" abre um seletor com os 18 tipos; dá para escolher até dois
+  (o Pokémon precisa ter os dois, ex.: Água/Terra). Combina com jogo, busca e captura e vai na URL
+  (`?type=water,ground`). Não faz requisição: usa o mapa de tipos que já fica em cache.
+- **Team builder** (`/team`): monte um time de até 6 Pokémon tocando nos cards da mesma listagem
+  filtrada (jogo, Pokédex, tipo, busca, capturados), e veja na aba *Análise* as fraquezas do time,
+  a tabela defensiva (quanto cada tipo de ataque causa em cada membro) e a cobertura ofensiva por
+  STAB (tipos que o time acerta de forma super efetiva e os que ficam sem cobertura). O time não é
+  salvo: fica só na URL (`/team?game=scarlet-violet&team=906,909,912`), o que sobrevive a recarregar
+  e permite compartilhar o link. A tabela de tipos é a atual (6ª geração em diante) e fica em
+  `src/data/typeChart.ts`.
 - **Capturados por jogo**: com um jogo selecionado, cada card ganha uma Poké Bola para marcar o
   Pokémon como capturado naquele jogo (também no hero da tela de detalhes). Chips "Capturados" e
   "Faltam" filtram a lista e mostram a contagem da Pokédex atual; o filtro vai na URL (`?caught=0`).
@@ -44,6 +54,9 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
   ficam de fora; DLCs aparecem como Pokédex do jogo base.
 - Na Pokédex de Alola o app mostra a forma de Alola mesmo quando a forma de Kanto também é obtível.
 - As marcações de captura ficam só no aparelho (não há conta nem sincronização entre Mac e iPhone).
+- A análise do time usa a tabela de tipos atual e os tipos atuais de cada Pokémon mesmo em jogos
+  antigos (ex.: Clefairy conta como Fada em Red/Blue). A cobertura ofensiva olha só os tipos do
+  próprio Pokémon (STAB), não os golpes que ele aprende, e cada tipo defensor isolado.
 - Os gritos vêm só em `.ogg` (Vorbis). Safari toca a partir do macOS 14.1 / iOS 17.4 (suporte
   completo no 18.4); em navegadores sem suporte o botão de som não aparece. No iOS o áudio só
   toca depois de um toque do usuário, por isso o grito é disparado no toque do card, e o botão
@@ -54,7 +67,7 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
 
 ### Roadmap
 
-- Fraquezas e resistências por tipo.
+- Fraquezas e resistências na tela de detalhes (a tabela já existe em `data/typeChart.ts`).
 - Descrição das habilidades.
 - Exportar/importar as marcações de captura (backup em JSON).
 - Favoritos.
@@ -85,6 +98,7 @@ src/
   plugins/vuetify.ts          # tema (cores, ícones, defaults do Material)
   types/pokemon.ts            # tipos de domínio (PokemonSummary, PokemonType…)
   data/games.ts               # jogos da série principal e as Pokédex regionais de cada um
+  data/typeChart.ts           # tabela de efetividade de tipos (estática, 6ª geração em diante)
   services/pokeapi/           # cliente HTTP, DTOs da PokéAPI e mapeamento para o domínio
     pokemon.service.ts        #   índice, resumo e detalhe do Pokémon
     pokedex.service.ts        #   entradas de uma Pokédex regional (número no jogo + espécie)
@@ -94,26 +108,31 @@ src/
     pokemon.ts                # formatação, URLs de artwork e de grito, cores dos tipos, stats
     evolution.ts              # regras "como evoluir" em pt-BR (gatilhos + condições)
     games.ts                  # busca de jogo/dex, agrupamento por geração, formas regionais
+    typeChart.ts              # multiplicadores, fraquezas do time e cobertura ofensiva
     storage.ts
   stores/
     pokedex.ts                # Pinia: índice + cache de resumos (persistido) e Pokédex regionais (memória)
     pokemonDetail.ts          # Pinia: detalhes, espécies e cadeias (só em memória)
   composables/
-    usePokemonList.ts         # busca + filtro por jogo + lotes do scroll infinito
+    usePokemonList.ts         # busca + filtros (jogo, captura, tipo) + lotes do scroll infinito
+    useTeam.ts                # time de até 6 na URL (?team=) e análise de tipos
     usePokemonDetail.ts       # carrega detalhe -> espécie -> cadeia, reage à rota e ao jogo (?game=)
     useCry.ts                 # áudio único compartilhado, desbloqueado no gesto do usuário
     useDebouncedRef.ts
   components/
-    atoms/                    # TypeChip, PokemonArtwork, DexNumber, StatBar, InfoTile, CryButton
-    molecules/                # PokemonCard, SearchField, GameFilterChip, DexChips, EmptyState,
-                              # PokemonHero, AboutGrid, AbilityList, StatsList, EvolutionStage,
-                              # EvolutionMethod, VarietyChips
-    organisms/                # AppHeader, PokemonGrid, GamePickerSheet, EvolutionChain,
-                              # EvolutionBranch (recursivo)
-    templates/                # DefaultLayout (home) e DetailLayout (voltar + ações)
+    atoms/                    # TypeChip, TypeToggle, MultiplierBadge, PokemonArtwork, PokemonAvatar,
+                              # DexNumber, StatBar, InfoTile, CryButton, CatchToggle
+    molecules/                # PokemonCard, SearchField, GameFilterChip, TypeFilterChip, DexChips,
+                              # CaughtFilterChips, TeamSlot, EmptyState, PokemonHero, AboutGrid,
+                              # AbilityList, StatsList, EvolutionStage, EvolutionMethod, VarietyChips
+    organisms/                # AppHeader, ListFilters, PokemonGrid, GamePickerSheet, TypePickerSheet,
+                              # LanguageSheet, TeamBench, TeamAnalysis, TeamDefenseTable, TeamCoverage,
+                              # EvolutionChain, EvolutionBranch (recursivo)
+    templates/                # DefaultLayout (home) e DetailLayout (voltar + ações + filtros)
   views/
     HomeView.vue              # página inicial (fica em KeepAlive para preservar o scroll)
     PokemonDetailView.vue     # página de detalhes
+    TeamView.vue              # team builder (mesma listagem da Home + time + análise)
 ```
 
 ### Fluxo de dados

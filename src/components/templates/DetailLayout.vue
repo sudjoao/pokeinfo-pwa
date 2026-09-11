@@ -1,15 +1,22 @@
 <script setup lang="ts">
 import AppHeader from '@/components/organisms/AppHeader.vue'
 
-defineProps<{ title: string }>()
+defineProps<{
+  title: string
+  /** Altura da extensão do cabeçalho (px), quando o slot `header` é usado. */
+  extensionHeight?: number
+}>()
 
 const emit = defineEmits<{ back: [] }>()
 </script>
 
 <template>
-  <AppHeader :title="title" back @back="emit('back')">
+  <AppHeader :title="title" back :extension-height="extensionHeight" @back="emit('back')">
     <template v-if="$slots.actions" #actions>
       <slot name="actions" />
+    </template>
+    <template v-if="$slots.header" #extension>
+      <slot name="header" />
     </template>
   </AppHeader>
 

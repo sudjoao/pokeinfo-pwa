@@ -2,7 +2,8 @@
   "app": {
     "name": "PokéInfo",
     "dexTitle": "Pokédex",
-    "detailTitle": "{name} · Pokédex"
+    "detailTitle": "{name} · Pokédex",
+    "teamTitle": "Team builder · PokéInfo"
   },
   "common": {
     "retry": "Try again",
@@ -37,7 +38,9 @@
     "completeMessage": "You have caught every Pokémon in the {dex} Pokédex in {game}.",
     "loadErrorTitle": "Could not load the Pokédex",
     "loadMoreError": "Error loading Pokémon",
-    "endOfList": "You have reached the end of the list."
+    "endOfList": "You have reached the end of the list.",
+    "teamBuilder": "Team builder",
+    "emptyFiltered": "No Pokémon matches these filters. Try another type or search."
   },
   "dex": {
     "crown-tundra": "Crown Tundra",
@@ -209,5 +212,42 @@
     "network": "Could not reach the PokéAPI",
     "http": "PokéAPI responded with status {status}",
     "loadDex": "Error loading the Pokédex"
+  },
+  "typeFilter": {
+    "chip": "Type",
+    "label": "Type filter",
+    "title": "Filter by type",
+    "hint": "Up to 2 types: the Pokémon must have both.",
+    "clear": "Clear",
+    "done": "Done"
+  },
+  "team": {
+    "title": "Team builder",
+    "heading": "Team",
+    "count": "{n} of {max}",
+    "clear": "Clear team",
+    "emptySlot": "Empty",
+    "addSlot": "Add a Pokémon to the team",
+    "remove": "Remove {name} from the team",
+    "open": "See details of {name}",
+    "inTeam": "In team",
+    "full": "Team is full: remove a Pokémon to add another one.",
+    "tabPick": "Pick",
+    "tabAnalysis": "Analysis",
+    "pickHint": "Tap a card to add it to the team; tap again to remove it.",
+    "analysisEmpty": "Add Pokémon to the team to see weaknesses and coverage.",
+    "defense": "Defense",
+    "defenseHint": "Damage each attacking type deals to each member: red is a weakness, green a resistance.",
+    "threats": "Team weaknesses",
+    "noThreats": "No attacking type hits two or more members super effectively without the team resisting it just as much.",
+    "weakMembers": "{n} weak | {n} weak",
+    "attack": "Attack",
+    "weak": "Weak",
+    "resist": "Resist",
+    "coverage": "Offensive coverage",
+    "coverageHint": "Types the team hits super effectively with same-type (STAB) moves.",
+    "gaps": "Not covered",
+    "noGaps": "The team hits every type super effectively.",
+    "chartNote": "Uses the current type chart (Generation VI onwards) and the current types of each Pokémon, even for older games."
   }
 }

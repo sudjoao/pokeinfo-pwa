@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { mdiTranslate } from '@mdi/js'
+import { mdiSwordCross, mdiTranslate } from '@mdi/js'
 import { gameContextQuery } from '@/utils/games'
 import { usePokemonList } from '@/composables/usePokemonList'
 import { useCry } from '@/composables/useCry'
@@ -13,11 +13,10 @@ import DefaultLayout from '@/components/templates/DefaultLayout.vue'
 import SearchField from '@/components/molecules/SearchField.vue'
 import EmptyState from '@/components/molecules/EmptyState.vue'
 import PokemonCardSkeleton from '@/components/molecules/PokemonCardSkeleton.vue'
-import GameFilterChip from '@/components/molecules/GameFilterChip.vue'
-import DexChips from '@/components/molecules/DexChips.vue'
-import CaughtFilterChips from '@/components/molecules/CaughtFilterChips.vue'
+import ListFilters from '@/components/organisms/ListFilters.vue'
 import PokemonGrid from '@/components/organisms/PokemonGrid.vue'
 import GamePickerSheet from '@/components/organisms/GamePickerSheet.vue'
+import TypePickerSheet from '@/components/organisms/TypePickerSheet.vue'
 import LanguageSheet from '@/components/organisms/LanguageSheet.vue'
 
 const {
@@ -29,6 +28,9 @@ const {
   setDex,
   caughtFilter,
   setCaughtFilter,
+  typeFilter,
+  toggleType,
+  clearTypes,
   caughtIds,
   caughtCount,
   missingCount,
@@ -51,17 +53,21 @@ const { locale, locales, setLocale } = useLocale()
 const { dexLabel } = useDexLabel()
 
 const pickerOpen = ref(false)
+const typesOpen = ref(false)
 const languageOpen = ref(false)
 
 /** Altura do cabeçalho: busca (48) + linha de chips (32) + espaçamentos. */
 const HEADER_EXTENSION_HEIGHT = 108
 
 const emptyTitle = computed(() => {
-  if (!game.value || !caughtFilter.value || query.value.trim()) return t('home.emptyTitle')
+  if (!game.value || !caughtFilter.value || query.value.trim() || typeFilter.value.length) {
+    return t('home.emptyTitle')
+  }
   return caughtFilter.value === 'caught' ? t('home.noneCaughtTitle') : t('home.completeTitle')
 })
 
 const emptyMessage = computed(() => {
+  if (typeFilter.value.length) return t('home.emptyFiltered')
   const params = { dex: dex.value ? dexLabel(dex.value) : '', game: game.value?.title }
   if (game.value && dex.value && caughtFilter.value && !query.value.trim()) {
     return caughtFilter.value === 'caught'
@@ -71,44 +77,49 @@ const emptyMessage = computed(() => {
   return game.value && dex.value ? t('home.emptyDex', params) : t('home.emptyNational')
 })
 
+/** Jogo e Pokédex atuais no formato da URL, para levar o contexto às outras telas. */
+const contextQuery = computed(() =>
+  gameContextQuery(game.value && dex.value ? { game: game.value, dex: dex.value } : null),
+)
+
 /**
  * O grito toca aqui, dentro do toque, porque o iOS bloqueia áudio fora de um gesto do usuário.
  * O jogo selecionado vai junto na URL para o detalhe mostrar o número regional e navegar pela dex.
  */
 function openPokemon(pokemon: PokemonSummary): void {
   cry.play(pokemon.id)
-  const context = game.value && dex.value ? { game: game.value, dex: dex.value } : null
-  router.push({ name: 'pokemon', params: { id: pokemon.id }, query: gameContextQuery(context) })
+  router.push({ name: 'pokemon', params: { id: pokemon.id }, query: contextQuery.value })
+}
+
+/** Abre o team builder já com o jogo e o filtro de tipo atuais. */
+function openTeamBuilder(): void {
+  const query: Record<string, string> = { ...contextQuery.value }
+  if (typeFilter.value.length) query.type = typeFilter.value.join(',')
+  router.push({ name: 'team', query })
 }
 </script>
 
 <template>
   <DefaultLayout :extension-height="HEADER_EXTENSION_HEIGHT">
     <template #actions>
+      <v-btn :icon="mdiSwordCross" :aria-label="t('home.teamBuilder')" @click="openTeamBuilder" />
       <v-btn :icon="mdiTranslate" :aria-label="t('language.title')" @click="languageOpen = true" />
     </template>
     <template #header>
       <SearchField v-model="query" />
-      <div
-        class="home-filters d-flex align-center ga-2 mt-2"
-        role="group"
-        :aria-label="t('home.gameFilterLabel')"
-      >
-        <GameFilterChip :label="game?.title ?? null" @click="pickerOpen = true" />
-        <template v-if="game && dex && game.dexes.length > 1">
-          <v-divider vertical class="home-filters__divider" />
-          <DexChips :dexes="game.dexes" :selected="dex.slug" @select="setDex" />
-        </template>
-        <template v-if="game">
-          <v-divider vertical class="home-filters__divider" />
-          <CaughtFilterChips
-            :selected="caughtFilter"
-            :caught-count="caughtCount"
-            :missing-count="missingCount"
-            @select="setCaughtFilter"
-          />
-        </template>
-      </div>
+      <ListFilters
+        class="mt-2"
+        :game="game"
+        :dex="dex"
+        :types="typeFilter"
+        :caught-filter="caughtFilter"
+        :caught-count="caughtCount"
+        :missing-count="missingCount"
+        @open-game="pickerOpen = true"
+        @open-types="typesOpen = true"
+        @select-dex="setDex"
+        @select-caught="setCaughtFilter"
+      />
     </template>
 
     <v-row v-if="sourceLoading" density="compact">
@@ -148,6 +159,13 @@ function openPokemon(pokemon: PokemonSummary): void {
       @select="setGame"
     />
 
+    <TypePickerSheet
+      v-model="typesOpen"
+      :selected="typeFilter"
+      @toggle="toggleType"
+      @clear="clearTypes"
+    />
+
     <LanguageSheet
       v-model="languageOpen"
       :locales="locales"
@@ -156,22 +174,3 @@ function openPokemon(pokemon: PokemonSummary): void {
     />
   </DefaultLayout>
 </template>
-
-<style scoped>
-/* A linha de chips rola na horizontal em telas estreitas, sem quebrar o cabeçalho. */
-.home-filters {
-  overflow-x: auto;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-}
-
-.home-filters::-webkit-scrollbar {
-  display: none;
-}
-
-.home-filters__divider {
-  height: 24px;
-  align-self: center;
-  opacity: 0.4;
-}
-</style>

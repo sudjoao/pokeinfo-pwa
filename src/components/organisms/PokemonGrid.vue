@@ -15,6 +15,8 @@ const props = defineProps<{
   skeletonCount?: number
   /** Ids de espécie capturados no jogo selecionado; undefined esconde o botão de captura. */
   caughtIds?: ReadonlySet<number>
+  /** Ids (da forma) escolhidos, ex.: os que já estão no time; undefined = lista sem seleção. */
+  selectedIds?: ReadonlySet<number>
 }>()
 
 const emit = defineEmits<{
@@ -69,6 +71,7 @@ const intersectOptions = { rootMargin: '0px 0px 1200px 0px' }
         <PokemonCard
           :pokemon="pokemon"
           :caught="caughtOf(pokemon)"
+          :selected="selectedIds?.has(pokemon.id)"
           @select="emit('select', $event)"
           @toggle-caught="emit('toggleCaught', $event)"
         />

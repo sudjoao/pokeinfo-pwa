@@ -1,5 +1,5 @@
 import { computed, ref, shallowRef, watch } from 'vue'
-import { useRoute, useRouter, type LocationQueryRaw } from 'vue-router'
+import { useRoute, useRouter, type LocationQuery, type LocationQueryRaw } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { GAMES, type Game, type GameDex } from '@/data/games'
 import { usePokedexStore } from '@/stores/pokedex'
@@ -7,9 +7,13 @@ import { useCaughtStore } from '@/stores/caught'
 import { useDebouncedRef } from '@/composables/useDebouncedRef'
 import { buildDexList, findGame, resolveDex } from '@/utils/games'
 import { describeError } from '@/utils/errors'
-import type { PokemonIndexEntry, PokemonListItem } from '@/types/pokemon'
+import { isPokemonType } from '@/utils/pokemon'
+import type { PokemonIndexEntry, PokemonListItem, PokemonType } from '@/types/pokemon'
 
 export const PAGE_SIZE = 24
+
+/** Um Pokémon tem no máximo dois tipos, então o filtro também para em dois. */
+export const MAX_TYPE_FILTERS = 2
 
 export type ListStatus = 'idle' | 'loading' | 'error' | 'done'
 
@@ -20,6 +24,13 @@ function caughtFilterParam(value: unknown): CaughtFilter {
   if (value === '1') return 'caught'
   if (value === '0') return 'missing'
   return null
+}
+
+/** `?type=fire,flying` -> ['fire', 'flying'] (ignora nomes inválidos e repetidos). */
+function typeFilterParam(value: unknown): PokemonType[] {
+  if (typeof value !== 'string' || !value) return []
+  const types = value.split(',').filter(isPokemonType)
+  return [...new Set(types)].slice(0, MAX_TYPE_FILTERS)
 }
 
 /** Entrada da fonte da lista: o índice nacional ou a Pokédex do jogo, já resolvida para a forma. */
@@ -48,10 +59,21 @@ function queryParam(value: unknown): string | null {
   return typeof value === 'string' && value ? value : null
 }
 
+/** Parâmetros da URL que esta lista controla; os demais (ex.: `team`) são preservados. */
+const OWN_QUERY_KEYS = ['q', 'game', 'dex', 'caught', 'type'] as const
+
+function foreignQuery(query: LocationQuery): LocationQueryRaw {
+  const result: LocationQueryRaw = {}
+  for (const [key, value] of Object.entries(query)) {
+    if (!(OWN_QUERY_KEYS as readonly string[]).includes(key)) result[key] = value
+  }
+  return result
+}
+
 /**
- * Orquestra busca + filtro por jogo + scroll infinito sobre a Pokédex.
+ * Orquestra busca + filtros (jogo, captura, tipo) + scroll infinito sobre a Pokédex.
  * A fonte da lista é o índice nacional ou a Pokédex regional do jogo escolhido;
- * a busca filtra a fonte localmente e os lotes carregam só os resumos necessários.
+ * os filtros são aplicados localmente e os lotes carregam só os resumos necessários.
  */
 export function usePokemonList() {
   const store = usePokedexStore()
@@ -73,6 +95,7 @@ export function usePokemonList() {
   )
 
   const caughtFilter = ref<CaughtFilter>(caughtFilterParam(route.query.caught))
+  const typeFilter = ref<PokemonType[]>(typeFilterParam(route.query.type))
 
   function setGame(slug: string | null): void {
     gameSlug.value = slug
@@ -86,6 +109,22 @@ export function usePokemonList() {
 
   function setDex(slug: string): void {
     dexSlug.value = slug
+  }
+
+  /** Liga/desliga um tipo; com dois já escolhidos, o novo substitui o mais recente. */
+  function toggleType(type: PokemonType): void {
+    const current = typeFilter.value
+    if (current.includes(type)) {
+      typeFilter.value = current.filter((item) => item !== type)
+    } else if (current.length < MAX_TYPE_FILTERS) {
+      typeFilter.value = [...current, type]
+    } else {
+      typeFilter.value = [...current.slice(0, MAX_TYPE_FILTERS - 1), type]
+    }
+  }
+
+  function clearTypes(): void {
+    typeFilter.value = []
   }
 
   // Carregamento das entradas da Pokédex do jogo (uma requisição por dex, cacheada na store).
@@ -117,18 +156,22 @@ export function usePokemonList() {
   })
 
   /**
-   * Filtro de captura aplicado com leitura não reativa do conjunto: marcar um card não pode
-   * encolher a lista no meio da paginação (o próximo lote pularia um Pokémon). A lista só
-   * reaplica o filtro quando jogo, busca ou o próprio filtro mudam.
+   * Filtros aplicados à fonte. O de captura lê o conjunto sem rastreamento reativo: marcar um
+   * card não pode encolher a lista no meio da paginação (o próximo lote pularia um Pokémon).
+   * O de tipo exige que o Pokémon tenha todos os tipos escolhidos (lê o mapa de tipos, que já
+   * está pronto antes de a lista aparecer). A lista só reaplica os filtros quando eles mudam.
    */
   const filtered = computed(() => {
     const matches = matcherFor(normalizedQuery.value)
     const status = game.value ? caughtFilter.value : null
     const caught = caughtStore.caughtInRaw(game.value?.slug)
+    const types = typeFilter.value
     return source.value.filter((entry) => {
       if (!matches(entry)) return false
-      if (status === null) return true
-      return caught.has(speciesOf(entry)) === (status === 'caught')
+      if (status !== null && caught.has(speciesOf(entry)) !== (status === 'caught')) return false
+      if (types.length === 0) return true
+      const own = store.typesOf(entry.id)
+      return own !== undefined && types.every((type) => own.includes(type))
     })
   })
 
@@ -238,12 +281,16 @@ export function usePokemonList() {
       if (game.value.dexes.length > 1 && dex.value) result.dex = dex.value.slug
       if (caughtFilter.value) result.caught = caughtFilter.value === 'caught' ? '1' : '0'
     }
+    if (typeFilter.value.length) result.type = typeFilter.value.join(',')
     return result
   }
 
-  watch([normalizedQuery, () => game.value?.slug, () => dex.value?.slug, caughtFilter], () => {
-    router.replace({ query: buildQuery() })
-  })
+  watch(
+    [normalizedQuery, () => game.value?.slug, () => dex.value?.slug, caughtFilter, typeFilter],
+    () => {
+      router.replace({ query: { ...foreignQuery(route.query), ...buildQuery() } })
+    },
+  )
 
   // Troca de jogo/dex volta ao topo; a busca só reinicia a lista.
   watch(dex, () => {
@@ -251,7 +298,7 @@ export function usePokemonList() {
     loadDex()
   })
 
-  watch([source, normalizedQuery, caughtFilter], () => reset())
+  watch([source, normalizedQuery, caughtFilter, typeFilter], () => reset())
 
   store.load()
   loadDex()
@@ -265,6 +312,9 @@ export function usePokemonList() {
     setDex,
     caughtFilter,
     setCaughtFilter,
+    typeFilter,
+    toggleType,
+    clearTypes,
     caughtIds,
     caughtCount,
     missingCount,

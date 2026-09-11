@@ -69,6 +69,13 @@ export const usePokedexStore = defineStore('pokedex', () => {
   /** Mapa "espécie -> forma regional" por região, derivado do índice (usado pela lista e pelo detalhe). */
   const regionalForms = computed(() => buildRegionalFormIndex(index.value))
 
+  /** Índice por id, para resolver nomes a partir de ids soltos (ex.: o time na URL). */
+  const indexById = computed(() => new Map(index.value.map((entry) => [entry.id, entry])))
+
+  function entryOf(id: number): PokemonIndexEntry | undefined {
+    return indexById.value.get(id)
+  }
+
   async function loadIndex(force = false): Promise<void> {
     if ((hasIndex.value && !force) || indexLoading.value) return
     indexLoading.value = true
@@ -179,6 +186,7 @@ export const usePokedexStore = defineStore('pokedex', () => {
     loading,
     sourceError,
     regionalForms,
+    entryOf,
     load,
     typesOf,
     ensureSummaries,
