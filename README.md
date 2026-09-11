@@ -27,7 +27,9 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
   (o Pokémon precisa ter os dois, ex.: Água/Terra). Combina com jogo, busca e captura e vai na URL
   (`?type=water,ground`). Não faz requisição: usa o mapa de tipos que já fica em cache.
 - **Team builder** (`/team`): monte um time de até 6 Pokémon tocando nos cards da mesma listagem
-  filtrada (jogo, Pokédex, tipo, busca, capturados), e veja na aba *Análise* as fraquezas do time,
+  filtrada (jogo, Pokédex, versão, tipo, busca, capturados). No celular, uma bandeja fixa no rodapé
+  mostra os 6 slots enquanto a lista rola e abre um sheet com o time completo; no desktop, o time
+  fica num painel lateral que acompanha a rolagem. Nos dois casos aparecem as fraquezas do time,
   a tabela defensiva (quanto cada tipo de ataque causa em cada membro) e a cobertura ofensiva por
   STAB (tipos que o time acerta de forma super efetiva e os que ficam sem cobertura). O time não é
   salvo: fica só na URL (`/team?game=scarlet-violet&team=906,909,912`), o que sobrevive a recarregar
@@ -139,7 +141,7 @@ src/
                               # CaughtFilterChips, VersionFilterChip, TeamSlot, EmptyState, PokemonHero, AboutGrid,
                               # AbilityList, StatsList, EvolutionStage, EvolutionMethod, VarietyChips
     organisms/                # AppHeader, ListFilters, PokemonGrid, GamePickerSheet, TypePickerSheet, VersionPickerSheet,
-                              # LanguageSheet, TeamBench, TeamAnalysis, TeamDefenseTable, TeamCoverage,
+                              # LanguageSheet, TeamBench, TeamPanel, TeamTray, TeamAnalysis, TeamDefenseTable, TeamCoverage,
                               # EvolutionChain, EvolutionBranch (recursivo)
     templates/                # DefaultLayout (home) e DetailLayout (voltar + ações + filtros)
   views/

@@ -232,11 +232,9 @@
     "emptySlot": "Empty",
     "addSlot": "Add a Pokémon to the team",
     "remove": "Remove {name} from the team",
-    "open": "See details of {name}",
+    "open": "Open the team",
     "inTeam": "In team",
     "full": "Team is full: remove a Pokémon to add another one.",
-    "tabPick": "Pick",
-    "tabAnalysis": "Analysis",
     "pickHint": "Tap a card to add it to the team; tap again to remove it.",
     "analysisEmpty": "Add Pokémon to the team to see weaknesses and coverage.",
     "defense": "Defense",
@@ -251,7 +249,9 @@
     "coverageHint": "Types the team hits super effectively with same-type (STAB) moves.",
     "gaps": "Not covered",
     "noGaps": "The team hits every type super effectively.",
-    "chartNote": "Uses the current type chart (Generation VI onwards) and the current types of each Pokémon, even for older games."
+    "chartNote": "Uses the current type chart (Generation VI onwards) and the current types of each Pokémon, even for older games.",
+    "close": "Close",
+    "trayEmpty": "Build your team"
   },
   "versionFilter": {
     "chip": "Version",

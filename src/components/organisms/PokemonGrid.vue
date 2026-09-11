@@ -17,6 +17,8 @@ const props = defineProps<{
   caughtIds?: ReadonlySet<number>
   /** Ids (da forma) escolhidos, ex.: os que já estão no time; undefined = lista sem seleção. */
   selectedIds?: ReadonlySet<number>
+  /** Cards mais largos em telas grandes (quando o grid divide a largura com um painel). */
+  wide?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -67,7 +69,14 @@ const intersectOptions = { rootMargin: '0px 0px 1200px 0px' }
 <template>
   <div class="pokemon-grid">
     <v-row density="compact">
-      <v-col v-for="pokemon in items" :key="pokemon.id" cols="6" sm="4" md="3" lg="2">
+      <v-col
+        v-for="pokemon in items"
+        :key="pokemon.id"
+        cols="6"
+        sm="4"
+        :md="wide ? 4 : 3"
+        :lg="wide ? 3 : 2"
+      >
         <PokemonCard
           :pokemon="pokemon"
           :caught="caughtOf(pokemon)"
@@ -85,7 +94,14 @@ const intersectOptions = { rootMargin: '0px 0px 1200px 0px' }
     />
 
     <v-row v-if="status === 'loading'" density="compact" class="mt-1">
-      <v-col v-for="n in skeletonCount ?? 6" :key="n" cols="6" sm="4" md="3" lg="2">
+      <v-col
+        v-for="n in skeletonCount ?? 6"
+        :key="n"
+        cols="6"
+        sm="4"
+        :md="wide ? 4 : 3"
+        :lg="wide ? 3 : 2"
+      >
         <PokemonCardSkeleton />
       </v-col>
     </v-row>

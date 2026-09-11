@@ -3,7 +3,11 @@ import { computed } from 'vue'
 import { TEAM_SIZE, type TeamMember } from '@/composables/useTeam'
 import TeamSlot from '@/components/molecules/TeamSlot.vue'
 
-const props = defineProps<{ members: readonly TeamMember[] }>()
+const props = defineProps<{
+  members: readonly TeamMember[]
+  /** Quebra em linhas (painel lateral e sheet) em vez de rolar na horizontal. */
+  wrap?: boolean
+}>()
 
 const emit = defineEmits<{
   select: [member: TeamMember]
@@ -18,7 +22,7 @@ const slots = computed<(TeamMember | null)[]>(() =>
 </script>
 
 <template>
-  <div class="team-bench d-flex ga-2">
+  <div class="team-bench d-flex ga-2" :class="{ 'team-bench--wrap': wrap }">
     <TeamSlot
       v-for="(member, i) in slots"
       :key="member?.id ?? `empty-${i}`"
@@ -31,7 +35,7 @@ const slots = computed<(TeamMember | null)[]>(() =>
 </template>
 
 <style scoped>
-/* Rola na horizontal no celular; em telas largas as 6 vagas cabem numa linha. */
+/* Rola na horizontal por padrão; com `wrap`, vira uma grade que cabe na largura disponível. */
 .team-bench {
   overflow-x: auto;
   scrollbar-width: none;
@@ -42,5 +46,15 @@ const slots = computed<(TeamMember | null)[]>(() =>
 
 .team-bench::-webkit-scrollbar {
   display: none;
+}
+
+.team-bench--wrap {
+  flex-wrap: wrap;
+  overflow: visible;
+}
+
+.team-bench--wrap :deep(.team-slot) {
+  flex: 1 1 96px;
+  max-width: 140px;
 }
 </style>

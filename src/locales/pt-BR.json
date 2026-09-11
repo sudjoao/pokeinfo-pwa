@@ -232,11 +232,9 @@
     "emptySlot": "Vazio",
     "addSlot": "Adicionar Pokémon ao time",
     "remove": "Remover {name} do time",
-    "open": "Ver detalhes de {name}",
+    "open": "Abrir o time",
     "inTeam": "No time",
     "full": "Time completo: remova um Pokémon para adicionar outro.",
-    "tabPick": "Escolher",
-    "tabAnalysis": "Análise",
     "pickHint": "Toque em um card para adicionar ao time; toque de novo para remover.",
     "analysisEmpty": "Adicione Pokémon ao time para ver fraquezas e cobertura.",
     "defense": "Defesa",
@@ -251,7 +249,9 @@
     "coverageHint": "Tipos que o time acerta de forma super efetiva com golpes do próprio tipo (STAB).",
     "gaps": "Sem cobertura",
     "noGaps": "O time acerta todos os tipos de forma super efetiva.",
-    "chartNote": "Usa a tabela de tipos atual (6ª geração em diante) e os tipos atuais de cada Pokémon, mesmo em jogos antigos."
+    "chartNote": "Usa a tabela de tipos atual (6ª geração em diante) e os tipos atuais de cada Pokémon, mesmo em jogos antigos.",
+    "close": "Fechar",
+    "trayEmpty": "Monte seu time"
   },
   "versionFilter": {
     "chip": "Versão",

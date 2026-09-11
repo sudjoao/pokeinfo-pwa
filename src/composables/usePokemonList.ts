@@ -366,13 +366,13 @@ export function usePokemonList() {
     },
   )
 
-  // Troca de jogo/dex volta ao topo; a busca só reinicia a lista.
-  watch(dex, () => {
-    window.scrollTo({ top: 0 })
-    loadDex()
-  })
+  watch(dex, () => loadDex())
 
-  watch([source, normalizedQuery, caughtFilter, typeFilter, activeAvailability], () => reset())
+  // Qualquer filtro novo reinicia a lista e volta ao topo (a URL muda por replace, que não rola).
+  watch([source, normalizedQuery, caughtFilter, typeFilter, activeAvailability], () => {
+    reset()
+    window.scrollTo({ top: 0 })
+  })
 
   store.load()
   loadDex()

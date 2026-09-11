@@ -22,10 +22,13 @@ const router = createRouter({
       component: () => import('@/views/TeamView.vue'),
     },
   ],
-  // Ao voltar, restaura a posição da lista (a Home fica viva via KeepAlive);
-  // ao abrir um detalhe, começa do topo.
-  scrollBehavior(_to, _from, savedPosition) {
-    return savedPosition ?? { top: 0 }
+  // Ao voltar, restaura a posição da lista (a Home fica viva via KeepAlive); ao abrir outra
+  // tela, começa do topo. Mudança só de query (filtros, time) mantém a posição: quem precisa
+  // voltar ao topo (troca de filtro reinicia a lista) faz isso explicitamente.
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) return savedPosition
+    if (to.path === from.path) return false
+    return { top: 0 }
   },
 })
 
