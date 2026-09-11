@@ -14,3 +14,7 @@ app.use(router)
 app.use(vuetify)
 
 app.mount('#app')
+
+// Pede ao navegador para não descartar o storage (marcações de captura) sob pressão de espaço.
+// O Chrome concede para PWAs instalados; o Safari ignora sem erro.
+navigator.storage?.persist?.().catch(() => {})

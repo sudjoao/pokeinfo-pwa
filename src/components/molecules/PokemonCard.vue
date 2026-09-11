@@ -5,10 +5,18 @@ import { artworkUrl, formatDexNumber, formatPokemonName, TYPE_STYLES } from '@/u
 import PokemonArtwork from '@/components/atoms/PokemonArtwork.vue'
 import DexNumber from '@/components/atoms/DexNumber.vue'
 import TypeChip from '@/components/atoms/TypeChip.vue'
+import CatchToggle from '@/components/atoms/CatchToggle.vue'
 
-const props = defineProps<{ pokemon: PokemonListItem }>()
+const props = defineProps<{
+  pokemon: PokemonListItem
+  /** Estado de captura no jogo selecionado; undefined esconde o botão (Pokédex Nacional). */
+  caught?: boolean
+}>()
 
-const emit = defineEmits<{ select: [pokemon: PokemonListItem] }>()
+const emit = defineEmits<{
+  select: [pokemon: PokemonListItem]
+  toggleCaught: [speciesId: number]
+}>()
 
 const name = computed(() => formatPokemonName(props.pokemon.name))
 const image = computed(() => artworkUrl(props.pokemon.id))
@@ -17,6 +25,7 @@ const accent = computed(() => TYPE_STYLES[props.pokemon.types[0] ?? 'unknown'].c
 /** Com um jogo selecionado, o número regional vai em destaque e o nacional fica pequeno. */
 const regional = computed(() => props.pokemon.dexNumber !== undefined)
 const nationalLabel = computed(() => formatDexNumber(props.pokemon.speciesId ?? props.pokemon.id))
+const speciesId = computed(() => props.pokemon.speciesId ?? props.pokemon.id)
 </script>
 
 <template>
@@ -28,6 +37,12 @@ const nationalLabel = computed(() => formatDexNumber(props.pokemon.speciesId ?? 
   >
     <div class="pokemon-card__art pa-2">
       <PokemonArtwork :src="image" :alt="name" :size="120" />
+      <CatchToggle
+        v-if="caught !== undefined"
+        :caught="caught"
+        class="pokemon-card__catch"
+        @toggle="emit('toggleCaught', speciesId)"
+      />
     </div>
     <v-card-item class="pt-2">
       <div class="d-flex align-baseline flex-wrap ga-1">
@@ -52,10 +67,17 @@ const nationalLabel = computed(() => formatDexNumber(props.pokemon.speciesId ?? 
 }
 
 .pokemon-card__art {
+  position: relative;
   background: color-mix(in srgb, var(--accent) 22%, rgb(var(--v-theme-surface)));
   border-radius: inherit;
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
+}
+
+.pokemon-card__catch {
+  position: absolute;
+  top: 4px;
+  right: 4px;
 }
 
 .pokemon-card__national {

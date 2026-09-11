@@ -11,6 +11,7 @@ import EmptyState from '@/components/molecules/EmptyState.vue'
 import PokemonCardSkeleton from '@/components/molecules/PokemonCardSkeleton.vue'
 import GameFilterChip from '@/components/molecules/GameFilterChip.vue'
 import DexChips from '@/components/molecules/DexChips.vue'
+import CaughtFilterChips from '@/components/molecules/CaughtFilterChips.vue'
 import PokemonGrid from '@/components/organisms/PokemonGrid.vue'
 import GamePickerSheet from '@/components/organisms/GamePickerSheet.vue'
 
@@ -21,6 +22,12 @@ const {
   dex,
   setGame,
   setDex,
+  caughtFilter,
+  setCaughtFilter,
+  caughtIds,
+  caughtCount,
+  missingCount,
+  toggleCaught,
   items,
   listKey,
   status,
@@ -40,11 +47,21 @@ const pickerOpen = ref(false)
 /** Altura do cabeçalho: busca (48) + linha de chips (32) + espaçamentos. */
 const HEADER_EXTENSION_HEIGHT = 108
 
-const emptyMessage = computed(() =>
-  game.value && dex.value
+const emptyTitle = computed(() => {
+  if (!game.value || !caughtFilter.value || query.value.trim()) return 'Nenhum Pokémon encontrado'
+  return caughtFilter.value === 'caught' ? 'Nenhum capturado ainda' : 'Pokédex completa!'
+})
+
+const emptyMessage = computed(() => {
+  if (game.value && dex.value && caughtFilter.value && !query.value.trim()) {
+    return caughtFilter.value === 'caught'
+      ? `Toque na Poké Bola de um card para marcar o que você já capturou em ${game.value.title}.`
+      : `Você já capturou todos os Pokémon da Pokédex de ${dex.value.label} em ${game.value.title}.`
+  }
+  return game.value && dex.value
     ? `Nenhum Pokémon com esse nome ou número na Pokédex de ${dex.value.label} (${game.value.title}).`
-    : 'Tente buscar por outro nome ou número da Pokédex.',
-)
+    : 'Tente buscar por outro nome ou número da Pokédex.'
+})
 
 /**
  * O grito toca aqui, dentro do toque, porque o iOS bloqueia áudio fora de um gesto do usuário.
@@ -71,6 +88,15 @@ function openPokemon(pokemon: PokemonSummary): void {
           <v-divider vertical class="home-filters__divider" />
           <DexChips :dexes="game.dexes" :selected="dex.slug" @select="setDex" />
         </template>
+        <template v-if="game">
+          <v-divider vertical class="home-filters__divider" />
+          <CaughtFilterChips
+            :selected="caughtFilter"
+            :caught-count="caughtCount"
+            :missing-count="missingCount"
+            @select="setCaughtFilter"
+          />
+        </template>
       </div>
     </template>
 
@@ -89,7 +115,7 @@ function openPokemon(pokemon: PokemonSummary): void {
       @action="retry"
     />
 
-    <EmptyState v-else-if="isEmpty" title="Nenhum Pokémon encontrado" :message="emptyMessage" />
+    <EmptyState v-else-if="isEmpty" :title="emptyTitle" :message="emptyMessage" />
 
     <PokemonGrid
       v-else
@@ -97,9 +123,11 @@ function openPokemon(pokemon: PokemonSummary): void {
       :items="items"
       :status="status"
       :error-message="errorMessage"
+      :caught-ids="game ? caughtIds : undefined"
       @load="loadMore"
       @retry="retry"
       @select="openPokemon"
+      @toggle-caught="toggleCaught"
     />
 
     <GamePickerSheet

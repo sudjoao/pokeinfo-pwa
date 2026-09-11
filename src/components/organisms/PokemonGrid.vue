@@ -12,13 +12,20 @@ const props = defineProps<{
   status: GridStatus
   errorMessage?: string | null
   skeletonCount?: number
+  /** Ids de espécie capturados no jogo selecionado; undefined esconde o botão de captura. */
+  caughtIds?: ReadonlySet<number>
 }>()
 
 const emit = defineEmits<{
   load: []
   retry: []
   select: [pokemon: PokemonListItem]
+  toggleCaught: [speciesId: number]
 }>()
+
+function caughtOf(pokemon: PokemonListItem): boolean | undefined {
+  return props.caughtIds?.has(pokemon.speciesId ?? pokemon.id)
+}
 
 const sentinelVisible = ref(false)
 
@@ -44,7 +51,12 @@ const intersectOptions = { rootMargin: '0px 0px 1200px 0px' }
   <div class="pokemon-grid">
     <v-row density="compact">
       <v-col v-for="pokemon in items" :key="pokemon.id" cols="6" sm="4" md="3" lg="2">
-        <PokemonCard :pokemon="pokemon" @select="emit('select', $event)" />
+        <PokemonCard
+          :pokemon="pokemon"
+          :caught="caughtOf(pokemon)"
+          @select="emit('select', $event)"
+          @toggle-caught="emit('toggleCaught', $event)"
+        />
       </v-col>
     </v-row>
 

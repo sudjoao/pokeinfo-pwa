@@ -2,6 +2,7 @@ import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter, type LocationQueryRaw } from 'vue-router'
 import { GAMES, type Game, type GameDex } from '@/data/games'
 import { usePokedexStore } from '@/stores/pokedex'
+import { useCaughtStore } from '@/stores/caught'
 import { useDebouncedRef } from '@/composables/useDebouncedRef'
 import { buildDexList, buildRegionalFormIndex, findGame, resolveDex } from '@/utils/games'
 import type { PokemonIndexEntry, PokemonListItem } from '@/types/pokemon'
@@ -10,10 +11,24 @@ export const PAGE_SIZE = 24
 
 export type ListStatus = 'idle' | 'loading' | 'error' | 'done'
 
+/** Filtro de captura: só capturados, só os que faltam, ou todos (null). */
+export type CaughtFilter = 'caught' | 'missing' | null
+
+function caughtFilterParam(value: unknown): CaughtFilter {
+  if (value === '1') return 'caught'
+  if (value === '0') return 'missing'
+  return null
+}
+
 /** Entrada da fonte da lista: o índice nacional ou a Pokédex do jogo, já resolvida para a forma. */
 interface ListSource extends PokemonIndexEntry {
   dexNumber?: number
   speciesId?: number
+}
+
+/** Id usado na marcação de captura: a espécie (número nacional), mesmo quando o card é uma forma regional. */
+function speciesOf(entry: ListSource): number {
+  return entry.speciesId ?? entry.id
 }
 
 function matches(entry: ListSource, query: string): boolean {
@@ -36,6 +51,7 @@ function queryParam(value: unknown): string | null {
  */
 export function usePokemonList() {
   const store = usePokedexStore()
+  const caughtStore = useCaughtStore()
   const route = useRoute()
   const router = useRouter()
 
@@ -51,9 +67,16 @@ export function usePokemonList() {
     game.value ? resolveDex(game.value, dexSlug.value) : null,
   )
 
+  const caughtFilter = ref<CaughtFilter>(caughtFilterParam(route.query.caught))
+
   function setGame(slug: string | null): void {
     gameSlug.value = slug
     dexSlug.value = null
+    caughtFilter.value = null
+  }
+
+  function setCaughtFilter(filter: CaughtFilter): void {
+    caughtFilter.value = filter
   }
 
   function setDex(slug: string): void {
@@ -90,9 +113,37 @@ export function usePokemonList() {
     return entries ? buildDexList(entries, dex.value, regionalForms.value) : []
   })
 
-  const filtered = computed(() =>
-    source.value.filter((entry) => matches(entry, normalizedQuery.value)),
-  )
+  /**
+   * Filtro de captura aplicado com leitura não reativa do conjunto: marcar um card não pode
+   * encolher a lista no meio da paginação (o próximo lote pularia um Pokémon). A lista só
+   * reaplica o filtro quando jogo, busca ou o próprio filtro mudam.
+   */
+  const filtered = computed(() => {
+    const query = normalizedQuery.value
+    const status = game.value ? caughtFilter.value : null
+    const caught = caughtStore.caughtInRaw(game.value?.slug)
+    return source.value.filter((entry) => {
+      if (!matches(entry, query)) return false
+      if (status === null) return true
+      return caught.has(speciesOf(entry)) === (status === 'caught')
+    })
+  })
+
+  /** Ids de espécie capturados no jogo atual (reativo por id: só o card tocado re-renderiza). */
+  const caughtIds = computed(() => caughtStore.caughtIn(game.value?.slug))
+
+  /** Capturados e faltantes dentro da Pokédex atual (o conjunto do jogo pode ter espécies de outras dexes). */
+  const caughtCount = computed(() => {
+    const ids = caughtIds.value
+    let count = 0
+    for (const entry of source.value) if (ids.has(speciesOf(entry))) count++
+    return count
+  })
+  const missingCount = computed(() => source.value.length - caughtCount.value)
+
+  function toggleCaught(speciesId: number): void {
+    if (game.value) caughtStore.toggle(game.value.slug, speciesId)
+  }
 
   const items = ref<PokemonListItem[]>([])
   const status = ref<ListStatus>('idle')
@@ -174,11 +225,12 @@ export function usePokemonList() {
     if (game.value) {
       result.game = game.value.slug
       if (game.value.dexes.length > 1 && dex.value) result.dex = dex.value.slug
+      if (caughtFilter.value) result.caught = caughtFilter.value === 'caught' ? '1' : '0'
     }
     return result
   }
 
-  watch([normalizedQuery, () => game.value?.slug, () => dex.value?.slug], () => {
+  watch([normalizedQuery, () => game.value?.slug, () => dex.value?.slug, caughtFilter], () => {
     router.replace({ query: buildQuery() })
   })
 
@@ -188,7 +240,7 @@ export function usePokemonList() {
     loadDex()
   })
 
-  watch([source, normalizedQuery], () => reset())
+  watch([source, normalizedQuery, caughtFilter], () => reset())
 
   store.loadIndex()
   loadDex()
@@ -200,6 +252,12 @@ export function usePokemonList() {
     dex,
     setGame,
     setDex,
+    caughtFilter,
+    setCaughtFilter,
+    caughtIds,
+    caughtCount,
+    missingCount,
+    toggleCaught,
     filtered,
     items,
     status,

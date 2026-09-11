@@ -6,6 +6,7 @@ import PokemonArtwork from '@/components/atoms/PokemonArtwork.vue'
 import DexNumber from '@/components/atoms/DexNumber.vue'
 import TypeChip from '@/components/atoms/TypeChip.vue'
 import CryButton from '@/components/atoms/CryButton.vue'
+import CatchToggle from '@/components/atoms/CatchToggle.vue'
 
 /** Número do Pokémon na Pokédex de um jogo, mostrado no lugar do nacional quando há jogo selecionado. */
 export interface RegionalNumber {
@@ -18,12 +19,14 @@ const props = defineProps<{
   pokemon: PokemonDetail
   genus?: string | null
   regional?: RegionalNumber | null
+  /** Capturado no jogo selecionado; undefined esconde o botão (sem jogo na URL). */
+  caught?: boolean
   showCry?: boolean
   cryPlaying?: boolean
   cryMuted?: boolean
 }>()
 
-const emit = defineEmits<{ playCry: [] }>()
+const emit = defineEmits<{ playCry: []; toggleCaught: [] }>()
 
 const name = computed(() => formatPokemonName(props.pokemon.name))
 const nationalLabel = computed(() => formatDexNumber(props.pokemon.speciesId))
@@ -51,8 +54,25 @@ const accent = computed(() => TYPE_STYLES[props.pokemon.types[0] ?? 'unknown'].c
           <p v-if="regional" class="text-body-small opacity-70 mt-1 mb-0">
             Pokédex de {{ regional.dexLabel }} · {{ regional.gameTitle }}
           </p>
+          <p v-if="caught !== undefined" class="text-body-small mt-1 mb-0">
+            {{ caught ? 'Capturado' : 'Ainda não capturado' }}
+            <template v-if="regional">em {{ regional.gameTitle }}</template>
+          </p>
         </div>
-        <CryButton v-if="showCry" :playing="cryPlaying" :muted="cryMuted" @play="emit('playCry')" />
+        <div class="d-flex flex-column align-center ga-2">
+          <CryButton
+            v-if="showCry"
+            :playing="cryPlaying"
+            :muted="cryMuted"
+            @play="emit('playCry')"
+          />
+          <CatchToggle
+            v-if="caught !== undefined"
+            :caught="caught"
+            size="default"
+            @toggle="emit('toggleCaught')"
+          />
+        </div>
       </div>
     </v-card-item>
     <v-card-text class="d-flex flex-wrap ga-1 pt-0">

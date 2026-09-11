@@ -23,6 +23,11 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
   (nível, item, troca, amizade, local, hora do dia, golpe conhecido, stats, formas regionais…).
   O método padrão dos jogos atuais fica em destaque; métodos de jogos antigos ficam recolhidos.
 - **Grito do Pokémon** ao abrir a tela de detalhes (com botão para repetir e para silenciar).
+- **Capturados por jogo**: com um jogo selecionado, cada card ganha uma Poké Bola para marcar o
+  Pokémon como capturado naquele jogo (também no hero da tela de detalhes). Chips "Capturados" e
+  "Faltam" filtram a lista e mostram a contagem da Pokédex atual; o filtro vai na URL (`?caught=0`).
+  A marcação é por espécie, então as ilhas de Alola e as formas regionais compartilham o mesmo
+  estado dentro de um jogo. Fica salva no aparelho em um bitset base64 (~170 bytes por jogo).
 - Tema claro/escuro seguindo a preferência do sistema.
 - **Offline**: índice e resumos ficam em cache local; artworks e respostas recentes ficam no service worker.
 - Instalável no iOS/Android como app (manifest + service worker).
@@ -35,6 +40,7 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
   adicioná-lo ali. Versões japonesas, Colosseum/XD (sem Pokédex) e jogos fora da série principal
   ficam de fora; DLCs aparecem como Pokédex do jogo base.
 - Na Pokédex de Alola o app mostra a forma de Alola mesmo quando a forma de Kanto também é obtível.
+- As marcações de captura ficam só no aparelho (não há conta nem sincronização entre Mac e iPhone).
 - Os gritos vêm só em `.ogg` (Vorbis). Safari toca a partir do macOS 14.1 / iOS 17.4 (suporte
   completo no 18.4); em navegadores sem suporte o botão de som não aparece. No iOS o áudio só
   toca depois de um toque do usuário, por isso o grito é disparado no toque do card, e o botão
@@ -47,6 +53,7 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
 
 - Fraquezas e resistências por tipo.
 - Descrição das habilidades.
+- Exportar/importar as marcações de captura (backup em JSON).
 - Favoritos.
 
 ## Tecnologias
@@ -125,6 +132,7 @@ O objetivo é funcionar offline sem inflar o armazenamento do usuário:
 | Onde | O que | Limite |
 | --- | --- | --- |
 | `localStorage` | índice (`pokeinfo:index:v1`) e resumos enxutos (`pokeinfo:summaries:v1`) | ~200 KB para a Pokédex inteira |
+| `localStorage` | capturados por jogo (`pokeinfo:caught:v1`), um bitset em base64 por jogo | ~170 bytes por jogo (~4 KB no total) |
 | Service worker `pokeapi-index` | resposta do índice | 3 entradas, 7 dias |
 | Service worker `pokeapi-pokedex` | Pokédex regionais por jogo (12 a 45 KB) | 12 entradas, 30 dias |
 | Service worker `pokeapi-species` | espécies e cadeias de evolução (~2 a 50 KB) | 100 entradas, 7 dias |

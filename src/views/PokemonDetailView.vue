@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { mdiChevronLeft, mdiChevronRight, mdiVolumeHigh, mdiVolumeOff } from '@mdi/js'
 import { usePokemonDetail, type NeighborEntry } from '@/composables/usePokemonDetail'
 import { useCry } from '@/composables/useCry'
+import { useCaughtStore } from '@/stores/caught'
 import { gameContextFromQuery, gameContextQuery } from '@/utils/games'
 import { formatDexNumber, formatPokemonName } from '@/utils/pokemon'
 import DetailLayout from '@/components/templates/DetailLayout.vue'
@@ -56,6 +57,20 @@ function neighborNumber(entry: NeighborEntry): string {
 }
 
 const cry = useCry()
+
+const caughtStore = useCaughtStore()
+/** Estado de captura no jogo da URL; undefined (sem jogo) esconde o botão no hero. */
+const caught = computed(() =>
+  context.value && detail.value
+    ? caughtStore.isCaught(context.value.game.slug, detail.value.speciesId)
+    : undefined,
+)
+
+function toggleCaught(): void {
+  if (context.value && detail.value) {
+    caughtStore.toggle(context.value.game.slug, detail.value.speciesId)
+  }
+}
 
 const title = computed(() => (detail.value ? formatPokemonName(detail.value.name) : 'PokéInfo'))
 
@@ -138,10 +153,12 @@ const showVarieties = computed(() => (species.value?.varieties.length ?? 0) > 1)
             :pokemon="detail"
             :genus="species?.genus"
             :regional="regional"
+            :caught="caught"
             :show-cry="cry.supported"
             :cry-playing="cry.playing.value"
             :cry-muted="cry.muted.value"
             @play-cry="cry.play(detail.id, detail.cryUrl ?? undefined)"
+            @toggle-caught="toggleCaught"
           />
         </v-col>
 
