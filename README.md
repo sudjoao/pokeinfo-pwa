@@ -1,4 +1,4 @@
-# PokéInfo
+# PokeInfo
 
 Pokédex em formato de **PWA** (Progressive Web App) para consultar informações sobre Pokémon:
 tipos, número na Pokédex, stats, habilidades e cadeias de evolução. Feita para ser instalada
@@ -113,6 +113,7 @@ src/
   data/games.ts               # jogos da série principal e as Pokédex regionais de cada um
   data/typeChart.ts           # tabela de efetividade de tipos (estática, 6ª geração em diante)
   data/exclusives.ts          # exclusivos de versão por jogo (estático, ids de espécie)
+  data/credits.ts             # autor, repositório e fontes de dados (tela "Sobre" e rodapé)
   services/pokeapi/           # cliente HTTP, DTOs da PokéAPI e mapeamento para o domínio
     pokemon.service.ts        #   índice, resumo e detalhe do Pokémon
     pokedex.service.ts        #   entradas de uma Pokédex regional (número no jogo + espécie)
@@ -140,7 +141,7 @@ src/
     molecules/                # PokemonCard, SearchField, GameFilterChip, TypeFilterChip, DexChips,
                               # CaughtFilterChips, VersionFilterChip, TeamSlot, EmptyState, PokemonHero, AboutGrid,
                               # AbilityList, StatsList, EvolutionStage, EvolutionMethod, VarietyChips
-    organisms/                # AppHeader, ListFilters, PokemonGrid, GamePickerSheet, TypePickerSheet, VersionPickerSheet,
+    organisms/                # AppHeader, ListFilters, PokemonGrid, GamePickerSheet, TypePickerSheet, VersionPickerSheet, AboutSheet,
                               # LanguageSheet, TeamBench, TeamPanel, TeamTray, TeamAnalysis, TeamDefenseTable, TeamCoverage,
                               # EvolutionChain, EvolutionBranch (recursivo)
     templates/                # DefaultLayout (home) e DetailLayout (voltar + ações + filtros)
@@ -214,5 +215,10 @@ e o content-type correto para o `manifest.webmanifest`. Basta conectar o reposit
 
 ## Créditos
 
-Dados e imagens fornecidos pela [PokéAPI](https://pokeapi.co/). Pokémon é marca registrada da
+Feito por [sudjoao](https://github.com/sudjoao). Código-fonte em
+[github.com/sudjoao/pokeinfo-pwa](https://github.com/sudjoao/pokeinfo-pwa); os créditos também
+aparecem no app, no botão "Sobre" do cabeçalho e no rodapé da lista.
+
+Dados e imagens fornecidos pela [PokéAPI](https://pokeapi.co/); lista de exclusivos de versão a
+partir da [Bulbapedia](https://bulbapedia.bulbagarden.net/). Pokémon é marca registrada da
 Nintendo/Creatures Inc./GAME FREAK inc.; este projeto é um estudo sem fins comerciais.

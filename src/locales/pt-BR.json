@@ -1,9 +1,9 @@
 {
   "app": {
-    "name": "PokéInfo",
-    "dexTitle": "Pokédex",
-    "detailTitle": "{name} · Pokédex",
-    "teamTitle": "Montar time · PokéInfo"
+    "name": "PokeInfo",
+    "dexTitle": "PokeInfo",
+    "detailTitle": "{name} · PokeInfo",
+    "teamTitle": "Montar time · PokeInfo"
   },
   "common": {
     "retry": "Tentar novamente",
@@ -263,5 +263,16 @@
     "bothShort": "Ambas",
     "only": "Só {version}",
     "onlyHint": "Exclusivo de {version}: não existe em {other}"
+  },
+  "about": {
+    "open": "Sobre o app",
+    "title": "Sobre o PokeInfo",
+    "description": "Pokédex em formato de app para consultar tipos, stats, evoluções e montar times, feita para funcionar offline e instalada na tela inicial.",
+    "madeBy": "Feito por {author}",
+    "repo": "Código-fonte no GitHub",
+    "data": "Dados e imagens da PokéAPI",
+    "exclusives": "Exclusivos de versão a partir da Bulbapedia",
+    "disclaimer": "Pokémon e os nomes dos personagens são marcas registradas da Nintendo, Creatures Inc. e GAME FREAK inc. Projeto de estudo, sem fins comerciais e sem vínculo com essas empresas.",
+    "close": "Fechar"
   }
 }

@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { mdiSwordCross, mdiTranslate } from '@mdi/js'
+import { mdiInformationOutline, mdiSwordCross, mdiTranslate } from '@mdi/js'
 import { gameContextQuery } from '@/utils/games'
 import { usePokemonList } from '@/composables/usePokemonList'
 import { useCry } from '@/composables/useCry'
@@ -19,6 +19,7 @@ import GamePickerSheet from '@/components/organisms/GamePickerSheet.vue'
 import TypePickerSheet from '@/components/organisms/TypePickerSheet.vue'
 import VersionPickerSheet from '@/components/organisms/VersionPickerSheet.vue'
 import LanguageSheet from '@/components/organisms/LanguageSheet.vue'
+import AboutSheet from '@/components/organisms/AboutSheet.vue'
 
 const {
   query,
@@ -62,6 +63,7 @@ const pickerOpen = ref(false)
 const typesOpen = ref(false)
 const versionsOpen = ref(false)
 const languageOpen = ref(false)
+const aboutOpen = ref(false)
 
 /** Altura do cabeçalho: busca (48) + linha de chips (32) + espaçamentos. */
 const HEADER_EXTENSION_HEIGHT = 108
@@ -117,6 +119,11 @@ function openTeamBuilder(): void {
     <template #actions>
       <v-btn :icon="mdiSwordCross" :aria-label="t('home.teamBuilder')" @click="openTeamBuilder" />
       <v-btn :icon="mdiTranslate" :aria-label="t('language.title')" @click="languageOpen = true" />
+      <v-btn
+        :icon="mdiInformationOutline"
+        :aria-label="t('about.open')"
+        @click="aboutOpen = true"
+      />
     </template>
     <template #header>
       <SearchField v-model="query" />
@@ -199,5 +206,7 @@ function openTeamBuilder(): void {
       :selected="locale"
       @select="setLocale"
     />
+
+    <AboutSheet v-model="aboutOpen" />
   </DefaultLayout>
 </template>

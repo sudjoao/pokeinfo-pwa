@@ -1,9 +1,9 @@
 {
   "app": {
-    "name": "PokéInfo",
-    "dexTitle": "Pokédex",
-    "detailTitle": "{name} · Pokédex",
-    "teamTitle": "Team builder · PokéInfo"
+    "name": "PokeInfo",
+    "dexTitle": "PokeInfo",
+    "detailTitle": "{name} · PokeInfo",
+    "teamTitle": "Team builder · PokeInfo"
   },
   "common": {
     "retry": "Try again",
@@ -263,5 +263,16 @@
     "bothShort": "Both",
     "only": "{version} only",
     "onlyHint": "Exclusive to {version}: not found in {other}"
+  },
+  "about": {
+    "open": "About the app",
+    "title": "About PokeInfo",
+    "description": "A Pokédex app to look up types, stats, evolutions and build teams, made to work offline from your home screen.",
+    "madeBy": "Made by {author}",
+    "repo": "Source code on GitHub",
+    "data": "Data and images from PokéAPI",
+    "exclusives": "Version exclusives from Bulbapedia",
+    "disclaimer": "Pokémon and character names are trademarks of Nintendo, Creatures Inc. and GAME FREAK inc. This is a study project, non-commercial and not affiliated with those companies.",
+    "close": "Close"
   }
 }

@@ -21,8 +21,8 @@ export default defineConfig({
       injectRegister: 'auto',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png'],
       manifest: {
-        name: 'PokéInfo',
-        short_name: 'PokéInfo',
+        name: 'PokeInfo',
+        short_name: 'PokeInfo',
         description: 'Pokédex PWA para consultar informações sobre Pokémon',
         lang: 'pt-BR',
         theme_color: '#dc2626',

@@ -1,11 +1,15 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
+import { AUTHOR, AUTHOR_URL, POKEAPI_URL } from '@/data/credits'
 import AppHeader from '@/components/organisms/AppHeader.vue'
 
 defineProps<{ extensionHeight?: number }>()
+
+const { t } = useI18n()
 </script>
 
 <template>
-  <AppHeader title="PokéInfo" :extension-height="extensionHeight">
+  <AppHeader title="PokeInfo" :extension-height="extensionHeight">
     <template v-if="$slots.actions" #actions>
       <slot name="actions" />
     </template>
@@ -17,11 +21,24 @@ defineProps<{ extensionHeight?: number }>()
   <v-main class="default-layout">
     <v-container class="default-layout__content" max-width="1280">
       <slot />
+      <footer class="default-layout__footer text-body-small text-center opacity-60 pt-6">
+        <i18n-t keypath="about.madeBy" tag="span">
+          <template #author>
+            <a :href="AUTHOR_URL" target="_blank" rel="noopener">{{ AUTHOR }}</a>
+          </template>
+        </i18n-t>
+        ·
+        <a :href="POKEAPI_URL" target="_blank" rel="noopener">{{ t('about.data') }}</a>
+      </footer>
     </v-container>
   </v-main>
 </template>
 
 <style scoped>
+.default-layout__footer a {
+  color: inherit;
+}
+
 .default-layout__content {
   padding-bottom: calc(16px + var(--safe-bottom));
   padding-left: calc(16px + var(--safe-left));
