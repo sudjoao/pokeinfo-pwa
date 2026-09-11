@@ -40,7 +40,9 @@
     "loadMoreError": "Error loading Pokémon",
     "endOfList": "You have reached the end of the list.",
     "teamBuilder": "Team builder",
-    "emptyFiltered": "No Pokémon matches these filters. Try another type or search."
+    "emptyFiltered": "No Pokémon matches these filters. Try another type or search.",
+    "onlyIn": "{version} only",
+    "exclusivesOf": "{version} exclusives"
   },
   "dex": {
     "crown-tundra": "Crown Tundra",
@@ -106,7 +108,8 @@
     "hatch": "Hatches from an egg when a parent holds {item}.",
     "resultForm": "→ {form} form",
     "otherGames": "+{n} in other games",
-    "fromForm": "(from {form})"
+    "fromForm": "(from {form})",
+    "exclusiveTo": "Exclusive to {version}"
   },
   "type": {
     "normal": "Normal",

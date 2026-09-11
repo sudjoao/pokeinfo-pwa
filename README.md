@@ -33,6 +33,12 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
   salvo: fica só na URL (`/team?game=scarlet-violet&team=906,909,912`), o que sobrevive a recarregar
   e permite compartilhar o link. A tabela de tipos é a atual (6ª geração em diante) e fica em
   `src/data/typeChart.ts`.
+- **Exclusivos de versão**: com um jogo de duas versões selecionado (Sword/Shield, Scarlet/Violet…),
+  o card mostra um selo "Só Sword" quando a espécie só existe naquela versão, e as chips "Só Sword" /
+  "Só Shield" filtram a lista (com a contagem da Pokédex atual, `?only=sword`). A tela de detalhes
+  mostra a mesma informação no hero. Funciona também no team builder. A lista é estática
+  (`src/data/exclusives.ts`, gerada a partir da Bulbapedia), porque a PokéAPI não tem esse dado:
+  os encontros por área são incompletos nas gerações 8 e 9 e não cobrem presentes, fósseis e evoluções.
 - **Capturados por jogo**: com um jogo selecionado, cada card ganha uma Poké Bola para marcar o
   Pokémon como capturado naquele jogo (também no hero da tela de detalhes). Chips "Capturados" e
   "Faltam" filtram a lista e mostram a contagem da Pokédex atual; o filtro vai na URL (`?caught=0`).
@@ -54,6 +60,10 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
   ficam de fora; DLCs aparecem como Pokédex do jogo base.
 - Na Pokédex de Alola o app mostra a forma de Alola mesmo quando a forma de Kanto também é obtível.
 - As marcações de captura ficam só no aparelho (não há conta nem sincronização entre Mac e iPhone).
+- Os exclusivos de versão são por espécie: uma espécie com uma forma em cada versão (Basculin,
+  Tauros de Paldea, Kyurem…) não conta como exclusiva. Exclusivos das DLCs e da White Forest entram
+  no jogo base, e Red/Blue segue a distribuição internacional. Jogos de versão única (Yellow,
+  Emerald, Platinum, Legends) não têm o filtro.
 - A análise do time usa a tabela de tipos atual e os tipos atuais de cada Pokémon mesmo em jogos
   antigos (ex.: Clefairy conta como Fada em Red/Blue). A cobertura ofensiva olha só os tipos do
   próprio Pokémon (STAB), não os golpes que ele aprende, e cada tipo defensor isolado.
@@ -99,6 +109,7 @@ src/
   types/pokemon.ts            # tipos de domínio (PokemonSummary, PokemonType…)
   data/games.ts               # jogos da série principal e as Pokédex regionais de cada um
   data/typeChart.ts           # tabela de efetividade de tipos (estática, 6ª geração em diante)
+  data/exclusives.ts          # exclusivos de versão por jogo (estático, ids de espécie)
   services/pokeapi/           # cliente HTTP, DTOs da PokéAPI e mapeamento para o domínio
     pokemon.service.ts        #   índice, resumo e detalhe do Pokémon
     pokedex.service.ts        #   entradas de uma Pokédex regional (número no jogo + espécie)
@@ -109,12 +120,13 @@ src/
     evolution.ts              # regras "como evoluir" em pt-BR (gatilhos + condições)
     games.ts                  # busca de jogo/dex, agrupamento por geração, formas regionais
     typeChart.ts              # multiplicadores, fraquezas do time e cobertura ofensiva
+    exclusives.ts             # versão exclusiva de uma espécie dentro de um jogo
     storage.ts
   stores/
     pokedex.ts                # Pinia: índice + cache de resumos (persistido) e Pokédex regionais (memória)
     pokemonDetail.ts          # Pinia: detalhes, espécies e cadeias (só em memória)
   composables/
-    usePokemonList.ts         # busca + filtros (jogo, captura, tipo) + lotes do scroll infinito
+    usePokemonList.ts         # busca + filtros (jogo, captura, tipo, versão) + lotes do scroll infinito
     useTeam.ts                # time de até 6 na URL (?team=) e análise de tipos
     usePokemonDetail.ts       # carrega detalhe -> espécie -> cadeia, reage à rota e ao jogo (?game=)
     useCry.ts                 # áudio único compartilhado, desbloqueado no gesto do usuário
@@ -123,7 +135,7 @@ src/
     atoms/                    # TypeChip, TypeToggle, MultiplierBadge, PokemonArtwork, PokemonAvatar,
                               # DexNumber, StatBar, InfoTile, CryButton, CatchToggle
     molecules/                # PokemonCard, SearchField, GameFilterChip, TypeFilterChip, DexChips,
-                              # CaughtFilterChips, TeamSlot, EmptyState, PokemonHero, AboutGrid,
+                              # CaughtFilterChips, VersionFilterChips, TeamSlot, EmptyState, PokemonHero, AboutGrid,
                               # AbilityList, StatsList, EvolutionStage, EvolutionMethod, VarietyChips
     organisms/                # AppHeader, ListFilters, PokemonGrid, GamePickerSheet, TypePickerSheet,
                               # LanguageSheet, TeamBench, TeamAnalysis, TeamDefenseTable, TeamCoverage,

@@ -8,6 +8,7 @@ import { useCry } from '@/composables/useCry'
 import { useCaughtStore } from '@/stores/caught'
 import { useDexLabel } from '@/composables/useDexLabel'
 import { gameContextFromQuery, gameContextQuery } from '@/utils/games'
+import { exclusiveVersionOf } from '@/utils/exclusives'
 import { formatDexNumber, formatPokemonName } from '@/utils/pokemon'
 import DetailLayout from '@/components/templates/DetailLayout.vue'
 import EmptyState from '@/components/molecules/EmptyState.vue'
@@ -75,6 +76,13 @@ function toggleCaught(): void {
     caughtStore.toggle(context.value.game.slug, detail.value.speciesId)
   }
 }
+
+/** Versão do jogo da URL em que a espécie é exclusiva (null quando existe nas duas ou sem jogo). */
+const exclusiveTo = computed(() =>
+  context.value && detail.value
+    ? (exclusiveVersionOf(context.value.game.slug, detail.value.speciesId)?.title ?? null)
+    : null,
+)
 
 const title = computed(() => (detail.value ? formatPokemonName(detail.value.name) : t('app.name')))
 
@@ -163,6 +171,7 @@ const showVarieties = computed(() => (species.value?.varieties.length ?? 0) > 1)
             :genus="species?.genus"
             :regional="regional"
             :caught="caught"
+            :exclusive-to="exclusiveTo"
             :show-cry="cry.supported"
             :cry-playing="cry.playing.value"
             :cry-muted="cry.muted.value"

@@ -8,6 +8,8 @@ import { useDebouncedRef } from '@/composables/useDebouncedRef'
 import { buildDexList, findGame, resolveDex } from '@/utils/games'
 import { describeError } from '@/utils/errors'
 import { isPokemonType } from '@/utils/pokemon'
+import { exclusiveVersionOf, exclusiveVersions, findExclusiveVersion } from '@/utils/exclusives'
+import type { ExclusiveVersion } from '@/data/exclusives'
 import type { PokemonIndexEntry, PokemonListItem, PokemonType } from '@/types/pokemon'
 
 export const PAGE_SIZE = 24
@@ -60,7 +62,7 @@ function queryParam(value: unknown): string | null {
 }
 
 /** Parâmetros da URL que esta lista controla; os demais (ex.: `team`) são preservados. */
-const OWN_QUERY_KEYS = ['q', 'game', 'dex', 'caught', 'type'] as const
+const OWN_QUERY_KEYS = ['q', 'game', 'dex', 'caught', 'type', 'only'] as const
 
 function foreignQuery(query: LocationQuery): LocationQueryRaw {
   const result: LocationQueryRaw = {}
@@ -97,10 +99,24 @@ export function usePokemonList() {
   const caughtFilter = ref<CaughtFilter>(caughtFilterParam(route.query.caught))
   const typeFilter = ref<PokemonType[]>(typeFilterParam(route.query.type))
 
+  /** Slug da versão cujos exclusivos a lista mostra (`?only=sword`); null = todos. */
+  const versionSlug = ref<string | null>(queryParam(route.query.only))
+  /** Versões do jogo atual que têm exclusivos (vazio em jogos de versão única). */
+  const versions = computed<readonly ExclusiveVersion[]>(() => exclusiveVersions(game.value?.slug))
+  /** Filtro de versão já validado contra o jogo atual. */
+  const version = computed<ExclusiveVersion | null>(() =>
+    findExclusiveVersion(game.value?.slug, versionSlug.value),
+  )
+
   function setGame(slug: string | null): void {
     gameSlug.value = slug
     dexSlug.value = null
     caughtFilter.value = null
+    versionSlug.value = null
+  }
+
+  function setVersionFilter(slug: string | null): void {
+    versionSlug.value = slug
   }
 
   function setCaughtFilter(filter: CaughtFilter): void {
@@ -166,13 +182,29 @@ export function usePokemonList() {
     const status = game.value ? caughtFilter.value : null
     const caught = caughtStore.caughtInRaw(game.value?.slug)
     const types = typeFilter.value
+    const gameKey = game.value?.slug
+    const only = version.value?.slug
     return source.value.filter((entry) => {
       if (!matches(entry)) return false
       if (status !== null && caught.has(speciesOf(entry)) !== (status === 'caught')) return false
+      if (only && exclusiveVersionOf(gameKey, speciesOf(entry))?.slug !== only) return false
       if (types.length === 0) return true
       const own = store.typesOf(entry.id)
       return own !== undefined && types.every((type) => own.includes(type))
     })
+  })
+
+  /** Quantos exclusivos de cada versão existem na Pokédex atual, por slug da versão. */
+  const exclusiveCounts = computed<Record<string, number>>(() => {
+    const counts: Record<string, number> = {}
+    const gameKey = game.value?.slug
+    if (!gameKey || versions.value.length === 0) return counts
+    for (const item of versions.value) counts[item.slug] = 0
+    for (const entry of source.value) {
+      const exclusive = exclusiveVersionOf(gameKey, speciesOf(entry))
+      if (exclusive) counts[exclusive.slug] = (counts[exclusive.slug] ?? 0) + 1
+    }
+    return counts
   })
 
   /** Ids de espécie capturados no jogo atual (reativo por id: só o card tocado re-renderiza). */
@@ -231,17 +263,22 @@ export function usePokemonList() {
     loadError.value = null
 
     const batch = filtered.value.slice(items.value.length, items.value.length + PAGE_SIZE)
+    const gameKey = game.value?.slug
 
     try {
       const summaries = await store.ensureSummaries(batch)
       if (current !== generation) return status.value
       items.value = [
         ...items.value,
-        ...summaries.map((summary, i) => ({
-          ...summary,
-          dexNumber: batch[i]?.dexNumber,
-          speciesId: batch[i]?.speciesId,
-        })),
+        ...summaries.map((summary, i) => {
+          const entry = batch[i]
+          return {
+            ...summary,
+            dexNumber: entry?.dexNumber,
+            speciesId: entry?.speciesId,
+            exclusiveTo: entry ? exclusiveVersionOf(gameKey, speciesOf(entry))?.title : undefined,
+          }
+        }),
       ]
       status.value = hasMore.value ? 'idle' : 'done'
     } catch (error) {
@@ -280,13 +317,21 @@ export function usePokemonList() {
       result.game = game.value.slug
       if (game.value.dexes.length > 1 && dex.value) result.dex = dex.value.slug
       if (caughtFilter.value) result.caught = caughtFilter.value === 'caught' ? '1' : '0'
+      if (version.value) result.only = version.value.slug
     }
     if (typeFilter.value.length) result.type = typeFilter.value.join(',')
     return result
   }
 
   watch(
-    [normalizedQuery, () => game.value?.slug, () => dex.value?.slug, caughtFilter, typeFilter],
+    [
+      normalizedQuery,
+      () => game.value?.slug,
+      () => dex.value?.slug,
+      caughtFilter,
+      typeFilter,
+      () => version.value?.slug,
+    ],
     () => {
       router.replace({ query: { ...foreignQuery(route.query), ...buildQuery() } })
     },
@@ -298,7 +343,7 @@ export function usePokemonList() {
     loadDex()
   })
 
-  watch([source, normalizedQuery, caughtFilter, typeFilter], () => reset())
+  watch([source, normalizedQuery, caughtFilter, typeFilter, version], () => reset())
 
   store.load()
   loadDex()
@@ -315,6 +360,10 @@ export function usePokemonList() {
     typeFilter,
     toggleType,
     clearTypes,
+    versions,
+    version,
+    setVersionFilter,
+    exclusiveCounts,
     caughtIds,
     caughtCount,
     missingCount,

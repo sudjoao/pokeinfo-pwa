@@ -47,6 +47,8 @@ export interface PokemonListItem extends PokemonSummary {
   dexNumber?: number
   /** Id da espécie (= número nacional), útil quando o card mostra uma forma regional. */
   speciesId?: number
+  /** Título da versão em que a espécie é exclusiva no jogo selecionado (ex.: "Sword"). */
+  exclusiveTo?: string
 }
 
 export const STAT_NAMES = [

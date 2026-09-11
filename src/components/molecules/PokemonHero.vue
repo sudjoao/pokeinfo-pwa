@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { mdiStarFourPoints } from '@mdi/js'
 import { useI18n } from 'vue-i18n'
 import type { PokemonDetail } from '@/types/pokemon'
 import { artworkUrl, formatDexNumber, formatPokemonName, TYPE_COLORS } from '@/utils/pokemon'
@@ -22,6 +23,8 @@ const props = defineProps<{
   regional?: RegionalNumber | null
   /** Capturado no jogo selecionado; undefined esconde o botão (sem jogo na URL). */
   caught?: boolean
+  /** Título da versão em que a espécie é exclusiva no jogo selecionado (ex.: "Sword"). */
+  exclusiveTo?: string | null
   showCry?: boolean
   cryPlaying?: boolean
   cryMuted?: boolean
@@ -63,6 +66,13 @@ const caughtLabel = computed(() => {
           <p v-if="regional" class="text-body-small opacity-70 mt-1 mb-0">
             {{ t('detail.dexOf', { dex: regional.dexLabel, game: regional.gameTitle }) }}
           </p>
+          <p
+            v-if="exclusiveTo"
+            class="pokemon-hero__exclusive text-body-small mt-1 mb-0 d-flex align-center ga-1"
+          >
+            <v-icon :icon="mdiStarFourPoints" size="14" />
+            {{ t('detail.exclusiveTo', { version: exclusiveTo }) }}
+          </p>
           <p v-if="caught !== undefined" class="text-body-small mt-1 mb-0">
             {{ caughtLabel }}
           </p>
@@ -97,6 +107,11 @@ const caughtLabel = computed(() => {
 .pokemon-hero__national {
   opacity: 0.45;
   font-variant-numeric: tabular-nums;
+}
+
+.pokemon-hero__exclusive {
+  color: rgb(var(--v-theme-secondary));
+  font-weight: 600;
 }
 
 .pokemon-hero__art {

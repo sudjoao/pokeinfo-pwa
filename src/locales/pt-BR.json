@@ -40,7 +40,9 @@
     "loadMoreError": "Erro ao carregar Pokémon",
     "endOfList": "Você chegou ao fim da lista.",
     "teamBuilder": "Montar time",
-    "emptyFiltered": "Nenhum Pokémon combina com os filtros. Tente outro tipo ou outra busca."
+    "emptyFiltered": "Nenhum Pokémon combina com os filtros. Tente outro tipo ou outra busca.",
+    "onlyIn": "Só {version}",
+    "exclusivesOf": "Exclusivos de {version}"
   },
   "dex": {
     "crown-tundra": "Tundra da Coroa",
@@ -106,7 +108,8 @@
     "hatch": "Nasce de um ovo quando um dos pais segura {item}.",
     "resultForm": "→ forma {form}",
     "otherGames": "+{n} em outros jogos",
-    "fromForm": "(a partir de {form})"
+    "fromForm": "(a partir de {form})",
+    "exclusiveTo": "Exclusivo de {version}"
   },
   "type": {
     "normal": "Normal",

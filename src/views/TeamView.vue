@@ -31,6 +31,10 @@ const {
   typeFilter,
   toggleType,
   clearTypes,
+  versions,
+  version,
+  setVersionFilter,
+  exclusiveCounts,
   caughtIds,
   caughtCount,
   missingCount,
@@ -96,10 +100,14 @@ function goBack(): void {
         :caught-filter="caughtFilter"
         :caught-count="caughtCount"
         :missing-count="missingCount"
+        :versions="versions"
+        :version-filter="version?.slug ?? null"
+        :exclusive-counts="exclusiveCounts"
         @open-game="pickerOpen = true"
         @open-types="typesOpen = true"
         @select-dex="setDex"
         @select-caught="setCaughtFilter"
+        @select-version="setVersionFilter"
       />
     </template>
 

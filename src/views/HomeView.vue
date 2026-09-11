@@ -31,6 +31,10 @@ const {
   typeFilter,
   toggleType,
   clearTypes,
+  versions,
+  version,
+  setVersionFilter,
+  exclusiveCounts,
   caughtIds,
   caughtCount,
   missingCount,
@@ -60,14 +64,20 @@ const languageOpen = ref(false)
 const HEADER_EXTENSION_HEIGHT = 108
 
 const emptyTitle = computed(() => {
-  if (!game.value || !caughtFilter.value || query.value.trim() || typeFilter.value.length) {
+  if (
+    !game.value ||
+    !caughtFilter.value ||
+    query.value.trim() ||
+    typeFilter.value.length ||
+    version.value
+  ) {
     return t('home.emptyTitle')
   }
   return caughtFilter.value === 'caught' ? t('home.noneCaughtTitle') : t('home.completeTitle')
 })
 
 const emptyMessage = computed(() => {
-  if (typeFilter.value.length) return t('home.emptyFiltered')
+  if (typeFilter.value.length || version.value) return t('home.emptyFiltered')
   const params = { dex: dex.value ? dexLabel(dex.value) : '', game: game.value?.title }
   if (game.value && dex.value && caughtFilter.value && !query.value.trim()) {
     return caughtFilter.value === 'caught'
@@ -115,10 +125,14 @@ function openTeamBuilder(): void {
         :caught-filter="caughtFilter"
         :caught-count="caughtCount"
         :missing-count="missingCount"
+        :versions="versions"
+        :version-filter="version?.slug ?? null"
+        :exclusive-counts="exclusiveCounts"
         @open-game="pickerOpen = true"
         @open-types="typesOpen = true"
         @select-dex="setDex"
         @select-caught="setCaughtFilter"
+        @select-version="setVersionFilter"
       />
     </template>
 

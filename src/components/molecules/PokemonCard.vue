@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { mdiCheckCircle } from '@mdi/js'
+import { mdiCheckCircle, mdiStarFourPoints } from '@mdi/js'
 import { useI18n } from 'vue-i18n'
 import type { PokemonListItem } from '@/types/pokemon'
 import { artworkUrl, formatDexNumber, formatPokemonName, TYPE_COLORS } from '@/utils/pokemon'
@@ -68,6 +68,14 @@ const speciesId = computed(() => props.pokemon.speciesId ?? props.pokemon.id)
         </span>
       </div>
       <v-card-title class="text-title-medium pa-0">{{ name }}</v-card-title>
+      <span
+        v-if="pokemon.exclusiveTo"
+        class="pokemon-card__exclusive text-label-small d-inline-flex align-center ga-1"
+        :aria-label="t('home.exclusivesOf', { version: pokemon.exclusiveTo })"
+      >
+        <v-icon :icon="mdiStarFourPoints" size="12" />
+        {{ t('home.onlyIn', { version: pokemon.exclusiveTo }) }}
+      </span>
     </v-card-item>
     <v-card-text class="d-flex flex-wrap ga-1 pt-0">
       <TypeChip v-for="type in pokemon.types" :key="type" :type="type" />
@@ -111,5 +119,10 @@ const speciesId = computed(() => props.pokemon.speciesId ?? props.pokemon.id)
 .pokemon-card__national {
   opacity: 0.45;
   font-variant-numeric: tabular-nums;
+}
+
+.pokemon-card__exclusive {
+  color: rgb(var(--v-theme-secondary));
+  font-weight: 600;
 }
 </style>

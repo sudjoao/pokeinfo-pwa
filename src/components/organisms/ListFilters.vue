@@ -2,13 +2,15 @@
 import { useI18n } from 'vue-i18n'
 import type { Game, GameDex } from '@/data/games'
 import type { CaughtFilter } from '@/composables/usePokemonList'
+import type { ExclusiveVersion } from '@/data/exclusives'
 import type { PokemonType } from '@/types/pokemon'
 import GameFilterChip from '@/components/molecules/GameFilterChip.vue'
 import TypeFilterChip from '@/components/molecules/TypeFilterChip.vue'
 import DexChips from '@/components/molecules/DexChips.vue'
 import CaughtFilterChips from '@/components/molecules/CaughtFilterChips.vue'
+import VersionFilterChips from '@/components/molecules/VersionFilterChips.vue'
 
-/** Linha de chips de filtro da listagem (jogo, tipo, Pokédex do jogo e captura). */
+/** Linha de chips de filtro da listagem (jogo, tipo, Pokédex do jogo, captura e exclusivos de versão). */
 defineProps<{
   game: Game | null
   dex: GameDex | null
@@ -16,6 +18,10 @@ defineProps<{
   caughtFilter: CaughtFilter
   caughtCount: number
   missingCount: number
+  /** Versões do jogo com exclusivos; vazio esconde as chips. */
+  versions: readonly ExclusiveVersion[]
+  versionFilter: string | null
+  exclusiveCounts: Record<string, number>
 }>()
 
 const emit = defineEmits<{
@@ -23,6 +29,7 @@ const emit = defineEmits<{
   openTypes: []
   selectDex: [slug: string]
   selectCaught: [filter: CaughtFilter]
+  selectVersion: [slug: string | null]
 }>()
 
 const { t } = useI18n()
@@ -47,6 +54,15 @@ const { t } = useI18n()
         :caught-count="caughtCount"
         :missing-count="missingCount"
         @select="emit('selectCaught', $event)"
+      />
+    </template>
+    <template v-if="game && versions.length">
+      <v-divider vertical class="list-filters__divider" />
+      <VersionFilterChips
+        :versions="versions"
+        :selected="versionFilter"
+        :counts="exclusiveCounts"
+        @select="emit('selectVersion', $event)"
       />
     </template>
   </div>
