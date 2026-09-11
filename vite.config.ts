@@ -4,6 +4,7 @@ import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
 import vuetify from 'vite-plugin-vuetify'
 import { VitePWA } from 'vite-plugin-pwa'
+import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite'
 
 const DAY = 60 * 60 * 24
 
@@ -13,6 +14,8 @@ export default defineConfig({
     vue(),
     vueDevTools(),
     vuetify({ autoImport: true }),
+    // Pré-compila os JSON de src/locales e usa o build runtime-only do vue-i18n (sem compilador).
+    VueI18nPlugin({ include: [fileURLToPath(new URL('./src/locales/**', import.meta.url))] }),
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
@@ -66,6 +69,17 @@ export default defineConfig({
             options: {
               cacheName: 'pokeapi-pokedex',
               expiration: { maxEntries: 12, maxAgeSeconds: 30 * DAY },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
+            // Mapa de tipos: 18 respostas de /type/{nome} (~20 KB cada) que substituem
+            // a leitura de /pokemon/{id} (~290 KB) para os tipos dos cards.
+            urlPattern: /^https:\/\/pokeapi\.co\/api\/v2\/type\/.*/i,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'pokeapi-types',
+              expiration: { maxEntries: 24, maxAgeSeconds: 30 * DAY },
               cacheableResponse: { statuses: [0, 200] },
             },
           },

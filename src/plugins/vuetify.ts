@@ -1,6 +1,7 @@
 import 'vuetify/styles'
 import { createVuetify, type ThemeDefinition } from 'vuetify'
 import { aliases, mdi } from 'vuetify/iconsets/mdi-svg'
+import { en, pt } from 'vuetify/locale'
 
 const light: ThemeDefinition = {
   dark: false,
@@ -23,6 +24,12 @@ const dark: ThemeDefinition = {
 }
 
 export const vuetify = createVuetify({
+  // Textos internos dos componentes; o idioma atual é trocado por `useLocale`.
+  locale: {
+    locale: 'pt',
+    fallback: 'en',
+    messages: { pt, en },
+  },
   theme: {
     defaultTheme: 'system',
     themes: { light, dark },

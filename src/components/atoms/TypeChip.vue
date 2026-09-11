@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { PokemonType } from '@/types/pokemon'
-import { TYPE_STYLES } from '@/utils/pokemon'
+import { TYPE_COLORS } from '@/utils/pokemon'
 
-const props = defineProps<{ type: PokemonType }>()
+defineProps<{ type: PokemonType }>()
 
-const style = computed(() => TYPE_STYLES[props.type])
+const { t } = useI18n()
 </script>
 
 <template>
-  <v-chip :color="style.color" variant="flat" class="type-chip">
-    {{ style.label }}
+  <v-chip :color="TYPE_COLORS[type]" variant="flat" class="type-chip">
+    {{ t(`type.${type}`) }}
   </v-chip>
 </template>
 

@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { StatName } from '@/types/pokemon'
-import { MAX_BASE_STAT, STAT_LABELS, statColor } from '@/utils/pokemon'
+import { MAX_BASE_STAT, statColor } from '@/utils/pokemon'
 
 const props = defineProps<{ name: StatName; value: number }>()
 
-const label = computed(() => STAT_LABELS[props.name].label)
+const { t } = useI18n()
+
+const label = computed(() => t(`stat.${props.name}`))
 const percent = computed(() => Math.min(100, (props.value / MAX_BASE_STAT) * 100))
 const color = computed(() => statColor(props.value))
 </script>

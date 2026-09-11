@@ -1,7 +1,14 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { PokemonDetail, PokemonSpecies } from '@/types/pokemon'
-import { formatEggGroup, formatHeight, formatWeight, genderRatio } from '@/utils/pokemon'
+import {
+  formatHeight,
+  formatPercent,
+  formatPokemonName,
+  formatWeight,
+  genderRatio,
+} from '@/utils/pokemon'
 import InfoTile from '@/components/atoms/InfoTile.vue'
 
 const props = defineProps<{
@@ -9,45 +16,55 @@ const props = defineProps<{
   species?: PokemonSpecies | null
 }>()
 
+const { t, te, locale } = useI18n()
+
+const height = computed(() => formatHeight(props.pokemon.height, locale.value))
+const weight = computed(() => formatWeight(props.pokemon.weight, locale.value))
+
 const gender = computed(() => {
   if (!props.species) return null
   const ratio = genderRatio(props.species.genderRate)
-  if (!ratio) return 'Sem gênero'
-  return `♀ ${ratio.female}% · ♂ ${ratio.male}%`
+  if (!ratio) return t('detail.genderless')
+  return `♀ ${formatPercent(ratio.female, locale.value)} · ♂ ${formatPercent(ratio.male, locale.value)}`
 })
 
-const eggGroups = computed(() => props.species?.eggGroups.map(formatEggGroup).join(', ') ?? null)
+/** Grupo de ovo traduzido; um grupo novo da PokéAPI cai no nome formatado. */
+function eggGroupLabel(name: string): string {
+  return te(`eggGroup.${name}`) ? t(`eggGroup.${name}`) : formatPokemonName(name)
+}
+
+const eggGroups = computed(() => props.species?.eggGroups.map(eggGroupLabel).join(', ') ?? null)
 
 const generation = computed(() =>
-  props.species?.generation ? `Geração ${props.species.generation}` : null,
+  props.species?.generation ? t('detail.generationValue', { n: props.species.generation }) : null,
 )
 
 const category = computed(() => {
   if (!props.species) return null
-  if (props.species.isMythical) return 'Mítico'
-  if (props.species.isLegendary) return 'Lendário'
-  if (props.species.isBaby) return 'Bebê'
-  return 'Comum'
+  if (props.species.isMythical) return t('detail.categoryMythical')
+  if (props.species.isLegendary) return t('detail.categoryLegendary')
+  if (props.species.isBaby) return t('detail.categoryBaby')
+  return t('detail.categoryCommon')
 })
 </script>
 
 <template>
   <v-card>
-    <v-card-title class="text-title-medium">Sobre</v-card-title>
+    <v-card-title class="text-title-medium">{{ t('detail.about') }}</v-card-title>
     <v-card-text>
       <div class="about-grid">
-        <InfoTile label="Altura" :value="formatHeight(pokemon.height)" />
-        <InfoTile label="Peso" :value="formatWeight(pokemon.weight)" />
-        <InfoTile label="Gênero" :value="gender ?? undefined" />
-        <InfoTile label="Grupos de ovo" :value="eggGroups ?? undefined" />
-        <InfoTile label="Geração" :value="generation ?? undefined" />
-        <InfoTile label="Categoria" :value="category ?? undefined" />
+        <InfoTile :label="t('detail.height')" :value="height" />
+        <InfoTile :label="t('detail.weight')" :value="weight" />
+        <InfoTile :label="t('detail.gender')" :value="gender ?? undefined" />
+        <InfoTile :label="t('detail.eggGroups')" :value="eggGroups ?? undefined" />
+        <InfoTile :label="t('detail.generation')" :value="generation ?? undefined" />
+        <InfoTile :label="t('detail.category')" :value="category ?? undefined" />
         <InfoTile
-          label="Taxa de captura"
+          :label="t('detail.captureRate')"
           :value="species ? String(species.captureRate) : undefined"
         />
         <InfoTile
-          label="Felicidade base"
+          :label="t('detail.baseHappiness')"
           :value="species?.baseHappiness != null ? String(species.baseHappiness) : undefined"
         />
       </div>

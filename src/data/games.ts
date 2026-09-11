@@ -85,9 +85,9 @@ export const GAMES: readonly Game[] = [
     title: 'X / Y',
     generation: 6,
     dexes: [
-      { slug: 'kalos-central', label: 'Kalos Central', formRegion: null },
-      { slug: 'kalos-coastal', label: 'Kalos Costeira', formRegion: null },
-      { slug: 'kalos-mountain', label: 'Kalos Montanhosa', formRegion: null },
+      { slug: 'kalos-central', label: 'Central Kalos', formRegion: null },
+      { slug: 'kalos-coastal', label: 'Coastal Kalos', formRegion: null },
+      { slug: 'kalos-mountain', label: 'Mountain Kalos', formRegion: null },
     ],
   },
   {
@@ -115,8 +115,8 @@ export const GAMES: readonly Game[] = [
     generation: 8,
     dexes: [
       { slug: 'galar', label: 'Galar', formRegion: 'galar' },
-      { slug: 'isle-of-armor', label: 'Ilha da Armadura', formRegion: 'galar' },
-      { slug: 'crown-tundra', label: 'Tundra da Coroa', formRegion: 'galar' },
+      { slug: 'isle-of-armor', label: 'Isle of Armor', formRegion: 'galar' },
+      { slug: 'crown-tundra', label: 'Crown Tundra', formRegion: 'galar' },
     ],
   },
   {
@@ -146,8 +146,8 @@ export const GAMES: readonly Game[] = [
     title: 'Legends: Z-A',
     generation: 9,
     dexes: [
-      { slug: 'lumiose-city', label: 'Lumiose', formRegion: null },
-      { slug: 'hyperspace', label: 'Hiperespaço', formRegion: null },
+      { slug: 'lumiose-city', label: 'Lumiose City', formRegion: null },
+      { slug: 'hyperspace', label: 'Hyperspace', formRegion: null },
     ],
   },
 ]

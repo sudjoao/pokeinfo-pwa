@@ -112,9 +112,43 @@ export interface PokemonSpecies {
   varieties: PokemonVariety[]
 }
 
-/** Um jeito de chegar a um estágio da evolução, já descrito em pt-BR. */
+/**
+ * Condições de uma evolução já normalizadas (só nomes/números), independentes do formato
+ * da PokéAPI. A frase é montada na hora de exibir, no idioma atual (`describeEvolution`).
+ */
+export interface EvolutionRequirement {
+  trigger: string | null
+  item: string | null
+  heldItem: string | null
+  gender: number | null
+  knownMove: string | null
+  knownMoveType: string | null
+  location: string | null
+  minLevel: number | null
+  minHappiness: number | null
+  minBeauty: number | null
+  minAffection: number | null
+  nearSpecialRock: boolean
+  needsMultiplayer: boolean
+  needsOverworldRain: boolean
+  partySpecies: string | null
+  partyType: string | null
+  relativePhysicalStats: number | null
+  timeOfDay: string | null
+  tradeSpecies: string | null
+  turnUpsideDown: boolean
+  region: string | null
+  usedMove: string | null
+  minMoveCount: number | null
+  minSteps: number | null
+  minDamageTaken: number | null
+}
+
+/** Um jeito de chegar a um estágio da evolução. */
 export interface EvolutionMethod {
-  description: string
+  requirement: EvolutionRequirement
+  /** Forma de origem quando só ela evolui assim (ex.: Sirfetch'd vem do Farfetch'd de Galar). */
+  baseForm: string | null
   /** Método considerado o padrão nos jogos atuais (campo is_default da PokéAPI). */
   isDefault: boolean
   /** Grupo de versões em que o método existe (ex.: "sword-shield"). */

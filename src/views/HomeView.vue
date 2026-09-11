@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+import { mdiTranslate } from '@mdi/js'
 import { gameContextQuery } from '@/utils/games'
 import { usePokemonList } from '@/composables/usePokemonList'
 import { useCry } from '@/composables/useCry'
+import { useLocale } from '@/composables/useLocale'
+import { useDexLabel } from '@/composables/useDexLabel'
 import type { PokemonSummary } from '@/types/pokemon'
 import DefaultLayout from '@/components/templates/DefaultLayout.vue'
 import SearchField from '@/components/molecules/SearchField.vue'
@@ -14,6 +18,7 @@ import DexChips from '@/components/molecules/DexChips.vue'
 import CaughtFilterChips from '@/components/molecules/CaughtFilterChips.vue'
 import PokemonGrid from '@/components/organisms/PokemonGrid.vue'
 import GamePickerSheet from '@/components/organisms/GamePickerSheet.vue'
+import LanguageSheet from '@/components/organisms/LanguageSheet.vue'
 
 const {
   query,
@@ -41,26 +46,29 @@ const {
 
 const router = useRouter()
 const cry = useCry()
+const { t } = useI18n()
+const { locale, locales, setLocale } = useLocale()
+const { dexLabel } = useDexLabel()
 
 const pickerOpen = ref(false)
+const languageOpen = ref(false)
 
 /** Altura do cabeçalho: busca (48) + linha de chips (32) + espaçamentos. */
 const HEADER_EXTENSION_HEIGHT = 108
 
 const emptyTitle = computed(() => {
-  if (!game.value || !caughtFilter.value || query.value.trim()) return 'Nenhum Pokémon encontrado'
-  return caughtFilter.value === 'caught' ? 'Nenhum capturado ainda' : 'Pokédex completa!'
+  if (!game.value || !caughtFilter.value || query.value.trim()) return t('home.emptyTitle')
+  return caughtFilter.value === 'caught' ? t('home.noneCaughtTitle') : t('home.completeTitle')
 })
 
 const emptyMessage = computed(() => {
+  const params = { dex: dex.value ? dexLabel(dex.value) : '', game: game.value?.title }
   if (game.value && dex.value && caughtFilter.value && !query.value.trim()) {
     return caughtFilter.value === 'caught'
-      ? `Toque na Poké Bola de um card para marcar o que você já capturou em ${game.value.title}.`
-      : `Você já capturou todos os Pokémon da Pokédex de ${dex.value.label} em ${game.value.title}.`
+      ? t('home.noneCaughtMessage', params)
+      : t('home.completeMessage', params)
   }
-  return game.value && dex.value
-    ? `Nenhum Pokémon com esse nome ou número na Pokédex de ${dex.value.label} (${game.value.title}).`
-    : 'Tente buscar por outro nome ou número da Pokédex.'
+  return game.value && dex.value ? t('home.emptyDex', params) : t('home.emptyNational')
 })
 
 /**
@@ -76,12 +84,15 @@ function openPokemon(pokemon: PokemonSummary): void {
 
 <template>
   <DefaultLayout :extension-height="HEADER_EXTENSION_HEIGHT">
+    <template #actions>
+      <v-btn :icon="mdiTranslate" :aria-label="t('language.title')" @click="languageOpen = true" />
+    </template>
     <template #header>
       <SearchField v-model="query" />
       <div
         class="home-filters d-flex align-center ga-2 mt-2"
         role="group"
-        aria-label="Filtro por jogo"
+        :aria-label="t('home.gameFilterLabel')"
       >
         <GameFilterChip :label="game?.title ?? null" @click="pickerOpen = true" />
         <template v-if="game && dex && game.dexes.length > 1">
@@ -109,9 +120,9 @@ function openPokemon(pokemon: PokemonSummary): void {
     <EmptyState
       v-else-if="sourceError"
       variant="error"
-      title="Não foi possível carregar a Pokédex"
+      :title="t('home.loadErrorTitle')"
       :message="sourceError"
-      action-label="Tentar novamente"
+      :action-label="t('common.retry')"
       @action="retry"
     />
 
@@ -135,6 +146,13 @@ function openPokemon(pokemon: PokemonSummary): void {
       :games="games"
       :selected="game?.slug ?? null"
       @select="setGame"
+    />
+
+    <LanguageSheet
+      v-model="languageOpen"
+      :locales="locales"
+      :selected="locale"
+      @select="setLocale"
     />
   </DefaultLayout>
 </template>

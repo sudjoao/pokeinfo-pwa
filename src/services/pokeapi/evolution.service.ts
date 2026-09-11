@@ -1,5 +1,10 @@
-import type { EvolutionChain, EvolutionMethod, EvolutionNode } from '@/types/pokemon'
-import { describeEvolution, type EvolutionRequirement } from '@/utils/evolution'
+import type {
+  EvolutionChain,
+  EvolutionMethod,
+  EvolutionNode,
+  EvolutionRequirement,
+  PokemonIndexEntry,
+} from '@/types/pokemon'
 import { idFromResourceUrl } from '@/utils/pokemon'
 import { fetchJson } from './client'
 import type { ChainLinkDto, EvolutionDetailDto } from './dto'
@@ -36,8 +41,9 @@ function toRequirement(d: EvolutionDetailDto): EvolutionRequirement {
 }
 
 /**
- * Converte os detalhes crus em métodos descritos, removendo duplicatas
- * (mesma frase + mesma forma resultante) e deixando os métodos padrão primeiro.
+ * Converte os detalhes crus em métodos, removendo duplicatas (mesmas condições, mesma forma
+ * de origem e mesma forma resultante) e deixando os métodos padrão primeiro.
+ * A frase é montada só na exibição, no idioma atual.
  */
 function toMethods(
   details: EvolutionDetailDto[],
@@ -48,18 +54,13 @@ function toMethods(
 
   for (const detail of details) {
     const evolvedForm = detail.evolved_form?.name ?? null
-    const baseForm = detail.base_form?.name ?? null
-    let description = describeEvolution(toRequirement(detail))
-    if (baseForm && parentName && baseForm !== parentName) {
-      // Ex.: Sirfetch'd só evolui do Farfetch'd de Galar (base_form "farfetchd-galar").
-      description += ` (a partir de ${baseForm
-        .split('-')
-        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-        .join(' ')})`
-    }
+    const rawBaseForm = detail.base_form?.name ?? null
+    const requirement = toRequirement(detail)
+    // Ex.: Sirfetch'd só evolui do Farfetch'd de Galar (base_form "farfetchd-galar").
+    const baseForm = rawBaseForm && parentName && rawBaseForm !== parentName ? rawBaseForm : null
 
     const resultForm = evolvedForm && evolvedForm !== speciesName ? evolvedForm : null
-    const key = `${description}|${resultForm ?? ''}`
+    const key = `${JSON.stringify(requirement)}|${baseForm ?? ''}|${resultForm ?? ''}`
     const existing = byKey.get(key)
     const isDefault = detail.is_default === true
 
@@ -68,7 +69,8 @@ function toMethods(
       continue
     }
     byKey.set(key, {
-      description,
+      requirement,
+      baseForm,
       isDefault,
       versionGroup: detail.version_group?.name ?? null,
       resultForm,
@@ -104,7 +106,7 @@ export async function getEvolutionChain(id: number, signal?: AbortSignal): Promi
   return toChain(dto)
 }
 
-/** Ids de todas as espécies da cadeia, em ordem de travessia. */
-export function collectSpeciesIds(node: EvolutionNode): number[] {
-  return [node.speciesId, ...node.evolvesTo.flatMap(collectSpeciesIds)]
+/** Todas as espécies da cadeia (id = Pokémon padrão, nome), em ordem de travessia. */
+export function collectSpecies(node: EvolutionNode): PokemonIndexEntry[] {
+  return [{ id: node.speciesId, name: node.name }, ...node.evolvesTo.flatMap(collectSpecies)]
 }

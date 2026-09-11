@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { mdiPokeball } from '@mdi/js'
+import { useI18n } from 'vue-i18n'
 
 defineProps<{
   caught: boolean
@@ -8,6 +9,8 @@ defineProps<{
 }>()
 
 const emit = defineEmits<{ toggle: [] }>()
+
+const { t } = useI18n()
 </script>
 
 <template>
@@ -19,8 +22,8 @@ const emit = defineEmits<{ toggle: [] }>()
     class="catch-toggle"
     :class="{ 'catch-toggle--caught': caught }"
     :aria-pressed="caught"
-    :aria-label="caught ? 'Desmarcar como capturado' : 'Marcar como capturado'"
-    :title="caught ? 'Capturado' : 'Marcar como capturado'"
+    :aria-label="caught ? t('catch.unmark') : t('catch.mark')"
+    :title="caught ? t('catch.caught') : t('catch.mark')"
     @click.stop.prevent="emit('toggle')"
   />
 </template>

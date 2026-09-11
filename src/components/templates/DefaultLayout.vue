@@ -6,6 +6,9 @@ defineProps<{ extensionHeight?: number }>()
 
 <template>
   <AppHeader title="PokéInfo" :extension-height="extensionHeight">
+    <template v-if="$slots.actions" #actions>
+      <slot name="actions" />
+    </template>
     <template v-if="$slots.header" #extension>
       <slot name="header" />
     </template>

@@ -28,14 +28,17 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
   "Faltam" filtram a lista e mostram a contagem da Pokédex atual; o filtro vai na URL (`?caught=0`).
   A marcação é por espécie, então as ilhas de Alola e as formas regionais compartilham o mesmo
   estado dentro de um jogo. Fica salva no aparelho em um bitset base64 (~170 bytes por jogo).
+- **Idioma**: botão no cabeçalho alterna entre *Português* (interface em pt-BR, com os textos que só
+  existem em inglês na PokéAPI mantidos assim) e *English* (tudo em inglês, inclusive tipos, stats,
+  grupos de ovo e as frases de evolução). Começa no idioma do aparelho e a escolha fica salva.
 - Tema claro/escuro seguindo a preferência do sistema.
-- **Offline**: índice e resumos ficam em cache local; artworks e respostas recentes ficam no service worker.
+- **Offline**: índice e mapa de tipos ficam em cache local; artworks e respostas recentes ficam no service worker.
 - Instalável no iOS/Android como app (manifest + service worker).
 
 ### Limitações conhecidas
 
-- A PokéAPI não tem textos em português: descrição da Pokédex, categoria da espécie, nomes de
-  habilidades, golpes, itens e locais ficam em inglês (como nos jogos), o que facilita a busca.
+- A PokéAPI não tem textos em português: mesmo no modo *Português*, descrição da Pokédex, categoria
+  da espécie, nomes de habilidades, golpes, itens e locais ficam em inglês (como nos jogos).
 - A lista de jogos é estática (`src/data/games.ts`): quando a PokéAPI incluir um jogo novo, é preciso
   adicioná-lo ali. Versões japonesas, Colosseum/XD (sem Pokédex) e jogos fora da série principal
   ficam de fora; DLCs aparecem como Pokédex do jogo base.
@@ -64,6 +67,7 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
 | Build | [Vite 8](https://vite.dev/) |
 | UI / Material Design | [Vuetify 4](https://vuetifyjs.com/) com ícones SVG de [`@mdi/js`](https://pictogrammers.com/library/mdi/) |
 | Estado | [Pinia](https://pinia.vuejs.org/) |
+| Idiomas | [vue-i18n](https://vue-i18n.intlify.dev/) (mensagens em `src/locales`, pré-compiladas pelo `unplugin-vue-i18n`) |
 | Rotas | [Vue Router](https://router.vuejs.org/) |
 | PWA | [vite-plugin-pwa](https://vite-pwa-org.netlify.app/) (Workbox) |
 | Dados | [PokéAPI v2](https://pokeapi.co/docs/v2) |
@@ -131,14 +135,20 @@ O objetivo é funcionar offline sem inflar o armazenamento do usuário:
 
 | Onde | O que | Limite |
 | --- | --- | --- |
-| `localStorage` | índice (`pokeinfo:index:v1`) e resumos enxutos (`pokeinfo:summaries:v1`) | ~200 KB para a Pokédex inteira |
+| `localStorage` | índice (`pokeinfo:index:v1`, ~40 KB) e mapa de tipos (`pokeinfo:types:v1`, ~16 KB) | ~60 KB para a Pokédex inteira |
 | `localStorage` | capturados por jogo (`pokeinfo:caught:v1`), um bitset em base64 por jogo | ~170 bytes por jogo (~4 KB no total) |
 | Service worker `pokeapi-index` | resposta do índice | 3 entradas, 7 dias |
+| Service worker `pokeapi-types` | os 18 `/type/{nome}` que montam o mapa de tipos (~20 KB cada) | 24 entradas, 30 dias |
 | Service worker `pokeapi-pokedex` | Pokédex regionais por jogo (12 a 45 KB) | 12 entradas, 30 dias |
 | Service worker `pokeapi-species` | espécies e cadeias de evolução (~2 a 50 KB) | 100 entradas, 7 dias |
 | Service worker `pokeapi-detail` | respostas de detalhe da PokéAPI (~300 KB cada) | 60 entradas, 7 dias |
 | Service worker `pokeapi-artwork` | artworks oficiais | 200 entradas, 30 dias |
 | Service worker `pokeapi-cries-v2` | gritos dos Pokémon (~7 KB cada) | 60 entradas, 30 dias |
+
+Os cards não fazem requisição por Pokémon: os tipos vêm de um mapa montado uma vez a partir dos
+18 endpoints `/type/{nome}` (~385 KB no total, renovado em segundo plano a cada 7 dias). Ler os tipos
+de `/pokemon/{id}` custaria ~290 KB por card, quase tudo lista de golpes. Só um Pokémon que não
+esteja no mapa (lançado depois do cache) dispara uma busca individual.
 
 Detalhes, espécies e cadeias ficam só em memória durante a sessão (store `pokemonDetail`),
 assim como as entradas das Pokédex regionais (store `pokedex`); nada disso vai para o `localStorage`.

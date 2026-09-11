@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { nextTick, ref, watch } from 'vue'
 import { mdiRefresh } from '@mdi/js'
+import { useI18n } from 'vue-i18n'
 import type { PokemonListItem } from '@/types/pokemon'
 import PokemonCard from '@/components/molecules/PokemonCard.vue'
 import PokemonCardSkeleton from '@/components/molecules/PokemonCardSkeleton.vue'
@@ -27,14 +28,28 @@ function caughtOf(pokemon: PokemonListItem): boolean | undefined {
   return props.caughtIds?.has(pokemon.speciesId ?? pokemon.id)
 }
 
+const { t } = useI18n()
+
 const sentinelVisible = ref(false)
+
+/** Espera o lote entrar no DOM e o IntersectionObserver reavaliar o sentinela (dois frames). */
+function afterLayout(): Promise<void> {
+  return nextTick().then(
+    () =>
+      new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))),
+  )
+}
 
 // Dispara o carregamento sempre que o sentinela estiver visível e a lista estiver ociosa.
 // Cobre tanto o scroll do usuário quanto o caso em que o lote carregado não preencheu a tela.
+// Como os lotes agora resolvem sem rede, a visibilidade é reconferida após o layout:
+// sem isso o valor antigo (ainda "visível") encadearia todos os lotes de uma vez.
 watch(
   [sentinelVisible, () => props.status],
-  ([visible, status]) => {
-    if (visible && status === 'idle') emit('load')
+  async ([visible, status]) => {
+    if (!visible || status !== 'idle') return
+    await afterLayout()
+    if (sentinelVisible.value && props.status === 'idle') emit('load')
   },
   { immediate: true },
 )
@@ -73,9 +88,9 @@ const intersectOptions = { rootMargin: '0px 0px 1200px 0px' }
     </v-row>
 
     <div v-else-if="status === 'error'" class="text-center py-6">
-      <p class="text-body-medium mb-3">{{ errorMessage ?? 'Erro ao carregar Pokémon' }}</p>
+      <p class="text-body-medium mb-3">{{ errorMessage ?? t('home.loadMoreError') }}</p>
       <v-btn color="primary" variant="tonal" :prepend-icon="mdiRefresh" @click="emit('retry')">
-        Tentar novamente
+        {{ t('common.retry') }}
       </v-btn>
     </div>
 
@@ -83,7 +98,7 @@ const intersectOptions = { rootMargin: '0px 0px 1200px 0px' }
       v-else-if="status === 'done' && items.length"
       class="text-center text-body-medium py-6 opacity-60"
     >
-      Você chegou ao fim da lista.
+      {{ t('home.endOfList') }}
     </p>
   </div>
 </template>

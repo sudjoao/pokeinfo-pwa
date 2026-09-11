@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { PokemonDetail } from '@/types/pokemon'
-import { artworkUrl, formatDexNumber, formatPokemonName, TYPE_STYLES } from '@/utils/pokemon'
+import { artworkUrl, formatDexNumber, formatPokemonName, TYPE_COLORS } from '@/utils/pokemon'
 import PokemonArtwork from '@/components/atoms/PokemonArtwork.vue'
 import DexNumber from '@/components/atoms/DexNumber.vue'
 import TypeChip from '@/components/atoms/TypeChip.vue'
@@ -28,10 +29,18 @@ const props = defineProps<{
 
 const emit = defineEmits<{ playCry: []; toggleCaught: [] }>()
 
+const { t } = useI18n()
+
 const name = computed(() => formatPokemonName(props.pokemon.name))
 const nationalLabel = computed(() => formatDexNumber(props.pokemon.speciesId))
 const image = computed(() => artworkUrl(props.pokemon.id))
-const accent = computed(() => TYPE_STYLES[props.pokemon.types[0] ?? 'unknown'].color)
+const accent = computed(() => TYPE_COLORS[props.pokemon.types[0] ?? 'unknown'])
+
+const caughtLabel = computed(() => {
+  const game = props.regional?.gameTitle
+  if (props.caught) return game ? t('catch.caughtIn', { game }) : t('catch.caught')
+  return game ? t('catch.notCaughtIn', { game }) : t('catch.notCaught')
+})
 </script>
 
 <template>
@@ -46,17 +55,16 @@ const accent = computed(() => TYPE_STYLES[props.pokemon.types[0] ?? 'unknown'].c
             <DexNumber v-if="regional" :id="regional.number" :digits="3" />
             <DexNumber v-else :id="pokemon.id" />
             <span v-if="regional" class="pokemon-hero__national text-label-small">
-              Nac. {{ nationalLabel }}
+              {{ t('common.national') }} {{ nationalLabel }}
             </span>
           </div>
           <v-card-title class="text-headline-small pa-0">{{ name }}</v-card-title>
           <v-card-subtitle v-if="genus" class="pa-0">{{ genus }}</v-card-subtitle>
           <p v-if="regional" class="text-body-small opacity-70 mt-1 mb-0">
-            Pokédex de {{ regional.dexLabel }} · {{ regional.gameTitle }}
+            {{ t('detail.dexOf', { dex: regional.dexLabel, game: regional.gameTitle }) }}
           </p>
           <p v-if="caught !== undefined" class="text-body-small mt-1 mb-0">
-            {{ caught ? 'Capturado' : 'Ainda não capturado' }}
-            <template v-if="regional">em {{ regional.gameTitle }}</template>
+            {{ caughtLabel }}
           </p>
         </div>
         <div class="d-flex flex-column align-center ga-2">

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { mdiPokeball } from '@mdi/js'
+import { useI18n } from 'vue-i18n'
 import type { CaughtFilter } from '@/composables/usePokemonList'
 
 defineProps<{
@@ -10,9 +11,11 @@ defineProps<{
 
 const emit = defineEmits<{ select: [filter: CaughtFilter] }>()
 
-const OPTIONS: { value: Exclude<CaughtFilter, null>; label: string }[] = [
-  { value: 'caught', label: 'Capturados' },
-  { value: 'missing', label: 'Faltam' },
+const { t } = useI18n()
+
+const OPTIONS: { value: Exclude<CaughtFilter, null>; labelKey: string }[] = [
+  { value: 'caught', labelKey: 'home.caught' },
+  { value: 'missing', labelKey: 'home.missing' },
 ]
 
 /** Tocar na chip já selecionada volta para "todos". */
@@ -33,7 +36,7 @@ function pick(value: Exclude<CaughtFilter, null>, selected: CaughtFilter): void 
     :aria-pressed="option.value === selected"
     @click="pick(option.value, selected)"
   >
-    {{ option.label }}
+    {{ t(option.labelKey) }}
     <span class="caught-chip__count ms-1">
       {{ option.value === 'caught' ? caughtCount : missingCount }}
     </span>

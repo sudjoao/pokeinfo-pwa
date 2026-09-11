@@ -1,9 +1,11 @@
 import { computed, ref, watch, type Ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ApiError } from '@/services/pokeapi/client'
-import { collectSpeciesIds } from '@/services/pokeapi/evolution.service'
+import { collectSpecies } from '@/services/pokeapi/evolution.service'
 import { usePokedexStore } from '@/stores/pokedex'
 import { usePokemonDetailStore } from '@/stores/pokemonDetail'
-import { buildDexList, buildRegionalFormIndex, type GameContext } from '@/utils/games'
+import { buildDexList, type GameContext } from '@/utils/games'
+import { describeError } from '@/utils/errors'
 import type {
   EvolutionChain,
   PokemonDetail,
@@ -20,10 +22,6 @@ export interface NeighborEntry extends PokemonIndexEntry {
   dexNumber?: number
 }
 
-function errorMessageOf(error: unknown, fallback: string): string {
-  return error instanceof Error ? error.message : fallback
-}
-
 /**
  * Orquestra o carregamento da tela de detalhe: primeiro o Pokémon (libera o topo da
  * tela), depois espécie + cadeia de evolução em paralelo. Reage à troca do id na rota.
@@ -32,6 +30,7 @@ function errorMessageOf(error: unknown, fallback: string): string {
 export function usePokemonDetail(idOrName: Ref<string>, context: Ref<GameContext | null>) {
   const store = usePokemonDetailStore()
   const pokedex = usePokedexStore()
+  const { t } = useI18n()
 
   const detail = ref<PokemonDetail | null>(null)
   const species = ref<PokemonSpecies | null>(null)
@@ -42,7 +41,10 @@ export function usePokemonDetail(idOrName: Ref<string>, context: Ref<GameContext
   const status = ref<DetailStatus>('loading')
   const speciesStatus = ref<SectionStatus>('loading')
   const chainStatus = ref<SectionStatus>('loading')
-  const errorMessage = ref<string | null>(null)
+  const loadError = ref<unknown>(null)
+  const errorMessage = computed(() =>
+    loadError.value ? describeError(loadError.value, t, 'detail.loadError') : null,
+  )
 
   // Requisições não são canceladas (alimentam o cache); resultados antigos são ignorados.
   let generation = 0
@@ -51,7 +53,7 @@ export function usePokemonDetail(idOrName: Ref<string>, context: Ref<GameContext
     chainStatus.value = 'loading'
     try {
       const result = await store.ensureChain(chainId)
-      const summaries = await pokedex.ensureSummaries(collectSpeciesIds(result.root))
+      const summaries = await pokedex.ensureSummaries(collectSpecies(result.root))
       if (current !== generation) return
       chainSummaries.value = Object.fromEntries(summaries.map((s) => [s.id, s]))
       chain.value = result
@@ -86,7 +88,7 @@ export function usePokemonDetail(idOrName: Ref<string>, context: Ref<GameContext
     status.value = 'loading'
     speciesStatus.value = 'loading'
     chainStatus.value = 'loading'
-    errorMessage.value = null
+    loadError.value = null
     detail.value = null
     species.value = null
     chain.value = null
@@ -110,7 +112,7 @@ export function usePokemonDetail(idOrName: Ref<string>, context: Ref<GameContext
         status.value = 'not-found'
       } else {
         status.value = 'error'
-        errorMessage.value = errorMessageOf(error, 'Erro ao carregar o Pokémon')
+        loadError.value = error
       }
     }
   }
@@ -125,11 +127,10 @@ export function usePokemonDetail(idOrName: Ref<string>, context: Ref<GameContext
 
   // Pokédex do jogo selecionado (se houver). Falhas aqui não bloqueiam a tela:
   // sem as entradas, a navegação simplesmente volta a seguir a ordem nacional.
-  const regionalForms = computed(() => buildRegionalFormIndex(pokedex.index))
   const dexList = computed(() => {
     const dex = context.value?.dex
     const entries = dex ? pokedex.dexEntries[dex.slug] : undefined
-    return dex && entries ? buildDexList(entries, dex, regionalForms.value) : null
+    return dex && entries ? buildDexList(entries, dex, pokedex.regionalForms) : null
   })
 
   watch(
@@ -174,7 +175,7 @@ export function usePokemonDetail(idOrName: Ref<string>, context: Ref<GameContext
   })
 
   watch(idOrName, load, { immediate: true })
-  pokedex.loadIndex()
+  pokedex.load()
 
   return {
     detail,

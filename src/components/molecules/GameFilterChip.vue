@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { mdiChevronDown, mdiGamepadVariant } from '@mdi/js'
+import { useI18n } from 'vue-i18n'
 
 defineProps<{
   /** Título do jogo selecionado; null = Pokédex Nacional (todos os jogos). */
@@ -7,6 +8,8 @@ defineProps<{
 }>()
 
 const emit = defineEmits<{ click: [] }>()
+
+const { t } = useI18n()
 </script>
 
 <template>
@@ -20,7 +23,7 @@ const emit = defineEmits<{ click: [] }>()
     aria-haspopup="dialog"
     @click="emit('click')"
   >
-    {{ label ?? 'Todos os jogos' }}
+    {{ label ?? t('home.allGames') }}
   </v-chip>
 </template>
 

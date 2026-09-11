@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { GameDex } from '@/data/games'
+import { useDexLabel } from '@/composables/useDexLabel'
 
 defineProps<{
   dexes: GameDex[]
@@ -7,6 +8,8 @@ defineProps<{
 }>()
 
 const emit = defineEmits<{ select: [slug: string] }>()
+
+const { dexLabel } = useDexLabel()
 </script>
 
 <template>
@@ -20,7 +23,7 @@ const emit = defineEmits<{ select: [slug: string] }>()
     :aria-pressed="dex.slug === selected"
     @click="emit('select', dex.slug)"
   >
-    {{ dex.label }}
+    {{ dexLabel(dex) }}
   </v-chip>
 </template>
 

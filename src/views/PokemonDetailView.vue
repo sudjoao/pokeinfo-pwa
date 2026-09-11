@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { mdiChevronLeft, mdiChevronRight, mdiVolumeHigh, mdiVolumeOff } from '@mdi/js'
 import { usePokemonDetail, type NeighborEntry } from '@/composables/usePokemonDetail'
 import { useCry } from '@/composables/useCry'
 import { useCaughtStore } from '@/stores/caught'
+import { useDexLabel } from '@/composables/useDexLabel'
 import { gameContextFromQuery, gameContextQuery } from '@/utils/games'
 import { formatDexNumber, formatPokemonName } from '@/utils/pokemon'
 import DetailLayout from '@/components/templates/DetailLayout.vue'
@@ -19,6 +21,8 @@ import PokemonDetailSkeleton from '@/components/organisms/PokemonDetailSkeleton.
 
 const route = useRoute()
 const router = useRouter()
+const { t } = useI18n()
+const { dexLabel } = useDexLabel()
 
 const idParam = computed(() => String(route.params.id ?? ''))
 /** Jogo selecionado na Home, preservado na URL (`?game=&dex=`). */
@@ -43,7 +47,7 @@ const regional = computed(() =>
   context.value && dexNumber.value !== null
     ? {
         number: dexNumber.value,
-        dexLabel: context.value.dex.label,
+        dexLabel: dexLabel(context.value.dex),
         gameTitle: context.value.game.title,
       }
     : null,
@@ -72,10 +76,12 @@ function toggleCaught(): void {
   }
 }
 
-const title = computed(() => (detail.value ? formatPokemonName(detail.value.name) : 'PokéInfo'))
+const title = computed(() => (detail.value ? formatPokemonName(detail.value.name) : t('app.name')))
 
 watch(detail, (value) => {
-  document.title = value ? `${formatPokemonName(value.name)} · Pokédex` : 'Pokédex'
+  document.title = value
+    ? t('app.detailTitle', { name: formatPokemonName(value.name) })
+    : t('app.dexTitle')
   // Se a tela foi aberta por um toque no card, o grito já tocou dentro do gesto;
   // aqui cobrimos a abertura por URL direta (o iOS pode recusar sem gesto, e tudo bem).
   if (value) cry.autoPlay(value.id, value.cryUrl)
@@ -100,7 +106,7 @@ const showVarieties = computed(() => (species.value?.varieties.length ?? 0) > 1)
     <template v-if="cry.supported" #actions>
       <v-btn
         :icon="cry.muted.value ? mdiVolumeOff : mdiVolumeHigh"
-        :aria-label="cry.muted.value ? 'Ativar som' : 'Desativar som'"
+        :aria-label="cry.muted.value ? t('cry.unmute') : t('cry.mute')"
         @click="cry.toggleMuted"
       />
     </template>
@@ -109,23 +115,26 @@ const showVarieties = computed(() => (species.value?.varieties.length ?? 0) > 1)
 
     <EmptyState
       v-else-if="status === 'not-found'"
-      title="Pokémon não encontrado"
-      message="Confira o número ou o nome e tente de novo."
-      action-label="Voltar à Pokédex"
+      :title="t('detail.notFoundTitle')"
+      :message="t('detail.notFoundMessage')"
+      :action-label="t('detail.backToDex')"
       @action="goBack"
     />
 
     <EmptyState
       v-else-if="status === 'error' || !detail"
       variant="error"
-      title="Não foi possível carregar o Pokémon"
+      :title="t('detail.errorTitle')"
       :message="errorMessage ?? undefined"
-      action-label="Tentar novamente"
+      :action-label="t('common.retry')"
       @action="retry"
     />
 
     <template v-else>
-      <nav class="d-flex justify-space-between align-center mb-3" aria-label="Pokémon vizinhos">
+      <nav
+        class="d-flex justify-space-between align-center mb-3"
+        :aria-label="t('detail.neighborsLabel')"
+      >
         <v-btn
           v-if="previous"
           variant="text"
@@ -167,7 +176,7 @@ const showVarieties = computed(() => (species.value?.varieties.length ?? 0) > 1)
             <v-skeleton-loader type="paragraph" />
           </v-card>
           <v-card v-else-if="species?.description">
-            <v-card-title class="text-title-medium">Pokédex</v-card-title>
+            <v-card-title class="text-title-medium">{{ t('detail.pokedex') }}</v-card-title>
             <v-card-text class="text-body-large">{{ species.description }}</v-card-text>
           </v-card>
 
@@ -178,15 +187,15 @@ const showVarieties = computed(() => (species.value?.varieties.length ?? 0) > 1)
 
         <v-col cols="12">
           <v-card v-if="chainStatus === 'loading'">
-            <v-card-title class="text-title-medium">Evolução</v-card-title>
+            <v-card-title class="text-title-medium">{{ t('detail.evolution') }}</v-card-title>
             <v-skeleton-loader type="list-item-avatar-two-line@2" />
           </v-card>
           <v-card v-else-if="chainStatus === 'error' || !chain">
-            <v-card-title class="text-title-medium">Evolução</v-card-title>
+            <v-card-title class="text-title-medium">{{ t('detail.evolution') }}</v-card-title>
             <v-card-text class="d-flex flex-column align-start ga-2">
-              <span>Não foi possível carregar a cadeia de evolução.</span>
+              <span>{{ t('detail.evolutionError') }}</span>
               <v-btn color="primary" variant="tonal" size="small" @click="retry">
-                Tentar novamente
+                {{ t('common.retry') }}
               </v-btn>
             </v-card-text>
           </v-card>

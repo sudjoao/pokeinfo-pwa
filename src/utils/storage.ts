@@ -16,3 +16,11 @@ export function writeStorage(key: string, value: unknown): void {
     // Sem espaço ou storage indisponível: o app segue funcionando só em memória.
   }
 }
+
+export function removeStorage(key: string): void {
+  try {
+    localStorage.removeItem(key)
+  } catch {
+    // Storage indisponível: nada a remover.
+  }
+}

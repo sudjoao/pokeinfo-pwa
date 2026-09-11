@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { mdiArrowLeft, mdiPokeball } from '@mdi/js'
+import { useI18n } from 'vue-i18n'
 
 defineProps<{
   title: string
@@ -10,12 +11,19 @@ defineProps<{
 }>()
 
 const emit = defineEmits<{ back: [] }>()
+
+const { t } = useI18n()
 </script>
 
 <template>
   <v-app-bar color="primary" flat class="app-header" :extension-height="extensionHeight ?? 48">
     <template #prepend>
-      <v-btn v-if="back" :icon="mdiArrowLeft" aria-label="Voltar" @click="emit('back')" />
+      <v-btn
+        v-if="back"
+        :icon="mdiArrowLeft"
+        :aria-label="t('common.back')"
+        @click="emit('back')"
+      />
       <v-icon v-else :icon="mdiPokeball" size="28" class="ms-2" />
     </template>
     <v-app-bar-title class="font-weight-bold">{{ title }}</v-app-bar-title>

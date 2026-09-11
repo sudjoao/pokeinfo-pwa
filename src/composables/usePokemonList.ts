@@ -1,10 +1,12 @@
-import { computed, ref, watch } from 'vue'
+import { computed, ref, shallowRef, watch } from 'vue'
 import { useRoute, useRouter, type LocationQueryRaw } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { GAMES, type Game, type GameDex } from '@/data/games'
 import { usePokedexStore } from '@/stores/pokedex'
 import { useCaughtStore } from '@/stores/caught'
 import { useDebouncedRef } from '@/composables/useDebouncedRef'
-import { buildDexList, buildRegionalFormIndex, findGame, resolveDex } from '@/utils/games'
+import { buildDexList, findGame, resolveDex } from '@/utils/games'
+import { describeError } from '@/utils/errors'
 import type { PokemonIndexEntry, PokemonListItem } from '@/types/pokemon'
 
 export const PAGE_SIZE = 24
@@ -31,13 +33,15 @@ function speciesOf(entry: ListSource): number {
   return entry.speciesId ?? entry.id
 }
 
-function matches(entry: ListSource, query: string): boolean {
-  if (!query) return true
+/** Predicado de busca já resolvido para a query (número ou trecho do nome). */
+function matcherFor(query: string): (entry: ListSource) => boolean {
+  if (!query) return () => true
   if (/^\d+$/.test(query)) {
     const number = Number(query)
-    return entry.dexNumber === undefined ? entry.id === number : entry.dexNumber === number
+    return (entry) =>
+      entry.dexNumber === undefined ? entry.id === number : entry.dexNumber === number
   }
-  return entry.name.includes(query)
+  return (entry) => entry.name.includes(query)
 }
 
 function queryParam(value: unknown): string | null {
@@ -54,6 +58,7 @@ export function usePokemonList() {
   const caughtStore = useCaughtStore()
   const route = useRoute()
   const router = useRouter()
+  const { t } = useI18n()
 
   const query = ref(queryParam(route.query.q) ?? '')
   const debouncedQuery = useDebouncedRef(query, 300)
@@ -85,7 +90,7 @@ export function usePokemonList() {
 
   // Carregamento das entradas da Pokédex do jogo (uma requisição por dex, cacheada na store).
   const dexLoading = ref(false)
-  const dexError = ref<string | null>(null)
+  const dexError = ref<unknown>(null)
 
   async function loadDex(): Promise<void> {
     const current = dex.value
@@ -99,18 +104,16 @@ export function usePokemonList() {
       await store.ensureDexEntries(current.slug)
     } catch (error) {
       if (dex.value?.slug !== current.slug) return
-      dexError.value = error instanceof Error ? error.message : 'Erro ao carregar a Pokédex'
+      dexError.value = error
     } finally {
       if (dex.value?.slug === current.slug) dexLoading.value = false
     }
   }
 
-  const regionalForms = computed(() => buildRegionalFormIndex(store.index))
-
   const source = computed<ListSource[]>(() => {
     if (!dex.value) return store.index
     const entries = store.dexEntries[dex.value.slug]
-    return entries ? buildDexList(entries, dex.value, regionalForms.value) : []
+    return entries ? buildDexList(entries, dex.value, store.regionalForms) : []
   })
 
   /**
@@ -119,11 +122,11 @@ export function usePokemonList() {
    * reaplica o filtro quando jogo, busca ou o próprio filtro mudam.
    */
   const filtered = computed(() => {
-    const query = normalizedQuery.value
+    const matches = matcherFor(normalizedQuery.value)
     const status = game.value ? caughtFilter.value : null
     const caught = caughtStore.caughtInRaw(game.value?.slug)
     return source.value.filter((entry) => {
-      if (!matches(entry, query)) return false
+      if (!matches(entry)) return false
       if (status === null) return true
       return caught.has(speciesOf(entry)) === (status === 'caught')
     })
@@ -145,17 +148,24 @@ export function usePokemonList() {
     if (game.value) caughtStore.toggle(game.value.slug, speciesId)
   }
 
-  const items = ref<PokemonListItem[]>([])
+  // shallowRef: os itens não mudam depois de carregados; a lista é substituída a cada lote.
+  const items = shallowRef<PokemonListItem[]>([])
   const status = ref<ListStatus>('idle')
-  const errorMessage = ref<string | null>(null)
+  const loadError = ref<unknown>(null)
+  const errorMessage = computed(() =>
+    loadError.value ? describeError(loadError.value, t, 'home.loadMoreError') : null,
+  )
   /** Muda a cada reset; usado como :key para reiniciar o scroll infinito. */
   const listKey = ref(0)
 
-  const sourceLoading = computed(() => store.indexLoading || dexLoading.value)
-  const sourceError = computed(() => store.indexError ?? dexError.value)
+  const sourceLoading = computed(() => store.loading || dexLoading.value)
+  const sourceError = computed(() => {
+    const error = store.sourceError ?? dexError.value
+    return error ? describeError(error, t, 'error.loadDex') : null
+  })
   const sourceReady = computed(
     () =>
-      store.hasIndex &&
+      store.ready &&
       !sourceLoading.value &&
       !sourceError.value &&
       (!dex.value || Boolean(store.dexEntries[dex.value.slug])),
@@ -175,24 +185,25 @@ export function usePokemonList() {
 
     const current = ++generation
     status.value = 'loading'
-    errorMessage.value = null
+    loadError.value = null
 
     const batch = filtered.value.slice(items.value.length, items.value.length + PAGE_SIZE)
 
     try {
-      const summaries = await store.ensureSummaries(batch.map((entry) => entry.id))
+      const summaries = await store.ensureSummaries(batch)
       if (current !== generation) return status.value
-      items.value.push(
+      items.value = [
+        ...items.value,
         ...summaries.map((summary, i) => ({
           ...summary,
           dexNumber: batch[i]?.dexNumber,
           speciesId: batch[i]?.speciesId,
         })),
-      )
+      ]
       status.value = hasMore.value ? 'idle' : 'done'
     } catch (error) {
       if (current !== generation) return status.value
-      errorMessage.value = error instanceof Error ? error.message : 'Erro ao carregar Pokémon'
+      loadError.value = error
       status.value = 'error'
     }
     return status.value
@@ -203,12 +214,12 @@ export function usePokemonList() {
     listKey.value++
     items.value = []
     status.value = 'idle'
-    errorMessage.value = null
+    loadError.value = null
   }
 
   async function retry(): Promise<void> {
-    if (!store.hasIndex) {
-      await store.loadIndex(true)
+    if (!store.ready) {
+      await store.load(true)
       return
     }
     if (dexError.value) {
@@ -242,7 +253,7 @@ export function usePokemonList() {
 
   watch([source, normalizedQuery, caughtFilter], () => reset())
 
-  store.loadIndex()
+  store.load()
   loadDex()
 
   return {
