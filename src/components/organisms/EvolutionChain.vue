@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import { useDisplay } from 'vuetify'
 import { useI18n } from 'vue-i18n'
 import type { EvolutionChain, PokemonSummary } from '@/types/pokemon'
 import { formatItemName } from '@/utils/evolution'
+import { useVocabularyStore } from '@/stores/vocabulary'
 import EvolutionBranch from '@/components/organisms/EvolutionBranch.vue'
 
 const props = defineProps<{
@@ -15,12 +16,25 @@ const props = defineProps<{
 const emit = defineEmits<{ select: [speciesId: number] }>()
 
 const { smAndDown } = useDisplay()
-const { t } = useI18n()
+const { t, locale } = useI18n()
+const vocabularyStore = useVocabularyStore()
 
 const hasEvolutions = computed(() => props.chain.root.evolvesTo.length > 0)
-const babyItem = computed(() =>
-  props.chain.babyTriggerItem ? formatItemName(props.chain.babyTriggerItem) : null,
+
+watch(
+  () => [props.chain.babyTriggerItem, locale.value] as const,
+  ([item, currentLocale]) => {
+    if (currentLocale === 'es' && item) vocabularyStore.ensureItemNameEs(item)
+  },
+  { immediate: true },
 )
+
+const babyItem = computed(() => {
+  if (!props.chain.babyTriggerItem) return null
+  const vocabulary =
+    locale.value === 'es' ? { items: vocabularyStore.items, moves: {} } : { items: {}, moves: {} }
+  return formatItemName(props.chain.babyTriggerItem, vocabulary)
+})
 </script>
 
 <template>

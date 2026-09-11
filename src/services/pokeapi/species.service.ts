@@ -3,8 +3,9 @@ import { generationNumber, idFromResourceUrl } from '@/utils/pokemon'
 import { fetchJson } from './client'
 import type { PokemonSpeciesDto } from './dto'
 
-/** A PokéAPI não tem pt-BR; usamos inglês para os textos. */
+/** A PokéAPI não tem pt-BR; usamos inglês como padrão e espanhol quando disponível (idioma `es`). */
 const TEXT_LANGUAGE = 'en'
+const ES_LANGUAGE = 'es'
 
 /** Remove quebras de linha e o caractere de "form feed" que os textos dos jogos trazem. */
 function cleanFlavorText(text: string): string {
@@ -15,15 +16,21 @@ function cleanFlavorText(text: string): string {
 }
 
 function toSpecies(dto: PokemonSpeciesDto): PokemonSpecies {
-  // As entradas vêm em ordem de versão; a última em inglês é a mais recente.
+  // As entradas vêm em ordem de versão; a última de cada idioma é a mais recente.
   const flavor = dto.flavor_text_entries.filter((f) => f.language.name === TEXT_LANGUAGE).at(-1)
   const genus = dto.genera.find((g) => g.language.name === TEXT_LANGUAGE)
+  const flavorEs = dto.flavor_text_entries.filter((f) => f.language.name === ES_LANGUAGE).at(-1)
+  const genusEs = dto.genera.find((g) => g.language.name === ES_LANGUAGE)
+  const nameEs = dto.names.find((n) => n.language.name === ES_LANGUAGE)
 
   return {
     id: dto.id,
     name: dto.name,
     genus: genus?.genus ?? null,
     description: flavor ? cleanFlavorText(flavor.flavor_text) : null,
+    nameEs: nameEs?.name ?? null,
+    genusEs: genusEs?.genus ?? null,
+    descriptionEs: flavorEs ? cleanFlavorText(flavorEs.flavor_text) : null,
     generation: dto.generation ? generationNumber(dto.generation.name) : null,
     genderRate: dto.gender_rate,
     eggGroups: dto.egg_groups.map((group) => group.name),

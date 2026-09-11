@@ -4,7 +4,7 @@ import { vuetify } from '@/plugins/vuetify'
 import { writeStorage } from '@/utils/storage'
 
 /** Locale do Vuetify (textos internos dos componentes, ex.: "limpar" do campo de busca). */
-const VUETIFY_LOCALE: Record<Locale, string> = { 'pt-BR': 'pt', en: 'en' }
+const VUETIFY_LOCALE: Record<Locale, string> = { 'pt-BR': 'pt', en: 'en', es: 'es' }
 
 function apply(locale: Locale): void {
   vuetify.locale.current.value = VUETIFY_LOCALE[locale]

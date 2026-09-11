@@ -7,6 +7,18 @@ export type { EvolutionRequirement }
 export type Translate = (key: string, values?: Record<string, unknown>) => string
 
 /**
+ * Nomes de item/golpe já resolvidos em espanhol (buscados sob demanda por quem monta a
+ * frase, ex. `EvolutionMethod.vue`). Vazio em pt/en, onde o comportamento é o de sempre
+ * (nome em inglês formatado a partir do slug).
+ */
+export interface VocabularyLookup {
+  items: Record<string, string | null | undefined>
+  moves: Record<string, string | null | undefined>
+}
+
+const EMPTY_VOCABULARY: VocabularyLookup = { items: {}, moves: {} }
+
+/**
  * Itens ficam com o nome em inglês (como nos jogos), para facilitar a busca.
  * Só ajustamos slugs que perdem o apóstrofo na PokéAPI.
  */
@@ -15,8 +27,11 @@ const ITEM_LABELS: Record<string, string> = {
   'leaders-crest': "Leader's Crest",
 }
 
-export function formatItemName(name: string): string {
-  return ITEM_LABELS[name] ?? formatPokemonName(name)
+export function formatItemName(
+  name: string,
+  vocabulary: VocabularyLookup = EMPTY_VOCABULARY,
+): string {
+  return vocabulary.items[name] ?? ITEM_LABELS[name] ?? formatPokemonName(name)
 }
 
 const TIMES_OF_DAY = ['day', 'night', 'dusk', 'full-moon']
@@ -38,16 +53,16 @@ function typeLabel(name: string, t: Translate): string {
   return isPokemonType(name) ? t(`type.${name}`) : formatPokemonName(name)
 }
 
-function formatMove(name: string): string {
-  return formatPokemonName(name)
+function formatMove(name: string, vocabulary: VocabularyLookup): string {
+  return vocabulary.moves[name] ?? formatPokemonName(name)
 }
 
 /** Frase principal, definida pelo gatilho da evolução. */
-function baseSentence(r: EvolutionRequirement, t: Translate): string {
+function baseSentence(r: EvolutionRequirement, t: Translate, vocabulary: VocabularyLookup): string {
   const times = r.minMoveCount
     ? t('evolution.timesN', { n: r.minMoveCount })
     : t('evolution.timesMany')
-  const move = r.usedMove ? formatMove(r.usedMove) : t('evolution.someMove')
+  const move = r.usedMove ? formatMove(r.usedMove, vocabulary) : t('evolution.someMove')
 
   switch (r.trigger) {
     case 'level-up':
@@ -60,7 +75,7 @@ function baseSentence(r: EvolutionRequirement, t: Translate): string {
         : t('evolution.trade')
     case 'use-item':
       return r.item
-        ? t('evolution.useItem', { item: formatItemName(r.item) })
+        ? t('evolution.useItem', { item: formatItemName(r.item, vocabulary) })
         : t('evolution.useAnyItem')
     case 'shed':
       return t('evolution.shed')
@@ -94,11 +109,17 @@ function baseSentence(r: EvolutionRequirement, t: Translate): string {
 }
 
 /** Condições extras, na ordem em que aparecem na frase. */
-function extraConditions(r: EvolutionRequirement, t: Translate): string[] {
+function extraConditions(
+  r: EvolutionRequirement,
+  t: Translate,
+  vocabulary: VocabularyLookup,
+): string[] {
   const parts: string[] = []
 
-  if (r.heldItem) parts.push(t('evolution.holding', { item: formatItemName(r.heldItem) }))
-  if (r.knownMove) parts.push(t('evolution.knowingMove', { move: formatMove(r.knownMove) }))
+  if (r.heldItem)
+    parts.push(t('evolution.holding', { item: formatItemName(r.heldItem, vocabulary) }))
+  if (r.knownMove)
+    parts.push(t('evolution.knowingMove', { move: formatMove(r.knownMove, vocabulary) }))
   if (r.knownMoveType)
     parts.push(t('evolution.knowingMoveType', { type: typeLabel(r.knownMoveType, t) }))
   if (r.minHappiness) parts.push(t('evolution.highHappiness'))
@@ -132,9 +153,13 @@ function extraConditions(r: EvolutionRequirement, t: Translate): string[] {
 }
 
 /** Monta a frase curta no idioma atual: "Nível 16", "Usar Water Stone", "Trade holding King's Rock"… */
-export function describeEvolution(requirement: EvolutionRequirement, t: Translate): string {
-  const extras = extraConditions(requirement, t)
-  const base = baseSentence(requirement, t)
+export function describeEvolution(
+  requirement: EvolutionRequirement,
+  t: Translate,
+  vocabulary: VocabularyLookup = EMPTY_VOCABULARY,
+): string {
+  const extras = extraConditions(requirement, t, vocabulary)
+  const base = baseSentence(requirement, t, vocabulary)
   return extras.length ? `${base} ${extras.join(', ')}` : base
 }
 

@@ -104,6 +104,19 @@ export default defineConfig({
             },
           },
           {
+            // Vocabulário sob demanda (habilidades, itens, golpes, stats, grupos de ovo) em
+            // espanhol: respostas pequenas e praticamente imutáveis, cache maior e mais longo
+            // que o catch-all abaixo. Precisa vir antes dele (o Workbox usa a primeira regra
+            // cujo urlPattern casar).
+            urlPattern: /^https:\/\/pokeapi\.co\/api\/v2\/(ability|item|move|stat|egg-group)\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'pokeapi-vocabulary',
+              expiration: { maxEntries: 300, maxAgeSeconds: 30 * DAY },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
             // Detalhes individuais (cada resposta tem ~300 KB, por isso o limite baixo)
             urlPattern: /^https:\/\/pokeapi\.co\/api\/v2\/.*/i,
             handler: 'CacheFirst',

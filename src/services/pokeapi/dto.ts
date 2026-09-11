@@ -62,6 +62,10 @@ export interface GenusEntry extends LocalizedText {
   genus: string
 }
 
+export interface NameEntry extends LocalizedText {
+  name: string
+}
+
 export interface PokemonSpeciesVarietyDto {
   is_default: boolean
   pokemon: NamedApiResource
@@ -82,6 +86,7 @@ export interface PokemonSpeciesDto {
   generation: NamedApiResource | null
   flavor_text_entries: FlavorTextEntry[]
   genera: GenusEntry[]
+  names: NameEntry[]
   varieties: PokemonSpeciesVarietyDto[]
 }
 

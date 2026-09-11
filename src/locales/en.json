@@ -18,7 +18,9 @@
     "pt-BR": "Português",
     "pt-BR-hint": "Interface em português; textos da PokéAPI em inglês",
     "en": "English",
-    "en-hint": "Everything in English"
+    "en-hint": "Everything in English",
+    "es": "Español",
+    "es-hint": "Interfaz en español; textos de la PokéAPI en español cuando estén disponibles, si no en inglés"
   },
   "home": {
     "searchPlaceholder": "Search by name or number",

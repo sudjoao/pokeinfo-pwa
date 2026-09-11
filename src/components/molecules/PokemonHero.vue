@@ -2,8 +2,9 @@
 import { computed } from 'vue'
 import { mdiStarFourPoints } from '@mdi/js'
 import { useI18n } from 'vue-i18n'
-import type { PokemonDetail } from '@/types/pokemon'
-import { artworkUrl, formatDexNumber, formatPokemonName, TYPE_COLORS } from '@/utils/pokemon'
+import type { PokemonDetail, PokemonSpecies } from '@/types/pokemon'
+import { artworkUrl, formatDexNumber, TYPE_COLORS } from '@/utils/pokemon'
+import { speciesDisplayName, speciesGenus } from '@/utils/species'
 import PokemonArtwork from '@/components/atoms/PokemonArtwork.vue'
 import DexNumber from '@/components/atoms/DexNumber.vue'
 import TypeChip from '@/components/atoms/TypeChip.vue'
@@ -19,7 +20,7 @@ export interface RegionalNumber {
 
 const props = defineProps<{
   pokemon: PokemonDetail
-  genus?: string | null
+  species?: PokemonSpecies | null
   regional?: RegionalNumber | null
   /** Capturado no jogo selecionado; undefined esconde o botão (sem jogo na URL). */
   caught?: boolean
@@ -32,9 +33,10 @@ const props = defineProps<{
 
 const emit = defineEmits<{ playCry: []; toggleCaught: [] }>()
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
-const name = computed(() => formatPokemonName(props.pokemon.name))
+const name = computed(() => speciesDisplayName(props.species, props.pokemon.name, locale.value))
+const genus = computed(() => speciesGenus(props.species, locale.value))
 const nationalLabel = computed(() => formatDexNumber(props.pokemon.speciesId))
 const image = computed(() => artworkUrl(props.pokemon.id))
 const accent = computed(() => TYPE_COLORS[props.pokemon.types[0] ?? 'unknown'])

@@ -99,6 +99,12 @@ export interface PokemonSpecies {
   genus: string | null
   /** Texto da Pokédex mais recente em inglês. */
   description: string | null
+  /** Nome em espanhol, quando a PokéAPI tiver (null se não tiver). */
+  nameEs: string | null
+  /** Gênero (ex.: "Pokémon Semilla") em espanhol, quando a PokéAPI tiver. */
+  genusEs: string | null
+  /** Texto da Pokédex mais recente em espanhol, quando a PokéAPI tiver. */
+  descriptionEs: string | null
   /** Número da geração (1..9). */
   generation: number | null
   /** -1 = sem gênero; 0..8 = chance de fêmea em oitavos. */

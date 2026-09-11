@@ -1,11 +1,31 @@
 <script setup lang="ts">
+import { watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { PokemonAbility } from '@/types/pokemon'
 import { formatPokemonName } from '@/utils/pokemon'
+import { useVocabularyStore } from '@/stores/vocabulary'
 
-defineProps<{ abilities: PokemonAbility[] }>()
+const props = defineProps<{ abilities: PokemonAbility[] }>()
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
+const vocabulary = useVocabularyStore()
+
+watch(
+  () => [props.abilities, locale.value] as const,
+  ([abilities, currentLocale]) => {
+    if (currentLocale !== 'es') return
+    abilities.forEach((ability) => vocabulary.ensureAbilityNameEs(ability.name))
+  },
+  { immediate: true },
+)
+
+function abilityLabel(name: string): string {
+  if (locale.value === 'es') {
+    const resolved = vocabulary.abilities[name]
+    if (resolved) return resolved
+  }
+  return formatPokemonName(name)
+}
 </script>
 
 <template>
@@ -19,7 +39,7 @@ const { t } = useI18n()
         :variant="ability.isHidden ? 'outlined' : 'tonal'"
         color="secondary"
       >
-        {{ formatPokemonName(ability.name) }}
+        {{ abilityLabel(ability.name) }}
         <span v-if="ability.isHidden" class="text-label-small ms-1 opacity-70">
           {{ t('detail.hiddenAbility') }}
         </span>

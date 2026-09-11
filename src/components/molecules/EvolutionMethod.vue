@@ -1,10 +1,16 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { mdiArrowDown, mdiArrowRight, mdiChevronDown, mdiChevronUp } from '@mdi/js'
 import type { EvolutionMethod } from '@/types/pokemon'
-import { describeEvolution, formLabel, formatVersionGroup } from '@/utils/evolution'
+import {
+  describeEvolution,
+  formLabel,
+  formatVersionGroup,
+  type VocabularyLookup,
+} from '@/utils/evolution'
 import { formatPokemonName } from '@/utils/pokemon'
+import { useVocabularyStore } from '@/stores/vocabulary'
 
 const props = defineProps<{
   methods: EvolutionMethod[]
@@ -13,16 +19,47 @@ const props = defineProps<{
   vertical?: boolean
 }>()
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
+const vocabularyStore = useVocabularyStore()
 
 const showAll = ref(false)
 
 const primary = computed(() => props.methods.filter((m) => m.isDefault))
 const others = computed(() => props.methods.filter((m) => !m.isDefault))
 
+/** Slugs de item/golpe citados nos métodos exibidos, pra pré-buscar o nome em espanhol. */
+function collectSlugs(methods: EvolutionMethod[]): { items: Set<string>; moves: Set<string> } {
+  const items = new Set<string>()
+  const moves = new Set<string>()
+  for (const { requirement: r } of methods) {
+    if (r.item) items.add(r.item)
+    if (r.heldItem) items.add(r.heldItem)
+    if (r.usedMove) moves.add(r.usedMove)
+    if (r.knownMove) moves.add(r.knownMove)
+  }
+  return { items, moves }
+}
+
+watch(
+  () => [props.methods, locale.value] as const,
+  ([methods, currentLocale]) => {
+    if (currentLocale !== 'es') return
+    const { items, moves } = collectSlugs(methods)
+    items.forEach((slug) => vocabularyStore.ensureItemNameEs(slug))
+    moves.forEach((slug) => vocabularyStore.ensureMoveNameEs(slug))
+  },
+  { immediate: true },
+)
+
+const vocabulary = computed<VocabularyLookup>(() =>
+  locale.value === 'es'
+    ? { items: vocabularyStore.items, moves: vocabularyStore.moves }
+    : { items: {}, moves: {} },
+)
+
 /** Frase no idioma atual, montada na exibição (o cache guarda só as condições). */
 function describe(method: EvolutionMethod): string {
-  const sentence = describeEvolution(method.requirement, t)
+  const sentence = describeEvolution(method.requirement, t, vocabulary.value)
   return method.baseForm
     ? `${sentence} ${t('detail.fromForm', { form: formatPokemonName(method.baseForm) })}`
     : sentence

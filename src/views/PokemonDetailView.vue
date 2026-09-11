@@ -10,6 +10,7 @@ import { useDexLabel } from '@/composables/useDexLabel'
 import { gameContextFromQuery, gameContextQuery } from '@/utils/games'
 import { exclusiveVersionOf } from '@/utils/exclusives'
 import { formatDexNumber, formatPokemonName } from '@/utils/pokemon'
+import { speciesDescription } from '@/utils/species'
 import DetailLayout from '@/components/templates/DetailLayout.vue'
 import EmptyState from '@/components/molecules/EmptyState.vue'
 import PokemonHero from '@/components/molecules/PokemonHero.vue'
@@ -23,7 +24,7 @@ import PokemonDetailSkeleton from '@/components/organisms/PokemonDetailSkeleton.
 
 const route = useRoute()
 const router = useRouter()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const { dexLabel } = useDexLabel()
 
 const idParam = computed(() => String(route.params.id ?? ''))
@@ -114,6 +115,8 @@ function goBack(): void {
 }
 
 const showVarieties = computed(() => (species.value?.varieties.length ?? 0) > 1)
+
+const description = computed(() => speciesDescription(species.value, locale.value))
 </script>
 
 <template>
@@ -175,7 +178,7 @@ const showVarieties = computed(() => (species.value?.varieties.length ?? 0) > 1)
         <v-col cols="12" md="5">
           <PokemonHero
             :pokemon="detail"
-            :genus="species?.genus"
+            :species="species"
             :regional="regional"
             :caught="caught"
             :exclusive-to="exclusiveTo"
@@ -191,9 +194,9 @@ const showVarieties = computed(() => (species.value?.varieties.length ?? 0) > 1)
           <v-card v-if="speciesStatus === 'loading'">
             <v-skeleton-loader type="paragraph" />
           </v-card>
-          <v-card v-else-if="species?.description">
+          <v-card v-else-if="description">
             <v-card-title class="text-title-medium">{{ t('detail.pokedex') }}</v-card-title>
-            <v-card-text class="text-body-large">{{ species.description }}</v-card-text>
+            <v-card-text class="text-body-large">{{ description }}</v-card-text>
           </v-card>
 
           <AboutGrid :pokemon="detail" :species="species" />
