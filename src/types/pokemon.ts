@@ -195,3 +195,21 @@ export interface EncounterLocation {
 
 /** Locais por jogo (chave = slug do jogo em `data/games.ts`). Só jogos da lista; fica só em memória. */
 export type PokemonEncounters = Record<string, EncounterLocation[]>
+
+/** Um método de encontro numa rota, com a chance somada (capada em 100; covis de raid podem estourar). */
+export interface RouteEncounterMethod {
+  slug: string
+  chance: number
+}
+
+/** Um Pokémon disponível numa rota, já somando todas as áreas do local para o jogo selecionado. */
+export interface RoutePokemon {
+  id: number
+  name: string
+  minLevel: number
+  maxLevel: number
+  /** Ordenados do maior para o menor `chance`. */
+  methods: RouteEncounterMethod[]
+  /** Slug da versão quando só aparece em uma das versões do jogo (ex.: "sword"); null nas duas. */
+  onlyIn: string | null
+}

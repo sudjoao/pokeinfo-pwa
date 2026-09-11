@@ -43,7 +43,10 @@ export function formatEncounterMethod(
 }
 
 /** "Nv. 2–5" ou "Nv. 18" quando a faixa é um nível só. */
-export function formatLevelRange(location: EncounterLocation, t: Translate): string {
+export function formatLevelRange(
+  location: Pick<EncounterLocation, 'minLevel' | 'maxLevel'>,
+  t: Translate,
+): string {
   return location.minLevel === location.maxLevel
     ? t('detail.level', { n: location.minLevel })
     : t('detail.levelRange', { min: location.minLevel, max: location.maxLevel })

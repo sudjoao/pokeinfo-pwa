@@ -178,3 +178,13 @@ export interface PokemonEncounterDto {
   location_area: NamedApiResource
   version_details: EncounterVersionDetailDto[]
 }
+
+export interface LocationAreaPokemonEncounterDto {
+  pokemon: NamedApiResource
+  version_details: EncounterVersionDetailDto[]
+}
+
+/** Só o que usamos de `/location-area/{slug}`: quem aparece ali, por versão. */
+export interface LocationAreaDto {
+  pokemon_encounters: LocationAreaPokemonEncounterDto[]
+}

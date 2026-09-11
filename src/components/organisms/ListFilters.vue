@@ -22,6 +22,8 @@ defineProps<{
   versions: readonly ExclusiveVersion[]
   /** Grupos marcados no filtro de versão ("both" e/ou slugs de versão); vazio = todos. */
   availability: readonly string[]
+  /** Na aba de rotas, só jogo e Pokédex fazem sentido; esconde tipo, captura e exclusivos. */
+  simplified?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -42,18 +44,20 @@ const { t } = useI18n()
     :aria-label="t('home.gameFilterLabel')"
   >
     <GameFilterChip :label="game?.title ?? null" @click="emit('openGame')" />
-    <VersionFilterChip
-      v-if="game && versions.length"
-      :versions="versions"
-      :selected="availability"
-      @click="emit('openVersions')"
-    />
-    <TypeFilterChip :types="types" @click="emit('openTypes')" />
+    <template v-if="!simplified">
+      <VersionFilterChip
+        v-if="game && versions.length"
+        :versions="versions"
+        :selected="availability"
+        @click="emit('openVersions')"
+      />
+      <TypeFilterChip :types="types" @click="emit('openTypes')" />
+    </template>
     <template v-if="game && dex && game.dexes.length > 1">
       <v-divider vertical class="list-filters__divider" />
       <DexChips :dexes="game.dexes" :selected="dex.slug" @select="emit('selectDex', $event)" />
     </template>
-    <template v-if="game">
+    <template v-if="game && !simplified">
       <v-divider vertical class="list-filters__divider" />
       <CaughtFilterChips
         :selected="caughtFilter"

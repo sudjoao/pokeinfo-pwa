@@ -46,7 +46,9 @@
     "teamBuilder": "Crear equipo",
     "emptyFiltered": "Ningún Pokémon coincide con los filtros. Prueba otro tipo u otra búsqueda.",
     "onlyIn": "Solo {version}",
-    "exclusivesOf": "Exclusivos de {version}"
+    "exclusivesOf": "Exclusivos de {version}",
+    "pokemonTab": "Pokémon",
+    "routesTab": "Rutas"
   },
   "dex": {
     "crown-tundra": "Tundra Corona",
@@ -355,5 +357,12 @@
     "ceiling-ambush": "Emboscada del techo",
     "ground-ambush": "Emboscada del suelo",
     "sky-ambush": "Emboscada del cielo"
+  },
+  "routes": {
+    "empty": "Sin datos de rutas para {game}.",
+    "emptyRoute": "Ningún Pokémon catalogado aquí para {game}.",
+    "loadError": "No se pudieron cargar los Pokémon de esta ruta.",
+    "pokemonCount": "{n} Pokémon | {n} Pokémon",
+    "chance": "{pct} %"
   }
 }

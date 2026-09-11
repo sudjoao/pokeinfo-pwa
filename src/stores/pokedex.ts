@@ -9,6 +9,8 @@ import {
 } from '@/types/pokemon'
 import { getPokemonIndex, getPokemonSummary } from '@/services/pokeapi/pokemon.service'
 import { getPokedexEntries } from '@/services/pokeapi/pokedex.service'
+import { getLocationAreaEncounters } from '@/services/pokeapi/location.service'
+import type { LocationAreaDto } from '@/services/pokeapi/dto'
 import { getTypeMap, type TypeMap } from '@/services/pokeapi/type.service'
 import { buildRegionalFormIndex } from '@/utils/games'
 import { readStorage, removeStorage, writeStorage } from '@/utils/storage'
@@ -179,6 +181,28 @@ export const usePokedexStore = defineStore('pokedex', () => {
     return request
   }
 
+  /** Encontros crus de áreas (`/location-area/{slug}`) já carregados, por slug. */
+  const areaEncounters = shallowRef<Record<string, LocationAreaDto>>({})
+  const areaInFlight = new Map<string, Promise<LocationAreaDto>>()
+
+  /** Garante que os encontros da área informada estejam em memória (uma requisição por área). */
+  function ensureAreaEncounters(slug: string): Promise<LocationAreaDto> {
+    const cached = areaEncounters.value[slug]
+    if (cached) return Promise.resolve(cached)
+
+    const pending = areaInFlight.get(slug)
+    if (pending) return pending
+
+    const request = getLocationAreaEncounters(slug)
+      .then((dto) => {
+        areaEncounters.value = { ...areaEncounters.value, [slug]: dto }
+        return dto
+      })
+      .finally(() => areaInFlight.delete(slug))
+    areaInFlight.set(slug, request)
+    return request
+  }
+
   return {
     index,
     hasIndex,
@@ -192,5 +216,7 @@ export const usePokedexStore = defineStore('pokedex', () => {
     ensureSummaries,
     dexEntries,
     ensureDexEntries,
+    areaEncounters,
+    ensureAreaEncounters,
   }
 })

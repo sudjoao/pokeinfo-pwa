@@ -46,7 +46,9 @@
     "teamBuilder": "Team builder",
     "emptyFiltered": "No Pokémon matches these filters. Try another type or search.",
     "onlyIn": "{version} only",
-    "exclusivesOf": "{version} exclusives"
+    "exclusivesOf": "{version} exclusives",
+    "pokemonTab": "Pokémon",
+    "routesTab": "Routes"
   },
   "dex": {
     "crown-tundra": "Crown Tundra",
@@ -355,5 +357,12 @@
     "ceiling-ambush": "Ceiling ambush",
     "ground-ambush": "Ground ambush",
     "sky-ambush": "Sky ambush"
+  },
+  "routes": {
+    "empty": "No route data for {game}.",
+    "emptyRoute": "No Pokémon catalogued here for {game}.",
+    "loadError": "Could not load this route's Pokémon.",
+    "pokemonCount": "{n} Pokémon | {n} Pokémon",
+    "chance": "{pct}%"
   }
 }

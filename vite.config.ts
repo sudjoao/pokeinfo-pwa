@@ -104,6 +104,17 @@ export default defineConfig({
             },
           },
           {
+            // Pokémon por rota (feature "Rotas"): respostas pequenas e praticamente imutáveis,
+            // por isso ficam num cache à parte do catch-all abaixo (que é pra respostas de ~300 KB).
+            urlPattern: /^https:\/\/pokeapi\.co\/api\/v2\/location-area\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'pokeapi-locations',
+              expiration: { maxEntries: 200, maxAgeSeconds: 30 * DAY },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
             // Vocabulário sob demanda (habilidades, itens, golpes, stats, grupos de ovo) em
             // espanhol: respostas pequenas e praticamente imutáveis, cache maior e mais longo
             // que o catch-all abaixo. Precisa vir antes dele (o Workbox usa a primeira regra

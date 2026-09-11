@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { mdiInformationOutline, mdiSwordCross, mdiTranslate } from '@mdi/js'
@@ -15,6 +15,7 @@ import EmptyState from '@/components/molecules/EmptyState.vue'
 import PokemonCardSkeleton from '@/components/molecules/PokemonCardSkeleton.vue'
 import ListFilters from '@/components/organisms/ListFilters.vue'
 import PokemonGrid from '@/components/organisms/PokemonGrid.vue'
+import RouteList from '@/components/organisms/RouteList.vue'
 import GamePickerSheet from '@/components/organisms/GamePickerSheet.vue'
 import TypePickerSheet from '@/components/organisms/TypePickerSheet.vue'
 import VersionPickerSheet from '@/components/organisms/VersionPickerSheet.vue'
@@ -59,6 +60,13 @@ const { t } = useI18n()
 const { locale, locales, setLocale } = useLocale()
 const { dexLabel } = useDexLabel()
 
+/** Aba ativa na Home; "routes" só existe com um jogo com dados de encontro selecionado. */
+const view = ref<'pokemon' | 'routes'>('pokemon')
+watch(
+  () => game.value?.slug,
+  () => (view.value = 'pokemon'),
+)
+
 const pickerOpen = ref(false)
 const typesOpen = ref(false)
 const versionsOpen = ref(false)
@@ -102,8 +110,13 @@ const contextQuery = computed(() =>
  * O jogo selecionado vai junto na URL para o detalhe mostrar o número regional e navegar pela dex.
  */
 function openPokemon(pokemon: PokemonSummary): void {
-  cry.play(pokemon.id)
-  router.push({ name: 'pokemon', params: { id: pokemon.id }, query: contextQuery.value })
+  openPokemonId(pokemon.id)
+}
+
+/** Mesma navegação, usada pela aba de rotas (que só tem o id, sem o resumo completo). */
+function openPokemonId(id: number): void {
+  cry.play(id)
+  router.push({ name: 'pokemon', params: { id }, query: contextQuery.value })
 }
 
 /** Abre o team builder já com o jogo e o filtro de tipo atuais. */
@@ -137,6 +150,7 @@ function openTeamBuilder(): void {
         :missing-count="missingCount"
         :versions="versions"
         :availability="availability"
+        :simplified="view === 'routes'"
         @open-game="pickerOpen = true"
         @open-types="typesOpen = true"
         @open-versions="versionsOpen = true"
@@ -145,35 +159,44 @@ function openTeamBuilder(): void {
       />
     </template>
 
-    <v-row v-if="sourceLoading" density="compact">
-      <v-col v-for="n in 12" :key="n" cols="6" sm="4" md="3" lg="2">
-        <PokemonCardSkeleton />
-      </v-col>
-    </v-row>
+    <v-tabs v-if="game?.hasEncounterData" v-model="view" class="mb-3" density="compact">
+      <v-tab value="pokemon">{{ t('home.pokemonTab') }}</v-tab>
+      <v-tab value="routes">{{ t('home.routesTab') }}</v-tab>
+    </v-tabs>
 
-    <EmptyState
-      v-else-if="sourceError"
-      variant="error"
-      :title="t('home.loadErrorTitle')"
-      :message="sourceError"
-      :action-label="t('common.retry')"
-      @action="retry"
-    />
+    <RouteList v-if="view === 'routes' && game" :game="game" @select="openPokemonId" />
 
-    <EmptyState v-else-if="isEmpty" :title="emptyTitle" :message="emptyMessage" />
+    <template v-else>
+      <v-row v-if="sourceLoading" density="compact">
+        <v-col v-for="n in 12" :key="n" cols="6" sm="4" md="3" lg="2">
+          <PokemonCardSkeleton />
+        </v-col>
+      </v-row>
 
-    <PokemonGrid
-      v-else
-      :key="listKey"
-      :items="items"
-      :status="status"
-      :error-message="errorMessage"
-      :caught-ids="game ? caughtIds : undefined"
-      @load="loadMore"
-      @retry="retry"
-      @select="openPokemon"
-      @toggle-caught="toggleCaught"
-    />
+      <EmptyState
+        v-else-if="sourceError"
+        variant="error"
+        :title="t('home.loadErrorTitle')"
+        :message="sourceError"
+        :action-label="t('common.retry')"
+        @action="retry"
+      />
+
+      <EmptyState v-else-if="isEmpty" :title="emptyTitle" :message="emptyMessage" />
+
+      <PokemonGrid
+        v-else
+        :key="listKey"
+        :items="items"
+        :status="status"
+        :error-message="errorMessage"
+        :caught-ids="game ? caughtIds : undefined"
+        @load="loadMore"
+        @retry="retry"
+        @select="openPokemon"
+        @toggle-caught="toggleCaught"
+      />
+    </template>
 
     <GamePickerSheet
       v-model="pickerOpen"

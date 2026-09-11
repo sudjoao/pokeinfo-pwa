@@ -46,7 +46,9 @@
     "teamBuilder": "Montar time",
     "emptyFiltered": "Nenhum Pokémon combina com os filtros. Tente outro tipo ou outra busca.",
     "onlyIn": "Só {version}",
-    "exclusivesOf": "Exclusivos de {version}"
+    "exclusivesOf": "Exclusivos de {version}",
+    "pokemonTab": "Pokémon",
+    "routesTab": "Rotas"
   },
   "dex": {
     "crown-tundra": "Tundra da Coroa",
@@ -355,5 +357,12 @@
     "ceiling-ambush": "Emboscada do teto",
     "ground-ambush": "Emboscada do chão",
     "sky-ambush": "Emboscada do céu"
+  },
+  "routes": {
+    "empty": "Sem dados de rota para {game}.",
+    "emptyRoute": "Nenhum pokémon catalogado aqui para {game}.",
+    "loadError": "Não foi possível carregar os pokémon desta rota.",
+    "pokemonCount": "{n} pokémon | {n} pokémon",
+    "chance": "{pct}%"
   }
 }
