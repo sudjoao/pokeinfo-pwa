@@ -50,14 +50,14 @@ watch(
  */
 :deep(.pokemon-artwork__img) {
   opacity: 0;
-  transform: scale(0.85);
+  transform: scale(0.55) rotate(-6deg);
   transition:
-    opacity 0.22s ease,
-    transform 0.22s ease;
+    opacity 0.3s ease,
+    transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 :deep(.pokemon-artwork__img--loaded) {
   opacity: 1;
-  transform: scale(1);
+  transform: scale(1) rotate(0deg);
 }
 </style>

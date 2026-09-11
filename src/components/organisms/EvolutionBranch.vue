@@ -8,14 +8,18 @@ import EvolutionMethod from '@/components/molecules/EvolutionMethod.vue'
  * Horizontal (desktop): estágio à esquerda, evoluções empilhadas à direita.
  * Vertical (celular): estágio em cima, evoluções abaixo lado a lado (quebrando linha).
  */
-defineProps<{
+const props = defineProps<{
   node: EvolutionNode
   summaries: Record<number, PokemonSummary>
   currentSpeciesId: number
   vertical?: boolean
+  /** Profundidade na cadeia (0 = base), repassada ao estágio pra escalonar a entrada. */
+  depth?: number
 }>()
 
 const emit = defineEmits<{ select: [speciesId: number] }>()
+
+const depth = props.depth ?? 0
 </script>
 
 <template>
@@ -32,6 +36,7 @@ const emit = defineEmits<{ select: [speciesId: number] }>()
       :summary="summaries[node.speciesId]"
       :current="node.speciesId === currentSpeciesId"
       :is-baby="node.isBaby"
+      :depth="depth"
       @select="emit('select', $event)"
     />
 
@@ -43,6 +48,7 @@ const emit = defineEmits<{ select: [speciesId: number] }>()
           :summaries="summaries"
           :current-species-id="currentSpeciesId"
           :vertical="vertical"
+          :depth="depth + 1"
           @select="emit('select', $event)"
         />
       </div>

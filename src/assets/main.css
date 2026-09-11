@@ -40,17 +40,26 @@ body {
  * .v-application__wrap, que já é position: relative) evita que a página entrante pule pra baixo
  * do conteúdo antigo nesse meio-tempo.
  */
-.page-enter-active > *,
-.page-leave-active > * {
+.page-enter-active > * {
   transition:
-    opacity 0.18s ease,
-    transform 0.18s ease;
+    opacity 0.32s ease,
+    transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.page-enter-from > *,
+.page-leave-active > * {
+  transition:
+    opacity 0.22s ease,
+    transform 0.22s ease;
+}
+
+.page-enter-from > * {
+  opacity: 0;
+  transform: translateY(20px) scale(0.98);
+}
+
 .page-leave-to > * {
   opacity: 0;
-  transform: translateY(8px);
+  transform: translateY(-8px) scale(0.98);
 }
 
 .page-leave-active > .v-main {
@@ -63,8 +72,11 @@ body {
   .page-enter-active > *,
   .page-leave-active > *,
   .pokemon-artwork__img,
-  .catch-toggle-wrap--burst::before,
-  .catch-toggle-wrap--burst::after {
+  .catch-burst__dot,
+  .team-slot-enter-active,
+  .team-slot-leave-active,
+  .team-slot-move,
+  .evolution-stage {
     transition: none !important;
     animation: none !important;
   }
@@ -76,6 +88,12 @@ body {
   }
 
   .pokemon-artwork__img {
+    opacity: 1;
+    transform: none;
+  }
+
+  .team-slot-enter-from,
+  .team-slot-leave-to {
     opacity: 1;
     transform: none;
   }

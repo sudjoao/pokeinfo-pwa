@@ -22,7 +22,12 @@ const slots = computed<(TeamMember | null)[]>(() =>
 </script>
 
 <template>
-  <div class="team-bench d-flex ga-2" :class="{ 'team-bench--wrap': wrap }">
+  <TransitionGroup
+    tag="div"
+    name="team-slot"
+    class="team-bench d-flex ga-2"
+    :class="{ 'team-bench--wrap': wrap }"
+  >
     <TeamSlot
       v-for="(member, i) in slots"
       :key="member?.id ?? `empty-${i}`"
@@ -31,7 +36,7 @@ const slots = computed<(TeamMember | null)[]>(() =>
       @remove="emit('remove', $event)"
       @add="emit('add')"
     />
-  </div>
+  </TransitionGroup>
 </template>
 
 <style scoped>
@@ -56,5 +61,37 @@ const slots = computed<(TeamMember | null)[]>(() =>
 .team-bench--wrap :deep(.team-slot) {
   flex: 1 1 96px;
   max-width: 140px;
+}
+
+/*
+ * Membro entra com um pop, sai encolhendo, e os vizinhos deslizam pro lugar (FLIP do
+ * TransitionGroup). leave-active vira position: absolute pra não empurrar quem tá ao lado
+ * enquanto ainda está saindo — assim o slide e o fade acontecem juntos, não em sequência.
+ */
+.team-slot-move {
+  transition: transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.team-slot-enter-active {
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.team-slot-leave-active {
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+  position: absolute;
+}
+
+.team-slot-enter-from {
+  opacity: 0;
+  transform: scale(0.4) translateY(12px);
+}
+
+.team-slot-leave-to {
+  opacity: 0;
+  transform: scale(0.4);
 }
 </style>
