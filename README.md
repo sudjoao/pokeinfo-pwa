@@ -23,6 +23,11 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
   (nível, item, troca, amizade, local, hora do dia, golpe conhecido, stats, formas regionais…).
   O método padrão dos jogos atuais fica em destaque; métodos de jogos antigos ficam recolhidos.
 - **Grito do Pokémon** ao abrir a tela de detalhes (com botão para repetir e para silenciar).
+- **Onde encontrar**: a tela de detalhes lista os locais em que o Pokémon aparece, com método de
+  encontro (grama, surf, pesca, presente, troca, raid…) e faixa de nível. Ao abrir a partir de um
+  jogo, mostra só os locais daquele jogo (com um botão para ver os outros); sem jogo, agrupa por
+  jogo em painéis. Quando o encontro só existe em uma das versões, a linha ganha o selo "Só Sword".
+  Vem de `/pokemon/{id}/encounters` (uma requisição por Pokémon, só na tela de detalhes).
 - **Filtro por tipo**: chip "Tipo" abre um seletor com os 18 tipos; dá para escolher até dois
   (o Pokémon precisa ter os dois, ex.: Água/Terra). Combina com jogo, busca e captura e vai na URL
   (`?type=water,ground`). Não faz requisição: usa o mapa de tipos que já fica em cache.
@@ -70,6 +75,10 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
 - A análise do time usa a tabela de tipos atual e os tipos atuais de cada Pokémon mesmo em jogos
   antigos (ex.: Clefairy conta como Fada em Red/Blue). A cobertura ofensiva olha só os tipos do
   próprio Pokémon (STAB), não os golpes que ele aprende, e cada tipo defensor isolado.
+- Os locais de encontro cobrem as gerações 1 a 7 e Sword/Shield (com as DLCs). A PokéAPI ainda
+  não tem esse dado para Brilliant Diamond / Shining Pearl, Legends: Arceus, Scarlet / Violet e
+  Legends: Z-A, e só lista encontros selvagens, presentes e trocas (evoluções e ovos não entram).
+  O nome da área é montado a partir do slug da API (`kanto-route-1-area` → "Kanto Route 1").
 - Os gritos vêm só em `.ogg` (Vorbis). Safari toca a partir do macOS 14.1 / iOS 17.4 (suporte
   completo no 18.4); em navegadores sem suporte o botão de som não aparece. No iOS o áudio só
   toca depois de um toque do usuário, por isso o grito é disparado no toque do card, e o botão
@@ -119,20 +128,22 @@ src/
     pokedex.service.ts        #   entradas de uma Pokédex regional (número no jogo + espécie)
     species.service.ts        #   espécie (descrição, gênero, grupos de ovo, formas)
     evolution.service.ts      #   cadeia de evolução -> árvore com métodos descritos
+    encounter.service.ts      #   locais de encontro -> uma linha por área e por jogo
   utils/
     pokemon.ts                # formatação, URLs de artwork e de grito, cores dos tipos, stats
     evolution.ts              # regras "como evoluir" em pt-BR (gatilhos + condições)
     games.ts                  # busca de jogo/dex, agrupamento por geração, formas regionais
     typeChart.ts              # multiplicadores, fraquezas do time e cobertura ofensiva
     exclusives.ts             # versão exclusiva de uma espécie dentro de um jogo
+    encounters.ts             # nome da área a partir do slug, método e faixa de nível
     storage.ts
   stores/
     pokedex.ts                # Pinia: índice + cache de resumos (persistido) e Pokédex regionais (memória)
-    pokemonDetail.ts          # Pinia: detalhes, espécies e cadeias (só em memória)
+    pokemonDetail.ts          # Pinia: detalhes, espécies, cadeias e locais (só em memória)
   composables/
     usePokemonList.ts         # busca + filtros (jogo, captura, tipo, versão) + lotes do scroll infinito
     useTeam.ts                # time de até 6 na URL (?team=) e análise de tipos
-    usePokemonDetail.ts       # carrega detalhe -> espécie -> cadeia, reage à rota e ao jogo (?game=)
+    usePokemonDetail.ts       # carrega detalhe -> espécie + locais -> cadeia, reage à rota e ao jogo (?game=)
     useCry.ts                 # áudio único compartilhado, desbloqueado no gesto do usuário
     useDebouncedRef.ts
   components/
@@ -140,10 +151,10 @@ src/
                               # DexNumber, StatBar, InfoTile, CryButton, CatchToggle
     molecules/                # PokemonCard, SearchField, GameFilterChip, TypeFilterChip, DexChips,
                               # CaughtFilterChips, VersionFilterChip, TeamSlot, EmptyState, PokemonHero, AboutGrid,
-                              # AbilityList, StatsList, EvolutionStage, EvolutionMethod, VarietyChips
+                              # AbilityList, StatsList, EvolutionStage, EvolutionMethod, VarietyChips, LocationRow
     organisms/                # AppHeader, ListFilters, PokemonGrid, GamePickerSheet, TypePickerSheet, VersionPickerSheet, AboutSheet,
                               # LanguageSheet, TeamBench, TeamPanel, TeamTray, TeamAnalysis, TeamDefenseTable, TeamCoverage,
-                              # EvolutionChain, EvolutionBranch (recursivo)
+                              # EvolutionChain, EvolutionBranch (recursivo), LocationList
     templates/                # DefaultLayout (home) e DetailLayout (voltar + ações + filtros)
   views/
     HomeView.vue              # página inicial (fica em KeepAlive para preservar o scroll)
@@ -163,6 +174,9 @@ src/
 5. A tela de detalhes busca `/pokemon/{id}`, depois `/pokemon-species/{id}` e
    `/evolution-chain/{id}`; os tipos dos estágios da evolução vêm do cache de resumos.
    A URL do grito também é derivada do id, o que permite tocá-lo ainda no toque do card.
+6. Os locais de encontro vêm de `/pokemon/{id}/encounters` em paralelo com a espécie; a resposta
+   crua é repetitiva (uma entrada por área × versão × nível), então o app guarda só uma linha por
+   área e por jogo, e as versões da API são mapeadas para os jogos de `data/games.ts`.
 
 ### Estratégia de cache
 
@@ -177,6 +191,7 @@ O objetivo é funcionar offline sem inflar o armazenamento do usuário:
 | Service worker `pokeapi-pokedex` | Pokédex regionais por jogo (12 a 45 KB) | 12 entradas, 30 dias |
 | Service worker `pokeapi-species` | espécies e cadeias de evolução (~2 a 50 KB) | 100 entradas, 7 dias |
 | Service worker `pokeapi-detail` | respostas de detalhe da PokéAPI (~300 KB cada) | 60 entradas, 7 dias |
+| Service worker `pokeapi-encounters` | locais de encontro por Pokémon (1 a 10 KB comprimidos) | 60 entradas, 7 dias |
 | Service worker `pokeapi-artwork` | artworks oficiais | 200 entradas, 30 dias |
 | Service worker `pokeapi-cries-v2` | gritos dos Pokémon (~7 KB cada) | 60 entradas, 30 dias |
 
@@ -185,7 +200,7 @@ Os cards não fazem requisição por Pokémon: os tipos vêm de um mapa montado 
 de `/pokemon/{id}` custaria ~290 KB por card, quase tudo lista de golpes. Só um Pokémon que não
 esteja no mapa (lançado depois do cache) dispara uma busca individual.
 
-Detalhes, espécies e cadeias ficam só em memória durante a sessão (store `pokemonDetail`),
+Detalhes, espécies, cadeias e locais ficam só em memória durante a sessão (store `pokemonDetail`),
 assim como as entradas das Pokédex regionais (store `pokedex`); nada disso vai para o `localStorage`.
 
 ## Como rodar

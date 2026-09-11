@@ -9,6 +9,7 @@ import { describeError } from '@/utils/errors'
 import type {
   EvolutionChain,
   PokemonDetail,
+  PokemonEncounters,
   PokemonIndexEntry,
   PokemonSpecies,
   PokemonSummary,
@@ -24,7 +25,7 @@ export interface NeighborEntry extends PokemonIndexEntry {
 
 /**
  * Orquestra o carregamento da tela de detalhe: primeiro o Pokémon (libera o topo da
- * tela), depois espécie + cadeia de evolução em paralelo. Reage à troca do id na rota.
+ * tela), depois espécie + cadeia de evolução e os locais de encontro em paralelo. Reage à troca do id na rota.
  * Com um jogo selecionado (`context`), a navegação anterior/próximo segue a Pokédex dele.
  */
 export function usePokemonDetail(idOrName: Ref<string>, context: Ref<GameContext | null>) {
@@ -37,10 +38,13 @@ export function usePokemonDetail(idOrName: Ref<string>, context: Ref<GameContext
   const chain = ref<EvolutionChain | null>(null)
   /** Resumos (tipos) das espécies da cadeia, indexados por id da espécie. */
   const chainSummaries = ref<Record<number, PokemonSummary>>({})
+  /** Locais de encontro por jogo (null enquanto carrega ou em erro). */
+  const encounters = ref<PokemonEncounters | null>(null)
 
   const status = ref<DetailStatus>('loading')
   const speciesStatus = ref<SectionStatus>('loading')
   const chainStatus = ref<SectionStatus>('loading')
+  const encountersStatus = ref<SectionStatus>('loading')
   const loadError = ref<unknown>(null)
   const errorMessage = computed(() =>
     loadError.value ? describeError(loadError.value, t, 'detail.loadError') : null,
@@ -61,6 +65,19 @@ export function usePokemonDetail(idOrName: Ref<string>, context: Ref<GameContext
     } catch {
       if (current !== generation) return
       chainStatus.value = 'error'
+    }
+  }
+
+  async function loadEncounters(current: number, pokemonId: number): Promise<void> {
+    encountersStatus.value = 'loading'
+    try {
+      const result = await store.ensureEncounters(pokemonId)
+      if (current !== generation) return
+      encounters.value = result
+      encountersStatus.value = 'ready'
+    } catch {
+      if (current !== generation) return
+      encountersStatus.value = 'error'
     }
   }
 
@@ -88,11 +105,13 @@ export function usePokemonDetail(idOrName: Ref<string>, context: Ref<GameContext
     status.value = 'loading'
     speciesStatus.value = 'loading'
     chainStatus.value = 'loading'
+    encountersStatus.value = 'loading'
     loadError.value = null
     detail.value = null
     species.value = null
     chain.value = null
     chainSummaries.value = {}
+    encounters.value = null
 
     const key = idOrName.value.trim().toLowerCase()
     if (!key) {
@@ -105,7 +124,10 @@ export function usePokemonDetail(idOrName: Ref<string>, context: Ref<GameContext
       if (current !== generation) return
       detail.value = result
       status.value = 'ready'
-      await loadSpecies(current, result.speciesId)
+      await Promise.all([
+        loadSpecies(current, result.speciesId),
+        loadEncounters(current, result.id),
+      ])
     } catch (error) {
       if (current !== generation) return
       if (error instanceof ApiError && error.status === 404) {
@@ -122,7 +144,13 @@ export function usePokemonDetail(idOrName: Ref<string>, context: Ref<GameContext
       await load()
       return
     }
-    await loadSpecies(generation, detail.value.speciesId)
+    const current = generation
+    const pending: Promise<void>[] = []
+    if (speciesStatus.value !== 'ready' || chainStatus.value !== 'ready') {
+      pending.push(loadSpecies(current, detail.value.speciesId))
+    }
+    if (encountersStatus.value !== 'ready') pending.push(loadEncounters(current, detail.value.id))
+    await Promise.all(pending)
   }
 
   // Pokédex do jogo selecionado (se houver). Falhas aqui não bloqueiam a tela:
@@ -182,9 +210,11 @@ export function usePokemonDetail(idOrName: Ref<string>, context: Ref<GameContext
     species,
     chain,
     chainSummaries,
+    encounters,
     status,
     speciesStatus,
     chainStatus,
+    encountersStatus,
     errorMessage,
     dexNumber,
     previous,

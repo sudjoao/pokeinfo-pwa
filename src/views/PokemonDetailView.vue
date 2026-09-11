@@ -18,6 +18,7 @@ import AbilityList from '@/components/molecules/AbilityList.vue'
 import StatsList from '@/components/molecules/StatsList.vue'
 import VarietyChips from '@/components/molecules/VarietyChips.vue'
 import EvolutionChain from '@/components/organisms/EvolutionChain.vue'
+import LocationList from '@/components/organisms/LocationList.vue'
 import PokemonDetailSkeleton from '@/components/organisms/PokemonDetailSkeleton.vue'
 
 const route = useRoute()
@@ -34,9 +35,11 @@ const {
   species,
   chain,
   chainSummaries,
+  encounters,
   status,
   speciesStatus,
   chainStatus,
+  encountersStatus,
   errorMessage,
   dexNumber,
   previous,
@@ -95,10 +98,14 @@ watch(detail, (value) => {
   if (value) cry.autoPlay(value.id, value.cryUrl)
 })
 
-/** Navega para outro Pokémon tocando o grito ainda dentro do gesto do usuário; mantém o jogo na URL. */
+/**
+ * Navega para outro Pokémon tocando o grito ainda dentro do gesto do usuário; mantém o jogo na URL.
+ * Usa replace para o histórico ficar sempre "lista → detalhe": por mais Pokémon que a pessoa
+ * percorra (vizinhos, evoluções, formas), voltar leva direto à listagem com os filtros de antes.
+ */
 function goTo(id: number): void {
   cry.play(id)
-  router.push({ name: 'pokemon', params: { id }, query: gameContextQuery(context.value) })
+  router.replace({ name: 'pokemon', params: { id }, query: gameContextQuery(context.value) })
 }
 
 function goBack(): void {
@@ -214,6 +221,15 @@ const showVarieties = computed(() => (species.value?.varieties.length ?? 0) > 1)
             :summaries="chainSummaries"
             :current-species-id="detail.speciesId"
             @select="goTo"
+          />
+        </v-col>
+
+        <v-col cols="12">
+          <LocationList
+            :encounters="encounters"
+            :status="encountersStatus"
+            :game="context?.game ?? null"
+            @retry="retry"
           />
         </v-col>
 

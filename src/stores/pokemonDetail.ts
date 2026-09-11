@@ -1,12 +1,18 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { EvolutionChain, PokemonDetail, PokemonSpecies } from '@/types/pokemon'
+import type {
+  EvolutionChain,
+  PokemonDetail,
+  PokemonEncounters,
+  PokemonSpecies,
+} from '@/types/pokemon'
 import { getPokemonDetail } from '@/services/pokeapi/pokemon.service'
 import { getPokemonSpecies } from '@/services/pokeapi/species.service'
 import { getEvolutionChain } from '@/services/pokeapi/evolution.service'
+import { getPokemonEncounters } from '@/services/pokeapi/encounter.service'
 
 /**
- * Cache em memória (só da sessão) de detalhes, espécies e cadeias de evolução.
+ * Cache em memória (só da sessão) de detalhes, espécies, cadeias de evolução e locais de encontro.
  * Não persiste em localStorage de propósito: o offline fica por conta do service worker,
  * que guarda as respostas cruas com limite de entradas (ver vite.config.ts).
  *
@@ -17,6 +23,8 @@ export const usePokemonDetailStore = defineStore('pokemonDetail', () => {
   const details = ref<Record<number, PokemonDetail>>({})
   const species = ref<Record<number, PokemonSpecies>>({})
   const chains = ref<Record<number, EvolutionChain>>({})
+  /** Locais por jogo, indexados pelo id da forma (Raichu de Alola tem os seus). */
+  const encounters = ref<Record<number, PokemonEncounters>>({})
 
   /** Deduplica requisições em voo por chave (id ou nome). */
   function dedupe<T>(inFlight: Map<string, Promise<T>>, key: string, run: () => Promise<T>) {
@@ -30,6 +38,7 @@ export const usePokemonDetailStore = defineStore('pokemonDetail', () => {
   const detailRequests = new Map<string, Promise<PokemonDetail>>()
   const speciesRequests = new Map<string, Promise<PokemonSpecies>>()
   const chainRequests = new Map<string, Promise<EvolutionChain>>()
+  const encounterRequests = new Map<string, Promise<PokemonEncounters>>()
 
   function findDetail(idOrName: number | string): PokemonDetail | undefined {
     if (typeof idOrName === 'number') return details.value[idOrName]
@@ -68,5 +77,24 @@ export const usePokemonDetailStore = defineStore('pokemonDetail', () => {
     })
   }
 
-  return { details, species, chains, ensureDetail, ensureSpecies, ensureChain }
+  function ensureEncounters(id: number): Promise<PokemonEncounters> {
+    const cached = encounters.value[id]
+    if (cached) return Promise.resolve(cached)
+    return dedupe(encounterRequests, String(id), async () => {
+      const result = await getPokemonEncounters(id)
+      encounters.value[id] = result
+      return result
+    })
+  }
+
+  return {
+    details,
+    species,
+    chains,
+    encounters,
+    ensureDetail,
+    ensureSpecies,
+    ensureChain,
+    ensureEncounters,
+  }
 })

@@ -174,3 +174,18 @@ export interface EvolutionChain {
   babyTriggerItem: string | null
   root: EvolutionNode
 }
+
+/** Onde um Pokémon aparece em um jogo, agregado por área (a PokéAPI lista uma entrada por nível/chance). */
+export interface EncounterLocation {
+  /** Slug da área na PokéAPI (ex.: "kanto-route-1-area"); o nome exibido é montado a partir dele. */
+  area: string
+  /** Métodos de encontro (slugs de `/encounter-method`: "walk", "surf", "old-rod"…), sem repetição. */
+  methods: string[]
+  minLevel: number
+  maxLevel: number
+  /** Slug da versão quando o encontro só existe em uma das versões do jogo (ex.: "sword"); null nas duas. */
+  onlyIn: string | null
+}
+
+/** Locais por jogo (chave = slug do jogo em `data/games.ts`). Só jogos da lista; fica só em memória. */
+export type PokemonEncounters = Record<string, EncounterLocation[]>

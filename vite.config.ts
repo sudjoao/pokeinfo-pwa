@@ -94,6 +94,16 @@ export default defineConfig({
             },
           },
           {
+            // Locais de encontro por Pokémon (de 2 bytes a ~500 KB crus, 1 a 10 KB comprimidos)
+            urlPattern: /^https:\/\/pokeapi\.co\/api\/v2\/pokemon\/[^/]+\/encounters/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'pokeapi-encounters',
+              expiration: { maxEntries: 60, maxAgeSeconds: 7 * DAY },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
             // Detalhes individuais (cada resposta tem ~300 KB, por isso o limite baixo)
             urlPattern: /^https:\/\/pokeapi\.co\/api\/v2\/.*/i,
             handler: 'CacheFirst',

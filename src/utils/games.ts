@@ -1,4 +1,4 @@
-import { GAMES, type FormRegion, type Game, type GameDex } from '@/data/games'
+import { GAMES, type FormRegion, type Game, type GameDex, type GameVersion } from '@/data/games'
 import type { PokedexEntry, PokemonIndexEntry } from '@/types/pokemon'
 
 export function findGame(slug: string | null | undefined): Game | null {
@@ -99,4 +99,26 @@ export function buildDexList(
       speciesId: entry.speciesId,
     }
   })
+}
+
+/** Jogo e versão a que uma versão da PokéAPI pertence (DLCs resolvem para a versão base). */
+export interface VersionOwner {
+  game: Game
+  version: GameVersion
+}
+
+let versionLookup: Map<string, VersionOwner> | null = null
+
+/** "the-isle-of-armor-sword" -> { game: Sword / Shield, version: Sword }; null para jogos fora da lista. */
+export function findGameByVersion(versionSlug: string): VersionOwner | null {
+  if (!versionLookup) {
+    versionLookup = new Map()
+    for (const game of GAMES) {
+      for (const version of game.versions) {
+        versionLookup.set(version.slug, { game, version })
+        for (const alias of version.aliases ?? []) versionLookup.set(alias, { game, version })
+      }
+    }
+  }
+  return versionLookup.get(versionSlug) ?? null
 }

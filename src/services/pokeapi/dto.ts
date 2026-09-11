@@ -153,3 +153,23 @@ export interface TypeDto {
   name: string
   pokemon: TypePokemonDto[]
 }
+
+export interface EncounterDetailDto {
+  min_level: number
+  max_level: number
+  chance: number
+  method: NamedApiResource
+  condition_values: NamedApiResource[]
+}
+
+export interface EncounterVersionDetailDto {
+  version: NamedApiResource
+  max_chance: number
+  encounter_details: EncounterDetailDto[]
+}
+
+/** Item de `/pokemon/{id}/encounters` (a resposta é uma lista, vazia quando não há dados). */
+export interface PokemonEncounterDto {
+  location_area: NamedApiResource
+  version_details: EncounterVersionDetailDto[]
+}
