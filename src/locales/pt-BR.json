@@ -356,7 +356,9 @@
     "rustling-bush-ambush": "Emboscada no arbusto",
     "ceiling-ambush": "Emboscada do teto",
     "ground-ambush": "Emboscada do chão",
-    "sky-ambush": "Emboscada do céu"
+    "sky-ambush": "Emboscada do céu",
+    "swarm": "Aparição em massa",
+    "poke-radar": "Poké Radar"
   },
   "routes": {
     "empty": "Sem dados de rota para {game}.",

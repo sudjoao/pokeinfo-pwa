@@ -356,7 +356,9 @@
     "rustling-bush-ambush": "Rustling bush ambush",
     "ceiling-ambush": "Ceiling ambush",
     "ground-ambush": "Ground ambush",
-    "sky-ambush": "Sky ambush"
+    "sky-ambush": "Sky ambush",
+    "swarm": "Mass outbreak",
+    "poke-radar": "Poké Radar"
   },
   "routes": {
     "empty": "No route data for {game}.",

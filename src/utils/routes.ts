@@ -1,4 +1,5 @@
 import { GAME_ROUTES, type GameRoute } from '@/data/routes'
+import { BDSP_ROUTES, type StaticGameRoute } from '@/data/routes-bdsp'
 import type { Game } from '@/data/games'
 import type { LocationAreaDto } from '@/services/pokeapi/dto'
 import type { RoutePokemon } from '@/types/pokemon'
@@ -7,6 +8,13 @@ import { idFromResourceUrl } from './pokemon'
 
 /** Teto de exibição: covis de Dynamax somam `chance` por raridade e podem passar de 100. */
 const MAX_CHANCE = 100
+
+export type AnyGameRoute = GameRoute | StaticGameRoute
+
+/** Rota sem endpoint ao vivo (ex.: BDSP, cujos pokémon já vêm prontos da Bulbapedia). */
+export function isStaticRoute(route: AnyGameRoute): route is StaticGameRoute {
+  return 'pokemon' in route
+}
 
 interface Accumulator {
   id: number
@@ -18,9 +26,17 @@ interface Accumulator {
   versions: Set<string>
 }
 
-/** Rotas curadas do jogo (`data/routes.ts`); vazio para jogos sem `hasEncounterData`. */
-export function routesForGame(game: Game): readonly GameRoute[] {
-  return GAME_ROUTES[game.slug] ?? []
+/**
+ * Rotas curadas do jogo: da PokéAPI (`data/routes.ts`, a maioria) ou pré-computadas de outra
+ * fonte quando a PokéAPI não tem o dado (`data/routes-bdsp.ts`). Vazio quando não há nenhuma.
+ */
+export function routesForGame(game: Game): readonly AnyGameRoute[] {
+  return GAME_ROUTES[game.slug] ?? BDSP_ROUTES[game.slug] ?? []
+}
+
+/** Se a aba "Rotas" deve aparecer pra esse jogo (alguma das duas fontes tem dado). */
+export function hasRoutes(game: Game): boolean {
+  return routesForGame(game).length > 0
 }
 
 /**

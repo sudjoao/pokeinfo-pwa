@@ -2,10 +2,9 @@
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { Game } from '@/data/games'
-import type { GameRoute } from '@/data/routes'
 import type { RoutePokemon } from '@/types/pokemon'
 import { usePokedexStore } from '@/stores/pokedex'
-import { routesForGame, toRoutePokemon } from '@/utils/routes'
+import { isStaticRoute, routesForGame, toRoutePokemon, type AnyGameRoute } from '@/utils/routes'
 import { formatAreaName } from '@/utils/encounters'
 import RoutePokemonRow from '@/components/molecules/RoutePokemonRow.vue'
 
@@ -33,8 +32,21 @@ watch(
   },
 )
 
-async function loadRoute(route: GameRoute): Promise<void> {
+async function loadRoute(route: AnyGameRoute): Promise<void> {
   if (results.value[route.location] || loading.value[route.location]) return
+
+  if (isStaticRoute(route)) {
+    // Já vem pronto (ex.: BDSP via Bulbapedia): só falta o nome, resolvido pelo índice em memória.
+    results.value = {
+      ...results.value,
+      [route.location]: route.pokemon.map((pokemon) => ({
+        ...pokemon,
+        name: pokedexStore.entryOf(pokemon.id)?.name ?? String(pokemon.id),
+      })),
+    }
+    return
+  }
+
   loading.value = { ...loading.value, [route.location]: true }
   failed.value = { ...failed.value, [route.location]: false }
   try {

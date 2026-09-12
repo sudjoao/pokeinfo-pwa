@@ -202,14 +202,21 @@ export interface RouteEncounterMethod {
   chance: number
 }
 
-/** Um Pokémon disponível numa rota, já somando todas as áreas do local para o jogo selecionado. */
-export interface RoutePokemon {
+/**
+ * Um Pokémon disponível numa rota sem nome resolvido (usado pelos jogos com dados pré-computados,
+ * como BDSP via Bulbapedia: o nome vem do índice já em memória, não precisa ir no arquivo estático).
+ */
+export interface StaticRoutePokemon {
   id: number
-  name: string
   minLevel: number
   maxLevel: number
   /** Ordenados do maior para o menor `chance`. */
   methods: RouteEncounterMethod[]
   /** Slug da versão quando só aparece em uma das versões do jogo (ex.: "sword"); null nas duas. */
   onlyIn: string | null
+}
+
+/** Um Pokémon disponível numa rota, já somando todas as áreas do local para o jogo selecionado. */
+export interface RoutePokemon extends StaticRoutePokemon {
+  name: string
 }

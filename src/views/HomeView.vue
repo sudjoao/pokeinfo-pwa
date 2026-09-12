@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { mdiInformationOutline, mdiSwordCross, mdiTranslate } from '@mdi/js'
 import { gameContextQuery } from '@/utils/games'
+import { hasRoutes } from '@/utils/routes'
 import { usePokemonList } from '@/composables/usePokemonList'
 import { useCry } from '@/composables/useCry'
 import { useLocale } from '@/composables/useLocale'
@@ -159,7 +160,7 @@ function openTeamBuilder(): void {
       />
     </template>
 
-    <v-tabs v-if="game?.hasEncounterData" v-model="view" class="mb-3" density="compact">
+    <v-tabs v-if="game && hasRoutes(game)" v-model="view" class="mb-3" density="compact">
       <v-tab value="pokemon">{{ t('home.pokemonTab') }}</v-tab>
       <v-tab value="routes">{{ t('home.routesTab') }}</v-tab>
     </v-tabs>
