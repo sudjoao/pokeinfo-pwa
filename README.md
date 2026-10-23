@@ -23,14 +23,20 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
     abrir todas as entradas (textos repetidos entre versões aparecem uma vez só).
   - **Fraquezas e resistências** (4×, 2×, ½, ¼, imune) com a tabela de tipos da geração do jogo.
   - **Stats mínimos e máximos** nos níveis 50 e 100 (natureza, IV e EV extremos).
-  - **Treino** (EVs ao derrotar, exp. base, taxa de captura com a chance aproximada, felicidade base,
-    curva de crescimento) e **reprodução** (grupos de ovo, gênero, ciclos/passos e a lista de
+  - **Treino** (EVs ao derrotar, exp. base, taxa de captura, felicidade base, curva de crescimento)
+    com a **calculadora de captura** (bola, HP, status, nível, turno; fórmula da geração do jogo, e a
+    Repeat Ball usa o "capturado" do app) e **reprodução** (grupos de ovo, gênero, ciclos/passos e a lista de
     Pokémon compatíveis para cruzar, vinda de `/egg-group`).
   - **Habilidades**: tocar numa habilidade abre a descrição e todos os Pokémon que a têm.
   - **Golpes por jogo**: por nível, TM/HM, ovo, tutor e outros, com tipo, categoria, poder, precisão
     e PP do jogo escolhido (inclusive valores antigos, como Karate Chop Normal na 1ª geração). Os
     golpes já vêm em `/pokemon/{id}`; os dados de cada golpe ficam numa tabela gerada
-    (`src/data/generated/moves.ts`), carregada num chunk próprio.
+    (`src/data/generated/moves.ts`), carregada num chunk próprio. Cada golpe é um link para a
+    página dele.
+  - **Sprites nos jogos** (da 1ª geração à atual, com shiny e GIFs animados), **itens segurados**
+    pelos selvagens com a chance em cada versão (Light Ball: Sword 5% · Shield 1%) e **mudanças
+    entre gerações** (tipos, habilidades e stats antigos, como Clefairy Normal até a 5ª geração),
+    tudo do mesmo `/pokemon/{id}`, sem requisição a mais.
 - **Cadeia de evolução** com o "como evoluir" em português para todos os gatilhos da PokéAPI
   (nível, item, troca, amizade, local, hora do dia, golpe conhecido, stats, formas regionais…).
   O método padrão dos jogos atuais fica em destaque; métodos de jogos antigos ficam recolhidos.
@@ -54,6 +60,24 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
   tabelas da 1ª geração, da 2ª à 5ª e da 6ª em diante; tudo na URL para compartilhar o cálculo.
 - **Comparar** (`/compare?ids=6,9,3`): até 3 Pokémon lado a lado (stats com o maior destacado, total,
   altura, peso, habilidades e fraquezas). O detalhe tem um botão que já abre a comparação com ele.
+- **Golpes** (`/moves`): todos os golpes aprendíveis com busca, filtro por tipo e categoria e
+  ordenação por poder, precisão ou PP, com os valores do jogo escolhido. O modo **Quem aprende**
+  cruza até 4 golpes num jogo (Earthquake + Ice Beam em Scarlet/Violet). A página do golpe
+  (`/move/:slug`) tem efeito, chance de efeito secundário, prioridade, alvo, TM do jogo, histórico
+  de valores e quem aprende por nível, TM, ovo e tutor. Os learnsets vêm de arquivos gerados, um por
+  jogo, baixados só quando aquele jogo é pedido.
+- **Itens e berries** (`/items`, `/item/:slug`): os ~1.600 itens dos jogos por bolso, com busca;
+  cada item mostra efeito, preço, Fling e quem segura na natureza; berries têm firmeza, sabores,
+  crescimento e Natural Gift.
+- **Naturezas e IVs** (`/stats`): tabela 5×5 das naturezas com os sabores e uma calculadora que, com
+  nível, natureza, EVs e os stats do jogo, dá a faixa de cada IV (estreitada pela característica),
+  ou faz o inverso.
+- **Velocidade** (`/speed`): speed tiers no nível 50 ou 100 (mín, neutro, máx, máx com natureza),
+  com Choice Scarf, Tailwind e estágios, por jogo, e o time destacado (atalho no team builder).
+- **Pokémon do dia** (`/daily`): adivinhe o Pokémon em até 8 palpites com pistas de geração, tipos,
+  altura, peso e total de stats. O mesmo para todos no mesmo dia, sem servidor (a data escolhe uma
+  posição numa permutação fixa das 1.025 espécies); resultado em emojis para compartilhar,
+  estatísticas salvas e no backup, e modo treino.
 - **Quem é esse Pokémon?** (`/quiz`): silhueta com 4 opções, grito como dica, filtro por geração,
   sequência e recorde salvo no aparelho. O menu também tem "Pokémon aleatório".
 - **Team builder** (`/team`): monte um time de até 6 Pokémon tocando nos cards da mesma listagem
@@ -97,17 +121,22 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
   intervalo de números e quantos foram capturados; com um jogo selecionado, tocar marca/desmarca.
 - **Backup**: no menu (☰), "Backup dos dados" baixa um JSON com capturados, shinies capturados,
   favoritos e caçadas, importa esse arquivo e gera um **link** (`/?backup=...`, ~200 caracteres por
-  jogo marcado) que, aberto em outro aparelho, pergunta se deve somar ou substituir os dados.
+  jogo marcado) que, aberto em outro aparelho, pergunta se deve somar ou substituir os dados. O
+  link também aparece como **QR code**, para passar os dados apontando a câmera.
 - **Menu lateral** com navegação, idioma, **tema** (sistema, claro ou escuro, salvo no aparelho),
   backup e créditos.
 - **Idioma**: botão no cabeçalho alterna entre *Português* (interface em pt-BR, com os textos que só
   existem em inglês na PokéAPI mantidos assim) e *English* (tudo em inglês, inclusive tipos, stats,
   grupos de ovo e as frases de evolução). Começa no idioma do aparelho e a escolha fica salva.
 - Tema claro/escuro seguindo a preferência do sistema (ou escolhido no menu).
-- **Compartilhar** o Pokémon ou o time pela folha nativa do aparelho (ou copiando o link), **deslizar**
+- **Vistos recentemente** (faixa no topo da Pokédex) e **buscas recentes** (ao focar a busca vazia),
+  salvos no aparelho e fora do backup.
+- **Compartilhar** o Pokémon ou o time pela folha nativa do aparelho (link ou **imagem** PNG gerada
+  no aparelho, com prévia antes de enviar), **deslizar**
   para os lados no detalhe para ir ao anterior/próximo, botão **voltar ao topo** nas listas longas e
   aviso quando o aparelho está **offline**.
-- **Instalação**: o manifest tem atalhos (time, tipos, favoritos, quiz) e capturas de tela.
+- **Instalação**: o manifest tem atalhos (time, tipos, favoritos, Pokémon do dia, quiz) e capturas
+  de tela.
 - **Acessibilidade** (WCAG 2.2 AA, verificado com axe nas telas principais nos dois temas): cards,
   estágios da evolução, membros do time e linhas de rota são links/botões nativos, alcançáveis pelo
   teclado (o card da Pokédex é um link de verdade: abre em nova aba com cmd/ctrl+clique); chips de
@@ -116,12 +145,16 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
   para a lista, para o card que foi aberto); a quantidade de resultados é anunciada ao leitor de
   tela depois de buscar ou filtrar.
 - **Offline**: índice e mapa de tipos ficam em cache local; artworks e respostas recentes ficam no service worker.
+  Em **Usar offline** (menu) dá para baixar, por geração, as fichas completas, as imagens e os gritos
+  (com estimativa de tamanho, progresso, cancelar/retomar e apagar), guardados em caches próprios.
 - Instalável no iOS/Android como app (manifest + service worker).
 
 ### Limitações conhecidas
 
 - A PokéAPI não tem textos em português: mesmo no modo *Português*, descrição da Pokédex, categoria
   da espécie, nomes de habilidades, golpes, itens e locais ficam em inglês (como nos jogos).
+- Legends: Z-A ainda não tem golpes na PokéAPI (nem no REST), então a busca "quem aprende" e os
+  aprendizes por jogo não incluem esse jogo.
 - A lista de jogos é estática (`src/data/games.ts`): quando a PokéAPI incluir um jogo novo, é preciso
   adicioná-lo ali. Versões japonesas, Colosseum/XD (sem Pokédex) e jogos fora da série principal
   ficam de fora; DLCs aparecem como Pokédex do jogo base.
@@ -176,6 +209,7 @@ Bulbapedia, com o procedimento descrito em [`scripts/README.md`](scripts/README.
 | Rotas | [Vue Router](https://router.vuejs.org/) |
 | PWA | [vite-plugin-pwa](https://vite-pwa-org.netlify.app/) (Workbox) |
 | Dados | [PokéAPI v2](https://pokeapi.co/docs/v2) (imagens redimensionadas pelo [wsrv.nl](https://wsrv.nl/)) |
+| QR code | [uqr](https://github.com/unjs/uqr) (MIT, só no backup) |
 | Qualidade | ESLint, oxlint, Prettier, vue-tsc |
 | Deploy | [Vercel](https://vercel.com/) |
 
@@ -268,6 +302,11 @@ O objetivo é funcionar offline sem inflar o armazenamento do usuário:
 | Service worker `pokemon-artwork-webp` | artworks em WebP via wsrv.nl (~13 KB no card, ~40 KB no detalhe) | 400 entradas, 30 dias |
 | Service worker `pokeapi-artwork-v2` | PNG original, só quando o proxy falha (~120 KB cada) | 30 entradas, 30 dias |
 | Service worker `pokeapi-cries-v2` | gritos dos Pokémon (~7 KB cada) | 60 entradas, 30 dias |
+| Service worker `pokeapi-vocabulary` | habilidades, itens, golpes, berries, máquinas (o `/move` traz os aprendizes) | 300 entradas, 30 dias |
+| Service worker `pokeapi-sprites` | sprites por jogo, animados e de itens (1 a 30 KB) | 400 entradas, 30 dias |
+| Service worker `generated-learnsets` | learnsets por jogo (5 a 99 KB gz), fora do precache | 30 entradas, 90 dias |
+| Caches `pokeinfo-offline-*-v1` | só o que a pessoa baixa em "Usar offline" (fichas, imagens, gritos) | sem limite de entradas; apagar pela sheet |
+| `localStorage` | Pokémon do dia (`pokeinfo:daily:v1`) e recentes (`pokeinfo:recent:v1`) | poucos KB |
 
 Os cards não fazem requisição por Pokémon: os tipos vêm de um mapa montado uma vez a partir dos
 18 endpoints `/type/{nome}` (~385 KB no total, renovado em segundo plano a cada 7 dias). Ler os tipos

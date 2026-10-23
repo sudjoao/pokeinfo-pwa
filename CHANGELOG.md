@@ -5,6 +5,51 @@ Todas as mudanças relevantes deste projeto são registradas aqui.
 O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e o projeto adota
 [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [1.6.0] - 2026-10-23
+
+Páginas de referência (golpes, itens, naturezas), ferramentas de batalha e captura, o Pokémon do
+dia e recursos do app (imagem para compartilhar, recentes, QR do backup e uso offline).
+
+### Adicionado
+
+- Tela de detalhes, sem requisição a mais:
+  - Sprites de todos os jogos, com shiny e GIFs animados; o jogo selecionado vem primeiro.
+  - Itens segurados pelos selvagens, com a chance em cada versão do jogo.
+  - Mudanças entre gerações: tipos, habilidades e stats antigos (Clefairy Normal até a 5ª geração,
+    o stat único Special da 1ª).
+  - Calculadora de captura: bola (com as de condição, e a Repeat Ball usando o "capturado" do app),
+    HP, status, nível e turno, pela fórmula da geração do jogo.
+- Golpes (`/moves`): lista com filtros e os valores do jogo; "Quem aprende" cruza até 4 golpes num
+  jogo; página de cada golpe (`/move/:slug`) com efeito, efeitos secundários, prioridade, alvo, TM do
+  jogo, histórico de valores e aprendizes por método. Os golpes do detalhe viram links.
+- Itens e berries (`/items`, `/item/:slug`): por bolso, com efeito, preço, Fling, quem segura na
+  natureza e, nas berries, firmeza, sabores, crescimento e Natural Gift.
+- Naturezas e IVs (`/stats`): tabela 5×5 das naturezas e calculadora de IV (com característica) ou
+  de stats; atalho "Calcular IVs" no card de stats.
+- Velocidade (`/speed`): speed tiers no nível 50/100 com Choice Scarf, Tailwind e estágios, por jogo,
+  com o time destacado (atalho "Ver velocidade" no team builder).
+- Pokémon do dia (`/daily`): até 8 palpites com pistas de geração, tipos, altura, peso e total de
+  stats; o mesmo para todos no dia, sem servidor; resultado em emojis, estatísticas (também no
+  backup) e modo treino.
+- Vistos recentemente na Pokédex e buscas recentes ao focar a busca.
+- Imagem PNG do time e do Pokémon para compartilhar, com prévia antes de enviar.
+- QR code do link de backup.
+- Usar offline: baixa por geração as fichas completas, as imagens e os gritos, com estimativa,
+  progresso, cancelar/retomar e apagar.
+- Menu em grupos (PokeInfo, Ferramentas, Jogos) e atalho do Pokémon do dia no manifest.
+
+### Alterado
+
+- Dados gerados novos (`scripts/gen-reference-data.mjs`): learnsets por jogo (um chunk por jogo,
+  fora do precache), índice de itens, naturezas e características.
+- O resumo de captura do card de treino usa a mesma fórmula da calculadora (antes era uma
+  aproximação).
+- Stats do detalhe calculados com a natureza em divisão inteira, como nos jogos.
+
+### Corrigido
+
+- Contraste do texto primário no tema escuro (chips selecionados, selo "Só Sword"): 4,43:1 -> 8,8:1.
+
 ## [1.5.0] - 2026-10-23
 
 Aba Rotas na ordem da história, com busca de local e chance separada por condição do encontro.
@@ -279,6 +324,7 @@ Primeira versão estável da Pokédex em formato de PWA, consumindo a [PokéAPI]
 - As marcações de captura ficam só no aparelho, sem sincronização entre dispositivos.
 - Os gritos vêm só em `.ogg`; em navegadores sem suporte o botão de som não aparece.
 
+[1.6.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.2.0...v1.3.0
