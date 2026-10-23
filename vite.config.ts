@@ -83,9 +83,23 @@ export default defineConfig({
         ],
       },
       workbox: {
+        // Learnsets (um chunk por jogo, ~920 KB gz no total) ficam fora do precache: só o jogo
+        // aberto é baixado, e fica no cache `generated-learnsets` abaixo.
+        globIgnores: ['**/learnset-*.js'],
         // Caches em runtime da PokéAPI, separados por tipo de recurso para
         // manter o armazenamento do usuário pequeno (ver README > Cache).
         runtimeCaching: [
+          {
+            // Mesma origem: o Workbox aceita a regex em qualquer ponto da URL.
+            urlPattern: /\/assets\/learnset-[^/]+\.js$/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'generated-learnsets',
+              // O hash muda a cada geração: entradas antigas saem pelo limite.
+              expiration: { maxEntries: 30, maxAgeSeconds: 90 * DAY },
+              cacheableResponse: { statuses: [200] },
+            },
+          },
           {
             // Índice completo de nomes (1 requisição grande, raramente muda)
             urlPattern: /^https:\/\/pokeapi\.co\/api\/v2\/pokemon\?limit=/i,
@@ -223,6 +237,17 @@ export default defineConfig({
       },
     }),
   ],
+  build: {
+    rolldownOptions: {
+      output: {
+        // Nome reconhecível para o service worker deixar os learnsets fora do precache.
+        chunkFileNames: (chunk) =>
+          chunk.facadeModuleId?.includes('/data/generated/learnsets/')
+            ? 'assets/learnset-[name]-[hash].js'
+            : 'assets/[name]-[hash].js',
+      },
+    },
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

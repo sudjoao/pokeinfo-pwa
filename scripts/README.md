@@ -6,10 +6,13 @@ script tem dependências (Node 22.18+ ou 24, que já remove os tipos ao importar
 | Script | Gera | Fonte | Quando rodar |
 | --- | --- | --- | --- |
 | `gen-pokemon-data.mjs` | `src/data/generated/` (stats, habilidades, golpes, formas, tabela de tipos antiga) | PokéAPI GraphQL beta + REST para o que faltar | Jogo, geração ou DLC nova |
+| `gen-reference-data.mjs` | `src/data/generated/learnsets/*.ts` (quem aprende cada golpe, por jogo), `items.ts`, `natures.ts`, `characteristics.ts` | PokéAPI GraphQL beta (learnsets, ~15 s) + REST para itens que faltarem | Jogo, geração ou DLC nova; tem `--check` |
 | `gen-routes.mjs` | `src/data/routes.ts` (locais com encontro por jogo) | PokéAPI REST (~1700 requisições, alguns minutos) | Jogo novo com `hasEncounterData`, ou dado novo na PokéAPI |
 
 ```sh
 node scripts/gen-pokemon-data.mjs
+node scripts/gen-reference-data.mjs --check   # só compara
+node scripts/gen-reference-data.mjs           # reescreve learnsets, itens, naturezas e características
 node scripts/gen-routes.mjs --check   # só compara com o arquivo atual
 node scripts/gen-routes.mjs           # reescreve src/data/routes.ts
 npx prettier --write src/data/routes.ts
