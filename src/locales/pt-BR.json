@@ -576,5 +576,18 @@
     "next": "Próximo",
     "streak": "Sequência: {n}",
     "best": "Recorde: {n}"
+  },
+  "shiny": {
+    "title": "Shiny em {game}",
+    "caught": "Shiny capturado",
+    "encounters": "encontros",
+    "increment": "Somar um encontro",
+    "decrement": "Tirar um encontro",
+    "reset": "Zerar",
+    "charm": "Shiny Charm",
+    "masuda": "Método Masuda",
+    "odds": "Chance por encontro: 1 em {n}",
+    "byNow": "{pct} de já ter achado",
+    "hint": "Chance base do jogo, sem surtos, sanduíches ou eventos. O contador fica salvo no aparelho e entra no backup."
   }
 }

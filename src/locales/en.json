@@ -576,5 +576,18 @@
     "next": "Next",
     "streak": "Streak: {n}",
     "best": "Best: {n}"
+  },
+  "shiny": {
+    "title": "Shiny in {game}",
+    "caught": "Shiny caught",
+    "encounters": "encounters",
+    "increment": "Add one encounter",
+    "decrement": "Remove one encounter",
+    "reset": "Reset",
+    "charm": "Shiny Charm",
+    "masuda": "Masuda method",
+    "odds": "Odds per encounter: 1 in {n}",
+    "byNow": "{pct} chance of having found one",
+    "hint": "Base game odds, without outbreaks, sandwiches or events. The counter is saved on this device and included in backups."
   }
 }

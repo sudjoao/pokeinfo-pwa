@@ -80,6 +80,10 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
   estado dentro de um jogo. Fica salva no aparelho em um bitset base64 (~170 bytes por jogo).
   Na aba **Rotas** cada Pokémon também tem a Poké Bola, a rota mostra quantos já foram capturados
   ("3/14") e dá para esconder os capturados.
+- **Shiny**: com um jogo selecionado (2ª geração em diante), o detalhe tem um card para marcar o shiny
+  como capturado (separado da captura normal) e um contador de encontros com Shiny Charm e método
+  Masuda, mostrando a chance por encontro do jogo (1/8192 até a 5ª geração, 1/4096 depois) e a
+  probabilidade de já ter achado. Fica salvo no aparelho e entra no backup.
 - **Caixas (living dex)**: um botão alterna a lista entre cards e caixas de 30 (6×5, como no Pokémon
   HOME), na ordem da Pokédex atual e com os filtros aplicados (`?layout=boxes`). Cada caixa mostra o
   intervalo de números e quantos foram capturados; com um jogo selecionado, tocar marca/desmarca.

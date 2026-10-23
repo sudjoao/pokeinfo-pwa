@@ -576,5 +576,18 @@
     "next": "Siguiente",
     "streak": "Racha: {n}",
     "best": "Récord: {n}"
+  },
+  "shiny": {
+    "title": "Variocolor en {game}",
+    "caught": "Variocolor capturado",
+    "encounters": "encuentros",
+    "increment": "Sumar un encuentro",
+    "decrement": "Quitar un encuentro",
+    "reset": "Reiniciar",
+    "charm": "Amuleto Iris",
+    "masuda": "Método Masuda",
+    "odds": "Probabilidad por encuentro: 1 entre {n}",
+    "byNow": "{pct} de haberlo encontrado ya",
+    "hint": "Probabilidad base del juego, sin brotes, bocadillos ni eventos. El contador se guarda en el dispositivo y entra en la copia."
   }
 }

@@ -13,6 +13,9 @@ import { usePokemonDetail, type NeighborEntry } from '@/composables/usePokemonDe
 import { useCry } from '@/composables/useCry'
 import { useCaughtStore } from '@/stores/caught'
 import { useFavoritesStore } from '@/stores/favorites'
+import { useHuntsStore, useShinyCaughtStore } from '@/stores/shiny'
+import { hasShinies } from '@/utils/shiny'
+import ShinyHuntCard from '@/components/organisms/ShinyHuntCard.vue'
 import { useDexLabel } from '@/composables/useDexLabel'
 import { gameContextFromQuery, gameContextQuery } from '@/utils/games'
 import { exclusiveVersionOf } from '@/utils/exclusives'
@@ -137,6 +140,25 @@ const showVarieties = computed(() => (species.value?.varieties.length ?? 0) > 1)
 const shiny = ref(false)
 
 const favorites = useFavoritesStore()
+
+const shinyCaught = useShinyCaughtStore()
+const hunts = useHuntsStore()
+/** Caçada de shiny do jogo da URL (só com jogo e a partir da 2ª geração, quando existe shiny). */
+const shinyContext = computed(() =>
+  context.value && detail.value && hasShinies(context.value.game.generation)
+    ? { game: context.value.game, speciesId: detail.value.speciesId }
+    : null,
+)
+const hunt = computed(() =>
+  shinyContext.value
+    ? hunts.huntOf(shinyContext.value.game.slug, shinyContext.value.speciesId)
+    : null,
+)
+
+function updateHunt(change: { count?: number; charm?: boolean; masuda?: boolean }): void {
+  const target = shinyContext.value
+  if (target) hunts.update(target.game.slug, target.speciesId, change)
+}
 const favorite = computed(() => (detail.value ? favorites.isFavorite(detail.value.id) : false))
 
 const ability = useAbilityInfo()
@@ -278,6 +300,20 @@ const egg = useEggCompatibility()
             :summaries="chainSummaries"
             :current-species-id="detail.speciesId"
             @select="goTo"
+          />
+        </v-col>
+
+        <v-col v-if="shinyContext" cols="12" md="6">
+          <ShinyHuntCard
+            :game-title="shinyContext.game.title"
+            :generation="shinyContext.game.generation"
+            :caught="shinyCaught.isCaught(shinyContext.game.slug, shinyContext.speciesId)"
+            :hunt="hunt"
+            @toggle-caught="shinyCaught.toggle(shinyContext.game.slug, shinyContext.speciesId)"
+            @count="updateHunt({ count: (hunt?.count ?? 0) + $event })"
+            @set-charm="updateHunt({ charm: $event })"
+            @set-masuda="updateHunt({ masuda: $event })"
+            @reset="hunts.reset(shinyContext.game.slug, shinyContext.speciesId)"
           />
         </v-col>
 
