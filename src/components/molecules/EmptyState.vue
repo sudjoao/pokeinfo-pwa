@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { onMounted } from 'vue'
 import { mdiAlertCircleOutline, mdiPokeball, mdiRefresh } from '@mdi/js'
+import { announce } from '@/composables/useAnnouncer'
 
-defineProps<{
+const props = defineProps<{
   variant?: 'empty' | 'error'
   title: string
   message?: string
@@ -9,6 +11,11 @@ defineProps<{
 }>()
 
 const emit = defineEmits<{ action: [] }>()
+
+// Um erro no lugar do conteúdo (ex.: o detalhe não carregou) precisa ser avisado ao leitor de tela.
+onMounted(() => {
+  if (props.variant === 'error') announce([props.title, props.message].filter(Boolean).join('. '))
+})
 </script>
 
 <template>

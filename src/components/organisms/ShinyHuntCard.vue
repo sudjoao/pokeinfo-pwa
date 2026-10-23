@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, nextTick, useTemplateRef, type ComponentPublicInstance } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { mdiMinus, mdiPlus, mdiRestore, mdiShimmer } from '@mdi/js'
 import type { ShinyHunt } from '@/stores/shiny'
@@ -25,6 +25,22 @@ const emit = defineEmits<{
 const { t, locale, n } = useI18n()
 
 const count = computed(() => props.hunt?.count ?? 0)
+
+// "Tirar" fica desabilitado no zero e "Zerar" some: se o foco estava neles, iria para o body.
+const plus = useTemplateRef<ComponentPublicInstance>('plus')
+function focusPlus(): void {
+  nextTick(() => (plus.value?.$el as HTMLElement | undefined)?.focus())
+}
+
+function decrement(): void {
+  emit('count', -1)
+  if (count.value <= 1) focusPlus()
+}
+
+function reset(): void {
+  emit('reset')
+  focusPlus()
+}
 const odds = computed(() =>
   shinyOdds(props.generation, props.hunt?.charm ?? false, props.hunt?.masuda ?? false),
 )
@@ -56,13 +72,14 @@ const byNow = computed(() =>
           size="small"
           :disabled="count === 0"
           :aria-label="t('shiny.decrement')"
-          @click="emit('count', -1)"
+          @click="decrement"
         />
         <div class="text-center" aria-live="polite">
           <div class="shiny-hunt__count text-headline-small">{{ n(count) }}</div>
           <div class="text-label-small opacity-70">{{ t('shiny.encounters') }}</div>
         </div>
         <v-btn
+          ref="plus"
           :icon="mdiPlus"
           color="primary"
           size="large"
@@ -75,7 +92,7 @@ const byNow = computed(() =>
           size="small"
           :prepend-icon="mdiRestore"
           class="ms-auto"
-          @click="emit('reset')"
+          @click="reset"
         >
           {{ t('shiny.reset') }}
         </v-btn>

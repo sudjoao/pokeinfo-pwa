@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { computed, defineAsyncComponent, ref, useTemplateRef, watch } from 'vue'
+import { computed, defineAsyncComponent, nextTick, ref, useTemplateRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { mdiChevronLeft, mdiChevronRight, mdiCompareHorizontal, mdiShareVariant } from '@mdi/js'
 import { usePokemonDetail, type NeighborEntry } from '@/composables/usePokemonDetail'
 import { useCry } from '@/composables/useCry'
+import { announce } from '@/composables/useAnnouncer'
+import { focusPageTitle } from '@/composables/usePageFocus'
 import { useCaughtStore } from '@/stores/caught'
 import { useFavoritesStore } from '@/stores/favorites'
 import { useHuntsStore, useShinyCaughtStore } from '@/stores/shiny'
@@ -19,6 +21,7 @@ import { useEggCompatibility } from '@/composables/useEggCompatibility'
 import { useSwipe } from '@/composables/useSwipe'
 import { shareLink } from '@/composables/useShare'
 import DetailLayout from '@/components/templates/DetailLayout.vue'
+import AppNotice from '@/components/molecules/AppNotice.vue'
 import EmptyState from '@/components/molecules/EmptyState.vue'
 import PokemonHero from '@/components/molecules/PokemonHero.vue'
 import AboutGrid from '@/components/molecules/AboutGrid.vue'
@@ -115,6 +118,26 @@ watch(detail, (value) => {
   if (value) cry.autoPlay(value.id, value.cryUrl)
 })
 
+// Troca de Pokémon na mesma tela (vizinho, swipe, evolução, forma): o leitor de tela não percebe
+// sozinho. Se o foco ficou num controle que ainda existe (ex.: "próximo"), só anuncia o nome,
+// para a pessoa poder seguir apertando; se ele sumiu (o estágio atual vira texto), vai para o h1.
+let shownId: number | undefined
+watch(
+  () => detail.value?.id,
+  (id) => {
+    // Entre um e outro o detalhe fica undefined (carregando): compara com o último mostrado.
+    if (id === undefined) return
+    const previousId = shownId
+    shownId = id
+    if (previousId === undefined || id === previousId) return
+    nextTick(() => {
+      const active = document.activeElement
+      if (!active || active === document.body || !active.isConnected) focusPageTitle()
+      else announce(title.value)
+    })
+  },
+)
+
 /**
  * Navega para outro Pokémon tocando o grito ainda dentro do gesto do usuário; mantém o jogo na URL.
  * Usa replace para o histórico ficar sempre "lista → detalhe": por mais Pokémon que a pessoa
@@ -172,12 +195,13 @@ function share(): void {
   if (!detail.value) return
   shareLink(title.value, window.location.href).then((result) => {
     if (result === 'copied') notice.value = t('common.linkCopied')
+    else if (result === 'failed') notice.value = t('common.shareFailed')
   })
 }
 </script>
 
 <template>
-  <DetailLayout :title="title" @back="goBack">
+  <DetailLayout :title="title" :ready="status !== 'loading'" @back="goBack">
     <template #actions>
       <v-btn v-if="detail" :icon="mdiShareVariant" :aria-label="t('common.share')" @click="share" />
       <v-btn
@@ -262,7 +286,7 @@ function share(): void {
 
           <v-col cols="12" md="7" class="d-flex flex-column ga-4">
             <v-card v-if="speciesStatus === 'loading'">
-              <v-skeleton-loader type="paragraph" />
+              <v-skeleton-loader aria-hidden="true" type="paragraph" />
             </v-card>
             <PokedexCard
               v-else-if="species"
@@ -289,7 +313,7 @@ function share(): void {
           <v-col cols="12">
             <v-card v-if="chainStatus === 'loading'">
               <v-card-title class="text-title-medium">{{ t('detail.evolution') }}</v-card-title>
-              <v-skeleton-loader type="list-item-avatar-two-line@2" />
+              <v-skeleton-loader aria-hidden="true" type="list-item-avatar-two-line@2" />
             </v-card>
             <v-card v-else-if="chainStatus === 'error' || !chain">
               <v-card-title class="text-title-medium">{{ t('detail.evolution') }}</v-card-title>
@@ -365,12 +389,6 @@ function share(): void {
         />
       </template>
     </div>
-    <v-snackbar
-      :model-value="notice !== null"
-      :timeout="2500"
-      @update:model-value="(open: boolean) => !open && (notice = null)"
-    >
-      {{ notice }}
-    </v-snackbar>
+    <AppNotice :text="notice" :timeout="2500" @close="notice = null" />
   </DetailLayout>
 </template>

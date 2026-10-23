@@ -27,7 +27,7 @@ import VersionPickerSheet from '@/components/organisms/VersionPickerSheet.vue'
 import AdvancedFilterSheet from '@/components/organisms/AdvancedFilterSheet.vue'
 import { usePokemonData } from '@/composables/usePokemonData'
 import { useOverlayFocusReturn } from '@/composables/useOverlayFocusReturn'
-import { noticeTimeout } from '@/utils/notice'
+import AppNotice from '@/components/molecules/AppNotice.vue'
 import TeamPanel from '@/components/organisms/TeamPanel.vue'
 import TeamTray from '@/components/organisms/TeamTray.vue'
 
@@ -112,6 +112,7 @@ function addSuggestion(id: number): void {
 function shareTeam(): void {
   shareLink(t('team.share'), window.location.href).then((result) => {
     if (result === 'copied') notice.value = t('common.linkCopied')
+    else if (result === 'failed') notice.value = t('common.shareFailed')
   })
 }
 
@@ -318,20 +319,13 @@ function goBack(): void {
       @clear="clearAdvanced"
     />
 
-    <v-snackbar v-model="fullNotice" :timeout="2500" location="top">{{
-      t('team.full')
-    }}</v-snackbar>
-    <v-snackbar
-      :model-value="notice !== null"
-      :timeout="noticeTimeout(notice)"
+    <AppNotice
+      :text="fullNotice ? t('team.full') : null"
+      :timeout="2500"
       location="top"
-      @update:model-value="(open: boolean) => !open && (notice = null)"
-    >
-      {{ notice }}
-      <template #actions>
-        <v-btn variant="text" @click="notice = null">{{ t('common.close') }}</v-btn>
-      </template>
-    </v-snackbar>
+      @close="fullNotice = false"
+    />
+    <AppNotice :text="notice" location="top" @close="notice = null" />
     <ShowdownImportDialog v-model="importOpen" @import="pasteShowdown" />
     <BackToTop :offset="mdAndUp ? 0 : 72" />
   </DetailLayout>

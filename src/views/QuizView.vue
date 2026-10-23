@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { mdiVolumeHigh } from '@mdi/js'
+import { mdiCheck, mdiClose, mdiVolumeHigh } from '@mdi/js'
 import { usePokedexStore } from '@/stores/pokedex'
 import { useCry } from '@/composables/useCry'
 import { usePokemonData } from '@/composables/usePokemonData'
@@ -81,6 +81,13 @@ function choose(entry: PokemonIndexEntry): void {
   }
 }
 
+// "Próximo" some ao trocar de pergunta: o foco vai para a primeira alternativa nova.
+const choicesEl = useTemplateRef<HTMLElement>('choicesEl')
+function nextQuestion(): void {
+  next()
+  nextTick(() => choicesEl.value?.querySelector<HTMLElement>('button')?.focus())
+}
+
 function hint(): void {
   if (answer.value) cry.listen(answer.value.id)
 }
@@ -137,7 +144,7 @@ function goBack(): void {
               t('quiz.wrong', { name: formatPokemonName(answer.name) })
             }}</template>
           </p>
-          <div class="quiz__choices">
+          <div ref="choicesEl" class="quiz__choices">
             <v-btn
               v-for="choice in choices"
               :key="choice.id"
@@ -156,9 +163,22 @@ function goBack(): void {
                   : undefined
               "
               :aria-disabled="revealed"
+              :prepend-icon="
+                revealed && choice.id === answer.id
+                  ? mdiCheck
+                  : revealed && choice.id === guess
+                    ? mdiClose
+                    : undefined
+              "
               @click="choose(choice)"
             >
               {{ formatPokemonName(choice.name) }}
+              <span v-if="revealed && choice.id === answer.id" class="d-sr-only">
+                ({{ t('quiz.rightAnswer') }})
+              </span>
+              <span v-else-if="revealed && choice.id === guess" class="d-sr-only">
+                ({{ t('quiz.yourAnswer') }})
+              </span>
             </v-btn>
           </div>
           <div class="d-flex flex-wrap justify-space-between align-center ga-2">
@@ -170,14 +190,16 @@ function goBack(): void {
             >
               {{ t('quiz.hint') }}
             </v-btn>
-            <v-btn v-if="revealed" color="primary" @click="next">{{ t('quiz.next') }}</v-btn>
+            <v-btn v-if="revealed" color="primary" @click="nextQuestion">{{
+              t('quiz.next')
+            }}</v-btn>
             <span class="text-label-large ms-auto">
               {{ t('quiz.streak', { n: streak }) }} · {{ t('quiz.best', { n: best }) }}
             </span>
           </div>
         </v-card-text>
       </v-card>
-      <v-skeleton-loader v-else type="image, button@2" />
+      <v-skeleton-loader aria-hidden="true" v-else type="image, button@2" />
     </div>
   </DetailLayout>
 </template>

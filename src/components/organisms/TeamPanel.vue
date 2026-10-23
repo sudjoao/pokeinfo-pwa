@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { mdiContentCopy, mdiDeleteSweepOutline, mdiImport, mdiShareVariant } from '@mdi/js'
+import { nextTick, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { TEAM_SIZE, type TeamMember } from '@/composables/useTeam'
 import type { CounterSuggestion, CoverageRow, DefenseRow } from '@/utils/typeChart'
@@ -28,13 +29,29 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+
+// Remover um membro ou limpar o time tira o botão focado da tela: o foco vai para o título.
+const heading = useTemplateRef<HTMLElement>('heading')
+function removed(): void {
+  nextTick(() => heading.value?.focus())
+}
+
+function remove(member: TeamMember): void {
+  emit('remove', member)
+  removed()
+}
+
+function clear(): void {
+  emit('clear')
+  removed()
+}
 </script>
 
 <template>
   <div class="team-panel d-flex flex-column ga-4">
     <section :aria-label="t('team.heading')">
       <div class="d-flex align-center justify-space-between mb-2">
-        <h2 class="text-title-medium">
+        <h2 ref="heading" class="team-panel__heading text-title-medium" tabindex="-1">
           {{ t('team.heading') }}
           <span class="team-panel__count opacity-70">
             {{ t('team.count', { n: members.length, max: TEAM_SIZE }) }}
@@ -45,7 +62,7 @@ const { t } = useI18n()
           variant="text"
           size="small"
           :prepend-icon="mdiDeleteSweepOutline"
-          @click="emit('clear')"
+          @click="clear"
         >
           {{ t('team.clear') }}
         </v-btn>
@@ -54,7 +71,7 @@ const { t } = useI18n()
         :members="members"
         wrap
         @select="emit('select', $event)"
-        @remove="emit('remove', $event)"
+        @remove="remove"
         @add="emit('add')"
       />
       <div class="d-flex flex-wrap ga-2 mt-2">

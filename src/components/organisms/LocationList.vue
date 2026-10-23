@@ -69,7 +69,11 @@ const missingGames = computed(() =>
     </v-card-title>
 
     <v-card-text>
-      <v-skeleton-loader v-if="status === 'loading'" type="list-item-two-line@3" />
+      <v-skeleton-loader
+        aria-hidden="true"
+        v-if="status === 'loading'"
+        type="list-item-two-line@3"
+      />
 
       <div
         v-else-if="status === 'error' || !encounters"

@@ -1,4 +1,5 @@
 import { nextTick, watch, type Ref } from 'vue'
+import { focusPageTitle } from './usePageFocus'
 
 function usable(element: HTMLElement | null): element is HTMLElement {
   return (
@@ -27,8 +28,8 @@ export function useOverlayFocusReturn(open: Readonly<Ref<boolean>>): void {
       // Só corrige o foco que ficou "perdido" (no body ou no overlay que está saindo).
       const active = document.activeElement
       if (active && active !== document.body && !active.closest('.v-overlay')) return
-      const fallback = document.querySelector<HTMLElement>('h1[tabindex]')
-      ;(usable(target) ? target : fallback)?.focus({ preventScroll: true })
+      if (usable(target)) target.focus({ preventScroll: true })
+      else focusPageTitle()
     })
   })
 }

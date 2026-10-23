@@ -2,6 +2,7 @@
 import { nextTick, ref, watch } from 'vue'
 import { mdiRefresh } from '@mdi/js'
 import { useI18n } from 'vue-i18n'
+import { announce } from '@/composables/useAnnouncer'
 import type { RouteLocationRaw } from 'vue-router'
 import type { PokemonListItem } from '@/types/pokemon'
 import PokemonCard from '@/components/molecules/PokemonCard.vue'
@@ -51,6 +52,14 @@ function afterLayout(): Promise<void> {
 // Cobre tanto o scroll do usuário quanto o caso em que o lote carregado não preencheu a tela.
 // Como os lotes agora resolvem sem rede, a visibilidade é reconferida após o layout:
 // sem isso o valor antigo (ainda "visível") encadearia todos os lotes de uma vez.
+watch(
+  () => props.status,
+  (status) => {
+    // O erro do lote seguinte aparece longe do foco (no fim da lista): avisa o leitor de tela.
+    if (status === 'error') announce(props.errorMessage ?? t('home.loadMoreError'))
+  },
+)
+
 watch(
   [sentinelVisible, () => props.status],
   async ([visible, status]) => {

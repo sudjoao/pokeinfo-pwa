@@ -127,7 +127,11 @@ watch(openPanel, (location) => {
             </span>
           </v-expansion-panel-title>
           <v-expansion-panel-text>
-            <v-skeleton-loader v-if="loading[route.location]" type="list-item-two-line@3" />
+            <v-skeleton-loader
+              aria-hidden="true"
+              v-if="loading[route.location]"
+              type="list-item-two-line@3"
+            />
 
             <div v-else-if="failed[route.location]" class="d-flex flex-column align-start ga-2">
               <span>{{ t('routes.loadError') }}</span>

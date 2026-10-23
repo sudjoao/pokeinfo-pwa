@@ -1,17 +1,28 @@
 <script setup lang="ts">
-import { useTemplateRef } from 'vue'
+import { toRef, useTemplateRef } from 'vue'
 import AppHeader from '@/components/organisms/AppHeader.vue'
 import { usePageFocus } from '@/composables/usePageFocus'
 
-defineProps<{
-  title: string
-  /** Altura da extensão do cabeçalho (px), quando o slot `header` é usado. */
-  extensionHeight?: number
-}>()
+const props = withDefaults(
+  defineProps<{
+    title: string
+    /** Altura da extensão do cabeçalho (px), quando o slot `header` é usado. */
+    extensionHeight?: number
+    /**
+     * Falso enquanto o conteúdo carrega: o foco só vai ao h1 quando o título já é o definitivo
+     * (senão o leitor anuncia "PokeInfo" e não percebe a troca para o nome do Pokémon).
+     */
+    ready?: boolean
+  }>(),
+  { ready: true },
+)
 
 const emit = defineEmits<{ back: [] }>()
 
-usePageFocus(useTemplateRef<HTMLElement>('root'))
+usePageFocus(
+  useTemplateRef<HTMLElement>('root'),
+  toRef(() => props.ready),
+)
 </script>
 
 <template>

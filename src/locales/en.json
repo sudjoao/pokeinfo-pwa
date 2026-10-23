@@ -20,7 +20,8 @@
     "backToTop": "Back to top",
     "share": "Share",
     "linkCopied": "Link copied.",
-    "close": "Close"
+    "close": "Close",
+    "shareFailed": "Couldn't share the link"
   },
   "language": {
     "title": "Language",
@@ -564,7 +565,9 @@
     "chartCaption": "Row: move type. Column: defending type.",
     "chartScroll": "Type chart (scroll sideways)",
     "attacker": "Attack",
-    "defender": "Defense"
+    "defender": "Defense",
+    "summaryDefense": "Weak to {weak} types, resists {resist}, immune to {immune}.",
+    "summaryAttack": "Super effective against {weak} types, not very effective against {resist}, no effect on {immune}."
   },
   "compare": {
     "title": "Compare",
@@ -584,7 +587,9 @@
     "hint": "Hear the cry",
     "next": "Next",
     "streak": "Streak: {n}",
-    "best": "Best: {n}"
+    "best": "Best: {n}",
+    "rightAnswer": "right answer",
+    "yourAnswer": "your answer"
   },
   "shiny": {
     "title": "Shiny in {game}",

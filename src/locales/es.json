@@ -20,7 +20,8 @@
     "backToTop": "Volver arriba",
     "share": "Compartir",
     "linkCopied": "Enlace copiado.",
-    "close": "Cerrar"
+    "close": "Cerrar",
+    "shareFailed": "No se pudo compartir el enlace"
   },
   "language": {
     "title": "Idioma",
@@ -564,7 +565,9 @@
     "chartCaption": "Fila: tipo del movimiento. Columna: tipo de quien lo recibe.",
     "chartScroll": "Tabla de tipos (desplázate a los lados)",
     "attacker": "Ataque",
-    "defender": "Defensa"
+    "defender": "Defensa",
+    "summaryDefense": "Débil ante {weak} tipos, resiste {resist}, inmune a {immune}.",
+    "summaryAttack": "Superefectivo contra {weak} tipos, poco efectivo contra {resist}, sin efecto en {immune}."
   },
   "compare": {
     "title": "Comparar",
@@ -584,7 +587,9 @@
     "hint": "Escuchar el grito",
     "next": "Siguiente",
     "streak": "Racha: {n}",
-    "best": "Récord: {n}"
+    "best": "Récord: {n}",
+    "rightAnswer": "respuesta correcta",
+    "yourAnswer": "tu respuesta"
   },
   "shiny": {
     "title": "Variocolor en {game}",

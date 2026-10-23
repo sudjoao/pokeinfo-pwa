@@ -7,7 +7,8 @@ import { useLocale } from '@/composables/useLocale'
 import { useThemePreference } from '@/composables/useThemePreference'
 import { useOnline } from '@/composables/useOnline'
 import { summarize, useBackup } from '@/composables/useBackup'
-import { noticeTimeout } from '@/utils/notice'
+import { announcement } from '@/composables/useAnnouncer'
+import AppNotice from '@/components/molecules/AppNotice.vue'
 import { decodeBackupParam, parseBackup, type Backup } from '@/utils/backup'
 import type { ImportMode } from '@/stores/gameSet'
 import AppMenu from '@/components/organisms/AppMenu.vue'
@@ -158,21 +159,14 @@ function skipToContent(): void {
       :exported-at="pending?.exportedAt ?? null"
       @confirm="confirmImport"
     />
-    <v-snackbar v-model="offlineOpen" :timeout="-1" location="top" color="surface-variant">
-      {{ t('app.offline') }}
-      <template #actions>
-        <v-btn variant="text" @click="offlineOpen = false">{{ t('common.close') }}</v-btn>
-      </template>
-    </v-snackbar>
-    <v-snackbar
-      :model-value="notice !== null"
-      :timeout="noticeTimeout(notice)"
-      @update:model-value="(open: boolean) => !open && (notice = null)"
-    >
-      {{ notice }}
-      <template #actions>
-        <v-btn variant="text" @click="notice = null">{{ t('common.close') }}</v-btn>
-      </template>
-    </v-snackbar>
+    <AppNotice
+      :text="offlineOpen ? t('app.offline') : null"
+      :timeout="-1"
+      location="top"
+      color="surface-variant"
+      @close="offlineOpen = false"
+    />
+    <AppNotice :text="notice" @close="notice = null" />
+    <p class="d-sr-only" aria-live="polite" aria-atomic="true">{{ announcement }}</p>
   </v-app>
 </template>

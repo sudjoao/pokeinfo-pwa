@@ -38,7 +38,7 @@ function select(id: number): void {
   <v-bottom-sheet v-model="open" scrollable :aria-label="title">
     <v-card rounded="t-xl" :title="title">
       <v-card-text class="ability-sheet__body">
-        <v-skeleton-loader v-if="status === 'loading'" type="paragraph" />
+        <v-skeleton-loader aria-hidden="true" v-if="status === 'loading'" type="paragraph" />
         <div v-else-if="status === 'error'" class="d-flex flex-column align-start ga-2">
           <span>{{ t('ability.error') }}</span>
           <v-btn color="primary" variant="tonal" size="small" @click="emit('retry')">

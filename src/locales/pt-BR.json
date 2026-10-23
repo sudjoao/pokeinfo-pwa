@@ -20,7 +20,8 @@
     "backToTop": "Voltar ao topo",
     "share": "Compartilhar",
     "linkCopied": "Link copiado.",
-    "close": "Fechar"
+    "close": "Fechar",
+    "shareFailed": "Não foi possível compartilhar o link"
   },
   "language": {
     "title": "Idioma",
@@ -564,7 +565,9 @@
     "chartCaption": "Linha: tipo do golpe. Coluna: tipo de quem recebe.",
     "chartScroll": "Tabela de tipos (role para os lados)",
     "attacker": "Ataque",
-    "defender": "Defesa"
+    "defender": "Defesa",
+    "summaryDefense": "Fraco a {weak} tipos, resiste a {resist}, imune a {immune}.",
+    "summaryAttack": "Super efetivo contra {weak} tipos, pouco efetivo contra {resist}, sem efeito em {immune}."
   },
   "compare": {
     "title": "Comparar",
@@ -584,7 +587,9 @@
     "hint": "Ouvir o grito",
     "next": "Próximo",
     "streak": "Sequência: {n}",
-    "best": "Recorde: {n}"
+    "best": "Recorde: {n}",
+    "rightAnswer": "resposta certa",
+    "yourAnswer": "sua resposta"
   },
   "shiny": {
     "title": "Shiny em {game}",

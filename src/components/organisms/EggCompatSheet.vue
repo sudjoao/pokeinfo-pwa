@@ -31,7 +31,11 @@ function select(id: number): void {
       <v-card-text class="egg-sheet__body">
         <p v-if="isDitto" class="text-body-large mb-0">{{ t('detail.eggDittoSelf') }}</p>
         <template v-else>
-          <v-skeleton-loader v-if="status === 'loading'" type="list-item-avatar@4" />
+          <v-skeleton-loader
+            aria-hidden="true"
+            v-if="status === 'loading'"
+            type="list-item-avatar@4"
+          />
           <div v-else-if="status === 'error'" class="d-flex flex-column align-start ga-2">
             <span>{{ t('detail.eggCompatibleError') }}</span>
             <v-btn color="primary" variant="tonal" size="small" @click="emit('retry')">

@@ -1,10 +1,18 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import {
+  computed,
+  nextTick,
+  onMounted,
+  ref,
+  useTemplateRef,
+  type ComponentPublicInstance,
+} from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { mdiClose } from '@mdi/js'
 import { usePokedexStore } from '@/stores/pokedex'
 import { usePokemonData } from '@/composables/usePokemonData'
+import { focusPageTitle } from '@/composables/usePageFocus'
 import { STAT_NAMES, type PokemonType } from '@/types/pokemon'
 import { formatHeight, formatPokemonName, formatWeight } from '@/utils/pokemon'
 import { rowTotal } from '@/utils/advancedFilters'
@@ -98,13 +106,22 @@ const options = computed(() =>
     })),
 )
 
+const autocomplete = useTemplateRef<ComponentPublicInstance>('autocomplete')
+
 function add(id: number | null): void {
-  if (id && ids.value.length < MAX_COMPARE) setIds([...ids.value, id])
+  if (!id || ids.value.length >= MAX_COMPARE) return
+  setIds([...ids.value, id])
+  // No terceiro o campo some; o foco iria para o body.
+  if (ids.value.length + 1 >= MAX_COMPARE) nextTick(focusPageTitle)
   search.value = null
 }
 
 function remove(id: number): void {
   setIds(ids.value.filter((item) => item !== id))
+  // O botão de remover sai junto com a coluna: o foco volta para o campo de adicionar.
+  nextTick(() =>
+    (autocomplete.value?.$el as HTMLElement | undefined)?.querySelector('input')?.focus(),
+  )
 }
 
 function goBack(): void {
@@ -118,6 +135,7 @@ function goBack(): void {
     <div class="d-flex flex-column ga-4">
       <v-autocomplete
         v-if="ids.length < MAX_COMPARE"
+        ref="autocomplete"
         v-model="search"
         :items="options"
         :label="t('compare.add')"
@@ -138,7 +156,7 @@ function goBack(): void {
             <div v-for="column in columns" :key="column.id" class="compare__pokemon">
               <v-btn
                 :icon="mdiClose"
-                size="x-small"
+                size="small"
                 variant="text"
                 class="compare__remove"
                 :aria-label="t('compare.remove', { name: column.name })"

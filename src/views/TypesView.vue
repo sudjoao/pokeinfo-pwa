@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
+import { announce } from '@/composables/useAnnouncer'
 import { useRoute, useRouter, type LocationQueryRaw } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import type { PokemonType } from '@/types/pokemon'
@@ -69,6 +70,20 @@ const entries = computed(() => {
     mode.value === 'attack'
       ? { type, multiplier: attackMultiplier(selected.value[0]!, [type], generation.value) }
       : { type, multiplier: attackMultiplier(type, selected.value, generation.value) },
+  )
+})
+
+// Anuncia só um resumo a cada troca: com aria-live no card inteiro o leitor lia até 18 grupos.
+watch(entries, (list) => {
+  if (!list.length) return
+  const count = (test: (m: number) => boolean) =>
+    list.filter((entry) => test(entry.multiplier)).length
+  announce(
+    t(mode.value === 'attack' ? 'types.summaryAttack' : 'types.summaryDefense', {
+      weak: count((m) => m > 1),
+      resist: count((m) => m > 0 && m < 1),
+      immune: count((m) => m === 0),
+    }),
   )
 })
 
@@ -142,7 +157,7 @@ function goBack(): void {
         </v-card>
 
         <v-card>
-          <v-card-text aria-live="polite">
+          <v-card-text>
             <p v-if="!entries.length" class="mb-0 opacity-70">{{ t('types.empty') }}</p>
             <MultiplierGroups v-else :entries="entries" :mode="mode" show-neutral />
           </v-card-text>

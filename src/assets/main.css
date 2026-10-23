@@ -5,6 +5,12 @@ html {
   overflow-x: hidden;
   -webkit-text-size-adjust: 100%;
   touch-action: manipulation;
+  /*
+   * Ao navegar com Tab, o item focado não fica escondido atrás do cabeçalho fixo (com a linha de
+   * filtros) nem da bandeja do time no rodapé (WCAG 2.4.11).
+   */
+  scroll-padding-top: calc(128px + var(--safe-top));
+  scroll-padding-bottom: calc(96px + var(--safe-bottom));
 }
 
 body {
