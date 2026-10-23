@@ -1,7 +1,11 @@
 <script setup lang="ts">
-import { computed, ref, useTemplateRef } from 'vue'
-import { mdiHistory, mdiMagnify } from '@mdi/js'
+import { computed, defineAsyncComponent, ref, useTemplateRef } from 'vue'
+import { mdiMagnify } from '@mdi/js'
 import { useI18n } from 'vue-i18n'
+import { useMountOnOpen } from '@/composables/useMountOnOpen'
+
+// Sob demanda: o v-menu puxaria VMenu + VOverlay (~11 KB gz) para a abertura do app.
+const RecentSearchMenu = defineAsyncComponent(() => import('./RecentSearchMenu.vue'))
 
 const model = defineModel<string>({ default: '' })
 /** Textos do campo; sem eles, os da busca de pokémon da Home. */
@@ -19,6 +23,7 @@ const { t } = useI18n()
 const root = useTemplateRef<HTMLElement>('root')
 const focused = ref(false)
 const showRecent = computed(() => focused.value && !model.value && !!props.recent?.length)
+const menuMounted = useMountOnOpen(showRecent)
 
 function pick(term: string): void {
   model.value = term
@@ -49,36 +54,13 @@ function onFocused(value: boolean): void {
       hide-details
       @update:focused="onFocused"
     />
-    <v-menu
-      v-if="recent?.length"
-      :model-value="showRecent"
-      :activator="root ?? undefined"
-      :open-on-click="false"
-      :close-on-content-click="false"
-      location="bottom start"
-      :scrim="false"
-      :persistent="true"
-      :capture-focus="false"
-      :retain-focus="false"
-      disable-initial-focus
-    >
-      <v-list density="compact" :aria-label="t('recent.searches')">
-        <v-list-subheader>{{ t('recent.searches') }}</v-list-subheader>
-        <v-list-item
-          v-for="term in recent"
-          :key="term"
-          :prepend-icon="mdiHistory"
-          :title="term"
-          @mousedown.prevent
-          @click="pick(term)"
-        />
-        <v-list-item
-          :title="t('recent.clearSearches')"
-          class="text-primary"
-          @mousedown.prevent
-          @click="emit('clearRecent')"
-        />
-      </v-list>
-    </v-menu>
+    <RecentSearchMenu
+      v-if="menuMounted && recent?.length"
+      :open="showRecent"
+      :activator="root"
+      :recent="recent"
+      @pick="pick"
+      @clear="emit('clearRecent')"
+    />
   </div>
 </template>
