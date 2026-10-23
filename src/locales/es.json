@@ -11,7 +11,8 @@
     "movesTitle": "Movimientos · PokeInfo",
     "itemsTitle": "Objetos · PokeInfo",
     "statsTitle": "Naturalezas e IV · PokeInfo",
-    "speedTitle": "Velocidad · PokeInfo"
+    "speedTitle": "Velocidad · PokeInfo",
+    "dailyTitle": "Pokémon del día · PokeInfo"
   },
   "common": {
     "retry": "Reintentar",
@@ -512,7 +513,8 @@
     "moves": "Movimientos",
     "items": "Objetos y bayas",
     "stats": "Naturalezas e IV",
-    "speed": "Velocidad (speed tiers)"
+    "speed": "Velocidad (speed tiers)",
+    "daily": "Pokémon del día"
   },
   "backup": {
     "title": "Copia de seguridad",
@@ -951,5 +953,50 @@
     "inTeam": "(en tu equipo)",
     "fromTeam": "Ver velocidad",
     "legend": "Mín: 0 IV, 0 EV, naturaleza que reduce. Neutra: 31 IV, 0 EV. Máx: 31 IV, 252 EV. Máx+: con naturaleza que aumenta (Alegre, Miedosa). El número gris junto al nombre es la base."
+  },
+  "daily": {
+    "title": "Pokémon del día",
+    "modeDaily": "Reto n.º {n}",
+    "modePractice": "Práctica",
+    "intro": "Descubre el Pokémon en hasta {n} intentos. Cada intento muestra si la generación, los tipos, la altura, el peso y el total de stats coinciden, o hacia dónde está la respuesta.",
+    "guessLabel": "Intento {n} de {max}",
+    "guesses": "Intentos",
+    "cryHint": "Pista: escuchar su grito",
+    "silhouetteHint": "Pista: la silueta del Pokémon.",
+    "correct": "¡Correcto: {name}!",
+    "wrong": "No es {name}. Quedan {left} intentos.",
+    "lost": "Se acabaron los intentos. Era {name}.",
+    "wonTitle": "¡Acertaste en {n} intento! | ¡Acertaste en {n} intentos!",
+    "lostTitle": "Esta vez no. Era:",
+    "share": "Compartir resultado",
+    "again": "Jugar otra vez",
+    "next": "Próximo Pokémon en {h} h {m} min",
+    "shareTitle": "PokeInfo · Pokémon del día n.º {n} · {score}/{max}",
+    "copied": "Resultado copiado.",
+    "clue": {
+      "generation": "Gen.",
+      "type1": "Tipo 1",
+      "type2": "Tipo 2",
+      "height": "Altura",
+      "weight": "Peso",
+      "total": "Total"
+    },
+    "direction": {
+      "equal": "(igual)",
+      "higher": "(la respuesta es mayor)",
+      "lower": "(la respuesta es menor)"
+    },
+    "type": {
+      "correct": "(correcto)",
+      "swapped": "(correcto, pero en el otro hueco)",
+      "wrong": "(incorrecto)"
+    },
+    "stats": "Tus estadísticas",
+    "played": "Partidas",
+    "winRate": "Victorias",
+    "streak": "Racha",
+    "best": "Récord",
+    "distribution": "Intentos hasta acertar",
+    "distributionRow": "{count} victorias con {n} intentos"
   }
 }

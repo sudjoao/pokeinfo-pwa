@@ -11,7 +11,8 @@
     "movesTitle": "Golpes · PokeInfo",
     "itemsTitle": "Itens · PokeInfo",
     "statsTitle": "Naturezas e IVs · PokeInfo",
-    "speedTitle": "Velocidade · PokeInfo"
+    "speedTitle": "Velocidade · PokeInfo",
+    "dailyTitle": "Pokémon do dia · PokeInfo"
   },
   "common": {
     "retry": "Tentar novamente",
@@ -512,7 +513,8 @@
     "moves": "Golpes",
     "items": "Itens e berries",
     "stats": "Naturezas e IVs",
-    "speed": "Velocidade (speed tiers)"
+    "speed": "Velocidade (speed tiers)",
+    "daily": "Pokémon do dia"
   },
   "backup": {
     "title": "Backup dos dados",
@@ -951,5 +953,50 @@
     "inTeam": "(no seu time)",
     "fromTeam": "Ver velocidade",
     "legend": "Mín: 0 IV, 0 EV, natureza que reduz. Neutro: 31 IV, 0 EV. Máx: 31 IV, 252 EV. Máx+: com natureza que aumenta (Jolly, Timid). O número cinza ao lado do nome é a base."
+  },
+  "daily": {
+    "title": "Pokémon do dia",
+    "modeDaily": "Desafio #{n}",
+    "modePractice": "Treino",
+    "intro": "Descubra o Pokémon em até {n} palpites. Cada palpite mostra se a geração, os tipos, a altura, o peso e o total de stats batem, ou para que lado está a resposta.",
+    "guessLabel": "Palpite {n} de {max}",
+    "guesses": "Palpites",
+    "cryHint": "Dica: ouvir o grito",
+    "silhouetteHint": "Dica: a silhueta do Pokémon.",
+    "correct": "Acertou: {name}!",
+    "wrong": "{name} não é. Restam {left} palpites.",
+    "lost": "Acabaram os palpites. Era {name}.",
+    "wonTitle": "Acertou em {n} palpite! | Acertou em {n} palpites!",
+    "lostTitle": "Não foi desta vez. Era:",
+    "share": "Compartilhar resultado",
+    "again": "Jogar de novo",
+    "next": "Próximo Pokémon em {h} h {m} min",
+    "shareTitle": "PokeInfo · Pokémon do dia #{n} · {score}/{max}",
+    "copied": "Resultado copiado.",
+    "clue": {
+      "generation": "Geração",
+      "type1": "Tipo 1",
+      "type2": "Tipo 2",
+      "height": "Altura",
+      "weight": "Peso",
+      "total": "Total"
+    },
+    "direction": {
+      "equal": "(igual)",
+      "higher": "(a resposta é maior)",
+      "lower": "(a resposta é menor)"
+    },
+    "type": {
+      "correct": "(certo)",
+      "swapped": "(certo, mas no outro slot)",
+      "wrong": "(errado)"
+    },
+    "stats": "Suas estatísticas",
+    "played": "Jogos",
+    "winRate": "Vitórias",
+    "streak": "Sequência",
+    "best": "Recorde",
+    "distribution": "Palpites até acertar",
+    "distributionRow": "{count} vitórias com {n} palpites"
   }
 }

@@ -69,6 +69,11 @@ const router = createRouter({
       name: 'speed',
       component: () => import('@/views/SpeedView.vue'),
     },
+    {
+      path: '/daily',
+      name: 'daily',
+      component: () => import('@/views/DailyView.vue'),
+    },
   ],
   // Ao voltar, restaura a posição da lista (a Home fica viva via KeepAlive); ao abrir outra
   // tela, começa do topo. Mudança só de query (filtros, time) mantém a posição: quem precisa
@@ -93,6 +98,7 @@ const ROUTE_TITLES: Partial<Record<string, string>> = {
   items: 'app.itemsTitle',
   stats: 'app.statsTitle',
   speed: 'app.speedTitle',
+  daily: 'app.dailyTitle',
 }
 
 function applyRouteTitle(): void {

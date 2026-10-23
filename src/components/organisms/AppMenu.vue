@@ -15,6 +15,7 @@ import {
   mdiBagPersonalOutline,
   mdiCalculatorVariantOutline,
   mdiSpeedometer,
+  mdiCalendarStar,
 } from '@mdi/js'
 import type { RouteLocationRaw } from 'vue-router'
 import type { ThemePreference } from '@/composables/useThemePreference'
@@ -68,7 +69,10 @@ const NAV_GROUPS: readonly { title: string; items: readonly NavItem[] }[] = [
   },
   {
     title: 'menu.groupGames',
-    items: [{ icon: mdiHelpCircleOutline, title: 'menu.quiz', to: { name: 'quiz' } }],
+    items: [
+      { icon: mdiCalendarStar, title: 'menu.daily', to: { name: 'daily' } },
+      { icon: mdiHelpCircleOutline, title: 'menu.quiz', to: { name: 'quiz' } },
+    ],
   },
 ]
 

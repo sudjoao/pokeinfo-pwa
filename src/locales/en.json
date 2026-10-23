@@ -11,7 +11,8 @@
     "movesTitle": "Moves · PokeInfo",
     "itemsTitle": "Items · PokeInfo",
     "statsTitle": "Natures and IVs · PokeInfo",
-    "speedTitle": "Speed tiers · PokeInfo"
+    "speedTitle": "Speed tiers · PokeInfo",
+    "dailyTitle": "Pokémon of the day · PokeInfo"
   },
   "common": {
     "retry": "Try again",
@@ -512,7 +513,8 @@
     "moves": "Moves",
     "items": "Items and berries",
     "stats": "Natures and IVs",
-    "speed": "Speed tiers"
+    "speed": "Speed tiers",
+    "daily": "Pokémon of the day"
   },
   "backup": {
     "title": "Data backup",
@@ -951,5 +953,50 @@
     "inTeam": "(in your team)",
     "fromTeam": "Speed tiers",
     "legend": "Min: 0 IV, 0 EV, hindering nature. Neutral: 31 IV, 0 EV. Max: 31 IV, 252 EV. Max+: with a boosting nature (Jolly, Timid). The grey number next to the name is the base stat."
+  },
+  "daily": {
+    "title": "Pokémon of the day",
+    "modeDaily": "Challenge #{n}",
+    "modePractice": "Practice",
+    "intro": "Find the Pokémon in up to {n} guesses. Each guess shows whether generation, types, height, weight and base stat total match, or which way the answer is.",
+    "guessLabel": "Guess {n} of {max}",
+    "guesses": "Guesses",
+    "cryHint": "Hint: hear its cry",
+    "silhouetteHint": "Hint: the Pokémon's silhouette.",
+    "correct": "Correct: {name}!",
+    "wrong": "Not {name}. {left} guesses left.",
+    "lost": "Out of guesses. It was {name}.",
+    "wonTitle": "Got it in {n} guess! | Got it in {n} guesses!",
+    "lostTitle": "Not this time. It was:",
+    "share": "Share result",
+    "again": "Play again",
+    "next": "Next Pokémon in {h} h {m} min",
+    "shareTitle": "PokeInfo · Pokémon of the day #{n} · {score}/{max}",
+    "copied": "Result copied.",
+    "clue": {
+      "generation": "Gen",
+      "type1": "Type 1",
+      "type2": "Type 2",
+      "height": "Height",
+      "weight": "Weight",
+      "total": "Total"
+    },
+    "direction": {
+      "equal": "(match)",
+      "higher": "(answer is higher)",
+      "lower": "(answer is lower)"
+    },
+    "type": {
+      "correct": "(correct)",
+      "swapped": "(right type, other slot)",
+      "wrong": "(wrong)"
+    },
+    "stats": "Your stats",
+    "played": "Played",
+    "winRate": "Win rate",
+    "streak": "Streak",
+    "best": "Best",
+    "distribution": "Guesses to win",
+    "distributionRow": "{count} wins in {n} guesses"
   }
 }

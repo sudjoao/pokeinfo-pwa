@@ -44,3 +44,27 @@ describe('backup', () => {
     expect(backupFileName(new Date('2026-10-23T10:00:00Z'))).toBe('pokeinfo-backup-2026-10-23.json')
   })
 })
+
+describe('backup com o Pokémon do dia', () => {
+  it('campo opcional: backup antigo continua válido e o novo leva as estatísticas', () => {
+    const old = parseBackup(
+      '{"app":"pokeinfo","version":1,"caught":{},"shiny":{},"favorites":"","hunts":{}}',
+    )
+    expect(old).not.toBeNull()
+    expect(old!.daily).toBeUndefined()
+    const daily = {
+      stats: {
+        played: 3,
+        won: 2,
+        streak: 1,
+        best: 2,
+        lastWon: '2026-10-25',
+        distribution: [0, 1, 1, 0, 0, 0, 0, 0],
+      },
+      game: { day: '2026-10-25', guesses: [25, 6], done: true },
+    }
+    const withDaily = parseBackup(JSON.stringify({ ...JSON.parse(JSON.stringify(old)), daily }))
+    expect(withDaily!.daily).toEqual(daily)
+    expect(parseBackup(JSON.stringify({ ...old, daily: { stats: 'x' } }))!.daily).toBeUndefined()
+  })
+})

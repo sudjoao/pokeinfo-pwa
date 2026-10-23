@@ -2,6 +2,7 @@ import { computed } from 'vue'
 import { useCaughtStore } from '@/stores/caught'
 import { useFavoritesStore } from '@/stores/favorites'
 import { useHuntsStore, useShinyCaughtStore } from '@/stores/shiny'
+import { useDailyStore } from '@/stores/daily'
 import type { ImportMode } from '@/stores/gameSet'
 import { backupFileName, createBackup, encodeBackupParam, type Backup } from '@/utils/backup'
 import { decodeBitset } from '@/utils/bitset'
@@ -35,6 +36,7 @@ export function useBackup() {
   const shiny = useShinyCaughtStore()
   const favorites = useFavoritesStore()
   const hunts = useHuntsStore()
+  const daily = useDailyStore()
 
   function current(): Backup {
     return createBackup({
@@ -42,6 +44,7 @@ export function useBackup() {
       shiny: shiny.exportData(),
       favorites: favorites.exportData(),
       hunts: hunts.exportData(),
+      daily: daily.exportData(),
     })
   }
 
@@ -68,6 +71,7 @@ export function useBackup() {
     shiny.importData(backup.shiny, mode)
     favorites.importData(backup.favorites, mode)
     hunts.importData(backup.hunts, mode)
+    if (backup.daily) daily.importData(backup.daily, mode)
   }
 
   return { summary, downloadFile, link, restore }

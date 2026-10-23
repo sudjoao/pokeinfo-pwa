@@ -21,3 +21,21 @@ export async function shareLink(title: string, url: string): Promise<ShareResult
     return 'failed'
   }
 }
+
+/** Compartilha um texto (ex.: o resultado do Pokémon do dia) ou, sem a folha nativa, copia. */
+export async function shareText(text: string): Promise<ShareResult> {
+  if (typeof navigator.share === 'function') {
+    try {
+      await navigator.share({ text })
+      return 'shared'
+    } catch (error) {
+      if ((error as DOMException)?.name === 'AbortError') return 'cancelled'
+    }
+  }
+  try {
+    await navigator.clipboard.writeText(text)
+    return 'copied'
+  } catch {
+    return 'failed'
+  }
+}

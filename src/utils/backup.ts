@@ -1,5 +1,6 @@
 import type { PersistedGameSet } from '@/stores/gameSet'
 import type { PersistedHunts } from '@/stores/shiny'
+import { parseDaily, type PersistedDaily } from './daily'
 
 /**
  * Backup de tudo o que o usuário marca no aparelho. Os conjuntos já ficam como bitsets em base64,
@@ -14,6 +15,8 @@ export interface Backup {
   shiny: PersistedGameSet
   favorites: string
   hunts: PersistedHunts
+  /** Estatísticas do "Pokémon do dia"; ausente nos backups anteriores à 1.6 (o formato não mudou). */
+  daily?: PersistedDaily
 }
 
 export type BackupData = Omit<Backup, 'app' | 'version' | 'exportedAt'>
@@ -52,6 +55,7 @@ export function parseBackup(text: string): Backup | null {
       typeof backup.hunts === 'object' && backup.hunts !== null && !Array.isArray(backup.hunts)
         ? backup.hunts
         : {},
+    ...(parseDaily(backup.daily) ? { daily: parseDaily(backup.daily)! } : {}),
   }
 }
 

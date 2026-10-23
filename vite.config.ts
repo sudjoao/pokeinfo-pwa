@@ -55,6 +55,7 @@ export default defineConfig({
           { name: 'Montar time', short_name: 'Time', url: '/team' },
           { name: 'Calculadora de tipos', short_name: 'Tipos', url: '/types' },
           { name: 'Favoritos', short_name: 'Favoritos', url: '/?fav=1' },
+          { name: 'Pokémon do dia', short_name: 'Do dia', url: '/daily' },
           { name: 'Quem é esse Pokémon?', short_name: 'Quiz', url: '/quiz' },
         ],
         // Capturas para a tela de instalação mais rica (Chrome/Android e desktop).
