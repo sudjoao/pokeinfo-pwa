@@ -484,5 +484,38 @@
     "boxes": "Cajas (living dex)",
     "box": "Caja {n}",
     "caught": "{caught}/{total}"
+  },
+  "filters": {
+    "chip": "Filtros",
+    "chipActive": "Filtros ({n})",
+    "title": "Filtros y orden",
+    "sortBy": "Ordenar por",
+    "direction": "Dirección",
+    "asc": "Ascendente",
+    "desc": "Descendente",
+    "favorites": "Solo favoritos",
+    "generation": "Generación",
+    "category": "Categoría",
+    "weakTo": "Débil contra",
+    "weakToHint": "Quien recibe daño súper eficaz de este tipo.",
+    "ability": "Habilidad",
+    "minTotal": "Total de estadísticas mínimo: {n}",
+    "sort": {
+      "number": "Número",
+      "name": "Nombre",
+      "total": "Total de estadísticas",
+      "height": "Altura",
+      "weight": "Peso"
+    },
+    "categories": {
+      "legendary": "Legendario",
+      "mythical": "Singular",
+      "baby": "Bebé",
+      "regular": "Común"
+    }
+  },
+  "favorites": {
+    "title": "Favoritos",
+    "toggle": "Marcar {name} como favorito"
   }
 }

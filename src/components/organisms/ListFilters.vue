@@ -9,6 +9,7 @@ import TypeFilterChip from '@/components/molecules/TypeFilterChip.vue'
 import DexChips from '@/components/molecules/DexChips.vue'
 import CaughtFilterChips from '@/components/molecules/CaughtFilterChips.vue'
 import VersionFilterChip from '@/components/molecules/VersionFilterChip.vue'
+import AdvancedFilterChip from '@/components/molecules/AdvancedFilterChip.vue'
 
 /** Linha de chips de filtro da listagem (jogo, tipo, Pokédex do jogo, captura e exclusivos de versão). */
 defineProps<{
@@ -24,6 +25,8 @@ defineProps<{
   availability: readonly string[]
   /** Na aba de rotas, só jogo e Pokédex fazem sentido; esconde tipo, captura e exclusivos. */
   simplified?: boolean
+  /** Quantos filtros avançados estão ativos (chip "Filtros"). */
+  advancedCount: number
 }>()
 
 const emit = defineEmits<{
@@ -32,6 +35,7 @@ const emit = defineEmits<{
   selectDex: [slug: string]
   selectCaught: [filter: CaughtFilter]
   openVersions: []
+  openAdvanced: []
 }>()
 
 const { t } = useI18n()
@@ -52,6 +56,7 @@ const { t } = useI18n()
         @click="emit('openVersions')"
       />
       <TypeFilterChip :types="types" @click="emit('openTypes')" />
+      <AdvancedFilterChip :count="advancedCount" @click="emit('openAdvanced')" />
     </template>
     <template v-if="game && dex && game.dexes.length > 1">
       <v-divider vertical class="list-filters__divider" />

@@ -18,6 +18,8 @@ import PokemonGrid from '@/components/organisms/PokemonGrid.vue'
 import GamePickerSheet from '@/components/organisms/GamePickerSheet.vue'
 import TypePickerSheet from '@/components/organisms/TypePickerSheet.vue'
 import VersionPickerSheet from '@/components/organisms/VersionPickerSheet.vue'
+import AdvancedFilterSheet from '@/components/organisms/AdvancedFilterSheet.vue'
+import { usePokemonData } from '@/composables/usePokemonData'
 import TeamPanel from '@/components/organisms/TeamPanel.vue'
 import TeamTray from '@/components/organisms/TeamTray.vue'
 
@@ -42,6 +44,10 @@ const {
   caughtCount,
   missingCount,
   toggleCaught,
+  advanced,
+  advancedCount,
+  setAdvanced,
+  clearAdvanced,
   items,
   filtered,
   listKey,
@@ -65,6 +71,14 @@ const { mdAndUp } = useDisplay()
 const pickerOpen = ref(false)
 const typesOpen = ref(false)
 const versionsOpen = ref(false)
+const advancedOpen = ref(false)
+const pokemonData = usePokemonData()
+
+/** Abre "Filtros" e já baixa a tabela (lista de habilidades, ordenação por stats). */
+function openAdvanced(): void {
+  advancedOpen.value = true
+  pokemonData.load().catch(() => {})
+}
 const teamOpen = ref(false)
 const fullNotice = ref(false)
 
@@ -116,7 +130,9 @@ function goBack(): void {
         :availability="availability"
         @open-game="pickerOpen = true"
         @open-types="typesOpen = true"
+        :advanced-count="advancedCount"
         @open-versions="versionsOpen = true"
+        @open-advanced="openAdvanced"
         @select-dex="setDex"
         @select-caught="setCaughtFilter"
       />
@@ -232,6 +248,14 @@ function goBack(): void {
       :counts="availabilityCounts"
       @toggle="toggleAvailability"
       @clear="clearAvailability"
+    />
+
+    <AdvancedFilterSheet
+      v-model="advancedOpen"
+      :filters="advanced"
+      :abilities="pokemonData.table.value?.abilities ?? null"
+      @update="setAdvanced"
+      @clear="clearAdvanced"
     />
 
     <v-snackbar v-model="fullNotice" :timeout="2500" location="top">{{

@@ -77,6 +77,9 @@ function onLinkClick(event: MouseEvent): void {
           {{ t('common.national') }} {{ nationalLabel }}
         </span>
       </div>
+      <span v-if="pokemon.sortLabel" class="pokemon-card__sort text-label-small">
+        {{ pokemon.sortLabel }}
+      </span>
       <v-card-title class="text-title-medium pa-0">
         <RouterLink v-if="to" :to="to" class="stretched-action" @click="onLinkClick">
           {{ name }}
@@ -138,6 +141,12 @@ function onLinkClick(event: MouseEvent): void {
   left: 8px;
   background: rgb(var(--v-theme-surface));
   border-radius: 50%;
+}
+
+.pokemon-card__sort {
+  display: block;
+  color: rgb(var(--v-theme-secondary));
+  font-weight: 600;
 }
 
 .pokemon-card__national {

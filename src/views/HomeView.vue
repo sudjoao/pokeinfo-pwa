@@ -21,6 +21,8 @@ import RouteList from '@/components/organisms/RouteList.vue'
 import GamePickerSheet from '@/components/organisms/GamePickerSheet.vue'
 import TypePickerSheet from '@/components/organisms/TypePickerSheet.vue'
 import VersionPickerSheet from '@/components/organisms/VersionPickerSheet.vue'
+import AdvancedFilterSheet from '@/components/organisms/AdvancedFilterSheet.vue'
+import { usePokemonData } from '@/composables/usePokemonData'
 
 const {
   query,
@@ -43,6 +45,10 @@ const {
   caughtCount,
   missingCount,
   toggleCaught,
+  advanced,
+  advancedCount,
+  setAdvanced,
+  clearAdvanced,
   items,
   filtered,
   listKey,
@@ -83,6 +89,14 @@ watch(
 const pickerOpen = ref(false)
 const typesOpen = ref(false)
 const versionsOpen = ref(false)
+const advancedOpen = ref(false)
+const pokemonData = usePokemonData()
+
+/** Abre "Filtros" e já baixa a tabela (lista de habilidades, ordenação por stats). */
+function openAdvanced(): void {
+  advancedOpen.value = true
+  pokemonData.load().catch(() => {})
+}
 
 /** Altura do cabeçalho: busca (48) + linha de chips (32) + espaçamentos. */
 const HEADER_EXTENSION_HEIGHT = 108
@@ -180,7 +194,9 @@ function openTeamBuilder(): void {
         :simplified="view === 'routes'"
         @open-game="pickerOpen = true"
         @open-types="typesOpen = true"
+        :advanced-count="advancedCount"
         @open-versions="versionsOpen = true"
+        @open-advanced="openAdvanced"
         @select-dex="setDex"
         @select-caught="setCaughtFilter"
       />
@@ -290,6 +306,14 @@ function openTeamBuilder(): void {
       :counts="availabilityCounts"
       @toggle="toggleAvailability"
       @clear="clearAvailability"
+    />
+
+    <AdvancedFilterSheet
+      v-model="advancedOpen"
+      :filters="advanced"
+      :abilities="pokemonData.table.value?.abilities ?? null"
+      @update="setAdvanced"
+      @clear="clearAdvanced"
     />
   </DefaultLayout>
 </template>

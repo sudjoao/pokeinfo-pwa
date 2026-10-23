@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { mdiShimmer, mdiStarFourPoints } from '@mdi/js'
+import { mdiHeart, mdiHeartOutline, mdiShimmer, mdiStarFourPoints } from '@mdi/js'
 import { useI18n } from 'vue-i18n'
 import type { PokemonDetail, PokemonSpecies } from '@/types/pokemon'
 import { formatDexNumber, TYPE_COLORS } from '@/utils/pokemon'
@@ -31,9 +31,15 @@ const props = defineProps<{
   cryMuted?: boolean
   /** Mostra o artwork shiny. */
   shiny?: boolean
+  favorite?: boolean
 }>()
 
-const emit = defineEmits<{ playCry: []; toggleCaught: []; toggleShiny: [] }>()
+const emit = defineEmits<{
+  playCry: []
+  toggleCaught: []
+  toggleShiny: []
+  toggleFavorite: []
+}>()
 
 const { t, locale } = useI18n()
 
@@ -63,6 +69,17 @@ const caughtLabel = computed(() => {
         :aria-label="t('detail.showShiny')"
         :title="t('detail.shiny')"
         @click="emit('toggleShiny')"
+      />
+      <v-btn
+        :icon="favorite ? mdiHeart : mdiHeartOutline"
+        size="small"
+        :variant="favorite ? 'flat' : 'tonal'"
+        :color="favorite ? 'primary' : undefined"
+        class="pokemon-hero__favorite"
+        :aria-pressed="favorite ?? false"
+        :aria-label="t('favorites.toggle', { name })"
+        :title="t('favorites.title')"
+        @click="emit('toggleFavorite')"
       />
     </div>
     <v-card-item>
@@ -128,6 +145,12 @@ const caughtLabel = computed(() => {
   position: absolute;
   top: 12px;
   right: 12px;
+}
+
+.pokemon-hero__favorite {
+  position: absolute;
+  top: 12px;
+  left: 12px;
 }
 
 .pokemon-hero__exclusive {

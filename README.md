@@ -43,6 +43,12 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
 - **Filtro por tipo**: chip "Tipo" abre um seletor com os 18 tipos; dá para escolher até dois
   (o Pokémon precisa ter os dois, ex.: Água/Terra). Combina com jogo, busca e captura e vai na URL
   (`?type=water,ground`). Não faz requisição: usa o mapa de tipos que já fica em cache.
+- **Filtros e ordenação** (chip "Filtros", também no team builder): ordenar por número, nome, total de
+  stats, cada stat, altura ou peso (o card mostra o valor), e filtrar por geração, categoria
+  (lendário, mítico, bebê, comum), "fraco a" um tipo (com a tabela da geração do jogo), habilidade,
+  total mínimo e só favoritos. Tudo na URL (`?sort=total&desc=1&gen=1&cat=legendary`). Os stats e
+  habilidades vêm de uma tabela gerada (~26 KB gz) baixada só quando algum desses filtros é usado.
+- **Favoritos**: coração no detalhe; o menu tem o atalho "Favoritos" (`/?fav=1`).
 - **Team builder** (`/team`): monte um time de até 6 Pokémon tocando nos cards da mesma listagem
   filtrada (jogo, Pokédex, versão, tipo, busca, capturados). No celular, uma bandeja fixa no rodapé
   mostra os 6 slots enquanto a lista rola e abre um sheet com o time completo; no desktop, o time
@@ -120,7 +126,6 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
 
 ### Roadmap
 
-- Favoritos.
 
 ## Dados gerados
 

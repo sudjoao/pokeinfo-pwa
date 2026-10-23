@@ -6,6 +6,7 @@ import { mdiChevronLeft, mdiChevronRight, mdiVolumeHigh, mdiVolumeOff } from '@m
 import { usePokemonDetail, type NeighborEntry } from '@/composables/usePokemonDetail'
 import { useCry } from '@/composables/useCry'
 import { useCaughtStore } from '@/stores/caught'
+import { useFavoritesStore } from '@/stores/favorites'
 import { useDexLabel } from '@/composables/useDexLabel'
 import { gameContextFromQuery, gameContextQuery } from '@/utils/games'
 import { exclusiveVersionOf } from '@/utils/exclusives'
@@ -129,6 +130,9 @@ const showVarieties = computed(() => (species.value?.varieties.length ?? 0) > 1)
 /** Artwork shiny no hero; continua ligado ao navegar entre Pokémon (para comparar shinies). */
 const shiny = ref(false)
 
+const favorites = useFavoritesStore()
+const favorite = computed(() => (detail.value ? favorites.isFavorite(detail.value.id) : false))
+
 const ability = useAbilityInfo()
 const egg = useEggCompatibility()
 </script>
@@ -200,6 +204,8 @@ const egg = useEggCompatibility()
             :cry-playing="cry.playing.value"
             :cry-muted="cry.muted.value"
             :shiny="shiny"
+            :favorite="favorite"
+            @toggle-favorite="favorites.toggle(detail.id)"
             @play-cry="cry.play(detail.id, detail.cryUrl ?? undefined)"
             @toggle-caught="toggleCaught"
             @toggle-shiny="shiny = !shiny"

@@ -2,6 +2,7 @@
 import { useI18n } from 'vue-i18n'
 import {
   mdiBookOpenVariant,
+  mdiHeartOutline,
   mdiDatabaseArrowDownOutline,
   mdiInformationOutline,
   mdiSwordCross,
@@ -39,6 +40,13 @@ function then(action: () => void): void {
         :title="t('menu.pokedex')"
         :to="{ name: 'home' }"
         exact
+        rounded="lg"
+        @click="open = false"
+      />
+      <v-list-item
+        :prepend-icon="mdiHeartOutline"
+        :title="t('favorites.title')"
+        :to="{ name: 'home', query: { fav: '1' } }"
         rounded="lg"
         @click="open = false"
       />

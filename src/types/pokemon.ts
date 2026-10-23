@@ -49,6 +49,8 @@ export interface PokemonListItem extends PokemonSummary {
   speciesId?: number
   /** Título da versão em que a espécie é exclusiva no jogo selecionado (ex.: "Sword"). */
   exclusiveTo?: string
+  /** Critério de ordenação já formatado (ex.: "Total 600", "1,7 m"), mostrado no card. */
+  sortLabel?: string
 }
 
 export const STAT_NAMES = [

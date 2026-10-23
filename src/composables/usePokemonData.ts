@@ -37,10 +37,6 @@ export function rowStats(row: PokemonDataRow): PokemonStat[] {
   return STAT_NAMES.map((name, index) => ({ name, value: row[index] as number }))
 }
 
-export function rowTotal(row: PokemonDataRow): number {
-  return row[0] + row[1] + row[2] + row[3] + row[4] + row[5]
-}
-
 /** Ids (formas incluídas) que têm a habilidade, com a marca de oculta. */
 export function pokemonWithAbility(
   data: PokemonDataTable,

@@ -1,13 +1,27 @@
-import { computed, ref, shallowRef, watch } from 'vue'
+import { computed, ref, shallowRef, toRaw, watch } from 'vue'
 import { useRoute, useRouter, type LocationQuery, type LocationQueryRaw } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { GAMES, type Game, type GameDex } from '@/data/games'
 import { usePokedexStore } from '@/stores/pokedex'
 import { useCaughtStore } from '@/stores/caught'
+import { useFavoritesStore } from '@/stores/favorites'
+import { usePokemonData } from '@/composables/usePokemonData'
+import {
+  ADVANCED_QUERY_KEYS,
+  activeCount,
+  advancedToQuery,
+  applyAdvanced,
+  EMPTY_ADVANCED,
+  needsTable,
+  parseAdvanced,
+  sortValue,
+  type AdvancedFilters,
+  type SortKey,
+} from '@/utils/advancedFilters'
 import { useDebouncedRef } from '@/composables/useDebouncedRef'
 import { buildDexList, findGame, resolveDex } from '@/utils/games'
 import { describeError } from '@/utils/errors'
-import { isPokemonType } from '@/utils/pokemon'
+import { formatHeight, formatWeight, isPokemonType } from '@/utils/pokemon'
 import { exclusiveVersionOf, exclusiveVersions } from '@/utils/exclusives'
 import type { ExclusiveVersion } from '@/data/exclusives'
 import type { PokemonIndexEntry, PokemonListItem, PokemonType } from '@/types/pokemon'
@@ -76,12 +90,12 @@ function availabilityOf(gameSlug: string | undefined, speciesId: number): string
 }
 
 /** Parâmetros da URL que esta lista controla; os demais (ex.: `team`) são preservados. */
-const OWN_QUERY_KEYS = ['q', 'game', 'dex', 'caught', 'type', 'versions'] as const
+const OWN_QUERY_KEYS = ['q', 'game', 'dex', 'caught', 'type', 'versions', ...ADVANCED_QUERY_KEYS]
 
 function foreignQuery(query: LocationQuery): LocationQueryRaw {
   const result: LocationQueryRaw = {}
   for (const [key, value] of Object.entries(query)) {
-    if (!(OWN_QUERY_KEYS as readonly string[]).includes(key)) result[key] = value
+    if (!OWN_QUERY_KEYS.includes(key)) result[key] = value
   }
   return result
 }
@@ -94,9 +108,22 @@ function foreignQuery(query: LocationQuery): LocationQueryRaw {
 export function usePokemonList() {
   const store = usePokedexStore()
   const caughtStore = useCaughtStore()
+  const favoritesStore = useFavoritesStore()
+  const pokemonData = usePokemonData()
   const route = useRoute()
   const router = useRouter()
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
+
+  /** Rótulo do critério de ordenação para o card; null na ordem por número ou nome. */
+  function sortLabelOf(id: number, sort: SortKey): string | undefined {
+    if (sort === 'number' || sort === 'name') return undefined
+    const value = sortValue(pokemonData.table.value?.rows[id], sort)
+    if (value === null) return undefined
+    if (sort === 'height') return formatHeight(value / 10, locale.value)
+    if (sort === 'weight') return formatWeight(value / 10, locale.value)
+    const name = sort === 'total' ? t('filters.sort.total') : t(`stat.${sort}`)
+    return `${name} ${value}`
+  }
 
   const query = ref(queryParam(route.query.q) ?? '')
   const debouncedQuery = useDebouncedRef(query, 300)
@@ -128,6 +155,48 @@ export function usePokemonList() {
   /** Filtro já validado contra o jogo atual (chaves de outro jogo são ignoradas). */
   const activeAvailability = computed(() =>
     game.value ? availability.value.filter((key) => availabilityKeys.value.includes(key)) : [],
+  )
+
+  /** Ordenação e filtros do botão "Filtros" (geração, categoria, fraqueza, habilidade…). */
+  const advanced = ref<AdvancedFilters>(parseAdvanced(route.query))
+  const advancedCount = computed(() => activeCount(advanced.value))
+
+  function setAdvanced(value: AdvancedFilters): void {
+    advanced.value = value
+  }
+
+  function clearAdvanced(): void {
+    advanced.value = { ...EMPTY_ADVANCED }
+  }
+
+  // Links de fora da lista (ex.: "Favoritos" no menu, `/?fav=1`) mudam a URL com a tela já viva
+  // (a Home fica em KeepAlive). Só reage na própria rota: a Home em cache continua observando a
+  // URL enquanto o team builder está aberto.
+  const ownRoute = route.name
+  watch(
+    () => route.query,
+    (query) => {
+      if (route.name !== ownRoute) return
+      const parsed = parseAdvanced(query)
+      const same =
+        JSON.stringify(advancedToQuery(parsed)) === JSON.stringify(advancedToQuery(advanced.value))
+      if (!same) advanced.value = parsed
+    },
+  )
+
+  // A tabela de stats/habilidades só é baixada quando algum filtro precisa dela.
+  const tableLoading = ref(false)
+  watch(
+    advanced,
+    (value) => {
+      if (!needsTable(value) || pokemonData.table.value) return
+      tableLoading.value = true
+      pokemonData
+        .load()
+        .catch(() => {})
+        .finally(() => (tableLoading.value = false))
+    },
+    { immediate: true },
   )
 
   function setGame(slug: string | null): void {
@@ -213,13 +282,22 @@ export function usePokemonList() {
     const types = typeFilter.value
     const gameKey = game.value?.slug
     const groups = activeAvailability.value
-    return source.value.filter((entry) => {
+    const basic = source.value.filter((entry) => {
       if (!matches(entry)) return false
       if (status !== null && caught.has(speciesOf(entry)) !== (status === 'caught')) return false
       if (groups.length && !groups.includes(availabilityOf(gameKey, speciesOf(entry)))) return false
       if (types.length === 0) return true
       const own = store.typesOf(entry.id)
       return own !== undefined && types.every((type) => own.includes(type))
+    })
+    const table = pokemonData.table.value
+    return applyAdvanced(basic, advanced.value, {
+      rows: table?.rows ?? null,
+      abilityIndex: table?.abilityIndex ?? null,
+      typesOf: (id) => store.typesOf(id),
+      // Sem rastreamento, pelo mesmo motivo da captura: desfavoritar não encolhe a lista no meio.
+      favorites: toRaw(favoritesStore.ids),
+      generation: game.value?.generation,
     })
   })
 
@@ -262,7 +340,7 @@ export function usePokemonList() {
   /** Muda a cada reset; usado como :key para reiniciar o scroll infinito. */
   const listKey = ref(0)
 
-  const sourceLoading = computed(() => store.loading || dexLoading.value)
+  const sourceLoading = computed(() => store.loading || dexLoading.value || tableLoading.value)
   const sourceError = computed(() => {
     const error = store.sourceError ?? dexError.value
     return error ? describeError(error, t, 'error.loadDex') : null
@@ -306,6 +384,7 @@ export function usePokemonList() {
             dexNumber: entry?.dexNumber,
             speciesId: entry?.speciesId,
             exclusiveTo: entry ? exclusiveVersionOf(gameKey, speciesOf(entry))?.title : undefined,
+            sortLabel: sortLabelOf(summary.id, advanced.value.sort),
           }
         }),
       ]
@@ -349,7 +428,7 @@ export function usePokemonList() {
       if (activeAvailability.value.length) result.versions = activeAvailability.value.join(',')
     }
     if (typeFilter.value.length) result.type = typeFilter.value.join(',')
-    return result
+    return { ...result, ...advancedToQuery(advanced.value) }
   }
 
   watch(
@@ -360,6 +439,7 @@ export function usePokemonList() {
       caughtFilter,
       typeFilter,
       activeAvailability,
+      advanced,
     ],
     () => {
       router.replace({ query: { ...foreignQuery(route.query), ...buildQuery() } })
@@ -369,10 +449,21 @@ export function usePokemonList() {
   watch(dex, () => loadDex())
 
   // Qualquer filtro novo reinicia a lista e volta ao topo (a URL muda por replace, que não rola).
-  watch([source, normalizedQuery, caughtFilter, typeFilter, activeAvailability], () => {
-    reset()
-    window.scrollTo({ top: 0 })
-  })
+  watch(
+    [
+      source,
+      normalizedQuery,
+      caughtFilter,
+      typeFilter,
+      activeAvailability,
+      advanced,
+      () => pokemonData.table.value,
+    ],
+    () => {
+      reset()
+      window.scrollTo({ top: 0 })
+    },
+  )
 
   store.load()
   loadDex()
@@ -398,6 +489,10 @@ export function usePokemonList() {
     caughtCount,
     missingCount,
     toggleCaught,
+    advanced,
+    advancedCount,
+    setAdvanced,
+    clearAdvanced,
     filtered,
     items,
     status,

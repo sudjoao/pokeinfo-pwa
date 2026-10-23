@@ -484,5 +484,38 @@
     "boxes": "Boxes (living dex)",
     "box": "Box {n}",
     "caught": "{caught}/{total}"
+  },
+  "filters": {
+    "chip": "Filters",
+    "chipActive": "Filters ({n})",
+    "title": "Filters and sorting",
+    "sortBy": "Sort by",
+    "direction": "Direction",
+    "asc": "Ascending",
+    "desc": "Descending",
+    "favorites": "Favorites only",
+    "generation": "Generation",
+    "category": "Category",
+    "weakTo": "Weak to",
+    "weakToHint": "Pokémon that take super effective damage from this type.",
+    "ability": "Ability",
+    "minTotal": "Minimum base stat total: {n}",
+    "sort": {
+      "number": "Number",
+      "name": "Name",
+      "total": "Base stat total",
+      "height": "Height",
+      "weight": "Weight"
+    },
+    "categories": {
+      "legendary": "Legendary",
+      "mythical": "Mythical",
+      "baby": "Baby",
+      "regular": "Regular"
+    }
+  },
+  "favorites": {
+    "title": "Favorites",
+    "toggle": "Favorite {name}"
   }
 }
