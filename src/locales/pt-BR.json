@@ -1003,5 +1003,15 @@
     "title": "Vistos recentemente",
     "searches": "Buscas recentes",
     "clearSearches": "Limpar buscas recentes"
+  },
+  "shareImage": {
+    "title": "Imagem para compartilhar",
+    "button": "Imagem",
+    "link": "Link",
+    "error": "Não foi possível gerar a imagem.",
+    "downloaded": "Imagem baixada.",
+    "teamTitle": "Meu time",
+    "teamAlt": "Imagem do time: {names}",
+    "pokemonAlt": "Imagem de {name} com tipos e stats"
   }
 }

@@ -2,7 +2,14 @@
 import { computed, defineAsyncComponent, nextTick, ref, useTemplateRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { mdiChevronLeft, mdiChevronRight, mdiCompareHorizontal, mdiShareVariant } from '@mdi/js'
+import {
+  mdiChevronLeft,
+  mdiChevronRight,
+  mdiCompareHorizontal,
+  mdiImageOutline,
+  mdiLinkVariant,
+  mdiShareVariant,
+} from '@mdi/js'
 import { usePokemonDetail, type NeighborEntry } from '@/composables/usePokemonDetail'
 import { useCry } from '@/composables/useCry'
 import { announce } from '@/composables/useAnnouncer'
@@ -19,6 +26,7 @@ import { formatDexNumber, formatPokemonName } from '@/utils/pokemon'
 import { LATEST_GENERATION } from '@/utils/typeChart'
 import { useMountOnOpen } from '@/composables/useMountOnOpen'
 import { useRecentStore } from '@/stores/recent'
+import { useShareImage } from '@/composables/useShareImage'
 import { useAbilityInfo } from '@/composables/useAbilityInfo'
 import { useEggCompatibility } from '@/composables/useEggCompatibility'
 import { useSwipe } from '@/composables/useSwipe'
@@ -45,6 +53,9 @@ import PokemonDetailSkeleton from '@/components/organisms/PokemonDetailSkeleton.
 const MovesCard = defineAsyncComponent(() => import('@/components/organisms/MovesCard.vue'))
 const SpritesCard = defineAsyncComponent(() => import('@/components/organisms/SpritesCard.vue'))
 const HeldItemsCard = defineAsyncComponent(() => import('@/components/organisms/HeldItemsCard.vue'))
+const ShareImageDialog = defineAsyncComponent(
+  () => import('@/components/organisms/ShareImageDialog.vue'),
+)
 const CaptureSheet = defineAsyncComponent(() => import('@/components/organisms/CaptureSheet.vue'))
 const GenerationChangesCard = defineAsyncComponent(
   () => import('@/components/organisms/GenerationChangesCard.vue'),
@@ -233,12 +244,58 @@ function share(): void {
     else if (result === 'failed') notice.value = t('common.shareFailed')
   })
 }
+
+const shareImage = useShareImage()
+const shareImageMounted = useMountOnOpen(shareImage.open)
+
+function openShareImage(): void {
+  const current = detail.value
+  if (!current) return
+  shareImage.generate(
+    async () => {
+      const { pokemonImage } = await import('@/utils/shareImage')
+      return pokemonImage(current, {
+        title: 'PokeInfo',
+        subtitle: context.value?.game.title,
+        type: (type) => t(`type.${type}`),
+        stat: (name) => t(`statShort.${name}`),
+        footer: window.location.host,
+      })
+    },
+    `pokeinfo-${current.name}.png`,
+    title.value,
+  )
+}
+
+async function sendShareImage(): Promise<void> {
+  const result = await shareImage.share()
+  if (result === 'downloaded') notice.value = t('shareImage.downloaded')
+  else if (result === 'failed') notice.value = t('common.shareFailed')
+  else if (result === 'shared') shareImage.open.value = false
+}
 </script>
 
 <template>
   <DetailLayout :title="title" :ready="status !== 'loading'" @back="goBack">
     <template #actions>
-      <v-btn v-if="detail" :icon="mdiShareVariant" :aria-label="t('common.share')" @click="share" />
+      <v-menu v-if="detail" location="bottom end">
+        <template #activator="{ props: menuProps }">
+          <v-btn v-bind="menuProps" :icon="mdiShareVariant" :aria-label="t('common.share')" />
+        </template>
+        <v-list density="compact">
+          <v-list-item
+            :prepend-icon="mdiLinkVariant"
+            :title="t('shareImage.link')"
+            @click="share"
+          />
+          <v-list-item
+            :prepend-icon="mdiImageOutline"
+            :title="t('shareImage.button')"
+            aria-haspopup="dialog"
+            @click="openShareImage"
+          />
+        </v-list>
+      </v-menu>
       <v-btn
         v-if="detail"
         :icon="mdiCompareHorizontal"
@@ -455,6 +512,14 @@ function share(): void {
           :holders="ability.holders.value"
           @select="goTo"
           @retry="ability.retry"
+        />
+        <ShareImageDialog
+          v-if="shareImageMounted"
+          v-model="shareImage.open.value"
+          :status="shareImage.status.value"
+          :url="shareImage.url.value"
+          :alt="t('shareImage.pokemonAlt', { name: formatPokemonName(detail.name) })"
+          @share="sendShareImage"
         />
         <CaptureSheet
           v-if="captureMounted && species"

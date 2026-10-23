@@ -1003,5 +1003,15 @@
     "title": "Recently viewed",
     "searches": "Recent searches",
     "clearSearches": "Clear recent searches"
+  },
+  "shareImage": {
+    "title": "Image to share",
+    "button": "Image",
+    "link": "Link",
+    "error": "Could not create the image.",
+    "downloaded": "Image downloaded.",
+    "teamTitle": "My team",
+    "teamAlt": "Team image: {names}",
+    "pokemonAlt": "Image of {name} with types and stats"
   }
 }

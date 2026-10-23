@@ -3,6 +3,7 @@ import {
   mdiContentCopy,
   mdiDeleteSweepOutline,
   mdiImport,
+  mdiImageOutline,
   mdiShareVariant,
   mdiSpeedometer,
 } from '@mdi/js'
@@ -33,6 +34,7 @@ const emit = defineEmits<{
   exportShowdown: []
   importShowdown: []
   share: []
+  shareImage: []
 }>()
 
 const { t } = useI18n()
@@ -100,6 +102,16 @@ function clear(): void {
           @click="emit('share')"
         >
           {{ t('team.share') }}
+        </v-btn>
+        <v-btn
+          v-if="members.length"
+          variant="tonal"
+          size="small"
+          :prepend-icon="mdiImageOutline"
+          aria-haspopup="dialog"
+          @click="emit('shareImage')"
+        >
+          {{ t('shareImage.button') }}
         </v-btn>
         <v-btn
           v-if="members.length"

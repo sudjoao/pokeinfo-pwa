@@ -39,3 +39,34 @@ export async function shareText(text: string): Promise<ShareResult> {
     return 'failed'
   }
 }
+
+/**
+ * Compartilha um arquivo (ex.: a imagem do time) pela folha nativa; onde não dá para mandar
+ * arquivos (Firefox, desktop sem Web Share), baixa o arquivo.
+ */
+export async function shareFile(
+  blob: Blob,
+  fileName: string,
+  title: string,
+): Promise<ShareResult | 'downloaded'> {
+  const file = new File([blob], fileName, { type: blob.type })
+  if (typeof navigator.canShare === 'function' && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file], title })
+      return 'shared'
+    } catch (error) {
+      if ((error as DOMException)?.name === 'AbortError') return 'cancelled'
+    }
+  }
+  try {
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = fileName
+    link.click()
+    setTimeout(() => URL.revokeObjectURL(url), 1000)
+    return 'downloaded'
+  } catch {
+    return 'failed'
+  }
+}

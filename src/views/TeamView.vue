@@ -13,6 +13,9 @@ import { suggestCounters } from '@/utils/typeChart'
 import ShowdownImportDialog from '@/components/organisms/ShowdownImportDialog.vue'
 import BackToTop from '@/components/atoms/BackToTop.vue'
 import { shareLink } from '@/composables/useShare'
+import { useShareImage } from '@/composables/useShareImage'
+import ShareImageDialog from '@/components/organisms/ShareImageDialog.vue'
+import { formatPokemonName } from '@/utils/pokemon'
 import type { PokemonSummary } from '@/types/pokemon'
 import DetailLayout from '@/components/templates/DetailLayout.vue'
 import SearchField from '@/components/molecules/SearchField.vue'
@@ -114,6 +117,37 @@ function shareTeam(): void {
     if (result === 'copied') notice.value = t('common.linkCopied')
     else if (result === 'failed') notice.value = t('common.shareFailed')
   })
+}
+
+const shareImage = useShareImage()
+const shareImageAlt = computed(() =>
+  t('shareImage.teamAlt', {
+    names: team.members.value.map((member) => formatPokemonName(member.name)).join(', '),
+  }),
+)
+
+function openShareImage(): void {
+  const members = team.members.value
+  shareImage.generate(
+    async () => {
+      const { teamImage } = await import('@/utils/shareImage')
+      return teamImage(members, {
+        title: t('shareImage.teamTitle'),
+        subtitle: game.value?.title,
+        type: (type) => t(`type.${type}`),
+        footer: `PokeInfo · ${window.location.host}`,
+      })
+    },
+    'pokeinfo-time.png',
+    t('team.share'),
+  )
+}
+
+async function sendShareImage(): Promise<void> {
+  const result = await shareImage.share()
+  if (result === 'downloaded') notice.value = t('shareImage.downloaded')
+  else if (result === 'failed') notice.value = t('common.shareFailed')
+  else if (result === 'shared') shareImage.open.value = false
 }
 
 function copyShowdown(): void {
@@ -248,6 +282,7 @@ function goBack(): void {
             @export-showdown="copyShowdown"
             @import-showdown="importOpen = true"
             @share="shareTeam"
+            @share-image="openShareImage"
           />
         </div>
       </v-col>
@@ -274,6 +309,7 @@ function goBack(): void {
               @export-showdown="copyShowdown"
               @import-showdown="importOpen = true"
               @share="shareTeam"
+              @share-image="openShareImage"
             />
           </v-card-text>
           <v-card-actions class="team-view__sheet-actions">
@@ -327,6 +363,13 @@ function goBack(): void {
     />
     <AppNotice :text="notice" location="top" @close="notice = null" />
     <ShowdownImportDialog v-model="importOpen" @import="pasteShowdown" />
+    <ShareImageDialog
+      v-model="shareImage.open.value"
+      :status="shareImage.status.value"
+      :url="shareImage.url.value"
+      :alt="shareImageAlt"
+      @share="sendShareImage"
+    />
     <BackToTop :offset="mdAndUp ? 0 : 72" />
   </DetailLayout>
 </template>
