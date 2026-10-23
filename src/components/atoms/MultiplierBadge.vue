@@ -1,10 +1,15 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { formatMultiplier } from '@/utils/typeChart'
 
 const props = defineProps<{ multiplier: number }>()
 
+const { n } = useI18n()
+
 const label = computed(() => formatMultiplier(props.multiplier))
+/** "0,25×" em pt-BR/es (o rótulo visual usa ¼ e ½). */
+const spoken = computed(() => `${n(props.multiplier)}×`)
 
 /**
  * Faixa do multiplicador, para a cor: fraqueza em vermelho, resistência em verde, imune em cinza.
@@ -27,7 +32,7 @@ const level = computed(() => {
     class="multiplier-badge text-label-medium"
     :class="`multiplier-badge--${level}`"
     role="img"
-    :aria-label="`${multiplier}×`"
+    :aria-label="spoken"
   >
     {{ label || '·' }}
   </span>

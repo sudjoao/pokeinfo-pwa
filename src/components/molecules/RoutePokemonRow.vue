@@ -29,7 +29,7 @@ const onlyIn = computed(() =>
 
 <template>
   <li class="route-pokemon-row stretched-host d-flex align-center ga-3">
-    <PokemonArtwork :id="pokemon.id" :alt="name" :size="48" />
+    <PokemonArtwork :id="pokemon.id" alt="" :size="48" />
     <div class="flex-grow-1 min-width-0">
       <div class="d-flex align-baseline flex-wrap gc-2">
         <button

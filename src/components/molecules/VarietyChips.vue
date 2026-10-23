@@ -20,7 +20,7 @@ function label(variety: PokemonVariety, speciesName: string): string {
 
 <template>
   <v-card>
-    <v-card-title class="text-title-medium">{{ t('detail.forms') }}</v-card-title>
+    <v-card-title tag="h2" class="text-title-medium">{{ t('detail.forms') }}</v-card-title>
     <v-card-text class="d-flex flex-wrap ga-2">
       <v-chip
         v-for="variety in varieties"

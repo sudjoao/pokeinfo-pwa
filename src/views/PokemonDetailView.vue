@@ -43,7 +43,7 @@ const MovesCard = defineAsyncComponent(() => import('@/components/organisms/Move
 
 const route = useRoute()
 const router = useRouter()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const { dexLabel } = useDexLabel()
 
 const idParam = computed(() => String(route.params.id ?? ''))
@@ -109,10 +109,17 @@ const exclusiveTo = computed(() =>
 
 const title = computed(() => (detail.value ? formatPokemonName(detail.value.name) : t('app.name')))
 
+watch(
+  [detail, locale],
+  ([value]) => {
+    document.title = value
+      ? t('app.detailTitle', { name: formatPokemonName(value.name) })
+      : t('app.dexTitle')
+  },
+  { immediate: true },
+)
+
 watch(detail, (value) => {
-  document.title = value
-    ? t('app.detailTitle', { name: formatPokemonName(value.name) })
-    : t('app.dexTitle')
   // Se a tela foi aberta por um toque no card, o grito já tocou dentro do gesto;
   // aqui cobrimos a abertura por URL direta (o iOS pode recusar sem gesto, e tudo bem).
   if (value) cry.autoPlay(value.id, value.cryUrl)
@@ -312,11 +319,15 @@ function share(): void {
 
           <v-col cols="12">
             <v-card v-if="chainStatus === 'loading'">
-              <v-card-title class="text-title-medium">{{ t('detail.evolution') }}</v-card-title>
+              <v-card-title tag="h2" class="text-title-medium">{{
+                t('detail.evolution')
+              }}</v-card-title>
               <v-skeleton-loader aria-hidden="true" type="list-item-avatar-two-line@2" />
             </v-card>
             <v-card v-else-if="chainStatus === 'error' || !chain">
-              <v-card-title class="text-title-medium">{{ t('detail.evolution') }}</v-card-title>
+              <v-card-title tag="h2" class="text-title-medium">{{
+                t('detail.evolution')
+              }}</v-card-title>
               <v-card-text class="d-flex flex-column align-start ga-2">
                 <span>{{ t('detail.evolutionError') }}</span>
                 <v-btn color="primary" variant="tonal" size="small" @click="retry">
@@ -374,6 +385,7 @@ function share(): void {
           v-model="ability.open.value"
           :title="ability.title.value"
           :description="ability.description.value"
+          :description-lang="ability.descriptionLang.value"
           :status="ability.status.value"
           :holders="ability.holders.value"
           @select="goTo"

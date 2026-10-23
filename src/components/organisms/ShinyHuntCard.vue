@@ -51,7 +51,7 @@ const byNow = computed(() =>
 
 <template>
   <v-card>
-    <v-card-title class="text-title-medium d-flex align-center ga-2">
+    <v-card-title tag="h2" class="text-title-medium d-flex align-center ga-2">
       <v-icon :icon="mdiShimmer" size="20" />
       {{ t('shiny.title', { game: gameTitle }) }}
     </v-card-title>

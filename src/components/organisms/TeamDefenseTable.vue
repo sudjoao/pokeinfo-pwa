@@ -19,32 +19,38 @@ const { t } = useI18n()
     <v-table density="compact" class="team-defense__table">
       <thead>
         <tr>
-          <th class="text-left">{{ t('team.attack') }}</th>
-          <th v-for="member in members" :key="member.id" class="text-center px-1">
+          <th scope="col" class="text-left">{{ t('team.attack') }}</th>
+          <th v-for="member in members" :key="member.id" scope="col" class="text-center px-1">
             <PokemonAvatar :id="member.id" :name="member.name" :size="28" />
           </th>
-          <th class="text-center px-1 team-defense__count text-label-small">
+          <th scope="col" class="text-center px-1 team-defense__count text-label-small">
             {{ t('team.weak') }}
           </th>
-          <th class="text-center px-1 team-defense__count text-label-small">
+          <th scope="col" class="text-center px-1 team-defense__count text-label-small">
             {{ t('team.resist') }}
           </th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="row in rows" :key="row.type">
-          <td class="pe-1"><TypeChip :type="row.type" size="x-small" /></td>
+          <th scope="row" class="pe-1"><TypeChip :type="row.type" size="x-small" /></th>
           <td v-for="(multiplier, i) in row.multipliers" :key="i" class="text-center px-1">
             <MultiplierBadge :multiplier="multiplier" />
           </td>
           <td class="text-center px-1 team-defense__count" :class="{ 'text-error': row.weak }">
-            {{ row.weak || '·' }}
+            <template v-if="row.weak">{{ row.weak }}</template>
+            <template v-else
+              ><span aria-hidden="true">·</span><span class="d-sr-only">0</span></template
+            >
           </td>
           <td
             class="text-center px-1 team-defense__count"
             :class="{ 'text-success': row.resistant }"
           >
-            {{ row.resistant || '·' }}
+            <template v-if="row.resistant">{{ row.resistant }}</template>
+            <template v-else
+              ><span aria-hidden="true">·</span><span class="d-sr-only">0</span></template
+            >
           </td>
         </tr>
       </tbody>

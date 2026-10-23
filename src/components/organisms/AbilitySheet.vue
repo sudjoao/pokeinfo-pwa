@@ -9,6 +9,8 @@ import { useOverlayFocusReturn } from '@/composables/useOverlayFocusReturn'
 const props = defineProps<{
   title: string
   description: string | null
+  /** Idioma da descrição ('en' quando a interface está em pt-BR). */
+  descriptionLang?: string
   status: 'loading' | 'ready' | 'error'
   /** Pokémon (e formas) que têm a habilidade; null enquanto a tabela carrega. */
   holders: readonly (PokemonButtonItem & { hidden: boolean })[] | null
@@ -45,12 +47,14 @@ function select(id: number): void {
             {{ t('common.retry') }}
           </v-btn>
         </div>
-        <p v-else class="text-body-large">{{ description ?? t('ability.noDescription') }}</p>
+        <p v-else class="text-body-large" :lang="description ? descriptionLang : undefined">
+          {{ description ?? t('ability.noDescription') }}
+        </p>
 
         <template v-if="holders">
-          <h3 class="text-title-small mt-4 mb-2">
+          <h2 class="text-title-small mt-4 mb-2">
             {{ t('ability.pokemonWith', { n: holders.length }) }}
-          </h3>
+          </h2>
           <PokemonButtonGrid :items="items" @select="select" />
         </template>
       </v-card-text>

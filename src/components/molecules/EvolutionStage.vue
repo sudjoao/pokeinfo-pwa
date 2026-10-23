@@ -36,7 +36,7 @@ const enterDelay = computed(() => `${(props.depth ?? 0) * 90}ms`)
     :link="!current"
     :aria-current="current ? 'page' : undefined"
   >
-    <PokemonArtwork :id="speciesId" :alt="label" :size="96" />
+    <PokemonArtwork :id="speciesId" alt="" :size="96" />
     <DexNumber :id="speciesId" />
     <div class="text-title-small">
       <span v-if="current">{{ label }}</span>

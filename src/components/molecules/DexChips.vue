@@ -35,4 +35,9 @@ const { dexLabel } = useDexLabel()
   color: rgb(var(--v-theme-primary));
   font-weight: 500;
 }
+
+/* O primário do tema escuro (#ef4444) dá 4,4:1 sobre a superfície; o tom mais claro passa de 6:1. */
+.dex-chip--selected.v-theme--dark {
+  color: #f87171;
+}
 </style>

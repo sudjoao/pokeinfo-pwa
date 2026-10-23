@@ -511,7 +511,8 @@
     "cards": "Tarjetas",
     "boxes": "Cajas (living dex)",
     "box": "Caja {n}",
-    "caught": "{caught}/{total}"
+    "caught": "{caught}/{total}",
+    "caughtLong": "{caught} de {total} capturados"
   },
   "filters": {
     "chip": "Filtros",
@@ -576,7 +577,8 @@
     "empty": "Elige Pokémon arriba para comparar estadísticas, tipos, habilidades y debilidades.",
     "remove": "Quitar {name} de la comparación",
     "withThis": "Comparar con otro Pokémon",
-    "bestHint": "Resaltado: el valor más alto de cada fila."
+    "bestHint": "Resaltado: el valor más alto de cada fila.",
+    "best": "mayor"
   },
   "quiz": {
     "title": "¿Quién es ese Pokémon?",

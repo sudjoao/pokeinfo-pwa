@@ -159,7 +159,13 @@ function goBack(): void {
         <v-card>
           <v-card-text>
             <p v-if="!entries.length" class="mb-0 opacity-70">{{ t('types.empty') }}</p>
-            <MultiplierGroups v-else :entries="entries" :mode="mode" show-neutral />
+            <MultiplierGroups
+              v-else
+              :entries="entries"
+              :mode="mode"
+              :heading-level="2"
+              show-neutral
+            />
           </v-card-text>
         </v-card>
       </template>
@@ -173,8 +179,10 @@ function goBack(): void {
                 <tr>
                   <td />
                   <th v-for="defender in available" :key="defender" scope="col">
+                    <span class="d-sr-only">{{ t(`type.${defender}`) }}</span>
                     <abbr
                       class="types-chart__type"
+                      aria-hidden="true"
                       :title="t(`type.${defender}`)"
                       :style="{
                         background: TYPE_COLORS[defender],
@@ -188,8 +196,10 @@ function goBack(): void {
               <tbody>
                 <tr v-for="attacker in available" :key="attacker">
                   <th scope="row">
+                    <span class="d-sr-only">{{ t(`type.${attacker}`) }}</span>
                     <abbr
                       class="types-chart__type"
+                      aria-hidden="true"
                       :title="t(`type.${attacker}`)"
                       :style="{
                         background: TYPE_COLORS[attacker],

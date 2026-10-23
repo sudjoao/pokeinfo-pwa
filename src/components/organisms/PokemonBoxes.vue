@@ -68,7 +68,12 @@ function onCell(entry: BoxEntry): void {
         {{ t('boxes.box', { n: index + 1 }) }}
         <span class="text-label-medium opacity-70">{{ rangeOf(box) }}</span>
         <span v-if="caughtIds" class="text-label-medium opacity-70 ms-auto">
-          {{ t('boxes.caught', { caught: box.filter(isCaught).length, total: box.length }) }}
+          <span aria-hidden="true">{{
+            t('boxes.caught', { caught: box.filter(isCaught).length, total: box.length })
+          }}</span>
+          <span class="d-sr-only">{{
+            t('boxes.caughtLong', { caught: box.filter(isCaught).length, total: box.length })
+          }}</span>
         </span>
       </h2>
       <ul class="pokemon-boxes__grid">

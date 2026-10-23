@@ -22,7 +22,7 @@ const emit = defineEmits<{ select: [id: number] }>()
         class="pokemon-button-grid__item text-body-medium"
         @click="emit('select', item.id)"
       >
-        <PokemonAvatar :id="item.id" :name="item.name" :size="36" />
+        <PokemonAvatar :id="item.id" :name="item.name" :size="36" decorative />
         <span class="text-truncate">{{ formatPokemonName(item.name) }}</span>
         <span v-if="item.note" class="text-label-small opacity-70">{{ item.note }}</span>
       </button>

@@ -63,6 +63,10 @@ function best(values: (number | undefined)[]): number {
   return Math.max(...values.map((value) => value ?? -1))
 }
 
+function isBest(value: number | undefined, values: (number | undefined)[]): boolean {
+  return value !== undefined && value === best(values) && columns.value.length > 1
+}
+
 const statRows = computed(() => [
   ...STAT_NAMES.map((name, index) => ({
     key: name,
@@ -151,74 +155,105 @@ function goBack(): void {
 
       <v-card v-else>
         <v-card-text>
-          <div class="compare" :style="{ '--columns': columns.length }">
-            <div class="compare__head" />
-            <div v-for="column in columns" :key="column.id" class="compare__pokemon">
-              <v-btn
-                :icon="mdiClose"
-                size="small"
-                variant="text"
-                class="compare__remove"
-                :aria-label="t('compare.remove', { name: column.name })"
-                @click="remove(column.id)"
-              />
-              <PokemonArtwork :id="column.id" :alt="column.name" :size="88" />
-              <RouterLink
-                :to="{ name: 'pokemon', params: { id: column.id } }"
-                class="compare__name"
-              >
-                {{ column.name }}
-              </RouterLink>
-              <div class="d-flex flex-wrap justify-center ga-1 mt-1">
-                <TypeChip v-for="type in column.types" :key="type" :type="type" size="x-small" />
-              </div>
-            </div>
-
-            <template v-for="row in statRows" :key="row.key">
-              <div class="compare__label" :class="{ 'font-weight-bold': row.key === 'total' }">
-                {{ row.label }}
-              </div>
-              <div
-                v-for="(value, index) in row.values"
-                :key="index"
-                class="compare__value"
-                :class="{
-                  'compare__value--best':
-                    value !== undefined && value === best(row.values) && columns.length > 1,
-                }"
-              >
-                {{ value ?? '—' }}
-              </div>
-            </template>
-
-            <div class="compare__label">{{ t('detail.height') }}</div>
-            <div v-for="column in columns" :key="`h${column.id}`" class="compare__value">
-              {{ column.row ? formatHeight(column.row[6] / 10, locale) : '—' }}
-            </div>
-            <div class="compare__label">{{ t('detail.weight') }}</div>
-            <div v-for="column in columns" :key="`w${column.id}`" class="compare__value">
-              {{ column.row ? formatWeight(column.row[7] / 10, locale) : '—' }}
-            </div>
-            <div class="compare__label">{{ t('detail.abilities') }}</div>
-            <div
-              v-for="column in columns"
-              :key="`a${column.id}`"
-              class="compare__value text-body-small"
-            >
-              <span v-for="name in abilityNames(column)" :key="name" class="d-block">{{
-                name
-              }}</span>
-            </div>
-            <div class="compare__label">{{ t('detail.weakTo') }}</div>
-            <div v-for="column in columns" :key="`x${column.id}`" class="compare__value">
-              <ul class="compare__weak">
-                <li v-for="entry in weaknesses(column.types)" :key="entry.type">
-                  <TypeChip :type="entry.type" size="x-small" />
-                  <MultiplierBadge :multiplier="entry.multiplier" />
-                </li>
-              </ul>
-            </div>
-          </div>
+          <!-- Tabela de verdade: o leitor de tela anuncia "Ataque, Charizard: 84" ao navegar. -->
+          <table class="compare">
+            <caption class="d-sr-only">
+              {{
+                t('compare.title')
+              }}
+            </caption>
+            <colgroup>
+              <col class="compare__label-col" />
+              <col v-for="column in columns" :key="column.id" />
+            </colgroup>
+            <thead>
+              <tr>
+                <td />
+                <th v-for="column in columns" :key="column.id" scope="col" class="compare__pokemon">
+                  <v-btn
+                    :icon="mdiClose"
+                    size="small"
+                    variant="text"
+                    class="compare__remove"
+                    :aria-label="t('compare.remove', { name: column.name })"
+                    @click="remove(column.id)"
+                  />
+                  <PokemonArtwork :id="column.id" alt="" :size="88" />
+                  <RouterLink
+                    :to="{ name: 'pokemon', params: { id: column.id } }"
+                    class="compare__name"
+                  >
+                    {{ column.name }}
+                  </RouterLink>
+                  <div class="d-flex flex-wrap justify-center ga-1 mt-1">
+                    <TypeChip
+                      v-for="type in column.types"
+                      :key="type"
+                      :type="type"
+                      size="x-small"
+                    />
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="row in statRows" :key="row.key">
+                <th
+                  scope="row"
+                  class="compare__label"
+                  :class="{ 'font-weight-bold': row.key === 'total' }"
+                >
+                  {{ row.label }}
+                </th>
+                <td
+                  v-for="(value, index) in row.values"
+                  :key="index"
+                  class="compare__value"
+                  :class="{ 'compare__value--best': isBest(value, row.values) }"
+                >
+                  {{ value ?? '—' }}
+                  <span v-if="isBest(value, row.values)" class="d-sr-only">
+                    ({{ t('compare.best') }})
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <th scope="row" class="compare__label">{{ t('detail.height') }}</th>
+                <td v-for="column in columns" :key="column.id" class="compare__value">
+                  {{ column.row ? formatHeight(column.row[6] / 10, locale) : '—' }}
+                </td>
+              </tr>
+              <tr>
+                <th scope="row" class="compare__label">{{ t('detail.weight') }}</th>
+                <td v-for="column in columns" :key="column.id" class="compare__value">
+                  {{ column.row ? formatWeight(column.row[7] / 10, locale) : '—' }}
+                </td>
+              </tr>
+              <tr>
+                <th scope="row" class="compare__label">{{ t('detail.abilities') }}</th>
+                <td
+                  v-for="column in columns"
+                  :key="column.id"
+                  class="compare__value text-body-small"
+                >
+                  <span v-for="name in abilityNames(column)" :key="name" class="d-block">{{
+                    name
+                  }}</span>
+                </td>
+              </tr>
+              <tr>
+                <th scope="row" class="compare__label">{{ t('detail.weakTo') }}</th>
+                <td v-for="column in columns" :key="column.id" class="compare__value">
+                  <ul class="compare__weak">
+                    <li v-for="entry in weaknesses(column.types)" :key="entry.type">
+                      <TypeChip :type="entry.type" size="x-small" />
+                      <MultiplierBadge :multiplier="entry.multiplier" />
+                    </li>
+                  </ul>
+                </td>
+              </tr>
+            </tbody>
+          </table>
           <p class="text-body-small opacity-70 mt-3 mb-0">{{ t('compare.bestHint') }}</p>
         </v-card-text>
       </v-card>
@@ -228,15 +263,25 @@ function goBack(): void {
 
 <style scoped>
 .compare {
-  display: grid;
-  grid-template-columns: minmax(0, 0.8fr) repeat(var(--columns), minmax(0, 1fr));
-  gap: 8px 8px;
-  align-items: center;
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 4px 8px;
+}
+
+.compare th,
+.compare td {
+  vertical-align: middle;
+}
+
+.compare__label-col {
+  width: 24%;
 }
 
 .compare__pokemon {
   position: relative;
   text-align: center;
+  font-weight: inherit;
 }
 
 .compare__remove {
@@ -255,6 +300,8 @@ function goBack(): void {
 }
 
 .compare__label {
+  text-align: start;
+  font-weight: inherit;
   font-size: 0.8125rem;
   hyphens: auto;
   overflow-wrap: break-word;

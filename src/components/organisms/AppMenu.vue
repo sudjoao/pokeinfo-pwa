@@ -36,7 +36,8 @@ function then(action: () => void): void {
 </script>
 
 <template>
-  <v-navigation-drawer v-model="open" temporary :aria-label="t('menu.title')">
+  <!-- tag="div": o drawer seria um <nav> em volta do outro, com o mesmo rótulo. -->
+  <v-navigation-drawer v-model="open" temporary tag="div">
     <!-- role="navigation": o v-list põe role="list", que não aceita os links como filhos. -->
     <v-list nav density="comfortable" role="navigation" :aria-label="t('menu.title')">
       <v-list-subheader>PokeInfo</v-list-subheader>

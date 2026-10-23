@@ -16,6 +16,8 @@ const props = defineProps<{
   mode: 'defense' | 'attack'
   /** Mostra também o grupo neutro (1×). */
   showNeutral?: boolean
+  /** Nível dos títulos dos grupos (3 dentro de um card com h2; 2 quando o card não tem título). */
+  headingLevel?: 2 | 3
 }>()
 
 const { t } = useI18n()
@@ -48,7 +50,9 @@ const groups = computed(() => {
 <template>
   <div class="d-flex flex-column ga-3">
     <div v-for="group in groups" :key="group.key">
-      <h3 class="text-label-large mb-1">{{ group.label }}</h3>
+      <component :is="`h${headingLevel ?? 3}`" class="text-label-large mb-1">
+        {{ group.label }}
+      </component>
       <ul class="multiplier-groups__list">
         <li
           v-for="entry in group.entries"

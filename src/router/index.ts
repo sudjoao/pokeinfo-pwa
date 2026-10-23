@@ -1,3 +1,4 @@
+import { watch } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
 import { i18n } from '@/plugins/i18n'
@@ -50,12 +51,22 @@ const router = createRouter({
 
 trackInAppNavigation(router)
 
-router.afterEach((to) => {
-  if (to.name === 'home') document.title = i18n.global.t('app.dexTitle')
-  if (to.name === 'team') document.title = i18n.global.t('app.teamTitle')
-  if (to.name === 'types') document.title = i18n.global.t('app.typesTitle')
-  if (to.name === 'compare') document.title = i18n.global.t('app.compareTitle')
-  if (to.name === 'quiz') document.title = i18n.global.t('app.quizTitle')
-})
+/** Título da aba por tela; o do detalhe é definido pela própria view (leva o nome do Pokémon). */
+const ROUTE_TITLES: Partial<Record<string, string>> = {
+  home: 'app.dexTitle',
+  team: 'app.teamTitle',
+  types: 'app.typesTitle',
+  compare: 'app.compareTitle',
+  quiz: 'app.quizTitle',
+}
+
+function applyRouteTitle(): void {
+  const key = ROUTE_TITLES[String(router.currentRoute.value.name)]
+  if (key) document.title = i18n.global.t(key)
+}
+
+router.afterEach(applyRouteTitle)
+// Trocar o idioma também troca o título da aba (o leitor de tela anuncia o título da janela).
+watch(i18n.global.locale, applyRouteTitle)
 
 export default router

@@ -27,10 +27,10 @@ const accent = computed(() => TYPE_COLORS[props.member?.types[0] ?? 'unknown'])
 <template>
   <v-card v-if="member" class="team-slot stretched-host" :style="{ '--accent': accent }" hover link>
     <div class="team-slot__art pa-1">
-      <PokemonArtwork :id="member.id" :alt="name" :size="72" />
+      <PokemonArtwork :id="member.id" alt="" :size="72" />
       <v-btn
         :icon="mdiClose"
-        size="x-small"
+        size="small"
         variant="flat"
         color="surface"
         class="team-slot__remove"
@@ -40,12 +40,7 @@ const accent = computed(() => TYPE_COLORS[props.member?.types[0] ?? 'unknown'])
     </div>
     <div class="px-2 pb-2 pt-1">
       <div class="text-label-medium text-truncate" :title="name">
-        <button
-          type="button"
-          class="stretched-action"
-          :aria-label="t('team.open', { name })"
-          @click="emit('select', member)"
-        >
+        <button type="button" class="stretched-action" @click="emit('select', member)">
           {{ name }}
         </button>
       </div>

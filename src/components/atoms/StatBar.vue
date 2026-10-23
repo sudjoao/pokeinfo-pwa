@@ -28,7 +28,7 @@ const color = computed(() => statColor(props.value))
       height="8"
       rounded
       class="flex-grow-1"
-      :aria-label="`${label}: ${value}`"
+      aria-hidden="true"
     />
     <span v-if="range" class="stat-bar__range text-label-medium">
       <span class="d-sr-only">{{ t('detail.statsMin') }}</span

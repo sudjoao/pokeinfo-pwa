@@ -33,12 +33,16 @@ export function useAbilityInfo() {
     return es ?? formatPokemonName(slug)
   })
 
-  const description = computed(() => {
+  /** Descrição e o idioma em que ela veio (a PokéAPI não tem pt-BR; o es pode faltar). */
+  const descriptionEntry = computed(() => {
     const slug = ability.value?.name
     const entry = slug ? vocabulary.abilityDescriptions[slug] : undefined
     if (!entry) return null
-    return locale.value === 'es' ? (entry.effectEs ?? entry.effect) : entry.effect
+    if (locale.value === 'es' && entry.effectEs) return { text: entry.effectEs, lang: 'es' }
+    return entry.effect ? { text: entry.effect, lang: 'en' } : null
   })
+  const description = computed(() => descriptionEntry.value?.text ?? null)
+  const descriptionLang = computed(() => descriptionEntry.value?.lang)
 
   async function load(): Promise<void> {
     const slug = ability.value?.name
@@ -68,5 +72,15 @@ export function useAbilityInfo() {
     load()
   }
 
-  return { open, ability, title, description, status, holders, show, retry: load }
+  return {
+    open,
+    ability,
+    title,
+    description,
+    descriptionLang,
+    status,
+    holders,
+    show,
+    retry: load,
+  }
 }

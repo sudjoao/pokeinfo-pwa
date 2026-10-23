@@ -30,7 +30,7 @@ const category = computed(() => {
 
 <template>
   <v-card>
-    <v-card-title class="text-title-medium">{{ t('detail.about') }}</v-card-title>
+    <v-card-title tag="h2" class="text-title-medium">{{ t('detail.about') }}</v-card-title>
     <v-card-text>
       <div class="about-grid">
         <InfoTile :label="t('detail.height')" :value="height" />

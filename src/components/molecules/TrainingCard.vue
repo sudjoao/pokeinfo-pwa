@@ -42,7 +42,7 @@ const capture = computed(() => {
 
 <template>
   <v-card>
-    <v-card-title class="text-title-medium">{{ t('detail.training') }}</v-card-title>
+    <v-card-title tag="h2" class="text-title-medium">{{ t('detail.training') }}</v-card-title>
     <v-card-text>
       <div class="training-grid">
         <InfoTile :label="t('detail.evYield')" :value="evYield" />

@@ -22,6 +22,7 @@ const ranges = computed(() =>
 <template>
   <v-card>
     <v-card-title
+      tag="h2"
       class="text-title-medium d-flex justify-space-between align-center flex-wrap ga-2"
     >
       <span>{{ t('detail.stats') }}</span>

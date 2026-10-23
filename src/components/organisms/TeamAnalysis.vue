@@ -38,7 +38,7 @@ function suggestionItems(list: readonly CounterSuggestion[]) {
 <template>
   <div class="d-flex flex-column ga-4">
     <v-card>
-      <v-card-title class="text-title-medium">{{ t('team.threats') }}</v-card-title>
+      <v-card-title tag="h2" class="text-title-medium">{{ t('team.threats') }}</v-card-title>
       <v-card-text>
         <p v-if="threats.length === 0" class="mb-0 opacity-70">{{ t('team.noThreats') }}</p>
         <div v-else class="d-flex flex-wrap ga-2">
@@ -57,7 +57,7 @@ function suggestionItems(list: readonly CounterSuggestion[]) {
     </v-card>
 
     <v-card v-if="suggestions.length">
-      <v-card-title class="text-title-medium">{{ t('team.suggestions') }}</v-card-title>
+      <v-card-title tag="h2" class="text-title-medium">{{ t('team.suggestions') }}</v-card-title>
       <v-card-subtitle class="text-wrap">
         {{ full ? t('team.suggestionsFull') : t('team.suggestionsHint') }}
       </v-card-subtitle>
@@ -67,13 +67,13 @@ function suggestionItems(list: readonly CounterSuggestion[]) {
     </v-card>
 
     <v-card>
-      <v-card-title class="text-title-medium">{{ t('team.defense') }}</v-card-title>
+      <v-card-title tag="h2" class="text-title-medium">{{ t('team.defense') }}</v-card-title>
       <v-card-subtitle class="text-wrap">{{ t('team.defenseHint') }}</v-card-subtitle>
       <TeamDefenseTable :members="members" :rows="defense" class="mt-2" />
     </v-card>
 
     <v-card>
-      <v-card-title class="text-title-medium">{{ t('team.coverage') }}</v-card-title>
+      <v-card-title tag="h2" class="text-title-medium">{{ t('team.coverage') }}</v-card-title>
       <v-card-subtitle class="text-wrap">{{ t('team.coverageHint') }}</v-card-subtitle>
       <v-card-text>
         <div v-if="gaps.length" class="d-flex align-center flex-wrap ga-2 mb-4">

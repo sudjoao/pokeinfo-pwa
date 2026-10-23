@@ -39,7 +39,7 @@ const babyItem = computed(() => {
 
 <template>
   <v-card>
-    <v-card-title class="text-title-medium">{{ t('detail.evolution') }}</v-card-title>
+    <v-card-title tag="h2" class="text-title-medium">{{ t('detail.evolution') }}</v-card-title>
     <v-card-text>
       <p v-if="!hasEvolutions" class="text-body-medium opacity-70 mb-0">
         {{ t('detail.noEvolution') }}

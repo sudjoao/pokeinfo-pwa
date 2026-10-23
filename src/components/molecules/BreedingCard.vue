@@ -37,7 +37,7 @@ const canBreed = computed(() => !props.species.eggGroups.includes('no-eggs'))
 
 <template>
   <v-card>
-    <v-card-title class="text-title-medium">{{ t('detail.breeding') }}</v-card-title>
+    <v-card-title tag="h2" class="text-title-medium">{{ t('detail.breeding') }}</v-card-title>
     <v-card-text>
       <div class="breeding-grid">
         <InfoTile :label="t('detail.eggGroups')" :value="eggGroups" />

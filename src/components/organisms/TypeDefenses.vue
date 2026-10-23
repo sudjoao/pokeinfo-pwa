@@ -32,7 +32,7 @@ const note = computed(() =>
 
 <template>
   <v-card>
-    <v-card-title class="text-title-medium">{{ t('detail.typeDefenses') }}</v-card-title>
+    <v-card-title tag="h2" class="text-title-medium">{{ t('detail.typeDefenses') }}</v-card-title>
     <v-card-text class="d-flex flex-column ga-3">
       <MultiplierGroups :entries="entries" mode="defense" />
       <p class="text-body-small opacity-70 mb-0">{{ note }}</p>

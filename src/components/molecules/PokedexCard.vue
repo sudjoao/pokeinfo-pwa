@@ -14,8 +14,14 @@ const props = defineProps<{
 
 const { t, locale } = useI18n()
 
-function textOf(entry: PokedexText): string | null {
-  return locale.value === 'es' ? (entry.es ?? entry.en) : (entry.en ?? entry.es)
+/** Texto no idioma atual (ou no outro, como reserva) e o idioma dele, para o `lang` do leitor de tela. */
+function textOf(entry: PokedexText): { text: string; lang: 'en' | 'es' } | null {
+  const order = locale.value === 'es' ? (['es', 'en'] as const) : (['en', 'es'] as const)
+  for (const lang of order) {
+    const text = entry[lang]
+    if (text) return { text, lang }
+  }
+  return null
 }
 
 function versionTitle(slug: string): string {
@@ -25,8 +31,8 @@ function versionTitle(slug: string): string {
 /** Entradas com texto no idioma atual (ou no outro, como reserva). */
 const entries = computed(() =>
   props.texts.flatMap((entry) => {
-    const text = textOf(entry)
-    return text ? [{ version: entry.version, title: versionTitle(entry.version), text }] : []
+    const found = textOf(entry)
+    return found ? [{ version: entry.version, title: versionTitle(entry.version), ...found }] : []
   }),
 )
 
@@ -41,23 +47,27 @@ const showAll = ref(false)
 
 /** Textos repetidos entre versões aparecem uma vez só, com as versões juntas. */
 const grouped = computed(() => {
-  const byText = new Map<string, string[]>()
+  const byText = new Map<string, { titles: string[]; lang: string }>()
   for (const entry of entries.value) {
-    const titles = byText.get(entry.text) ?? []
-    titles.push(entry.title)
-    byText.set(entry.text, titles)
+    const group = byText.get(entry.text) ?? { titles: [], lang: entry.lang }
+    group.titles.push(entry.title)
+    byText.set(entry.text, group)
   }
-  return [...byText].map(([text, titles]) => ({ text, titles: titles.join(', ') }))
+  return [...byText].map(([text, group]) => ({
+    text,
+    lang: group.lang,
+    titles: group.titles.join(', '),
+  }))
 })
 </script>
 
 <template>
   <v-card v-if="featured">
-    <v-card-title class="text-title-medium">
+    <v-card-title tag="h2" class="text-title-medium">
       {{ t('detail.pokedexIn', { version: featured.title }) }}
     </v-card-title>
     <v-card-text class="text-body-large">
-      <p class="mb-0">{{ featured.text }}</p>
+      <p class="mb-0" :lang="featured.lang">{{ featured.text }}</p>
       <v-btn
         v-if="grouped.length > 1"
         variant="text"
@@ -71,7 +81,7 @@ const grouped = computed(() => {
       <dl v-if="showAll" class="pokedex-card__all text-body-medium mt-2">
         <template v-for="entry in grouped" :key="entry.text">
           <dt class="text-label-large">{{ entry.titles }}</dt>
-          <dd class="mb-3">{{ entry.text }}</dd>
+          <dd class="mb-3" :lang="entry.lang">{{ entry.text }}</dd>
         </template>
       </dl>
     </v-card-text>

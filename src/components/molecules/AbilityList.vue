@@ -32,7 +32,7 @@ function abilityLabel(name: string): string {
 
 <template>
   <v-card>
-    <v-card-title class="text-title-medium">{{ t('detail.abilities') }}</v-card-title>
+    <v-card-title tag="h2" class="text-title-medium">{{ t('detail.abilities') }}</v-card-title>
     <v-card-text class="d-flex flex-wrap ga-2">
       <v-chip
         v-for="ability in abilities"

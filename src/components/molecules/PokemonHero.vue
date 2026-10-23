@@ -91,7 +91,7 @@ const caughtLabel = computed(() => {
               {{ t('common.national') }} {{ nationalLabel }}
             </span>
           </div>
-          <v-card-title class="text-headline-small pa-0">{{ name }}</v-card-title>
+          <v-card-title tag="h2" class="text-headline-small pa-0">{{ name }}</v-card-title>
           <v-card-subtitle v-if="genus" class="pa-0">{{ genus }}</v-card-subtitle>
           <p v-if="regional" class="text-body-small opacity-70 mt-1 mb-0">
             {{ t('detail.dexOf', { dex: regional.dexLabel, game: regional.gameTitle }) }}

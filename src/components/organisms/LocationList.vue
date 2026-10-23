@@ -51,7 +51,7 @@ const missingGames = computed(() =>
 <template>
   <v-card>
     <v-card-title class="d-flex align-center justify-space-between flex-wrap ga-2">
-      <span class="text-title-medium">{{ t('detail.locations') }}</span>
+      <h2 class="text-title-medium">{{ t('detail.locations') }}</h2>
       <v-btn
         v-if="game && status === 'ready'"
         size="small"

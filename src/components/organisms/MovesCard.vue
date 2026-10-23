@@ -72,7 +72,7 @@ const dash = '—'
 
 <template>
   <v-card>
-    <v-card-title class="text-title-medium">{{ t('moves.title') }}</v-card-title>
+    <v-card-title tag="h2" class="text-title-medium">{{ t('moves.title') }}</v-card-title>
     <v-card-text>
       <p v-if="!groups.length" class="mb-0 opacity-70">{{ t('moves.noneAtAll') }}</p>
       <template v-else>
@@ -112,7 +112,11 @@ const dash = '—'
                   class="moves-card__num"
                   :title="move.level === 0 ? t('moves.evolveLong') : undefined"
                 >
-                  {{ levelLabel(move) }}
+                  <template v-if="move.level === 0">
+                    <span aria-hidden="true">{{ levelLabel(move) }}</span>
+                    <span class="d-sr-only">{{ t('moves.evolveLong') }}</span>
+                  </template>
+                  <template v-else>{{ levelLabel(move) }}</template>
                 </td>
                 <td>
                   <div class="font-weight-medium">{{ moveName(move) }}</div>

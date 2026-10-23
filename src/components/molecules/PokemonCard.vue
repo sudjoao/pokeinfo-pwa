@@ -97,7 +97,6 @@ function onLinkClick(event: MouseEvent): void {
       <span
         v-if="pokemon.exclusiveTo"
         class="pokemon-card__exclusive text-label-small d-inline-flex align-center ga-1"
-        :aria-label="t('home.exclusivesOf', { version: pokemon.exclusiveTo })"
       >
         <v-icon :icon="mdiStarFourPoints" size="12" />
         {{ t('home.onlyIn', { version: pokemon.exclusiveTo }) }}

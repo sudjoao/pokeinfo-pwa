@@ -7,6 +7,8 @@ const props = defineProps<{
   name: string
   /** Lado do avatar em px. */
   size?: number
+  /** O nome já está escrito ao lado: a imagem sai da árvore de acessibilidade (alt vazio). */
+  decorative?: boolean
 }>()
 
 const label = computed(() => formatPokemonName(props.name))
@@ -26,8 +28,8 @@ const src = computed(() =>
 <template>
   <img
     :src="src"
-    :alt="label"
-    :title="label"
+    :alt="decorative ? '' : label"
+    :title="decorative ? undefined : label"
     :width="size ?? 28"
     :height="size ?? 28"
     loading="lazy"

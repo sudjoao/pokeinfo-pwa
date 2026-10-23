@@ -29,7 +29,8 @@ const label = computed(() =>
 </script>
 
 <template>
-  <button type="button" class="team-tray" :aria-label="t('team.open')" @click="emit('open')">
+  <!-- O nome acessível inclui o texto visível ("3 de 6"), como pede o critério 2.5.3. -->
+  <button type="button" class="team-tray" aria-haspopup="dialog" @click="emit('open')">
     <div class="team-tray__inner d-flex align-center ga-3">
       <div class="d-flex ga-2" aria-hidden="true">
         <span
@@ -42,7 +43,9 @@ const label = computed(() =>
           <PokemonAvatar v-if="member" :id="member.id" :name="member.name" :size="34" />
         </span>
       </div>
-      <span class="team-tray__label text-label-large flex-grow-1 text-truncate">{{ label }}</span>
+      <span class="team-tray__label text-label-large flex-grow-1 text-truncate">
+        <span class="d-sr-only">{{ t('team.open') }}: </span>{{ label }}
+      </span>
       <v-icon :icon="mdiChevronUp" />
     </div>
   </button>
