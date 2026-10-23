@@ -5,62 +5,117 @@ Todas as mudanças relevantes deste projeto são registradas aqui.
 O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e o projeto adota
 [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
-## [Não lançado]
+## [1.3.0] - 2026-10-23
+
+Tela de detalhes completa, ferramentas novas (tipos, comparação, quiz), recursos de coleção
+(caixas, shiny, backup), acessibilidade revisada e imagens ~10× menores.
 
 ### Adicionado
 
-- Detalhe completo: fraquezas e resistências pela tabela da geração do jogo, golpes por jogo (nível,
-  TM/HM, ovo, tutor, outros) com os valores antigos de cada golpe, treino (EVs, exp. base, chance de
-  captura, felicidade, crescimento), reprodução (ciclos/passos e Pokémon compatíveis), texto da
-  Pokédex do jogo selecionado com todas as entradas, botão shiny, stats mín./máx. nos níveis 50/100
-  e sheet de habilidade com descrição e quem mais a tem.
-- Tabela de tipos por geração (1ª, 2ª–5ª, 6ª+) e tipos antigos dos Pokémon no team builder, no
-  detalhe e no filtro "fraco a".
-- Filtros e ordenação: total de stats, cada stat, altura, peso, geração, categoria, fraqueza,
-  habilidade, total mínimo e só favoritos, tudo na URL.
-- Favoritos (coração no detalhe, atalho no menu).
-- Capturados na aba Rotas (Poké Bola, contagem por rota, esconder capturados).
-- Caixas de 30 estilo Pokémon HOME para living dex (`?layout=boxes`).
-- Backup de capturados, shinies, favoritos e caçadas por arquivo JSON e por link (`/?backup=`).
-- Shiny capturado e contador de shiny hunt com Shiny Charm e Masuda.
-- Calculadora de tipos (`/types`), comparação de até 3 Pokémon (`/compare`), quiz "Quem é esse
-  Pokémon?" (`/quiz`) e Pokémon aleatório.
-- Team builder: exportar/importar no formato do Pokémon Showdown e sugestões para as fraquezas.
-- Menu lateral com navegação, idioma, tema manual (sistema/claro/escuro), backup e sobre.
-- Compartilhar (Web Share ou link copiado), deslizar no detalhe, voltar ao topo, aviso de offline,
-  atalhos e capturas de tela no manifest.
-- Testes com Vitest, CI no GitHub Actions e geradores de dados em `scripts/`.
+#### Tela de detalhes
+
+- Fraquezas e resistências (4×, 2×, ½, ¼, imune) com a tabela de tipos da geração do jogo.
+- Golpes por jogo: por nível, TM/HM, ovo, tutor e outros, com tipo, categoria, poder, precisão e PP
+  daquele jogo (inclusive valores antigos, como Karate Chop Normal na 1ª geração).
+- Treino (EVs ao derrotar, exp. base, taxa de captura com a chance aproximada, felicidade base,
+  curva de crescimento) e reprodução (grupos de ovo, gênero, ciclos/passos e a lista de Pokémon
+  compatíveis para cruzar).
+- Texto da Pokédex do jogo selecionado e todas as entradas por versão.
+- Botão para ver o artwork shiny e stats mínimos/máximos nos níveis 50 e 100.
+- Sheet de habilidade com a descrição e todos os Pokémon que a têm.
+- Botões de comparar e de compartilhar no cabeçalho; deslizar para os lados vai ao anterior/próximo.
+
+#### Listagem e coleção
+
+- Filtros e ordenação ("Filtros"): ordenar por número, nome, total, cada stat, altura ou peso (o card
+  mostra o valor) e filtrar por geração, categoria, "fraco a", habilidade, total mínimo e favoritos,
+  tudo na URL. Também no team builder.
+- Favoritos: coração no detalhe e atalho no menu (`/?fav=1`).
+- Caixas de 30 estilo Pokémon HOME para living dex (`?layout=boxes`), com capturados por caixa.
+- Capturados na aba Rotas: Poké Bola por Pokémon, contagem por rota e opção de esconder capturados.
+- Shiny capturado (separado da captura normal) e contador de shiny hunt por jogo, com Shiny Charm,
+  método Masuda, chance por encontro e probabilidade acumulada.
+- Backup de capturados, shinies, favoritos e caçadas por arquivo JSON e por link (`/?backup=`),
+  com a opção de somar ou substituir ao importar.
+
+#### Ferramentas
+
+- Calculadora de tipos (`/types`): defesa, ataque e tabela 18×18, com as tabelas da 1ª geração, da
+  2ª à 5ª e da 6ª em diante.
+- Comparação de até 3 Pokémon lado a lado (`/compare`).
+- Quiz "Quem é esse Pokémon?" (`/quiz`) com silhueta, grito como dica, filtro por geração e recorde.
+- Pokémon aleatório.
+- Team builder: copiar e importar no formato do Pokémon Showdown, compartilhar o time e sugestões de
+  Pokémon que resistem às fraquezas do time.
+
+#### Navegação e app
+
+- Menu lateral com navegação, idioma, tema manual (sistema, claro ou escuro), backup e sobre.
+- Compartilhar pela folha nativa (ou copiando o link), botão voltar ao topo e aviso de offline.
+- Manifest com atalhos (time, tipos, favoritos, quiz) e capturas de tela para a instalação.
+- Acessibilidade: botão "Pular para o conteúdo", foco no título ao trocar de tela (e no card aberto
+  ao voltar para a lista) e anúncio da quantidade de resultados para leitores de tela.
+
+#### Projeto
+
+- Testes de unidade com Vitest e CI no GitHub Actions (lint, type-check, testes e build).
+- Geradores de dados em `scripts/`: tabelas da PokéAPI (`src/data/generated/`) e rotas por jogo,
+  com o procedimento dos dados da Bulbapedia documentado em `scripts/README.md`.
 
 ### Alterado
 
-- Artworks servidos em WebP redimensionado pelo proxy wsrv.nl, em três larguras fixas, com o PNG
-  original como plano B. O primeiro lote da Pokédex baixa ~70 KB de imagens em vez de ~700 KB, e o
-  cache de artworks do service worker deixa de ocupar ~24 MB (o cache antigo é apagado).
-- Chips de tipo, ameaças do time e multiplicadores com cores de texto/fundo que passam de 4,5:1;
-  textos secundários com opacidade 0.7 (antes 0.45–0.6); chip "secundário" do tema escuro com texto
-  escuro.
-- No seletor de tipos, os tipos não escolhidos não ficam mais esmaecidos (o texto ficava ilegível);
-  o escolhido ganha check e anel duplo.
-- `@vueuse/motion` trocado pela Web Animations API (~12 KB gz a menos no JS inicial) e
-  `content-visibility` nos cards da grade.
+- O team builder, o detalhe e o filtro "fraco a" usam a tabela de tipos e os tipos dos Pokémon da
+  geração do jogo selecionado (ex.: sem Fada antes da 6ª geração, Clefairy Normal em Red/Blue).
+- Artworks em WebP redimensionado pelo proxy wsrv.nl, em três larguras fixas, com o PNG original
+  como plano B: o primeiro lote da Pokédex baixa ~70 KB de imagens em vez de ~700 KB, e o cache de
+  artworks deixa de ocupar ~24 MB (o cache antigo é apagado).
+- Contraste revisado (WCAG AA): chips de tipo com texto claro ou escuro conforme a cor,
+  multiplicadores e textos secundários mais fortes, chip "secundário" do tema escuro com texto
+  escuro. No seletor de tipos, os não escolhidos deixaram de ficar esmaecidos.
+- O card da Pokédex virou um link de verdade (abre em nova aba com cmd/ctrl+clique).
 - Os botões de idioma e "Sobre" do cabeçalho foram para o menu lateral.
+- Animação de captura com a Web Animations API, sem o `@vueuse/motion` (~12 KB gz a menos no JS
+  inicial), e `content-visibility` nos cards da grade.
+- Rotas regeneradas: entram Birth Island e Navel Rock (Emerald) e Trainers' School (Ultra Sun/Moon).
 
 ### Corrigido
 
-- Cards da Pokédex, do team builder, estágios da evolução, membros do time e Pokémon das rotas não
-  eram alcançáveis pelo teclado (o `v-card` com `@click` vira uma `<div>` sem `tabindex`). Agora o
-  card da Pokédex é um link de verdade e os demais são botões, sem elementos interativos aninhados.
+- Cards, estágios da evolução, membros do time e Pokémon das rotas não eram alcançáveis pelo
+  teclado nem anunciados como botão/link.
 - Zoom bloqueado (`user-scalable=no`) e orientação travada em retrato no manifest.
-- Chips de filtro (jogo, versão, tipo, Pokédex, capturados) sem papel de botão para o leitor de tela.
-- Poké Bola de captura com rótulo que mudava junto com o estado; agora diz qual Pokémon é e usa só o
-  `aria-pressed`. O ícone desmarcado ficou mais visível (era ~2:1 sobre o card).
-- Forma atual nas formas alternativas aparecia desabilitada e quase ilegível; agora fica marcada
-  como atual.
+- Chips de filtro sem papel de botão para o leitor de tela.
+- Poké Bola de captura com rótulo que mudava junto com o estado; agora diz qual Pokémon é e usa só
+  o `aria-pressed`, e o ícone desmarcado ficou mais visível.
+- Forma atual nas formas alternativas aparecia desabilitada e quase ilegível.
+
+### Removido
+
+- Dependência `@vueuse/motion`.
+
+## [1.2.0] - 2026-09-12
 
 ### Adicionado
 
-- Botão "Pular para o conteúdo", foco no título ao trocar de tela (e no card aberto ao voltar para a
-  lista) e anúncio da quantidade de resultados para leitores de tela.
+- Aba **Rotas** na Home (com um jogo selecionado): os locais do jogo com encontro, cada um com os
+  Pokémon, a faixa de nível e a chance por método (ex.: "Grama 50%"), carregados ao abrir a rota.
+  Lista de locais gerada a partir de `/location-area` da PokéAPI (`src/data/routes.ts`).
+- Rotas de Brilliant Diamond / Shining Pearl, que a PokéAPI não tem, a partir da Bulbapedia
+  (`src/data/routes-bdsp.ts`), com os métodos "Enxame" e "Poké Radar".
+
+## [1.1.0] - 2026-09-11
+
+### Adicionado
+
+- Idioma **Español**: interface em espanhol e, quando a PokéAPI tem, nome, categoria e descrição da
+  espécie e nomes de habilidades, itens e golpes em espanhol (buscados sob demanda).
+- Animações: transição entre telas, entrada do artwork, "pop" da Poké Bola ao capturar, estágios da
+  evolução em cascata com destaque no atual e entrada/saída dos membros do time. Todas respeitam
+  "reduzir movimento" do sistema.
+
+### Corrigido
+
+- Navegação travando com a transição de página nas telas carregadas sob demanda, e ajustes nas
+  animações de captura, da evolução e do time.
 
 ## [1.0.0] - 2026-09-11
 
@@ -148,4 +203,7 @@ Primeira versão estável da Pokédex em formato de PWA, consumindo a [PokéAPI]
 - As marcações de captura ficam só no aparelho, sem sincronização entre dispositivos.
 - Os gritos vêm só em `.ogg`; em navegadores sem suporte o botão de som não aparece.
 
+[1.3.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.2.0...v1.3.0
+[1.2.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.1.0...v1.2.0
+[1.1.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/sudjoao/pokeinfo-pwa/releases/tag/v1.0.0
