@@ -132,13 +132,16 @@ const multiplierText = computed(() =>
             class="capture-sheet__small"
           />
         </div>
+        <div v-if="ball.uses === 'turns'" id="capture-turns" class="text-label-large">
+          {{ t('capture.turns', { n: turns + 1 }) }}
+        </div>
         <v-slider
           v-if="ball.uses === 'turns'"
           v-model="turns"
           :min="0"
           :max="15"
           :step="1"
-          :label="t('capture.turns', { n: turns + 1 })"
+          aria-labelledby="capture-turns"
           hide-details
           color="primary"
         />
@@ -165,12 +168,13 @@ const multiplierText = computed(() =>
           {{ multiplier > 1 ? t('capture.netYes') : t('capture.netNo') }}
         </p>
 
+        <div id="capture-hp" class="text-label-large">{{ t('capture.hp', { n: hp }) }}</div>
         <v-slider
           v-model="hp"
           :min="1"
           :max="100"
           :step="1"
-          :label="t('capture.hp', { n: hp })"
+          aria-labelledby="capture-hp"
           hide-details
           color="primary"
         />

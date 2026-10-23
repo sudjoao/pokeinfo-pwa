@@ -78,14 +78,14 @@ function start(): void {
           <p class="text-body-medium mb-0">{{ t('offline.intro') }}</p>
 
           <div>
-            <h3 id="offline-generations" class="text-title-small mb-1">
+            <h2 id="offline-generations" class="text-title-small mb-1">
               {{ t('offline.generations') }}
-            </h3>
+            </h2>
             <v-chip-group
               v-model="generations"
               multiple
               column
-              selected-class="text-primary"
+              selected-class="text-primary-safe"
               aria-labelledby="offline-generations"
             >
               <v-chip
@@ -105,7 +105,7 @@ function start(): void {
           </div>
 
           <div>
-            <h3 class="text-title-small mb-1">{{ t('offline.packs') }}</h3>
+            <h2 class="text-title-small mb-1">{{ t('offline.packs') }}</h2>
             <v-checkbox
               v-for="pack in OFFLINE_PACKS"
               :key="pack"

@@ -110,7 +110,7 @@ function goBack(): void {
     <div class="quiz d-flex flex-column ga-4">
       <fieldset class="quiz__generations">
         <legend class="text-label-large mb-1">{{ t('filters.generation') }}</legend>
-        <v-chip-group v-model="generations" multiple column selected-class="text-primary">
+        <v-chip-group v-model="generations" multiple column selected-class="text-primary-safe">
           <v-chip
             v-for="gen in GENERATIONS"
             :key="gen"

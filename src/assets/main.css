@@ -156,3 +156,16 @@ body {
     transform: none;
   }
 }
+
+/*
+ * Texto na cor primária sobre a superfície (chip selecionado, selo "Só Sword"). No tema escuro o
+ * primário (#ef4444) dá 4,43:1 sobre #1e1e1e, abaixo do AA (4,5:1); este vermelho claro passa
+ * também sobre o fundo de foco/hover dos chips (#2e374c). Os botões continuam com o primário.
+ */
+.text-primary-safe {
+  color: rgb(var(--v-theme-primary)) !important;
+}
+
+.v-theme--dark .text-primary-safe {
+  color: #fca5a5 !important;
+}

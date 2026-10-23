@@ -269,7 +269,7 @@ const dash = '—'
         <v-chip-group
           v-model="category"
           :aria-label="t('movesPage.category')"
-          selected-class="text-primary"
+          selected-class="text-primary-safe"
         >
           <v-chip
             v-for="value in CATEGORIES"

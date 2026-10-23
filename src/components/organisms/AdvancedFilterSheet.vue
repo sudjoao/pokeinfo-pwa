@@ -104,7 +104,7 @@ function setSort(key: SortKey): void {
             :model-value="filters.generations"
             multiple
             column
-            selected-class="text-primary"
+            selected-class="text-primary-safe"
             @update:model-value="
               set(
                 'generations',
@@ -132,7 +132,7 @@ function setSort(key: SortKey): void {
             :model-value="filters.categories"
             multiple
             column
-            selected-class="text-primary"
+            selected-class="text-primary-safe"
             @update:model-value="set('categories', $event)"
           >
             <v-chip

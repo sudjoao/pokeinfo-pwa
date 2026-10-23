@@ -70,7 +70,7 @@ const onlyIn = computed(() =>
             </span>
           </span>
         </template>
-        <v-chip v-if="onlyIn" size="x-small" variant="outlined" color="primary">
+        <v-chip v-if="onlyIn" size="x-small" variant="outlined" class="text-primary-safe">
           {{ t('versionFilter.only', { version: onlyIn }) }}
         </v-chip>
       </div>

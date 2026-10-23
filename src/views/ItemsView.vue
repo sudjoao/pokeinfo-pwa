@@ -66,7 +66,7 @@ function goBack(): void {
       <v-chip-group
         v-model="pocket"
         :aria-label="t('itemsPage.pocket')"
-        selected-class="text-primary"
+        selected-class="text-primary-safe"
         column
       >
         <v-chip
@@ -87,7 +87,12 @@ function goBack(): void {
           t('itemsPage.empty')
         }}</v-card-text>
         <template v-else>
-          <v-list density="comfortable" :aria-label="t('itemsPage.results', filtered.length)">
+          <!-- role="navigation": o v-list põe role="list", que não aceita os links como filhos (como no AppMenu). -->
+          <v-list
+            density="comfortable"
+            role="navigation"
+            :aria-label="t('itemsPage.results', filtered.length)"
+          >
             <v-list-item
               v-for="item in filtered.slice(0, shown)"
               :key="item.slug"
