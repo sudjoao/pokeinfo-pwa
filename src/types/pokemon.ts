@@ -86,6 +86,47 @@ export interface PokemonMoveLearn {
   level: number
 }
 
+/** Sprite de um jogo (pixel art até a 5ª geração, modelos 3D depois). */
+export interface PokemonGameSprite {
+  generation: number
+  /** Chave do jogo em `sprites.versions` ("red-blue", "gold", "scarlet-violet"…) ou "showdown". */
+  key: string
+  front: string | null
+  shiny: string | null
+  /** GIF animado (Crystal, Black/White, Showdown). */
+  animated: string | null
+  animatedShiny: string | null
+}
+
+/** Item que o Pokémon selvagem pode segurar, com a chance (%) por versão. */
+export interface PokemonHeldItem {
+  item: string
+  rarity: Record<string, number>
+}
+
+/**
+ * Valor antigo (tipos, habilidades ou stats) que valeu até a geração `until`, inclusive
+ * (Clefairy foi Normal até a 5ª geração).
+ */
+export interface PokemonPastTypes {
+  until: number
+  types: PokemonType[]
+}
+
+export interface PokemonPastAbility {
+  until: number
+  slot: number
+  ability: string
+  isHidden: boolean
+}
+
+export interface PokemonPastStat {
+  until: number
+  /** Inclui "special", o stat único de Ataque/Defesa Especial da 1ª geração. */
+  name: string
+  value: number
+}
+
 /** Detalhe de um Pokémon (forma), já mapeado e enxuto. Fica só em memória. */
 export interface PokemonDetail extends PokemonSummary {
   speciesId: number
@@ -102,6 +143,12 @@ export interface PokemonDetail extends PokemonSummary {
   cryUrl: string | null
   /** Golpes por grupo de versões, já sem o resto da resposta (~260 KB crus). */
   moves: PokemonMoveLearn[]
+  /** Sprites por jogo, da 1ª geração à atual (ver `toSprites`). */
+  sprites: PokemonGameSprite[]
+  heldItems: PokemonHeldItem[]
+  pastTypes: PokemonPastTypes[]
+  pastAbilities: PokemonPastAbility[]
+  pastStats: PokemonPastStat[]
 }
 
 /** Texto da Pokédex de uma versão de jogo. */

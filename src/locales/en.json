@@ -205,7 +205,8 @@
     "defense": "Defense",
     "special-attack": "Sp. Attack",
     "special-defense": "Sp. Defense",
-    "speed": "Speed"
+    "speed": "Speed",
+    "special": "Special"
   },
   "eggGroup": {
     "monster": "Monster",
@@ -662,5 +663,26 @@
     "story-progress-before-national-dex": "before the National Pokédex",
     "story-progress-hall-of-fame": "after the Hall of Fame",
     "story-progress-before-hall-of-fame": "before the Hall of Fame"
+  },
+  "sprites": {
+    "title": "Game sprites",
+    "shiny": "Shiny",
+    "noShiny": "No shiny",
+    "generation": "Generation {n}",
+    "current": "(selected game)",
+    "showAll": "Show all ({n})",
+    "showLess": "Show less"
+  },
+  "heldItems": {
+    "title": "Held items",
+    "noneInGame": "PokéAPI lists no held items in {game}.",
+    "more": "+{n} games",
+    "hint": "Chance that the wild Pokémon is holding the item."
+  },
+  "changes": {
+    "title": "Changes across generations",
+    "until": "Until Generation {n}",
+    "abilities": "Ability: {abilities}",
+    "statWas": "{stat} {old} (now {now})"
   }
 }

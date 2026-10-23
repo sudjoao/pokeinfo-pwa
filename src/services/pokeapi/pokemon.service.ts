@@ -2,15 +2,20 @@ import {
   POKEMON_TYPES,
   STAT_NAMES,
   type PokemonDetail,
+  type PokemonGameSprite,
+  type PokemonHeldItem,
   type PokemonIndexEntry,
+  type PokemonPastAbility,
+  type PokemonPastStat,
+  type PokemonPastTypes,
   type PokemonMoveLearn,
   type PokemonStat,
   type PokemonSummary,
   type PokemonType,
 } from '@/types/pokemon'
-import { idFromResourceUrl } from '@/utils/pokemon'
+import { generationNumber, idFromResourceUrl } from '@/utils/pokemon'
 import { fetchJson } from './client'
-import type { PokemonDto, PokemonListResponse } from './dto'
+import type { PokemonDto, PokemonListResponse, PokemonSpriteSetDto } from './dto'
 
 function toPokemonType(name: string): PokemonType {
   return (POKEMON_TYPES as readonly string[]).includes(name) ? (name as PokemonType) : 'unknown'
@@ -42,7 +47,89 @@ function toMoves(dto: PokemonDto): PokemonMoveLearn[] {
   )
 }
 
-function toDetail(dto: PokemonDto): PokemonDetail {
+function spriteOf(generation: number, key: string, set: PokemonSpriteSetDto): PokemonGameSprite {
+  return {
+    generation,
+    key,
+    front: set.front_default ?? null,
+    shiny: set.front_shiny ?? null,
+    animated: set.animated?.front_default ?? null,
+    animatedShiny: set.animated?.front_shiny ?? null,
+  }
+}
+
+/**
+ * Sprites de cada jogo, da 1ª geração à atual, mais os animados do Showdown no fim. Ignora as
+ * chaves "icons" (ícones de menu, não um jogo) e jogos sem nenhuma imagem para esta forma.
+ */
+export function toSprites(dto: PokemonDto): PokemonGameSprite[] {
+  const sprites: PokemonGameSprite[] = []
+  for (const [genKey, games] of Object.entries(dto.sprites?.versions ?? {})) {
+    const generation = generationNumber(genKey)
+    if (!generation) continue
+    for (const [key, set] of Object.entries(games)) {
+      if (key === 'icons') continue
+      const sprite = spriteOf(generation, key, set)
+      if (sprite.front || sprite.animated) sprites.push(sprite)
+    }
+  }
+  sprites.sort((a, b) => a.generation - b.generation)
+  const showdown = dto.sprites?.other?.showdown
+  if (showdown?.front_default) {
+    const last = sprites[sprites.length - 1]?.generation ?? 0
+    // O Showdown não guarda o GIF em `animated`: o próprio front já é animado.
+    sprites.push({
+      ...spriteOf(last, 'showdown', {}),
+      animated: showdown.front_default,
+      animatedShiny: showdown.front_shiny ?? null,
+    })
+  }
+  return sprites
+}
+
+export function toHeldItems(dto: PokemonDto): PokemonHeldItem[] {
+  return (dto.held_items ?? []).map((held) => ({
+    item: held.item.name,
+    rarity: Object.fromEntries(held.version_details.map((v) => [v.version.name, v.rarity])),
+  }))
+}
+
+export function toPastTypes(dto: PokemonDto): PokemonPastTypes[] {
+  return (dto.past_types ?? []).flatMap((past) => {
+    const until = generationNumber(past.generation.name)
+    if (!until) return []
+    const types = [...past.types]
+      .sort((a, b) => a.slot - b.slot)
+      .map((t) => toPokemonType(t.type.name))
+    return [{ until, types }]
+  })
+}
+
+/**
+ * Habilidades que mudaram. Entradas com habilidade nula ficam de fora: são o "sem habilidade
+ * oculta antes da 5ª geração", igual para todos os Pokémon e sem informação.
+ */
+export function toPastAbilities(dto: PokemonDto): PokemonPastAbility[] {
+  return (dto.past_abilities ?? []).flatMap((past) => {
+    const until = generationNumber(past.generation.name)
+    if (!until) return []
+    return past.abilities.flatMap((slot) =>
+      slot.ability
+        ? [{ until, slot: slot.slot, ability: slot.ability.name, isHidden: slot.is_hidden }]
+        : [],
+    )
+  })
+}
+
+export function toPastStats(dto: PokemonDto): PokemonPastStat[] {
+  return (dto.past_stats ?? []).flatMap((past) => {
+    const until = generationNumber(past.generation.name)
+    if (!until) return []
+    return past.stats.map((slot) => ({ until, name: slot.stat.name, value: slot.base_stat }))
+  })
+}
+
+export function toDetail(dto: PokemonDto): PokemonDetail {
   return {
     ...toSummary(dto),
     speciesId: idFromResourceUrl(dto.species.url),
@@ -60,6 +147,11 @@ function toDetail(dto: PokemonDto): PokemonDetail {
     baseExperience: dto.base_experience,
     cryUrl: dto.cries?.latest ?? dto.cries?.legacy ?? null,
     moves: toMoves(dto),
+    sprites: toSprites(dto),
+    heldItems: toHeldItems(dto),
+    pastTypes: toPastTypes(dto),
+    pastAbilities: toPastAbilities(dto),
+    pastStats: toPastStats(dto),
   }
 }
 

@@ -40,6 +40,11 @@ import PokemonDetailSkeleton from '@/components/organisms/PokemonDetailSkeleton.
 
 // A tabela de golpes (~16 KB gz) vem num chunk próprio, em paralelo com o resto da tela.
 const MovesCard = defineAsyncComponent(() => import('@/components/organisms/MovesCard.vue'))
+const SpritesCard = defineAsyncComponent(() => import('@/components/organisms/SpritesCard.vue'))
+const HeldItemsCard = defineAsyncComponent(() => import('@/components/organisms/HeldItemsCard.vue'))
+const GenerationChangesCard = defineAsyncComponent(
+  () => import('@/components/organisms/GenerationChangesCard.vue'),
+)
 
 const route = useRoute()
 const router = useRouter()
@@ -331,6 +336,27 @@ function share(): void {
             />
           </v-col>
 
+          <v-col v-if="detail.heldItems.length" cols="12" md="6">
+            <HeldItemsCard
+              :items="detail.heldItems"
+              :game="context?.game ?? null"
+              class="fill-height"
+            />
+          </v-col>
+          <v-col
+            v-if="detail.pastTypes.length || detail.pastAbilities.length || detail.pastStats.length"
+            cols="12"
+            md="6"
+          >
+            <GenerationChangesCard
+              :past-types="detail.pastTypes"
+              :past-abilities="detail.pastAbilities"
+              :past-stats="detail.pastStats"
+              :stats="detail.stats"
+              class="fill-height"
+            />
+          </v-col>
+
           <v-col cols="12">
             <v-card v-if="chainStatus === 'loading'">
               <v-card-title tag="h2" class="text-title-medium">{{
@@ -355,6 +381,15 @@ function share(): void {
               :summaries="chainSummaries"
               :current-species-id="detail.speciesId"
               @select="goTo"
+            />
+          </v-col>
+
+          <v-col v-if="detail.sprites.length" cols="12">
+            <SpritesCard
+              :key="detail.id"
+              :sprites="detail.sprites"
+              :game="context?.game ?? null"
+              :shiny="shiny"
             />
           </v-col>
 

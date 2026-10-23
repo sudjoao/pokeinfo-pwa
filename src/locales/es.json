@@ -205,7 +205,8 @@
     "defense": "Defensa",
     "special-attack": "Ataque Especial",
     "special-defense": "Defensa Especial",
-    "speed": "Velocidad"
+    "speed": "Velocidad",
+    "special": "Especial"
   },
   "eggGroup": {
     "monster": "Monstruo",
@@ -662,5 +663,26 @@
     "story-progress-before-national-dex": "antes de la Pokédex Nacional",
     "story-progress-hall-of-fame": "tras el Hall de la Fama",
     "story-progress-before-hall-of-fame": "antes del Hall de la Fama"
+  },
+  "sprites": {
+    "title": "Sprites en los juegos",
+    "shiny": "Variocolor",
+    "noShiny": "Sin variocolor",
+    "generation": "{n}.ª generación",
+    "current": "(juego seleccionado)",
+    "showAll": "Mostrar todos ({n})",
+    "showLess": "Mostrar menos"
+  },
+  "heldItems": {
+    "title": "Objetos equipados",
+    "noneInGame": "La PokéAPI no registra objetos equipados en {game}.",
+    "more": "+{n} juegos",
+    "hint": "Probabilidad de que el Pokémon salvaje lleve el objeto."
+  },
+  "changes": {
+    "title": "Cambios entre generaciones",
+    "until": "Hasta la {n}.ª generación",
+    "abilities": "Habilidad: {abilities}",
+    "statWas": "{stat} {old} (ahora {now})"
   }
 }

@@ -30,6 +30,11 @@ export function artworkSrc(id: number, size: number, shiny = false): string {
   return `https://wsrv.nl/?url=${source}&w=${width}&we&output=webp`
 }
 
+/** Sprite de item (PNG pequeno do repositório de sprites da PokéAPI): "oran-berry" -> URL. */
+export function itemSpriteUrl(slug: string): string {
+  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${slug}.png`
+}
+
 /** 25 -> "#0025"; com `digits` 3 (Pokédex regionais): 25 -> "#025" */
 export function formatDexNumber(id: number, digits = 4): string {
   return `#${String(id).padStart(digits, '0')}`

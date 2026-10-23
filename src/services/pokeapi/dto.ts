@@ -45,6 +45,39 @@ export interface PokemonMoveDto {
   version_group_details: PokemonMoveVersionDto[]
 }
 
+/** Conjunto de sprites de um jogo; animados só em Crystal, Black/White e Showdown. */
+export interface PokemonSpriteSetDto {
+  front_default?: string | null
+  front_shiny?: string | null
+  animated?: { front_default?: string | null; front_shiny?: string | null } | null
+}
+
+export interface PokemonSpritesDto {
+  /** "generation-i" -> "red-blue" -> sprites (inclui chaves "icons", que não são jogos). */
+  versions?: Record<string, Record<string, PokemonSpriteSetDto>>
+  other?: { showdown?: PokemonSpriteSetDto | null } | null
+}
+
+export interface PokemonHeldItemDto {
+  item: NamedApiResource
+  version_details: { rarity: number; version: NamedApiResource }[]
+}
+
+export interface PokemonPastTypesDto {
+  generation: NamedApiResource
+  types: PokemonTypeSlot[]
+}
+
+export interface PokemonPastAbilitiesDto {
+  generation: NamedApiResource
+  abilities: { ability: NamedApiResource | null; is_hidden: boolean; slot: number }[]
+}
+
+export interface PokemonPastStatsDto {
+  generation: NamedApiResource
+  stats: PokemonStatSlot[]
+}
+
 export interface PokemonDto {
   id: number
   name: string
@@ -60,6 +93,11 @@ export interface PokemonDto {
   cries: PokemonCriesDto | null
   species: NamedApiResource
   moves: PokemonMoveDto[]
+  sprites?: PokemonSpritesDto
+  held_items?: PokemonHeldItemDto[]
+  past_types?: PokemonPastTypesDto[]
+  past_abilities?: PokemonPastAbilitiesDto[]
+  past_stats?: PokemonPastStatsDto[]
 }
 
 export interface LocalizedText {

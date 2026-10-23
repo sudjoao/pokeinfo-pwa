@@ -196,6 +196,19 @@ export default defineConfig({
             },
           },
           {
+            // Sprites pequenos (1–30 KB): por jogo, animados do Showdown e de itens. Antes da regra
+            // do PNG original, que casa o mesmo repositório com limite baixo. Pedidos com
+            // crossorigin, para a resposta ser CORS (200) e não opaca.
+            urlPattern:
+              /^https:\/\/raw\.githubusercontent\.com\/PokeAPI\/sprites\/master\/sprites\/(pokemon\/versions|pokemon\/other\/showdown|items)\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'pokeapi-sprites',
+              expiration: { maxEntries: 400, maxAgeSeconds: 30 * DAY },
+              cacheableResponse: { statuses: [200] },
+            },
+          },
+          {
             // PNG original (~120 KB cada): agora só quando o proxy falha, por isso o limite baixo.
             // O cache antigo `pokeapi-artwork` (200 PNGs, ~24 MB) é apagado no main.ts.
             urlPattern: /^https:\/\/raw\.githubusercontent\.com\/PokeAPI\/sprites\/.*/i,

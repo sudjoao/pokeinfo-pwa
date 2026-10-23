@@ -205,7 +205,8 @@
     "defense": "Defesa",
     "special-attack": "Ataque Especial",
     "special-defense": "Defesa Especial",
-    "speed": "Velocidade"
+    "speed": "Velocidade",
+    "special": "Especial"
   },
   "eggGroup": {
     "monster": "Monstro",
@@ -662,5 +663,26 @@
     "story-progress-before-national-dex": "antes da Pokédex Nacional",
     "story-progress-hall-of-fame": "depois da Liga",
     "story-progress-before-hall-of-fame": "antes da Liga"
+  },
+  "sprites": {
+    "title": "Sprites nos jogos",
+    "shiny": "Shiny",
+    "noShiny": "Sem shiny",
+    "generation": "{n}ª geração",
+    "current": "(jogo selecionado)",
+    "showAll": "Mostrar todos ({n})",
+    "showLess": "Mostrar menos"
+  },
+  "heldItems": {
+    "title": "Itens segurados",
+    "noneInGame": "A PokéAPI não lista itens segurados em {game}.",
+    "more": "+{n} jogos",
+    "hint": "Chance de o Pokémon selvagem estar segurando o item."
+  },
+  "changes": {
+    "title": "Mudanças entre gerações",
+    "until": "Até a {n}ª geração",
+    "abilities": "Habilidade: {abilities}",
+    "statWas": "{stat} {old} (hoje {now})"
   }
 }
