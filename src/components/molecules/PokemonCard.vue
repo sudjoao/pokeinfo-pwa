@@ -18,9 +18,10 @@ const props = defineProps<{
   selected?: boolean
   /**
    * Destino do card: vira um link de verdade (abre em nova aba, cmd/ctrl+clique). Sem ele, o card
-   * é um botão de alternância (team builder, com `selected` como estado).
+   * é um botão de alternância (team builder, com `selected` como estado). É uma função (estável)
+   * e não o objeto da rota: um objeto novo a cada render da grade fazia todos os cards renderizarem.
    */
-  to?: RouteLocationRaw
+  linkTo?: (pokemon: PokemonListItem) => RouteLocationRaw
 }>()
 
 const emit = defineEmits<{
@@ -30,6 +31,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 
+const to = computed(() => props.linkTo?.(props.pokemon))
 const name = computed(() => formatPokemonName(props.pokemon.name))
 const accent = computed(() => TYPE_COLORS[props.pokemon.types[0] ?? 'unknown'])
 

@@ -81,9 +81,15 @@ const intersectOptions = { rootMargin: '0px 0px 1200px 0px' }
 <template>
   <div class="pokemon-grid">
     <v-row density="compact">
+      <!--
+        v-memo: marcar um capturado (ou chegar um lote novo) re-renderiza a grade; sem ele o Vue
+        recriaria os vnodes de todas as centenas de células para comparar. Só a célula cujo estado
+        mudou é refeita. `linkTo` é estável; o card calcula o destino (e reage ao jogo) sozinho.
+      -->
       <v-col
         v-for="pokemon in items"
         :key="pokemon.id"
+        v-memo="[pokemon, caughtOf(pokemon), selectedIds?.has(pokemon.id), wide, linkTo]"
         class="pokemon-grid__cell"
         cols="6"
         sm="4"
@@ -94,7 +100,7 @@ const intersectOptions = { rootMargin: '0px 0px 1200px 0px' }
           :pokemon="pokemon"
           :caught="caughtOf(pokemon)"
           :selected="selectedIds?.has(pokemon.id)"
-          :to="linkTo?.(pokemon)"
+          :link-to="linkTo"
           @select="emit('select', $event)"
           @toggle-caught="emit('toggleCaught', $event)"
         />

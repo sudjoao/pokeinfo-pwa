@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { markRaw } from 'vue'
 import type {
   EvolutionChain,
   PokemonDetail,
@@ -18,13 +18,28 @@ import { getPokemonEncounters } from '@/services/pokeapi/encounter.service'
  *
  * As requisições não são canceláveis de propósito: mesmo que a tela mude antes da
  * resposta, o resultado entra no cache e serve à próxima visita.
+ *
+ * Os caches são Maps simples com objetos `markRaw`: só são lidos pelos `ensure*`, nunca no
+ * template, e um detalhe tem milhares de golpes (movimentos × versões); torná-los reativos criava
+ * milhares de proxies por Pokémon. Detalhes e encontros (os grandes) guardam só os últimos
+ * MAX_CACHED, como os gritos em useCry.
  */
+const MAX_CACHED = 30
+
+/** Guarda no Map como "usado agora" (fim da ordem de inserção) e descarta os mais antigos. */
+function remember<K, V extends object>(cache: Map<K, V>, key: K, value: V, max = Infinity): V {
+  cache.delete(key)
+  cache.set(key, markRaw(value))
+  while (cache.size > max) cache.delete(cache.keys().next().value as K)
+  return value
+}
+
 export const usePokemonDetailStore = defineStore('pokemonDetail', () => {
-  const details = ref<Record<number, PokemonDetail>>({})
-  const species = ref<Record<number, PokemonSpecies>>({})
-  const chains = ref<Record<number, EvolutionChain>>({})
+  const details = new Map<number, PokemonDetail>()
+  const species = new Map<number, PokemonSpecies>()
+  const chains = new Map<number, EvolutionChain>()
   /** Locais por jogo, indexados pelo id da forma (Raichu de Alola tem os seus). */
-  const encounters = ref<Record<number, PokemonEncounters>>({})
+  const encounters = new Map<number, PokemonEncounters>()
 
   /** Deduplica requisições em voo por chave (id ou nome). */
   function dedupe<T>(inFlight: Map<string, Promise<T>>, key: string, run: () => Promise<T>) {
@@ -41,57 +56,48 @@ export const usePokemonDetailStore = defineStore('pokemonDetail', () => {
   const encounterRequests = new Map<string, Promise<PokemonEncounters>>()
 
   function findDetail(idOrName: number | string): PokemonDetail | undefined {
-    if (typeof idOrName === 'number') return details.value[idOrName]
-    const id = Number(idOrName)
-    if (Number.isInteger(id)) return details.value[id]
-    return Object.values(details.value).find((detail) => detail.name === idOrName)
+    const id = typeof idOrName === 'number' ? idOrName : Number(idOrName)
+    if (Number.isInteger(id)) return details.get(id)
+    return [...details.values()].find((detail) => detail.name === idOrName)
   }
 
   function ensureDetail(idOrName: number | string): Promise<PokemonDetail> {
     const cached = findDetail(idOrName)
-    if (cached) return Promise.resolve(cached)
+    if (cached) return Promise.resolve(remember(details, cached.id, cached, MAX_CACHED))
     return dedupe(detailRequests, String(idOrName), async () => {
       const detail = await getPokemonDetail(idOrName)
-      details.value[detail.id] = detail
-      return detail
+      return remember(details, detail.id, detail, MAX_CACHED)
     })
   }
 
   function ensureSpecies(id: number): Promise<PokemonSpecies> {
-    const cached = species.value[id]
+    const cached = species.get(id)
     if (cached) return Promise.resolve(cached)
     return dedupe(speciesRequests, String(id), async () => {
       const result = await getPokemonSpecies(id)
-      species.value[result.id] = result
-      return result
+      return remember(species, result.id, result)
     })
   }
 
   function ensureChain(id: number): Promise<EvolutionChain> {
-    const cached = chains.value[id]
+    const cached = chains.get(id)
     if (cached) return Promise.resolve(cached)
     return dedupe(chainRequests, String(id), async () => {
       const result = await getEvolutionChain(id)
-      chains.value[result.id] = result
-      return result
+      return remember(chains, result.id, result)
     })
   }
 
   function ensureEncounters(id: number): Promise<PokemonEncounters> {
-    const cached = encounters.value[id]
-    if (cached) return Promise.resolve(cached)
+    const cached = encounters.get(id)
+    if (cached) return Promise.resolve(remember(encounters, id, cached, MAX_CACHED))
     return dedupe(encounterRequests, String(id), async () => {
       const result = await getPokemonEncounters(id)
-      encounters.value[id] = result
-      return result
+      return remember(encounters, id, result, MAX_CACHED)
     })
   }
 
   return {
-    details,
-    species,
-    chains,
-    encounters,
     ensureDetail,
     ensureSpecies,
     ensureChain,

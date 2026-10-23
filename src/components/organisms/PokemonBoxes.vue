@@ -91,6 +91,7 @@ function onCell(entry: BoxEntry): void {
               :id="entry.id"
               :name="entry.name"
               :size="44"
+              decorative
               class="pokemon-boxes__avatar"
             />
           </button>
@@ -108,6 +109,12 @@ function onCell(entry: BoxEntry): void {
 }
 
 .pokemon-boxes__box {
+  /*
+   * Até ~40 caixas (1.300 botões com imagem) de uma vez: as que estão fora da tela não são
+   * diagramadas nem pintadas até chegarem perto. O tamanho reservado evita a barra de rolagem pular.
+   */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 340px;
   padding: 12px;
   border-radius: 16px;
   background: rgb(var(--v-theme-surface));
@@ -142,9 +149,7 @@ function onCell(entry: BoxEntry): void {
   border-radius: 10px;
   background: color-mix(in srgb, rgb(var(--v-theme-primary)) 12%, transparent);
   cursor: pointer;
-  transition:
-    background 0.15s ease,
-    filter 0.15s ease;
+  transition: background 0.15s ease;
 }
 
 .pokemon-boxes__cell:focus-visible {
@@ -152,9 +157,15 @@ function onCell(entry: BoxEntry): void {
   outline-offset: 1px;
 }
 
-/* Falta capturar: sem cor e sem fundo; o estado também vai no aria-pressed. */
+/*
+ * Falta capturar: sem cor e sem fundo; o estado também vai no aria-pressed. O filtro fica só na
+ * imagem (não no botão inteiro): centenas de botões filtrados pesam na pintura.
+ */
 .pokemon-boxes__cell--missing {
   background: color-mix(in srgb, rgb(var(--v-theme-on-surface)) 5%, transparent);
+}
+
+.pokemon-boxes__cell--missing .pokemon-boxes__avatar {
   filter: grayscale(1);
   opacity: 0.55;
 }

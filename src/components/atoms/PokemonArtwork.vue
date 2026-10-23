@@ -11,16 +11,21 @@ const props = defineProps<{
   size?: number
   /** Versão shiny (cores alternativas) do artwork. */
   shiny?: boolean
+  /** Imagem principal da tela (LCP): baixa já, com prioridade alta, em vez de esperar o scroll. */
+  priority?: boolean
 }>()
 
+const side = computed(() => props.size ?? 120)
 const loaded = ref(false)
 /** Se o proxy (wsrv.nl) falhar, tenta uma vez o PNG original do repositório de sprites. */
 const fallback = ref(false)
+/** Nem o PNG original carregou: mostra a Poké Bola no lugar. */
+const failed = ref(false)
 
 const src = computed(() =>
   fallback.value
     ? artworkUrl(props.id, props.shiny)
-    : artworkSrc(props.id, props.size ?? 120, props.shiny),
+    : artworkSrc(props.id, side.value, props.shiny),
 )
 
 // Reseta ao trocar de Pokémon (ex.: navegação interna entre Pokémon) para repetir a entrada.
@@ -29,46 +34,75 @@ watch(
   () => {
     loaded.value = false
     fallback.value = false
+    failed.value = false
   },
 )
 
 function onError(): void {
   if (!fallback.value) fallback.value = true
-  else loaded.value = true
+  else failed.value = true
 }
 </script>
 
 <template>
-  <v-img
-    :src="src"
-    :alt="alt"
-    :height="size ?? 120"
-    contain
-    crossorigin="anonymous"
-    :draggable="false"
-    :image-class="['pokemon-artwork__img', loaded ? 'pokemon-artwork__img--loaded' : '']"
-    @load="loaded = true"
-    @error="onError"
-  >
-    <template #placeholder>
-      <div class="d-flex align-center justify-center fill-height">
-        <v-progress-circular indeterminate size="24" width="2" color="primary" />
-      </div>
-    </template>
-    <template #error>
-      <div class="d-flex align-center justify-center fill-height">
-        <v-icon :icon="mdiPokeball" size="48" color="grey" />
-      </div>
-    </template>
-  </v-img>
+  <!--
+    <img> nativo em vez de v-img: o v-img cria um observer, uma transição e um spinner por
+    instância (centenas na lista) e não repassa loading/decoding/width/height ao <img>.
+  -->
+  <div class="pokemon-artwork" :style="{ height: `${side}px` }">
+    <v-icon
+      v-if="!loaded || failed"
+      :icon="mdiPokeball"
+      :size="Math.min(48, side / 2)"
+      class="pokemon-artwork__placeholder"
+      :class="{ 'pokemon-artwork__placeholder--failed': failed }"
+      :role="failed && alt ? 'img' : undefined"
+      :aria-label="failed && alt ? alt : undefined"
+      :aria-hidden="failed && alt ? undefined : 'true'"
+    />
+    <img
+      v-if="!failed"
+      :src="src"
+      :alt="alt"
+      :width="side"
+      :height="side"
+      :loading="priority ? 'eager' : 'lazy'"
+      :fetchpriority="priority ? 'high' : undefined"
+      decoding="async"
+      crossorigin="anonymous"
+      draggable="false"
+      class="pokemon-artwork__img"
+      :class="{ 'pokemon-artwork__img--loaded': loaded }"
+      @load="loaded = true"
+      @error="onError"
+    />
+  </div>
 </template>
 
 <style scoped>
-/*
- * O <img> real fica bem aninhado dentro do template interno do v-img (não é a raiz do
- * componente), então o atributo de escopo do Vue não alcança ele sem :deep().
- */
-:deep(.pokemon-artwork__img) {
+.pokemon-artwork {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.pokemon-artwork__placeholder {
+  position: absolute;
+  opacity: 0.18;
+}
+
+.pokemon-artwork__placeholder--failed {
+  position: static;
+  opacity: 0.5;
+}
+
+.pokemon-artwork__img {
+  height: 100%;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
   opacity: 0;
   transform: scale(0.55) rotate(-6deg);
   transition:
@@ -76,7 +110,7 @@ function onError(): void {
     transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-:deep(.pokemon-artwork__img--loaded) {
+.pokemon-artwork__img--loaded {
   opacity: 1;
   transform: scale(1) rotate(0deg);
 }

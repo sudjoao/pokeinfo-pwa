@@ -1,4 +1,4 @@
-import { computed, ref, watch, type Ref } from 'vue'
+import { computed, ref, shallowRef, watch, type Ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ApiError } from '@/services/pokeapi/client'
 import { collectSpecies } from '@/services/pokeapi/evolution.service'
@@ -6,6 +6,7 @@ import { usePokedexStore } from '@/stores/pokedex'
 import { usePokemonDetailStore } from '@/stores/pokemonDetail'
 import { buildDexList, type GameContext } from '@/utils/games'
 import { describeError } from '@/utils/errors'
+import { artworkSrc, HERO_ARTWORK_SIZE } from '@/utils/pokemon'
 import type {
   EvolutionChain,
   PokemonDetail,
@@ -28,18 +29,33 @@ export interface NeighborEntry extends PokemonIndexEntry {
  * tela), depois espécie + cadeia de evolução e os locais de encontro em paralelo. Reage à troca do id na rota.
  * Com um jogo selecionado (`context`), a navegação anterior/próximo segue a Pokédex dele.
  */
+/** Mesma requisição do `<img>` do hero (tamanho e crossorigin iguais), para cair no cache dele. */
+function preloadArtwork(id: number): void {
+  const image = new Image()
+  image.crossOrigin = 'anonymous'
+  image.fetchPriority = 'high'
+  image.src = artworkSrc(id, HERO_ARTWORK_SIZE)
+}
+
 export function usePokemonDetail(idOrName: Ref<string>, context: Ref<GameContext | null>) {
   const store = usePokemonDetailStore()
   const pokedex = usePokedexStore()
   const { t } = useI18n()
 
-  const detail = ref<PokemonDetail | null>(null)
-  const species = ref<PokemonSpecies | null>(null)
-  const chain = ref<EvolutionChain | null>(null)
+  // shallowRef: os objetos vêm prontos do cache (markRaw) e nunca são alterados por dentro.
+  const detail = shallowRef<PokemonDetail | null>(null)
+  const species = shallowRef<PokemonSpecies | null>(null)
+  const chain = shallowRef<EvolutionChain | null>(null)
   /** Resumos (tipos) das espécies da cadeia, indexados por id da espécie. */
   const chainSummaries = ref<Record<number, PokemonSummary>>({})
   /** Locais de encontro por jogo (null enquanto carrega ou em erro). */
-  const encounters = ref<PokemonEncounters | null>(null)
+  const encounters = shallowRef<PokemonEncounters | null>(null)
+  /**
+   * Os locais ficam no fim da tela e a resposta pode passar de 500 KB (Magikarp): só são pedidos
+   * quando a lista chega perto da tela (`requestEncounters`). Depois disso, a troca de Pokémon na
+   * mesma tela já carrega junto, porque a pessoa está olhando essa parte.
+   */
+  let encountersWanted = false
 
   const status = ref<DetailStatus>('loading')
   const speciesStatus = ref<SectionStatus>('loading')
@@ -119,6 +135,10 @@ export function usePokemonDetail(idOrName: Ref<string>, context: Ref<GameContext
       return
     }
 
+    // O artwork é a maior imagem da tela (LCP) e a URL sai do id: começa a baixar junto com o
+    // JSON do detalhe (~300 KB) em vez de esperar ele chegar e a tela renderizar.
+    if (/^\d+$/.test(key)) preloadArtwork(Number(key))
+
     try {
       const result = await store.ensureDetail(/^\d+$/.test(key) ? Number(key) : key)
       if (current !== generation) return
@@ -126,7 +146,7 @@ export function usePokemonDetail(idOrName: Ref<string>, context: Ref<GameContext
       status.value = 'ready'
       await Promise.all([
         loadSpecies(current, result.speciesId),
-        loadEncounters(current, result.id),
+        encountersWanted ? loadEncounters(current, result.id) : undefined,
       ])
     } catch (error) {
       if (current !== generation) return
@@ -149,8 +169,17 @@ export function usePokemonDetail(idOrName: Ref<string>, context: Ref<GameContext
     if (speciesStatus.value !== 'ready' || chainStatus.value !== 'ready') {
       pending.push(loadSpecies(current, detail.value.speciesId))
     }
-    if (encountersStatus.value !== 'ready') pending.push(loadEncounters(current, detail.value.id))
+    if (encountersWanted && encountersStatus.value !== 'ready') {
+      pending.push(loadEncounters(current, detail.value.id))
+    }
     await Promise.all(pending)
+  }
+
+  /** Chamado quando a lista de locais se aproxima da tela. */
+  function requestEncounters(): void {
+    if (encountersWanted) return
+    encountersWanted = true
+    if (status.value === 'ready' && detail.value) loadEncounters(generation, detail.value.id)
   }
 
   // Pokédex do jogo selecionado (se houver). Falhas aqui não bloqueiam a tela:
@@ -220,5 +249,6 @@ export function usePokemonDetail(idOrName: Ref<string>, context: Ref<GameContext
     previous,
     next,
     retry,
+    requestEncounters,
   }
 }

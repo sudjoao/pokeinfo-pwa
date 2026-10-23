@@ -14,6 +14,9 @@ export function artworkUrl(id: number, shiny = false): string {
  */
 const ARTWORK_WIDTHS = [96, 240, 480] as const
 
+/** Lado do artwork no topo do detalhe; o detalhe pré-carrega essa mesma URL (ver usePokemonDetail). */
+export const HERO_ARTWORK_SIZE = 240
+
 /**
  * Artwork redimensionado e convertido para WebP pelo wsrv.nl (proxy de imagens na Cloudflare).
  * O PNG original tem 475 px e ~120 KB; na largura de um card (240 px, 2× da tela) fica com ~13 KB.

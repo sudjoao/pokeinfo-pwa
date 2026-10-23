@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { mdiHeart, mdiHeartOutline, mdiShimmer, mdiStarFourPoints } from '@mdi/js'
 import { useI18n } from 'vue-i18n'
 import type { PokemonDetail, PokemonSpecies } from '@/types/pokemon'
-import { formatDexNumber, TYPE_COLORS } from '@/utils/pokemon'
+import { formatDexNumber, HERO_ARTWORK_SIZE, TYPE_COLORS } from '@/utils/pokemon'
 import { speciesDisplayName, speciesGenus } from '@/utils/species'
 import PokemonArtwork from '@/components/atoms/PokemonArtwork.vue'
 import DexNumber from '@/components/atoms/DexNumber.vue'
@@ -57,7 +57,13 @@ const caughtLabel = computed(() => {
 <template>
   <v-card class="pokemon-hero" :style="{ '--accent': accent }">
     <div class="pokemon-hero__art pa-4">
-      <PokemonArtwork :id="pokemon.id" :alt="name" :size="240" :shiny="shiny" />
+      <PokemonArtwork
+        :id="pokemon.id"
+        :alt="name"
+        :size="HERO_ARTWORK_SIZE"
+        :shiny="shiny"
+        priority
+      />
       <v-btn
         :icon="mdiShimmer"
         size="small"

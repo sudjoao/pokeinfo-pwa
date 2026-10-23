@@ -65,7 +65,21 @@ const {
   previous,
   next,
   retry,
+  requestEncounters,
 } = usePokemonDetail(idParam, context)
+
+/**
+ * A lista de locais chegou perto da tela: só agora os encontros (resposta grande) são pedidos.
+ * Enquanto espécie e evolução carregam a página fica curta e a lista "parece" perto; por isso só
+ * vale depois que essas seções assentam.
+ */
+const locationsNear = ref(false)
+function onLocationsNear(visible: boolean): void {
+  locationsNear.value = visible
+}
+watch([locationsNear, speciesStatus, chainStatus], ([near, speciesState, chainState]) => {
+  if (near && speciesState !== 'loading' && chainState !== 'loading') requestEncounters()
+})
 
 const regional = computed(() =>
   context.value && dexNumber.value !== null
@@ -364,6 +378,7 @@ function share(): void {
 
           <v-col cols="12">
             <LocationList
+              v-intersect="{ handler: onLocationsNear, options: { rootMargin: '400px 0px' } }"
               :encounters="encounters"
               :status="encountersStatus"
               :game="context?.game ?? null"
