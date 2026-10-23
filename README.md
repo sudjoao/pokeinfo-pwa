@@ -95,7 +95,11 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
 - **Idioma**: botão no cabeçalho alterna entre *Português* (interface em pt-BR, com os textos que só
   existem em inglês na PokéAPI mantidos assim) e *English* (tudo em inglês, inclusive tipos, stats,
   grupos de ovo e as frases de evolução). Começa no idioma do aparelho e a escolha fica salva.
-- Tema claro/escuro seguindo a preferência do sistema.
+- Tema claro/escuro seguindo a preferência do sistema (ou escolhido no menu).
+- **Compartilhar** o Pokémon ou o time pela folha nativa do aparelho (ou copiando o link), **deslizar**
+  para os lados no detalhe para ir ao anterior/próximo, botão **voltar ao topo** nas listas longas e
+  aviso quando o aparelho está **offline**.
+- **Instalação**: o manifest tem atalhos (time, tipos, favoritos, quiz) e capturas de tela.
 - **Acessibilidade** (WCAG 2.2 AA, verificado com axe nas telas principais nos dois temas): cards,
   estágios da evolução, membros do time e linhas de rota são links/botões nativos, alcançáveis pelo
   teclado (o card da Pokédex é um link de verdade: abre em nova aba com cmd/ctrl+clique); chips de

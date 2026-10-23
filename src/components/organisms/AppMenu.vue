@@ -83,12 +83,6 @@ function then(action: () => void): void {
         rounded="lg"
         @click="open = false"
       />
-      <v-list-item
-        :prepend-icon="mdiDiceMultipleOutline"
-        :title="t('menu.random')"
-        rounded="lg"
-        @click="then(() => emit('random'))"
-      />
     </v-list>
 
     <v-divider class="my-2" />
@@ -110,6 +104,12 @@ function then(action: () => void): void {
       </v-btn-toggle>
     </div>
     <v-list nav density="comfortable">
+      <v-list-item
+        :prepend-icon="mdiDiceMultipleOutline"
+        :title="t('menu.random')"
+        rounded="lg"
+        @click="then(() => emit('random'))"
+      />
       <v-list-item
         :prepend-icon="mdiTranslate"
         :title="t('menu.language')"

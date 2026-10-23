@@ -6,7 +6,8 @@
     "teamTitle": "Montar time · PokeInfo",
     "typesTitle": "Calculadora de tipos · PokeInfo",
     "compareTitle": "Comparar · PokeInfo",
-    "quizTitle": "Quem é esse Pokémon? · PokeInfo"
+    "quizTitle": "Quem é esse Pokémon? · PokeInfo",
+    "offline": "Sem conexão: mostrando o que já está salvo neste aparelho."
   },
   "common": {
     "retry": "Tentar novamente",
@@ -15,7 +16,10 @@
     "less": "Menos",
     "clear": "Limpar",
     "done": "Pronto",
-    "skipToContent": "Pular para o conteúdo"
+    "skipToContent": "Pular para o conteúdo",
+    "backToTop": "Voltar ao topo",
+    "share": "Compartilhar",
+    "linkCopied": "Link copiado."
   },
   "language": {
     "title": "Idioma",
@@ -317,7 +321,8 @@
     "importUnknown": "Não reconhecidos: {names}.",
     "suggestions": "Sugestões para as fraquezas",
     "suggestionsHint": "Da lista atual, quem resiste às fraquezas do time sem ser fraco a elas. Toque para adicionar.",
-    "suggestionsFull": "Time cheio: tire alguém para trocar por uma sugestão."
+    "suggestionsFull": "Time cheio: tire alguém para trocar por uma sugestão.",
+    "share": "Compartilhar time"
   },
   "versionFilter": {
     "chip": "Versão",

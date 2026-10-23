@@ -6,7 +6,8 @@
     "teamTitle": "Team builder · PokeInfo",
     "typesTitle": "Type calculator · PokeInfo",
     "compareTitle": "Compare · PokeInfo",
-    "quizTitle": "Who's that Pokémon? · PokeInfo"
+    "quizTitle": "Who's that Pokémon? · PokeInfo",
+    "offline": "Offline: showing what is already saved on this device."
   },
   "common": {
     "retry": "Try again",
@@ -15,7 +16,10 @@
     "less": "Less",
     "clear": "Clear",
     "done": "Done",
-    "skipToContent": "Skip to content"
+    "skipToContent": "Skip to content",
+    "backToTop": "Back to top",
+    "share": "Share",
+    "linkCopied": "Link copied."
   },
   "language": {
     "title": "Language",
@@ -317,7 +321,8 @@
     "importUnknown": "Not recognized: {names}.",
     "suggestions": "Suggestions for the weaknesses",
     "suggestionsHint": "From the current list, Pokémon that resist the team's weaknesses without being weak to them. Tap to add.",
-    "suggestionsFull": "Team is full: remove someone to swap in a suggestion."
+    "suggestionsFull": "Team is full: remove someone to swap in a suggestion.",
+    "share": "Share team"
   },
   "versionFilter": {
     "chip": "Version",

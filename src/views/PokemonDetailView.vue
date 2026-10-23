@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { computed, defineAsyncComponent, ref, watch } from 'vue'
+import { computed, defineAsyncComponent, ref, useTemplateRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import {
   mdiChevronLeft,
   mdiChevronRight,
   mdiCompareHorizontal,
+  mdiShareVariant,
   mdiVolumeHigh,
   mdiVolumeOff,
 } from '@mdi/js'
@@ -22,6 +23,8 @@ import { exclusiveVersionOf } from '@/utils/exclusives'
 import { formatDexNumber, formatPokemonName } from '@/utils/pokemon'
 import { useAbilityInfo } from '@/composables/useAbilityInfo'
 import { useEggCompatibility } from '@/composables/useEggCompatibility'
+import { useSwipe } from '@/composables/useSwipe'
+import { shareLink } from '@/composables/useShare'
 import DetailLayout from '@/components/templates/DetailLayout.vue'
 import EmptyState from '@/components/molecules/EmptyState.vue'
 import PokemonHero from '@/components/molecules/PokemonHero.vue'
@@ -163,11 +166,27 @@ const favorite = computed(() => (detail.value ? favorites.isFavorite(detail.valu
 
 const ability = useAbilityInfo()
 const egg = useEggCompatibility()
+
+// Deslizar para os lados troca de Pokémon (anterior/próximo), como virar página.
+useSwipe(useTemplateRef<HTMLElement>('swipeArea'), {
+  onNext: () => next.value && goTo(next.value.id),
+  onPrevious: () => previous.value && goTo(previous.value.id),
+})
+
+const notice = ref<string | null>(null)
+
+function share(): void {
+  if (!detail.value) return
+  shareLink(title.value, window.location.href).then((result) => {
+    if (result === 'copied') notice.value = t('common.linkCopied')
+  })
+}
 </script>
 
 <template>
   <DetailLayout :title="title" @back="goBack">
     <template #actions>
+      <v-btn v-if="detail" :icon="mdiShareVariant" :aria-label="t('common.share')" @click="share" />
       <v-btn
         v-if="detail"
         :icon="mdiCompareHorizontal"
@@ -182,181 +201,190 @@ const egg = useEggCompatibility()
       />
     </template>
 
-    <PokemonDetailSkeleton v-if="status === 'loading'" />
+    <div ref="swipeArea">
+      <PokemonDetailSkeleton v-if="status === 'loading'" />
 
-    <EmptyState
-      v-else-if="status === 'not-found'"
-      :title="t('detail.notFoundTitle')"
-      :message="t('detail.notFoundMessage')"
-      :action-label="t('detail.backToDex')"
-      @action="goBack"
-    />
-
-    <EmptyState
-      v-else-if="status === 'error' || !detail"
-      variant="error"
-      :title="t('detail.errorTitle')"
-      :message="errorMessage ?? undefined"
-      :action-label="t('common.retry')"
-      @action="retry"
-    />
-
-    <template v-else>
-      <nav
-        class="d-flex justify-space-between align-center mb-3"
-        :aria-label="t('detail.neighborsLabel')"
-      >
-        <v-btn
-          v-if="previous"
-          variant="text"
-          :prepend-icon="mdiChevronLeft"
-          class="text-none"
-          @click="goTo(previous.id)"
-        >
-          {{ neighborNumber(previous) }} {{ formatPokemonName(previous.name) }}
-        </v-btn>
-        <span v-else />
-        <v-btn
-          v-if="next"
-          variant="text"
-          :append-icon="mdiChevronRight"
-          class="text-none"
-          @click="goTo(next.id)"
-        >
-          {{ formatPokemonName(next.name) }} {{ neighborNumber(next) }}
-        </v-btn>
-      </nav>
-
-      <v-row>
-        <v-col cols="12" md="5">
-          <PokemonHero
-            :pokemon="detail"
-            :species="species"
-            :regional="regional"
-            :caught="caught"
-            :exclusive-to="exclusiveTo"
-            :show-cry="cry.supported"
-            :cry-playing="cry.playing.value"
-            :cry-muted="cry.muted.value"
-            :shiny="shiny"
-            :favorite="favorite"
-            @toggle-favorite="favorites.toggle(detail.id)"
-            @play-cry="cry.play(detail.id, detail.cryUrl ?? undefined)"
-            @toggle-caught="toggleCaught"
-            @toggle-shiny="shiny = !shiny"
-          />
-          <TypeDefenses
-            class="mt-4"
-            :pokemon-id="detail.id"
-            :types="detail.types"
-            :generation="context?.game.generation"
-            :game-title="context?.game.title"
-          />
-        </v-col>
-
-        <v-col cols="12" md="7" class="d-flex flex-column ga-4">
-          <v-card v-if="speciesStatus === 'loading'">
-            <v-skeleton-loader type="paragraph" />
-          </v-card>
-          <PokedexCard
-            v-else-if="species"
-            :texts="species.pokedexTexts"
-            :game="context?.game ?? null"
-          />
-
-          <AboutGrid :pokemon="detail" :species="species" />
-          <AbilityList :abilities="detail.abilities" @open="ability.show" />
-          <StatsList :stats="detail.stats" />
-        </v-col>
-
-        <v-col cols="12" md="6">
-          <TrainingCard :pokemon="detail" :species="species" class="fill-height" />
-        </v-col>
-        <v-col v-if="species" cols="12" md="6">
-          <BreedingCard
-            :species="species"
-            class="fill-height"
-            @open-compatible="egg.show(species)"
-          />
-        </v-col>
-
-        <v-col cols="12">
-          <v-card v-if="chainStatus === 'loading'">
-            <v-card-title class="text-title-medium">{{ t('detail.evolution') }}</v-card-title>
-            <v-skeleton-loader type="list-item-avatar-two-line@2" />
-          </v-card>
-          <v-card v-else-if="chainStatus === 'error' || !chain">
-            <v-card-title class="text-title-medium">{{ t('detail.evolution') }}</v-card-title>
-            <v-card-text class="d-flex flex-column align-start ga-2">
-              <span>{{ t('detail.evolutionError') }}</span>
-              <v-btn color="primary" variant="tonal" size="small" @click="retry">
-                {{ t('common.retry') }}
-              </v-btn>
-            </v-card-text>
-          </v-card>
-          <EvolutionChain
-            v-else
-            :chain="chain"
-            :summaries="chainSummaries"
-            :current-species-id="detail.speciesId"
-            @select="goTo"
-          />
-        </v-col>
-
-        <v-col v-if="shinyContext" cols="12" md="6">
-          <ShinyHuntCard
-            :game-title="shinyContext.game.title"
-            :generation="shinyContext.game.generation"
-            :caught="shinyCaught.isCaught(shinyContext.game.slug, shinyContext.speciesId)"
-            :hunt="hunt"
-            @toggle-caught="shinyCaught.toggle(shinyContext.game.slug, shinyContext.speciesId)"
-            @count="updateHunt({ count: (hunt?.count ?? 0) + $event })"
-            @set-charm="updateHunt({ charm: $event })"
-            @set-masuda="updateHunt({ masuda: $event })"
-            @reset="hunts.reset(shinyContext.game.slug, shinyContext.speciesId)"
-          />
-        </v-col>
-
-        <v-col cols="12">
-          <MovesCard :moves="detail.moves" :version-group="context?.game.slug ?? null" />
-        </v-col>
-
-        <v-col cols="12">
-          <LocationList
-            :encounters="encounters"
-            :status="encountersStatus"
-            :game="context?.game ?? null"
-            @retry="retry"
-          />
-        </v-col>
-
-        <v-col v-if="showVarieties && species" cols="12">
-          <VarietyChips
-            :varieties="species.varieties"
-            :species-name="species.name"
-            :current-id="detail.id"
-            @select="goTo"
-          />
-        </v-col>
-      </v-row>
-
-      <AbilitySheet
-        v-model="ability.open.value"
-        :title="ability.title.value"
-        :description="ability.description.value"
-        :status="ability.status.value"
-        :holders="ability.holders.value"
-        @select="goTo"
-        @retry="ability.retry"
+      <EmptyState
+        v-else-if="status === 'not-found'"
+        :title="t('detail.notFoundTitle')"
+        :message="t('detail.notFoundMessage')"
+        :action-label="t('detail.backToDex')"
+        @action="goBack"
       />
-      <EggCompatSheet
-        v-model="egg.open.value"
-        :status="egg.status.value"
-        :species="egg.species.value"
-        :is-ditto="egg.isDitto.value"
-        @select="goTo"
-        @retry="egg.retry"
+
+      <EmptyState
+        v-else-if="status === 'error' || !detail"
+        variant="error"
+        :title="t('detail.errorTitle')"
+        :message="errorMessage ?? undefined"
+        :action-label="t('common.retry')"
+        @action="retry"
       />
-    </template>
+
+      <template v-else>
+        <nav
+          class="d-flex justify-space-between align-center mb-3"
+          :aria-label="t('detail.neighborsLabel')"
+        >
+          <v-btn
+            v-if="previous"
+            variant="text"
+            :prepend-icon="mdiChevronLeft"
+            class="text-none"
+            @click="goTo(previous.id)"
+          >
+            {{ neighborNumber(previous) }} {{ formatPokemonName(previous.name) }}
+          </v-btn>
+          <span v-else />
+          <v-btn
+            v-if="next"
+            variant="text"
+            :append-icon="mdiChevronRight"
+            class="text-none"
+            @click="goTo(next.id)"
+          >
+            {{ formatPokemonName(next.name) }} {{ neighborNumber(next) }}
+          </v-btn>
+        </nav>
+
+        <v-row>
+          <v-col cols="12" md="5">
+            <PokemonHero
+              :pokemon="detail"
+              :species="species"
+              :regional="regional"
+              :caught="caught"
+              :exclusive-to="exclusiveTo"
+              :show-cry="cry.supported"
+              :cry-playing="cry.playing.value"
+              :cry-muted="cry.muted.value"
+              :shiny="shiny"
+              :favorite="favorite"
+              @toggle-favorite="favorites.toggle(detail.id)"
+              @play-cry="cry.play(detail.id, detail.cryUrl ?? undefined)"
+              @toggle-caught="toggleCaught"
+              @toggle-shiny="shiny = !shiny"
+            />
+            <TypeDefenses
+              class="mt-4"
+              :pokemon-id="detail.id"
+              :types="detail.types"
+              :generation="context?.game.generation"
+              :game-title="context?.game.title"
+            />
+          </v-col>
+
+          <v-col cols="12" md="7" class="d-flex flex-column ga-4">
+            <v-card v-if="speciesStatus === 'loading'">
+              <v-skeleton-loader type="paragraph" />
+            </v-card>
+            <PokedexCard
+              v-else-if="species"
+              :texts="species.pokedexTexts"
+              :game="context?.game ?? null"
+            />
+
+            <AboutGrid :pokemon="detail" :species="species" />
+            <AbilityList :abilities="detail.abilities" @open="ability.show" />
+            <StatsList :stats="detail.stats" />
+          </v-col>
+
+          <v-col cols="12" md="6">
+            <TrainingCard :pokemon="detail" :species="species" class="fill-height" />
+          </v-col>
+          <v-col v-if="species" cols="12" md="6">
+            <BreedingCard
+              :species="species"
+              class="fill-height"
+              @open-compatible="egg.show(species)"
+            />
+          </v-col>
+
+          <v-col cols="12">
+            <v-card v-if="chainStatus === 'loading'">
+              <v-card-title class="text-title-medium">{{ t('detail.evolution') }}</v-card-title>
+              <v-skeleton-loader type="list-item-avatar-two-line@2" />
+            </v-card>
+            <v-card v-else-if="chainStatus === 'error' || !chain">
+              <v-card-title class="text-title-medium">{{ t('detail.evolution') }}</v-card-title>
+              <v-card-text class="d-flex flex-column align-start ga-2">
+                <span>{{ t('detail.evolutionError') }}</span>
+                <v-btn color="primary" variant="tonal" size="small" @click="retry">
+                  {{ t('common.retry') }}
+                </v-btn>
+              </v-card-text>
+            </v-card>
+            <EvolutionChain
+              v-else
+              :chain="chain"
+              :summaries="chainSummaries"
+              :current-species-id="detail.speciesId"
+              @select="goTo"
+            />
+          </v-col>
+
+          <v-col v-if="shinyContext" cols="12" md="6">
+            <ShinyHuntCard
+              :game-title="shinyContext.game.title"
+              :generation="shinyContext.game.generation"
+              :caught="shinyCaught.isCaught(shinyContext.game.slug, shinyContext.speciesId)"
+              :hunt="hunt"
+              @toggle-caught="shinyCaught.toggle(shinyContext.game.slug, shinyContext.speciesId)"
+              @count="updateHunt({ count: (hunt?.count ?? 0) + $event })"
+              @set-charm="updateHunt({ charm: $event })"
+              @set-masuda="updateHunt({ masuda: $event })"
+              @reset="hunts.reset(shinyContext.game.slug, shinyContext.speciesId)"
+            />
+          </v-col>
+
+          <v-col cols="12">
+            <MovesCard :moves="detail.moves" :version-group="context?.game.slug ?? null" />
+          </v-col>
+
+          <v-col cols="12">
+            <LocationList
+              :encounters="encounters"
+              :status="encountersStatus"
+              :game="context?.game ?? null"
+              @retry="retry"
+            />
+          </v-col>
+
+          <v-col v-if="showVarieties && species" cols="12">
+            <VarietyChips
+              :varieties="species.varieties"
+              :species-name="species.name"
+              :current-id="detail.id"
+              @select="goTo"
+            />
+          </v-col>
+        </v-row>
+
+        <AbilitySheet
+          v-model="ability.open.value"
+          :title="ability.title.value"
+          :description="ability.description.value"
+          :status="ability.status.value"
+          :holders="ability.holders.value"
+          @select="goTo"
+          @retry="ability.retry"
+        />
+        <EggCompatSheet
+          v-model="egg.open.value"
+          :status="egg.status.value"
+          :species="egg.species.value"
+          :is-ditto="egg.isDitto.value"
+          @select="goTo"
+          @retry="egg.retry"
+        />
+      </template>
+    </div>
+    <v-snackbar
+      :model-value="notice !== null"
+      :timeout="2500"
+      @update:model-value="(open: boolean) => !open && (notice = null)"
+    >
+      {{ notice }}
+    </v-snackbar>
   </DetailLayout>
 </template>

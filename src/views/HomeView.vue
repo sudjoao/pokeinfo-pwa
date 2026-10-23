@@ -17,6 +17,7 @@ import PokemonCardSkeleton from '@/components/molecules/PokemonCardSkeleton.vue'
 import ListFilters from '@/components/organisms/ListFilters.vue'
 import PokemonGrid from '@/components/organisms/PokemonGrid.vue'
 import PokemonBoxes from '@/components/organisms/PokemonBoxes.vue'
+import BackToTop from '@/components/atoms/BackToTop.vue'
 import RouteList from '@/components/organisms/RouteList.vue'
 import GamePickerSheet from '@/components/organisms/GamePickerSheet.vue'
 import TypePickerSheet from '@/components/organisms/TypePickerSheet.vue'
@@ -307,6 +308,8 @@ function openTeamBuilder(): void {
       @toggle="toggleAvailability"
       @clear="clearAvailability"
     />
+
+    <BackToTop />
 
     <AdvancedFilterSheet
       v-model="advancedOpen"

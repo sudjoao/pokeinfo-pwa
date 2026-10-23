@@ -2,7 +2,6 @@
 import { ref, useTemplateRef, watch } from 'vue'
 import { mdiPokeball } from '@mdi/js'
 import { useI18n } from 'vue-i18n'
-import { useMotion } from '@vueuse/motion'
 import { prefersReducedMotion } from '@/composables/usePrefersReducedMotion'
 
 const props = defineProps<{
@@ -18,7 +17,6 @@ const emit = defineEmits<{ toggle: [] }>()
 const { t } = useI18n()
 
 const wrapRef = useTemplateRef<HTMLElement>('wrap')
-const { apply } = useMotion(wrapRef, { initial: { scale: 1, rotate: 0 } })
 
 const bursting = ref(false)
 let skipNextWatch = true
@@ -41,11 +39,16 @@ watch(
     burstTimer = setTimeout(() => {
       bursting.value = false
     }, 600)
-    apply({
-      scale: [1, 1.4, 0.95, 1],
-      rotate: [0, -18, 8, 0],
-      transition: { duration: 380, ease: 'easeOut' },
-    })
+    // Web Animations API nativa (antes era o @vueuse/motion, só para este efeito).
+    wrapRef.value?.animate(
+      [
+        { transform: 'scale(1) rotate(0deg)' },
+        { transform: 'scale(1.4) rotate(-18deg)' },
+        { transform: 'scale(0.95) rotate(8deg)' },
+        { transform: 'scale(1) rotate(0deg)' },
+      ],
+      { duration: 380, easing: 'ease-out' },
+    )
   },
 )
 </script>

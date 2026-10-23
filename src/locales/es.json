@@ -6,7 +6,8 @@
     "teamTitle": "Crear equipo · PokeInfo",
     "typesTitle": "Calculadora de tipos · PokeInfo",
     "compareTitle": "Comparar · PokeInfo",
-    "quizTitle": "¿Quién es ese Pokémon? · PokeInfo"
+    "quizTitle": "¿Quién es ese Pokémon? · PokeInfo",
+    "offline": "Sin conexión: mostrando lo que ya está guardado en este dispositivo."
   },
   "common": {
     "retry": "Reintentar",
@@ -15,7 +16,10 @@
     "less": "Menos",
     "clear": "Limpiar",
     "done": "Listo",
-    "skipToContent": "Saltar al contenido"
+    "skipToContent": "Saltar al contenido",
+    "backToTop": "Volver arriba",
+    "share": "Compartir",
+    "linkCopied": "Enlace copiado."
   },
   "language": {
     "title": "Idioma",
@@ -317,7 +321,8 @@
     "importUnknown": "No reconocidos: {names}.",
     "suggestions": "Sugerencias para las debilidades",
     "suggestionsHint": "De la lista actual, quienes resisten las debilidades del equipo sin ser débiles a ellas. Toca para añadir.",
-    "suggestionsFull": "Equipo completo: quita a alguien para cambiarlo por una sugerencia."
+    "suggestionsFull": "Equipo completo: quita a alguien para cambiarlo por una sugerencia.",
+    "share": "Compartir equipo"
   },
   "versionFilter": {
     "chip": "Versión",

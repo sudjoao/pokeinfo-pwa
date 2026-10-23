@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { mdiContentCopy, mdiDeleteSweepOutline, mdiImport } from '@mdi/js'
+import { mdiContentCopy, mdiDeleteSweepOutline, mdiImport, mdiShareVariant } from '@mdi/js'
 import { useI18n } from 'vue-i18n'
 import { TEAM_SIZE, type TeamMember } from '@/composables/useTeam'
 import type { CounterSuggestion, CoverageRow, DefenseRow } from '@/utils/typeChart'
@@ -24,6 +24,7 @@ const emit = defineEmits<{
   addSuggestion: [id: number]
   exportShowdown: []
   importShowdown: []
+  share: []
 }>()
 
 const { t } = useI18n()
@@ -57,6 +58,15 @@ const { t } = useI18n()
         @add="emit('add')"
       />
       <div class="d-flex flex-wrap ga-2 mt-2">
+        <v-btn
+          v-if="members.length"
+          variant="tonal"
+          size="small"
+          :prepend-icon="mdiShareVariant"
+          @click="emit('share')"
+        >
+          {{ t('team.share') }}
+        </v-btn>
         <v-btn
           v-if="members.length"
           variant="tonal"

@@ -2,7 +2,6 @@ import './assets/main.css'
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import { MotionPlugin } from '@vueuse/motion'
 
 import App from './App.vue'
 import router from './router'
@@ -17,7 +16,6 @@ app.use(createPinia())
 app.use(router)
 app.use(vuetify)
 app.use(i18n)
-app.use(MotionPlugin)
 applyInitialLocale()
 applyInitialTheme()
 

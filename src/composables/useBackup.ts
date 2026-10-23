@@ -3,12 +3,7 @@ import { useCaughtStore } from '@/stores/caught'
 import { useFavoritesStore } from '@/stores/favorites'
 import { useHuntsStore, useShinyCaughtStore } from '@/stores/shiny'
 import type { ImportMode } from '@/stores/gameSet'
-import {
-  backupFileName,
-  createBackup,
-  encodeBackupParam,
-  type Backup,
-} from '@/utils/backup'
+import { backupFileName, createBackup, encodeBackupParam, type Backup } from '@/utils/backup'
 import { decodeBitset } from '@/utils/bitset'
 
 /** Resumo de um backup (ou do que está no aparelho) para mostrar antes de exportar/importar. */

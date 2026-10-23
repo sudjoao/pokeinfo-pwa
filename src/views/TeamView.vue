@@ -11,6 +11,8 @@ import { usePokedexStore } from '@/stores/pokedex'
 import { exportShowdown, importShowdown } from '@/utils/showdown'
 import { suggestCounters } from '@/utils/typeChart'
 import ShowdownImportDialog from '@/components/organisms/ShowdownImportDialog.vue'
+import BackToTop from '@/components/atoms/BackToTop.vue'
+import { shareLink } from '@/composables/useShare'
 import type { PokemonSummary } from '@/types/pokemon'
 import DetailLayout from '@/components/templates/DetailLayout.vue'
 import SearchField from '@/components/molecules/SearchField.vue'
@@ -102,6 +104,12 @@ const suggestions = computed(() =>
 
 function addSuggestion(id: number): void {
   if (team.toggle(id) === 'full') fullNotice.value = true
+}
+
+function shareTeam(): void {
+  shareLink(t('team.share'), window.location.href).then((result) => {
+    if (result === 'copied') notice.value = t('common.linkCopied')
+  })
 }
 
 function copyShowdown(): void {
@@ -235,6 +243,7 @@ function goBack(): void {
             @add-suggestion="addSuggestion"
             @export-showdown="copyShowdown"
             @import-showdown="importOpen = true"
+            @share="shareTeam"
           />
         </div>
       </v-col>
@@ -260,6 +269,7 @@ function goBack(): void {
               @add-suggestion="addSuggestion"
               @export-showdown="copyShowdown"
               @import-showdown="importOpen = true"
+              @share="shareTeam"
             />
           </v-card-text>
           <v-card-actions class="team-view__sheet-actions">
@@ -317,6 +327,7 @@ function goBack(): void {
       {{ notice }}
     </v-snackbar>
     <ShowdownImportDialog v-model="importOpen" @import="pasteShowdown" />
+    <BackToTop :offset="mdAndUp ? 0 : 72" />
   </DetailLayout>
 </template>
 

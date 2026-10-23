@@ -75,6 +75,7 @@ const intersectOptions = { rootMargin: '0px 0px 1200px 0px' }
       <v-col
         v-for="pokemon in items"
         :key="pokemon.id"
+        class="pokemon-grid__cell"
         cols="6"
         sm="4"
         :md="wide ? 4 : 3"
@@ -127,6 +128,15 @@ const intersectOptions = { rootMargin: '0px 0px 1200px 0px' }
 </template>
 
 <style scoped>
+/*
+ * O navegador pula layout e pintura dos cards fora da tela (a lista inteira pode passar de mil
+ * cards ao rolar até o fim); `auto` lembra a altura real depois do primeiro desenho.
+ */
+.pokemon-grid__cell {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 280px;
+}
+
 .pokemon-grid__sentinel {
   height: 1px;
 }

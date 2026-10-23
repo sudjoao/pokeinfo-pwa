@@ -49,6 +49,37 @@ export default defineConfig({
             purpose: 'any maskable',
           },
         ],
+        // Atalhos do ícone instalado (pressionar e segurar no Android; menu de contexto no desktop).
+        shortcuts: [
+          { name: 'Montar time', short_name: 'Time', url: '/team' },
+          { name: 'Calculadora de tipos', short_name: 'Tipos', url: '/types' },
+          { name: 'Favoritos', short_name: 'Favoritos', url: '/?fav=1' },
+          { name: 'Quem é esse Pokémon?', short_name: 'Quiz', url: '/quiz' },
+        ],
+        // Capturas para a tela de instalação mais rica (Chrome/Android e desktop).
+        screenshots: [
+          {
+            src: '/screenshots/home-narrow.jpg',
+            sizes: '780x1688',
+            type: 'image/jpeg',
+            form_factor: 'narrow',
+            label: 'Pokédex de Scarlet / Violet',
+          },
+          {
+            src: '/screenshots/detail-narrow.jpg',
+            sizes: '780x1688',
+            type: 'image/jpeg',
+            form_factor: 'narrow',
+            label: 'Detalhes do Charizard',
+          },
+          {
+            src: '/screenshots/team-wide.jpg',
+            sizes: '1280x800',
+            type: 'image/jpeg',
+            form_factor: 'wide',
+            label: 'Team builder com análise de tipos',
+          },
+        ],
       },
       workbox: {
         // Caches em runtime da PokéAPI, separados por tipo de recurso para

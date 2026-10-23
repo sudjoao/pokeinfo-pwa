@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { useAppMenu } from '@/composables/useAppMenu'
 import { useLocale } from '@/composables/useLocale'
 import { useThemePreference } from '@/composables/useThemePreference'
+import { useOnline } from '@/composables/useOnline'
 import { summarize, useBackup } from '@/composables/useBackup'
 import { decodeBackupParam, parseBackup, type Backup } from '@/utils/backup'
 import type { ImportMode } from '@/stores/gameSet'
@@ -22,6 +23,7 @@ const menu = useAppMenu()
 const { locale, locales, setLocale } = useLocale()
 const { preference: theme, setPreference: setTheme } = useThemePreference()
 const backup = useBackup()
+const online = useOnline()
 
 const notice = ref<string | null>(null)
 const canShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function'
@@ -152,6 +154,9 @@ function skipToContent(): void {
       :exported-at="pending?.exportedAt ?? null"
       @confirm="confirmImport"
     />
+    <v-snackbar :model-value="!online" :timeout="-1" location="top" color="surface-variant">
+      {{ t('app.offline') }}
+    </v-snackbar>
     <v-snackbar
       :model-value="notice !== null"
       :timeout="4000"
