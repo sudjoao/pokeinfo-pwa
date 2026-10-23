@@ -81,6 +81,13 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
   estado dentro de um jogo. Fica salva no aparelho em um bitset base64 (~170 bytes por jogo).
   Na aba **Rotas** cada Pokémon também tem a Poké Bola, a rota mostra quantos já foram capturados
   ("3/14") e dá para esconder os capturados.
+- **Rotas**: com um jogo com dados de encontro selecionado, a aba **Rotas** lista os locais na ordem
+  da história (Pallet Town, Route 1, Viridian City…), divididos por região ou DLC quando o jogo tem
+  mais de uma (Johto/Kanto, Ilhas Sevii, Isle of Armor, Crown Tundra), com busca pelo nome. Cada
+  local mostra os Pokémon com nível e chance por método, separada por condição quando ela muda:
+  hora do dia, estação, swarm, rádio, Poké Radar, slot 2 e tipo de árvore no Headbutt
+  ("Grama · noite 15% · manhã/dia 5%"). A ordem é escrita à mão em `src/data/routeOrder.ts`,
+  porque a PokéAPI não tem esse dado.
 - **Shiny**: com um jogo selecionado (2ª geração em diante), o detalhe tem um card para marcar o shiny
   como capturado (separado da captura normal) e um contador de encontros com Shiny Charm e método
   Masuda, mostrando a chance por encontro do jogo (1/8192 até a 5ª geração, 1/4096 depois) e a
@@ -151,7 +158,8 @@ geração, flags e habilidades de todos os Pokémon (`pokemon.ts`), golpes com o
 (`moves.ts`) e as exceções da tabela de tipos e os tipos antigos de Pokémon (`typesPast.ts`). Usa o
 GraphQL beta só no script (o app não depende dele) e completa pelo REST o que ainda não estiver lá.
 Rodar de novo quando sair jogo ou geração nova: `node scripts/gen-pokemon-data.mjs`. As rotas
-(`src/data/routes.ts`) vêm de `scripts/gen-routes.mjs`; os exclusivos e as rotas de BDSP vêm da
+(`src/data/routes.ts`) vêm de `scripts/gen-routes.mjs` (um teste falha se aparecer local novo fora da
+ordem da história em `src/data/routeOrder.ts`); os exclusivos e as rotas de BDSP vêm da
 Bulbapedia, com o procedimento descrito em [`scripts/README.md`](scripts/README.md).
 
 ## Tecnologias

@@ -5,6 +5,29 @@ Todas as mudanças relevantes deste projeto são registradas aqui.
 O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e o projeto adota
 [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [1.5.0] - 2026-10-23
+
+Aba Rotas na ordem da história, com busca de local e chance separada por condição do encontro.
+
+### Adicionado
+
+- Rotas na ordem em que aparecem no jogo (Pallet Town, Route 1, Viridian City…), não mais em ordem
+  alfabética. Jogos com mais de uma região ou DLC ganham seções: Johto e Kanto em
+  Gold/Silver/Crystal/HGSS, Ilhas Sevii em FireRed/LeafGreen, Isle of Armor e Crown Tundra em
+  Sword/Shield. Black 2/White 2 seguem o caminho próprio, a partir de Aspertia. Lendários errantes
+  e lojas ficam em "Outros encontros", no fim.
+- Busca de local na aba Rotas, sem diferenciar maiúsculas nem acentos.
+- Chance por condição do encontro: hora do dia, estação, dia da semana, swarm, rádio de
+  Hoenn/Sinnoh, Poké Radar, jogo no slot 2 e tipo de árvore no Headbutt (ex.: "Grama · noite 15% ·
+  manhã/dia 5%"). Swarm, rádio, radar e slot 2 só aparecem quando o Pokémon depende deles ou a
+  chance sobe pelo menos 10 pontos.
+
+### Corrigido
+
+- Chance inflada nas rotas: condições que se excluem eram somadas (o Pidgey da Rota 29 em Gold
+  aparecia com 100%; são 55% de manhã e de dia e nada à noite).
+- Na lista de uma rota, a imagem do Pokémon ocupava a linha inteira e cortava os nomes dos métodos.
+
 ## [1.4.0] - 2026-10-23
 
 Sons opcionais, revisão completa de acessibilidade (axe zerado com sheets e dialogs abertos) e
@@ -256,6 +279,7 @@ Primeira versão estável da Pokédex em formato de PWA, consumindo a [PokéAPI]
 - As marcações de captura ficam só no aparelho, sem sincronização entre dispositivos.
 - Os gritos vêm só em `.ogg`; em navegadores sem suporte o botão de som não aparece.
 
+[1.5.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.1.0...v1.2.0
