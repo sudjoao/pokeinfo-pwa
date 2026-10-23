@@ -998,5 +998,10 @@
     "best": "Récord",
     "distribution": "Intentos hasta acertar",
     "distributionRow": "{count} victorias con {n} intentos"
+  },
+  "recent": {
+    "title": "Vistos recientemente",
+    "searches": "Búsquedas recientes",
+    "clearSearches": "Borrar búsquedas recientes"
   }
 }

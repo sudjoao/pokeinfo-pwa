@@ -998,5 +998,10 @@
     "best": "Recorde",
     "distribution": "Palpites até acertar",
     "distributionRow": "{count} vitórias com {n} palpites"
+  },
+  "recent": {
+    "title": "Vistos recentemente",
+    "searches": "Buscas recentes",
+    "clearSearches": "Limpar buscas recentes"
   }
 }

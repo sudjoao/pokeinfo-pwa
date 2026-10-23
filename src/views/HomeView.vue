@@ -11,6 +11,9 @@ import { useDexLabel } from '@/composables/useDexLabel'
 import type { PokemonSummary } from '@/types/pokemon'
 import DefaultLayout from '@/components/templates/DefaultLayout.vue'
 import SearchField from '@/components/molecules/SearchField.vue'
+import RecentStrip from '@/components/molecules/RecentStrip.vue'
+import { useRecentStore } from '@/stores/recent'
+import { usePokedexStore } from '@/stores/pokedex'
 import EmptyState from '@/components/molecules/EmptyState.vue'
 import ResultsAnnouncer from '@/components/atoms/ResultsAnnouncer.vue'
 import PokemonCardSkeleton from '@/components/molecules/PokemonCardSkeleton.vue'
@@ -70,6 +73,23 @@ const {
 
 const router = useRouter()
 const route = useRoute()
+const recent = useRecentStore()
+const pokedexStore = usePokedexStore()
+
+/** Faixa "Vistos recentemente": só na lista sem busca nem filtro (é o "ponto de partida"). */
+const recentItems = computed(() =>
+  query.value.trim() || typeFilter.value.length || advancedCount.value
+    ? []
+    : recent.pokemon.flatMap((id) => {
+        const entry = pokedexStore.entryOf(id)
+        return entry ? [{ id, name: entry.name }] : []
+      }),
+)
+
+/** A busca que levou a abrir um Pokémon vira "busca recente". */
+function rememberSearch(): void {
+  if (query.value.trim()) recent.search(query.value)
+}
 
 /** Cards (padrão) ou caixas de 30, como no Pokémon HOME (`?layout=boxes`). */
 const layout = computed<'cards' | 'boxes'>(() =>
@@ -152,11 +172,13 @@ let lastOpenedId: number | null = null
  */
 function onCardOpen(pokemon: PokemonSummary): void {
   lastOpenedId = pokemon.id
+  rememberSearch()
   cry.play(pokemon.id)
 }
 
 /** Navegação da aba de rotas (que só tem o id, sem o resumo completo). */
 function openPokemonId(id: number): void {
+  rememberSearch()
   cry.play(id)
   router.push({ name: 'pokemon', params: { id }, query: contextQuery.value })
 }
@@ -188,7 +210,7 @@ function openTeamBuilder(): void {
       <v-btn :icon="mdiSwordCross" :aria-label="t('home.teamBuilder')" @click="openTeamBuilder" />
     </template>
     <template #header>
-      <SearchField v-model="query" />
+      <SearchField v-model="query" :recent="recent.searches" @clear-recent="recent.clearSearches" />
       <ListFilters
         class="mt-2"
         :game="game"
@@ -224,6 +246,13 @@ function openTeamBuilder(): void {
     />
 
     <template v-else>
+      <RecentStrip
+        v-if="recentItems.length && layout === 'cards'"
+        :items="recentItems"
+        class="mb-3"
+        @select="openPokemonId"
+        @clear="recent.clearPokemon"
+      />
       <ResultsAnnouncer :count="filtered.length" :ready="!sourceLoading && !sourceError" />
 
       <div class="d-flex justify-end mb-2">

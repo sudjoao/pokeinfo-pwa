@@ -18,6 +18,7 @@ import { exclusiveVersionOf } from '@/utils/exclusives'
 import { formatDexNumber, formatPokemonName } from '@/utils/pokemon'
 import { LATEST_GENERATION } from '@/utils/typeChart'
 import { useMountOnOpen } from '@/composables/useMountOnOpen'
+import { useRecentStore } from '@/stores/recent'
 import { useAbilityInfo } from '@/composables/useAbilityInfo'
 import { useEggCompatibility } from '@/composables/useEggCompatibility'
 import { useSwipe } from '@/composables/useSwipe'
@@ -109,6 +110,7 @@ function neighborNumber(entry: NeighborEntry): string {
 const cry = useCry()
 
 const caughtStore = useCaughtStore()
+const recent = useRecentStore()
 const captureOpen = ref(false)
 const captureMounted = useMountOnOpen(captureOpen)
 /** Estado de captura no jogo da URL; undefined (sem jogo) esconde o botão no hero. */
@@ -147,6 +149,8 @@ watch(detail, (value) => {
   // Se a tela foi aberta por um toque no card, o grito já tocou dentro do gesto;
   // aqui cobrimos a abertura por URL direta (o iOS pode recusar sem gesto, e tudo bem).
   if (value) cry.autoPlay(value.id, value.cryUrl)
+  // Também cobre a abertura por URL direta, por isso o registro fica aqui e não no card.
+  if (value) recent.visit(value.id)
 })
 
 // Troca de Pokémon na mesma tela (vizinho, swipe, evolução, forma): o leitor de tela não percebe

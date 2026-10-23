@@ -998,5 +998,10 @@
     "best": "Best",
     "distribution": "Guesses to win",
     "distributionRow": "{count} wins in {n} guesses"
+  },
+  "recent": {
+    "title": "Recently viewed",
+    "searches": "Recent searches",
+    "clearSearches": "Clear recent searches"
   }
 }
