@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { mdiArrowLeft, mdiMenu } from '@mdi/js'
 import { useAppMenu } from '@/composables/useAppMenu'
+import SoundToggle from '@/components/molecules/SoundToggle.vue'
 import { useI18n } from 'vue-i18n'
 
 defineProps<{
@@ -37,8 +38,9 @@ const { drawer } = useAppMenu()
     <v-app-bar-title tag="h1" tabindex="-1" class="app-header__title font-weight-bold">
       {{ title }}
     </v-app-bar-title>
-    <template v-if="$slots.actions" #append>
+    <template #append>
       <slot name="actions" />
+      <SoundToggle />
     </template>
     <template v-if="$slots.extension" #extension>
       <div class="app-header__extension w-100 px-4 pb-3">

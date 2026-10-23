@@ -78,10 +78,13 @@
   },
   "cry": {
     "play": "Play the Pokémon's cry",
-    "playShort": "Play cry",
-    "muted": "Sound off",
-    "mute": "Turn sound off",
-    "unmute": "Turn sound on"
+    "playShort": "Play cry"
+  },
+  "sound": {
+    "toggle": "Pokémon sounds",
+    "hint": "Tap here to turn on the Pokémon sounds",
+    "enable": "Turn on",
+    "dismiss": "Not now"
   },
   "detail": {
     "neighborsLabel": "Neighboring Pokémon",

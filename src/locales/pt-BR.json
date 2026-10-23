@@ -78,10 +78,13 @@
   },
   "cry": {
     "play": "Ouvir o grito do Pokémon",
-    "playShort": "Ouvir o grito",
-    "muted": "Som desativado",
-    "mute": "Desativar som",
-    "unmute": "Ativar som"
+    "playShort": "Ouvir o grito"
+  },
+  "sound": {
+    "toggle": "Sons dos Pokémon",
+    "hint": "Toque aqui para ativar os sons dos Pokémon",
+    "enable": "Ativar",
+    "dismiss": "Agora não"
   },
   "detail": {
     "neighborsLabel": "Pokémon vizinhos",

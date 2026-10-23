@@ -82,7 +82,7 @@ function choose(entry: PokemonIndexEntry): void {
 }
 
 function hint(): void {
-  if (answer.value) cry.play(answer.value.id)
+  if (answer.value) cry.listen(answer.value.id)
 }
 
 watch([() => store.index.length, generations, () => pokemonData.table.value], () => {

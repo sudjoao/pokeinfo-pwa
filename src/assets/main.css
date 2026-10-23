@@ -126,7 +126,8 @@ body {
   .team-slot-enter-active,
   .team-slot-leave-active,
   .team-slot-move,
-  .evolution-stage {
+  .evolution-stage,
+  .cry-button--playing {
     transition: none !important;
     animation: none !important;
   }

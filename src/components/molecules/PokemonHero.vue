@@ -28,7 +28,6 @@ const props = defineProps<{
   exclusiveTo?: string | null
   showCry?: boolean
   cryPlaying?: boolean
-  cryMuted?: boolean
   /** Mostra o artwork shiny. */
   shiny?: boolean
   favorite?: boolean
@@ -109,12 +108,7 @@ const caughtLabel = computed(() => {
           </p>
         </div>
         <div class="d-flex flex-column align-center ga-2">
-          <CryButton
-            v-if="showCry"
-            :playing="cryPlaying"
-            :muted="cryMuted"
-            @play="emit('playCry')"
-          />
+          <CryButton v-if="showCry" :playing="cryPlaying" @play="emit('playCry')" />
           <CatchToggle
             v-if="caught !== undefined"
             :caught="caught"

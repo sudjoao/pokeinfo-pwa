@@ -1,8 +1,12 @@
 import { computed, ref } from 'vue'
 import { cryUrl } from '@/utils/pokemon'
-import { readStorage, writeStorage } from '@/utils/storage'
+import { initialSoundEnabled } from '@/utils/sound'
+import { readStorage, removeStorage, writeStorage } from '@/utils/storage'
 
-const MUTED_KEY = 'pokeinfo:cry-muted:v1'
+const SOUND_KEY = 'pokeinfo:sound:v1'
+/** Chave antiga (guardava "mudo", com o som ligado por padrão); migrada e apagada no carregamento. */
+const LEGACY_MUTED_KEY = 'pokeinfo:cry-muted:v1'
+const HINT_KEY = 'pokeinfo:sound-hint:v1'
 /** Janela em que um autoplay é ignorado se o mesmo Pokémon acabou de ser tocado pelo gesto. */
 const RECENT_PLAY_WINDOW_MS = 4000
 /** Quantos gritos ficam decodificados em memória (blobs de ~7 KB). */
@@ -30,7 +34,14 @@ const supported =
 // resposta parcial, servindo 2 bytes para todas as faixas seguintes: o som nunca tocava.
 // Com fetch a resposta é sempre completa e cacheável de forma íntegra.
 let audio: HTMLAudioElement | null = null
-const muted = ref(readStorage<boolean>(MUTED_KEY) ?? false)
+const legacyMuted = readStorage<boolean>(LEGACY_MUTED_KEY)
+const enabled = ref(initialSoundEnabled(readStorage<boolean>(SOUND_KEY), legacyMuted))
+if (legacyMuted !== null) {
+  writeStorage(SOUND_KEY, enabled.value)
+  removeStorage(LEGACY_MUTED_KEY)
+}
+/** Se a pessoa já viu (e fechou) o aviso "toque aqui para ativar os sons". */
+const hintSeen = ref(readStorage<boolean>(HINT_KEY) ?? false)
 const playing = ref(false)
 let lastPlay: { id: number; at: number } | null = null
 /** Id do último pedido; respostas de pedidos anteriores são descartadas. */
@@ -115,9 +126,21 @@ function start(element: HTMLAudioElement, id: number, src: string): Promise<bool
     })
 }
 
-async function playCry(id: number, url: string, withinGesture: boolean): Promise<boolean> {
-  if (!supported || muted.value) {
-    debug('ignorado', { id, supported, muted: muted.value })
+/** Toca o silêncio dentro do gesto para o elemento ficar liberado no iOS/Safari. */
+function unlock(element: HTMLAudioElement): void {
+  element.pause()
+  element.src = SILENT_WAV
+  element.play().catch(() => {})
+}
+
+async function playCry(
+  id: number,
+  url: string,
+  withinGesture: boolean,
+  force = false,
+): Promise<boolean> {
+  if (!supported || (!enabled.value && !force)) {
+    debug('ignorado', { id, supported, enabled: enabled.value })
     return false
   }
   const element = getAudio()
@@ -129,11 +152,7 @@ async function playCry(id: number, url: string, withinGesture: boolean): Promise
 
   // Tudo até aqui roda de forma síncrona dentro do clique. Enquanto o arquivo baixa,
   // tocamos um silêncio para o elemento ficar liberado no iOS/Safari.
-  if (withinGesture) {
-    element.pause()
-    element.src = SILENT_WAV
-    element.play().catch(() => {})
-  }
+  if (withinGesture) unlock(element)
 
   const objectUrl = await download(id, url)
   if (!objectUrl || requestedId !== id) return false
@@ -142,12 +161,17 @@ async function playCry(id: number, url: string, withinGesture: boolean): Promise
 
 export function useCry() {
   /**
-   * Toca o grito do Pokémon. Deve ser chamado de forma síncrona dentro de um
-   * gesto do usuário (clique/toque) para funcionar no iOS. Resolve `false` se
-   * o navegador recusar, o download falhar ou não houver suporte.
+   * Som implícito de um gesto (tocar no card, ir ao vizinho): só toca com o som ligado. Deve ser
+   * chamado de forma síncrona dentro do clique/toque para funcionar no iOS. Resolve `false` se
+   * o som estiver desligado, o navegador recusar, o download falhar ou não houver suporte.
    */
   function play(id: number, url = cryUrl(id)): Promise<boolean> {
     return playCry(id, url, true)
+  }
+
+  /** Pedido explícito de ouvir o grito (botão do alto-falante): toca mesmo com o som desligado. */
+  function listen(id: number, url = cryUrl(id)): Promise<boolean> {
+    return playCry(id, url, true, true)
   }
 
   /** Tentativa de autoplay ao abrir a tela; pula se o mesmo Pokémon acabou de tocar. */
@@ -158,18 +182,31 @@ export function useCry() {
     return playCry(id, url ?? cryUrl(id), false)
   }
 
-  function toggleMuted(): void {
-    muted.value = !muted.value
-    writeStorage(MUTED_KEY, muted.value)
-    if (muted.value) audio?.pause()
+  /** Liga/desliga os sons. Chamado no clique: ao ligar, já desbloqueia o áudio no iOS. */
+  function setEnabled(value: boolean): void {
+    enabled.value = value
+    writeStorage(SOUND_KEY, value)
+    if (value && supported) unlock(getAudio())
+    else audio?.pause()
+    dismissHint()
+  }
+
+  function dismissHint(): void {
+    if (hintSeen.value) return
+    hintSeen.value = true
+    writeStorage(HINT_KEY, true)
   }
 
   return {
     supported,
-    muted: computed(() => muted.value),
+    enabled: computed(() => enabled.value),
     playing: computed(() => playing.value),
+    hintSeen: computed(() => hintSeen.value),
     play,
+    listen,
     autoPlay,
-    toggleMuted,
+    setEnabled,
+    toggleEnabled: () => setEnabled(!enabled.value),
+    dismissHint,
   }
 }

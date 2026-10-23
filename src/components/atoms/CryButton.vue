@@ -1,11 +1,8 @@
 <script setup lang="ts">
-import { mdiVolumeHigh, mdiVolumeOff } from '@mdi/js'
+import { mdiVolumeHigh } from '@mdi/js'
 import { useI18n } from 'vue-i18n'
 
-defineProps<{
-  playing?: boolean
-  muted?: boolean
-}>()
+defineProps<{ playing?: boolean }>()
 
 const emit = defineEmits<{ play: [] }>()
 
@@ -14,12 +11,12 @@ const { t } = useI18n()
 
 <template>
   <v-btn
-    :icon="muted ? mdiVolumeOff : mdiVolumeHigh"
+    :icon="mdiVolumeHigh"
     variant="tonal"
     color="primary"
     :class="{ 'cry-button--playing': playing }"
-    :aria-label="muted ? t('cry.muted') : t('cry.play')"
-    :title="muted ? t('cry.muted') : t('cry.playShort')"
+    :aria-label="t('cry.play')"
+    :title="t('cry.playShort')"
     @click="emit('play')"
   />
 </template>

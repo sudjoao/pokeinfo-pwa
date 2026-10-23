@@ -2,14 +2,7 @@
 import { computed, defineAsyncComponent, ref, useTemplateRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import {
-  mdiChevronLeft,
-  mdiChevronRight,
-  mdiCompareHorizontal,
-  mdiShareVariant,
-  mdiVolumeHigh,
-  mdiVolumeOff,
-} from '@mdi/js'
+import { mdiChevronLeft, mdiChevronRight, mdiCompareHorizontal, mdiShareVariant } from '@mdi/js'
 import { usePokemonDetail, type NeighborEntry } from '@/composables/usePokemonDetail'
 import { useCry } from '@/composables/useCry'
 import { useCaughtStore } from '@/stores/caught'
@@ -193,12 +186,6 @@ function share(): void {
         :aria-label="t('compare.withThis')"
         :to="{ name: 'compare', query: { ids: String(detail.id) } }"
       />
-      <v-btn
-        v-if="cry.supported"
-        :icon="cry.muted.value ? mdiVolumeOff : mdiVolumeHigh"
-        :aria-label="cry.muted.value ? t('cry.unmute') : t('cry.mute')"
-        @click="cry.toggleMuted"
-      />
     </template>
 
     <div ref="swipeArea">
@@ -257,11 +244,10 @@ function share(): void {
               :exclusive-to="exclusiveTo"
               :show-cry="cry.supported"
               :cry-playing="cry.playing.value"
-              :cry-muted="cry.muted.value"
               :shiny="shiny"
               :favorite="favorite"
               @toggle-favorite="favorites.toggle(detail.id)"
-              @play-cry="cry.play(detail.id, detail.cryUrl ?? undefined)"
+              @play-cry="cry.listen(detail.id, detail.cryUrl ?? undefined)"
               @toggle-caught="toggleCaught"
               @toggle-shiny="shiny = !shiny"
             />
