@@ -16,6 +16,7 @@ import {
   mdiCalculatorVariantOutline,
   mdiSpeedometer,
   mdiCalendarStar,
+  mdiCloudDownloadOutline,
 } from '@mdi/js'
 import type { RouteLocationRaw } from 'vue-router'
 import type { ThemePreference } from '@/composables/useThemePreference'
@@ -28,6 +29,7 @@ const emit = defineEmits<{
   setTheme: [theme: ThemePreference]
   openLanguage: []
   openBackup: []
+  openOffline: []
   openAbout: []
   random: []
 }>()
@@ -151,6 +153,14 @@ function then(action: () => void): void {
         aria-haspopup="dialog"
         rounded="lg"
         @click="then(() => emit('openBackup'))"
+      />
+      <v-list-item
+        :prepend-icon="mdiCloudDownloadOutline"
+        :title="t('menu.offline')"
+        role="button"
+        aria-haspopup="dialog"
+        rounded="lg"
+        @click="then(() => emit('openOffline'))"
       />
       <v-list-item
         :prepend-icon="mdiInformationOutline"

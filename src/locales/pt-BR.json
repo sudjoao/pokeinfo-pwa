@@ -514,7 +514,8 @@
     "items": "Itens e berries",
     "stats": "Naturezas e IVs",
     "speed": "Velocidade (speed tiers)",
-    "daily": "Pokémon do dia"
+    "daily": "Pokémon do dia",
+    "offline": "Usar offline"
   },
   "backup": {
     "title": "Backup dos dados",
@@ -1018,5 +1019,26 @@
     "teamTitle": "Meu time",
     "teamAlt": "Imagem do time: {names}",
     "pokemonAlt": "Imagem de {name} com tipos e stats"
+  },
+  "offline": {
+    "title": "Usar offline",
+    "unsupported": "Este navegador não permite guardar dados para usar sem internet.",
+    "intro": "Baixe as fichas, as imagens e os gritos para abrir os Pokémon sem internet. Sem isso, só fica salvo o que você já abriu (e só os mais recentes).",
+    "generations": "Gerações",
+    "generation": "Gen {n}",
+    "packs": "O que baixar",
+    "pack": {
+      "data": "Fichas completas (detalhe, espécie, evolução, golpes)",
+      "images": "Imagens (cards e detalhe)",
+      "cries": "Gritos"
+    },
+    "saved": "{n} de {total} salvos",
+    "mb": "{n} MB",
+    "download": "Baixar (≈ {size})",
+    "progress": "{done} de {total} arquivos",
+    "failed": "{n} arquivos não baixaram. Toque em Baixar de novo para tentar só esses.",
+    "usage": "Espaço usado pelo PokeInfo neste aparelho: {used} de {quota} disponíveis.",
+    "hint": "O que já está salvo é pulado: dá para cancelar e continuar depois. Os dados não se atualizam sozinhos; apague e baixe de novo para pegar novidades da PokéAPI.",
+    "clear": "Apagar dados offline"
   }
 }

@@ -8,6 +8,38 @@ import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite'
 
 const DAY = 60 * 60 * 24
 
+/** Só o que o plugin abaixo usa da Cache API (o config roda no Node, sem os tipos do DOM). */
+declare const caches: {
+  match(request: Request, options: { cacheName: string }): Promise<Response | undefined>
+}
+
+/**
+ * Pacotes do "Usar offline" (src/utils/offline.ts, OFFLINE_CACHES): quando o cache da regra não
+ * tem a resposta, procura nos caches dos pacotes antes de ir à rede. Assim o que foi baixado não
+ * fica sujeito aos limites de entradas das regras. Precisa ser autocontido (o workbox-build copia o
+ * código da função para o service worker), por isso repete os nomes dos caches.
+ */
+const offlineFallback = {
+  cachedResponseWillBeUsed: async ({
+    request,
+    cachedResponse,
+  }: {
+    request: Request
+    cachedResponse?: Response
+  }) => {
+    if (cachedResponse) return cachedResponse
+    for (const cacheName of [
+      'pokeinfo-offline-data-v1',
+      'pokeinfo-offline-images-v1',
+      'pokeinfo-offline-cries-v1',
+    ]) {
+      const hit = await caches.match(request, { cacheName })
+      if (hit) return hit
+    }
+    return null
+  },
+}
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
@@ -138,6 +170,7 @@ export default defineConfig({
             handler: 'CacheFirst',
             options: {
               cacheName: 'pokeapi-species',
+              plugins: [offlineFallback],
               expiration: { maxEntries: 100, maxAgeSeconds: 7 * DAY },
               cacheableResponse: { statuses: [0, 200] },
             },
@@ -183,6 +216,7 @@ export default defineConfig({
             handler: 'CacheFirst',
             options: {
               cacheName: 'pokeapi-detail',
+              plugins: [offlineFallback],
               expiration: { maxEntries: 60, maxAgeSeconds: 7 * DAY },
               cacheableResponse: { statuses: [0, 200] },
             },
@@ -195,6 +229,7 @@ export default defineConfig({
             handler: 'CacheFirst',
             options: {
               cacheName: 'pokeapi-cries-v2',
+              plugins: [offlineFallback],
               expiration: { maxEntries: 60, maxAgeSeconds: 30 * DAY },
               cacheableResponse: { statuses: [200] },
             },
@@ -207,6 +242,7 @@ export default defineConfig({
             handler: 'CacheFirst',
             options: {
               cacheName: 'pokemon-artwork-webp',
+              plugins: [offlineFallback],
               expiration: { maxEntries: 400, maxAgeSeconds: 30 * DAY },
               cacheableResponse: { statuses: [200] },
             },

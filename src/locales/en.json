@@ -514,7 +514,8 @@
     "items": "Items and berries",
     "stats": "Natures and IVs",
     "speed": "Speed tiers",
-    "daily": "Pokémon of the day"
+    "daily": "Pokémon of the day",
+    "offline": "Use offline"
   },
   "backup": {
     "title": "Data backup",
@@ -1018,5 +1019,26 @@
     "teamTitle": "My team",
     "teamAlt": "Team image: {names}",
     "pokemonAlt": "Image of {name} with types and stats"
+  },
+  "offline": {
+    "title": "Use offline",
+    "unsupported": "This browser can't store data for offline use.",
+    "intro": "Download entries, images and cries to open Pokémon without internet. Otherwise only what you already opened is kept (and only the latest ones).",
+    "generations": "Generations",
+    "generation": "Gen {n}",
+    "packs": "What to download",
+    "pack": {
+      "data": "Full entries (details, species, evolution, moves)",
+      "images": "Images (cards and details)",
+      "cries": "Cries"
+    },
+    "saved": "{n} of {total} saved",
+    "mb": "{n} MB",
+    "download": "Download (≈ {size})",
+    "progress": "{done} of {total} files",
+    "failed": "{n} files didn't download. Tap Download again to retry just those.",
+    "usage": "Space used by PokeInfo on this device: {used} of {quota} available.",
+    "hint": "What is already saved is skipped: you can cancel and continue later. Data does not update by itself; clear and download again to get PokéAPI updates.",
+    "clear": "Clear offline data"
   }
 }

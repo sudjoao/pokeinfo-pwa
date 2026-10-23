@@ -19,6 +19,7 @@ import { useMountOnOpen } from '@/composables/useMountOnOpen'
 const LanguageSheet = defineAsyncComponent(() => import('@/components/organisms/LanguageSheet.vue'))
 const AboutSheet = defineAsyncComponent(() => import('@/components/organisms/AboutSheet.vue'))
 const BackupSheet = defineAsyncComponent(() => import('@/components/organisms/BackupSheet.vue'))
+const OfflineSheet = defineAsyncComponent(() => import('@/components/organisms/OfflineSheet.vue'))
 const BackupImportDialog = defineAsyncComponent(
   () => import('@/components/organisms/BackupImportDialog.vue'),
 )
@@ -31,6 +32,7 @@ const menu = useAppMenu()
 const languageMounted = useMountOnOpen(menu.languageOpen)
 const aboutMounted = useMountOnOpen(menu.aboutOpen)
 const backupMounted = useMountOnOpen(menu.backupOpen)
+const offlineMounted = useMountOnOpen(menu.offlineOpen)
 const { locale, locales, setLocale } = useLocale()
 const { preference: theme, setPreference: setTheme } = useThemePreference()
 const backup = useBackup()
@@ -133,6 +135,7 @@ function skipToContent(): void {
       @set-theme="setTheme"
       @open-language="menu.languageOpen.value = true"
       @open-backup="menu.backupOpen.value = true"
+      @open-offline="menu.offlineOpen.value = true"
       @open-about="menu.aboutOpen.value = true"
       @random="openRandom"
     />
@@ -164,6 +167,7 @@ function skipToContent(): void {
       @select="setLocale"
     />
     <AboutSheet v-if="aboutMounted" v-model="menu.aboutOpen.value" />
+    <OfflineSheet v-if="offlineMounted" v-model="menu.offlineOpen.value" />
     <BackupSheet
       v-if="backupMounted"
       v-model="menu.backupOpen.value"

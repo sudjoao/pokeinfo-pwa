@@ -5,7 +5,8 @@ const drawer = ref(false)
 const languageOpen = ref(false)
 const aboutOpen = ref(false)
 const backupOpen = ref(false)
+const offlineOpen = ref(false)
 
 export function useAppMenu() {
-  return { drawer, languageOpen, aboutOpen, backupOpen }
+  return { drawer, languageOpen, aboutOpen, backupOpen, offlineOpen }
 }

@@ -514,7 +514,8 @@
     "items": "Objetos y bayas",
     "stats": "Naturalezas e IV",
     "speed": "Velocidad (speed tiers)",
-    "daily": "Pokémon del día"
+    "daily": "Pokémon del día",
+    "offline": "Usar sin conexión"
   },
   "backup": {
     "title": "Copia de seguridad",
@@ -1018,5 +1019,26 @@
     "teamTitle": "Mi equipo",
     "teamAlt": "Imagen del equipo: {names}",
     "pokemonAlt": "Imagen de {name} con tipos y stats"
+  },
+  "offline": {
+    "title": "Usar sin conexión",
+    "unsupported": "Este navegador no permite guardar datos para usar sin conexión.",
+    "intro": "Descarga las fichas, las imágenes y los gritos para abrir los Pokémon sin conexión. Si no, solo se guarda lo que ya abriste (y solo lo más reciente).",
+    "generations": "Generaciones",
+    "generation": "Gen. {n}",
+    "packs": "Qué descargar",
+    "pack": {
+      "data": "Fichas completas (detalle, especie, evolución, movimientos)",
+      "images": "Imágenes (tarjetas y detalle)",
+      "cries": "Gritos"
+    },
+    "saved": "{n} de {total} guardados",
+    "mb": "{n} MB",
+    "download": "Descargar (≈ {size})",
+    "progress": "{done} de {total} archivos",
+    "failed": "{n} archivos no se descargaron. Toca Descargar de nuevo para reintentar solo esos.",
+    "usage": "Espacio usado por PokeInfo en este dispositivo: {used} de {quota} disponibles.",
+    "hint": "Lo ya guardado se omite: puedes cancelar y seguir después. Los datos no se actualizan solos; borra y descarga de nuevo para obtener novedades de la PokéAPI.",
+    "clear": "Borrar datos sin conexión"
   }
 }
