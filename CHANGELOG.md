@@ -7,6 +7,30 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 
 ## [Não lançado]
 
+### Adicionado
+
+- Detalhe completo: fraquezas e resistências pela tabela da geração do jogo, golpes por jogo (nível,
+  TM/HM, ovo, tutor, outros) com os valores antigos de cada golpe, treino (EVs, exp. base, chance de
+  captura, felicidade, crescimento), reprodução (ciclos/passos e Pokémon compatíveis), texto da
+  Pokédex do jogo selecionado com todas as entradas, botão shiny, stats mín./máx. nos níveis 50/100
+  e sheet de habilidade com descrição e quem mais a tem.
+- Tabela de tipos por geração (1ª, 2ª–5ª, 6ª+) e tipos antigos dos Pokémon no team builder, no
+  detalhe e no filtro "fraco a".
+- Filtros e ordenação: total de stats, cada stat, altura, peso, geração, categoria, fraqueza,
+  habilidade, total mínimo e só favoritos, tudo na URL.
+- Favoritos (coração no detalhe, atalho no menu).
+- Capturados na aba Rotas (Poké Bola, contagem por rota, esconder capturados).
+- Caixas de 30 estilo Pokémon HOME para living dex (`?layout=boxes`).
+- Backup de capturados, shinies, favoritos e caçadas por arquivo JSON e por link (`/?backup=`).
+- Shiny capturado e contador de shiny hunt com Shiny Charm e Masuda.
+- Calculadora de tipos (`/types`), comparação de até 3 Pokémon (`/compare`), quiz "Quem é esse
+  Pokémon?" (`/quiz`) e Pokémon aleatório.
+- Team builder: exportar/importar no formato do Pokémon Showdown e sugestões para as fraquezas.
+- Menu lateral com navegação, idioma, tema manual (sistema/claro/escuro), backup e sobre.
+- Compartilhar (Web Share ou link copiado), deslizar no detalhe, voltar ao topo, aviso de offline,
+  atalhos e capturas de tela no manifest.
+- Testes com Vitest, CI no GitHub Actions e geradores de dados em `scripts/`.
+
 ### Alterado
 
 - Artworks servidos em WebP redimensionado pelo proxy wsrv.nl, em três larguras fixas, com o PNG
@@ -17,6 +41,9 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
   escuro.
 - No seletor de tipos, os tipos não escolhidos não ficam mais esmaecidos (o texto ficava ilegível);
   o escolhido ganha check e anel duplo.
+- `@vueuse/motion` trocado pela Web Animations API (~12 KB gz a menos no JS inicial) e
+  `content-visibility` nos cards da grade.
+- Os botões de idioma e "Sobre" do cabeçalho foram para o menu lateral.
 
 ### Corrigido
 
