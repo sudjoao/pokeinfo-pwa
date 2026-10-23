@@ -8,9 +8,11 @@ import {
 } from '@mdi/js'
 import { useI18n } from 'vue-i18n'
 import { AUTHOR, AUTHOR_URL, BULBAPEDIA_URL, POKEAPI_URL, REPO_URL } from '@/data/credits'
+import { useOverlayFocusReturn } from '@/composables/useOverlayFocusReturn'
 
 /** Créditos do app: autor, repositório, fontes de dados e aviso de marca. */
 const open = defineModel<boolean>({ default: false })
+useOverlayFocusReturn(open)
 
 const { t } = useI18n()
 
@@ -41,14 +43,15 @@ const links = [
 </script>
 
 <template>
-  <v-bottom-sheet v-model="open" inset>
-    <v-card class="about-sheet" rounded="t-xl" :aria-label="t('about.title')">
+  <v-bottom-sheet v-model="open" inset :aria-label="t('about.title')">
+    <v-card class="about-sheet" rounded="t-xl">
       <v-card-title class="text-title-large pt-4 d-flex align-center ga-2">
         <v-icon :icon="mdiPokeball" color="primary" />
         {{ t('about.title') }}
       </v-card-title>
       <v-card-text class="text-body-medium pb-0">{{ t('about.description') }}</v-card-text>
-      <v-list density="comfortable" nav>
+      <!-- Só links: sem role="navigation" o Vuetify gera uma "list" com filhos "link" (inválido). -->
+      <v-list density="comfortable" nav role="navigation" :aria-label="t('about.title')">
         <v-list-item
           v-for="link in links"
           :key="link.href"

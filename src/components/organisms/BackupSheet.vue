@@ -3,6 +3,7 @@ import { useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { mdiContentCopy, mdiDownload, mdiShareVariant, mdiUpload } from '@mdi/js'
 import type { BackupSummary } from '@/composables/useBackup'
+import { useOverlayFocusReturn } from '@/composables/useOverlayFocusReturn'
 
 defineProps<{
   summary: BackupSummary
@@ -11,6 +12,7 @@ defineProps<{
 }>()
 
 const open = defineModel<boolean>({ required: true })
+useOverlayFocusReturn(open)
 
 const emit = defineEmits<{
   download: []
@@ -32,7 +34,7 @@ function onFile(event: Event): void {
 </script>
 
 <template>
-  <v-bottom-sheet v-model="open" inset>
+  <v-bottom-sheet v-model="open" inset :aria-label="t('backup.title')">
     <v-card rounded="t-xl" :title="t('backup.title')">
       <v-card-text class="d-flex flex-column ga-3">
         <p class="text-body-medium mb-0">{{ t('backup.intro') }}</p>

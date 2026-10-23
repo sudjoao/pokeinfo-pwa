@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import type { Game } from '@/data/games'
 import { groupGamesByGeneration } from '@/utils/games'
 import { useDexLabel } from '@/composables/useDexLabel'
+import { useOverlayFocusReturn } from '@/composables/useOverlayFocusReturn'
 
 const props = defineProps<{
   games: readonly Game[]
@@ -15,6 +16,7 @@ const props = defineProps<{
 const emit = defineEmits<{ select: [slug: string | null] }>()
 
 const open = defineModel<boolean>({ default: false })
+useOverlayFocusReturn(open)
 
 const { t } = useI18n()
 const { dexLabel } = useDexLabel()
@@ -32,8 +34,8 @@ function choose(slug: string | null): void {
 </script>
 
 <template>
-  <v-bottom-sheet v-model="open" inset>
-    <v-card class="game-picker" rounded="t-xl" :aria-label="t('home.chooseGame')">
+  <v-bottom-sheet v-model="open" inset :aria-label="t('home.chooseGame')">
+    <v-card class="game-picker" rounded="t-xl">
       <v-card-title class="text-title-large pt-4">{{ t('home.pickGame') }}</v-card-title>
       <v-list class="game-picker__list" density="comfortable" nav>
         <v-list-item

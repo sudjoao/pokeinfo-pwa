@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import PokemonButtonGrid, {
   type PokemonButtonItem,
 } from '@/components/molecules/PokemonButtonGrid.vue'
+import { useOverlayFocusReturn } from '@/composables/useOverlayFocusReturn'
 
 const props = defineProps<{
   title: string
@@ -14,6 +15,7 @@ const props = defineProps<{
 }>()
 
 const open = defineModel<boolean>({ required: true })
+useOverlayFocusReturn(open)
 
 const emit = defineEmits<{ select: [id: number]; retry: [] }>()
 
@@ -33,7 +35,7 @@ function select(id: number): void {
 </script>
 
 <template>
-  <v-bottom-sheet v-model="open" scrollable>
+  <v-bottom-sheet v-model="open" scrollable :aria-label="title">
     <v-card rounded="t-xl" :title="title">
       <v-card-text class="ability-sheet__body">
         <v-skeleton-loader v-if="status === 'loading'" type="paragraph" />

@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { BOTH_VERSIONS } from '@/composables/usePokemonList'
 import type { ExclusiveVersion } from '@/data/exclusives'
+import { useOverlayFocusReturn } from '@/composables/useOverlayFocusReturn'
 
 /**
  * Filtro de versão: "nas duas versões", "só A" e "só B". Os três grupos cobrem a Pokédex inteira,
@@ -22,6 +23,7 @@ const emit = defineEmits<{
 }>()
 
 const open = defineModel<boolean>({ default: false })
+useOverlayFocusReturn(open)
 
 const { t } = useI18n()
 
@@ -55,13 +57,13 @@ const options = computed<Option[]>(() => {
 </script>
 
 <template>
-  <v-bottom-sheet v-model="open" inset>
-    <v-card class="version-picker" rounded="t-xl" :aria-label="t('versionFilter.title')">
+  <v-bottom-sheet v-model="open" inset :aria-label="t('versionFilter.title')">
+    <v-card class="version-picker" rounded="t-xl">
       <v-card-title class="text-title-large pt-4">{{ t('versionFilter.title') }}</v-card-title>
       <v-card-subtitle class="text-wrap">
         {{ t('versionFilter.hint', { game: gameTitle }) }}
       </v-card-subtitle>
-      <v-list density="comfortable" nav role="group" :aria-label="t('versionFilter.label')">
+      <v-list density="comfortable" nav :aria-label="t('versionFilter.label')">
         <v-list-item
           v-for="option in options"
           :key="option.key"
@@ -73,7 +75,11 @@ const options = computed<Option[]>(() => {
           @click="emit('toggle', option.key)"
         >
           <template #prepend>
-            <v-checkbox-btn :model-value="selected.includes(option.key)" tabindex="-1" />
+            <v-checkbox-btn
+              :model-value="selected.includes(option.key)"
+              tabindex="-1"
+              aria-hidden="true"
+            />
           </template>
           <template #append>
             <span class="version-picker__count text-label-large">
@@ -95,7 +101,8 @@ const options = computed<Option[]>(() => {
 
 <style scoped>
 .version-picker__count {
-  opacity: 0.6;
+  /* 0.7 é o mínimo que mantém 4,5:1 (ver medium-emphasis-opacity no tema). */
+  opacity: 0.7;
   font-variant-numeric: tabular-nums;
 }
 

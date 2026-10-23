@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { BackupSummary } from '@/composables/useBackup'
 import type { ImportMode } from '@/stores/gameSet'
+import { useOverlayFocusReturn } from '@/composables/useOverlayFocusReturn'
 
 const props = defineProps<{
   summary: BackupSummary | null
@@ -10,6 +11,7 @@ const props = defineProps<{
 }>()
 
 const open = defineModel<boolean>({ required: true })
+useOverlayFocusReturn(open)
 
 const emit = defineEmits<{ confirm: [mode: ImportMode] }>()
 
@@ -30,7 +32,7 @@ function confirm(): void {
 </script>
 
 <template>
-  <v-dialog v-model="open" max-width="480">
+  <v-dialog v-model="open" max-width="480" :aria-label="t('backup.importTitle')">
     <v-card
       :title="t('backup.importTitle')"
       :subtitle="date ? t('backup.importFrom', { date }) : undefined"

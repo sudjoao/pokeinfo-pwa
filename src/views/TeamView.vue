@@ -26,6 +26,8 @@ import TypePickerSheet from '@/components/organisms/TypePickerSheet.vue'
 import VersionPickerSheet from '@/components/organisms/VersionPickerSheet.vue'
 import AdvancedFilterSheet from '@/components/organisms/AdvancedFilterSheet.vue'
 import { usePokemonData } from '@/composables/usePokemonData'
+import { useOverlayFocusReturn } from '@/composables/useOverlayFocusReturn'
+import { noticeTimeout } from '@/utils/notice'
 import TeamPanel from '@/components/organisms/TeamPanel.vue'
 import TeamTray from '@/components/organisms/TeamTray.vue'
 
@@ -86,6 +88,7 @@ function openAdvanced(): void {
   pokemonData.load().catch(() => {})
 }
 const teamOpen = ref(false)
+useOverlayFocusReturn(teamOpen)
 const fullNotice = ref(false)
 const notice = ref<string | null>(null)
 const importOpen = ref(false)
@@ -252,8 +255,8 @@ function goBack(): void {
     <!-- Celular: bandeja fixa no rodapé; o time completo e a análise abrem num sheet. -->
     <template v-if="!mdAndUp">
       <TeamTray :members="team.members.value" @open="teamOpen = true" />
-      <v-bottom-sheet v-model="teamOpen">
-        <v-card class="team-view__sheet" rounded="t-xl" :aria-label="t('team.heading')">
+      <v-bottom-sheet v-model="teamOpen" :aria-label="t('team.heading')">
+        <v-card class="team-view__sheet" rounded="t-xl">
           <v-card-text class="team-view__sheet-body">
             <TeamPanel
               :members="team.members.value"
@@ -320,11 +323,14 @@ function goBack(): void {
     }}</v-snackbar>
     <v-snackbar
       :model-value="notice !== null"
-      :timeout="4000"
+      :timeout="noticeTimeout(notice)"
       location="top"
       @update:model-value="(open: boolean) => !open && (notice = null)"
     >
       {{ notice }}
+      <template #actions>
+        <v-btn variant="text" @click="notice = null">{{ t('common.close') }}</v-btn>
+      </template>
     </v-snackbar>
     <ShowdownImportDialog v-model="importOpen" @import="pasteShowdown" />
     <BackToTop :offset="mdAndUp ? 0 : 72" />

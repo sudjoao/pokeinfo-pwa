@@ -7,6 +7,7 @@ import { useLocale } from '@/composables/useLocale'
 import { useThemePreference } from '@/composables/useThemePreference'
 import { useOnline } from '@/composables/useOnline'
 import { summarize, useBackup } from '@/composables/useBackup'
+import { noticeTimeout } from '@/utils/notice'
 import { decodeBackupParam, parseBackup, type Backup } from '@/utils/backup'
 import type { ImportMode } from '@/stores/gameSet'
 import AppMenu from '@/components/organisms/AppMenu.vue'
@@ -24,6 +25,9 @@ const { locale, locales, setLocale } = useLocale()
 const { preference: theme, setPreference: setTheme } = useThemePreference()
 const backup = useBackup()
 const online = useOnline()
+/** Aviso de offline: abre a cada queda de conexão e pode ser fechado. */
+const offlineOpen = ref(!online.value)
+watch(online, (value) => (offlineOpen.value = !value))
 
 const notice = ref<string | null>(null)
 const canShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function'
@@ -154,15 +158,21 @@ function skipToContent(): void {
       :exported-at="pending?.exportedAt ?? null"
       @confirm="confirmImport"
     />
-    <v-snackbar :model-value="!online" :timeout="-1" location="top" color="surface-variant">
+    <v-snackbar v-model="offlineOpen" :timeout="-1" location="top" color="surface-variant">
       {{ t('app.offline') }}
+      <template #actions>
+        <v-btn variant="text" @click="offlineOpen = false">{{ t('common.close') }}</v-btn>
+      </template>
     </v-snackbar>
     <v-snackbar
       :model-value="notice !== null"
-      :timeout="4000"
+      :timeout="noticeTimeout(notice)"
       @update:model-value="(open: boolean) => !open && (notice = null)"
     >
       {{ notice }}
+      <template #actions>
+        <v-btn variant="text" @click="notice = null">{{ t('common.close') }}</v-btn>
+      </template>
     </v-snackbar>
   </v-app>
 </template>

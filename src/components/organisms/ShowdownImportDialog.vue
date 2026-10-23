@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useOverlayFocusReturn } from '@/composables/useOverlayFocusReturn'
 
 const open = defineModel<boolean>({ required: true })
+useOverlayFocusReturn(open)
 
 const emit = defineEmits<{ import: [text: string] }>()
 
@@ -20,7 +22,7 @@ function confirm(): void {
 </script>
 
 <template>
-  <v-dialog v-model="open" max-width="520">
+  <v-dialog v-model="open" max-width="520" :aria-label="t('team.importTitle')">
     <v-card :title="t('team.importTitle')">
       <v-card-text>
         <p class="text-body-medium">{{ t('team.importHint') }}</p>

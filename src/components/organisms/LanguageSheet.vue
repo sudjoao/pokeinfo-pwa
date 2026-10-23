@@ -2,6 +2,7 @@
 import { mdiCheck } from '@mdi/js'
 import { useI18n } from 'vue-i18n'
 import type { Locale } from '@/plugins/i18n'
+import { useOverlayFocusReturn } from '@/composables/useOverlayFocusReturn'
 
 defineProps<{
   locales: readonly Locale[]
@@ -11,6 +12,7 @@ defineProps<{
 const emit = defineEmits<{ select: [locale: Locale] }>()
 
 const open = defineModel<boolean>({ default: false })
+useOverlayFocusReturn(open)
 
 const { t } = useI18n()
 
@@ -21,8 +23,8 @@ function choose(locale: Locale): void {
 </script>
 
 <template>
-  <v-bottom-sheet v-model="open" inset>
-    <v-card class="language-sheet" rounded="t-xl" :aria-label="t('language.title')">
+  <v-bottom-sheet v-model="open" inset :aria-label="t('language.title')">
+    <v-card class="language-sheet" rounded="t-xl">
       <v-card-title class="text-title-large pt-4">{{ t('language.title') }}</v-card-title>
       <v-list class="language-sheet__list" density="comfortable" nav>
         <v-list-item
@@ -45,5 +47,10 @@ function choose(locale: Locale): void {
 <style scoped>
 .language-sheet__list {
   padding-bottom: calc(8px + var(--safe-bottom));
+}
+
+/* No item ativo o texto fica na cor primária; o esmaecimento padrão do subtítulo derrubava o contraste. */
+.language-sheet__list :deep(.v-list-item--active .v-list-item-subtitle) {
+  opacity: 1;
 }
 </style>

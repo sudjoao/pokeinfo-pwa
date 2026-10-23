@@ -1,0 +1,34 @@
+import { nextTick, watch, type Ref } from 'vue'
+
+function usable(element: HTMLElement | null): element is HTMLElement {
+  return (
+    !!element && element.isConnected && !element.closest('[inert]') && element.checkVisibility()
+  )
+}
+
+/**
+ * Devolve o foco a quem abriu o sheet/dialog quando ele fecha. O Vuetify só faz isso quando o
+ * overlay tem `activator`; aqui todos abrem por `v-model`, e o foco caía no `<body>`. Se o
+ * elemento de origem sumiu (ex.: item do menu lateral, que fica inerte ao fechar), vai para o h1.
+ */
+export function useOverlayFocusReturn(open: Readonly<Ref<boolean>>): void {
+  let origin: HTMLElement | null = null
+
+  // flush 'pre' (padrão): roda antes do Vuetify mover o foco para dentro do conteúdo.
+  watch(open, (value) => {
+    if (value) {
+      const active = document.activeElement
+      origin = active instanceof HTMLElement && active !== document.body ? active : null
+      return
+    }
+    const target = origin
+    origin = null
+    nextTick(() => {
+      // Só corrige o foco que ficou "perdido" (no body ou no overlay que está saindo).
+      const active = document.activeElement
+      if (active && active !== document.body && !active.closest('.v-overlay')) return
+      const fallback = document.querySelector<HTMLElement>('h1[tabindex]')
+      ;(usable(target) ? target : fallback)?.focus({ preventScroll: true })
+    })
+  })
+}

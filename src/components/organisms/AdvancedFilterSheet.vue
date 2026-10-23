@@ -11,6 +11,7 @@ import {
 } from '@/utils/advancedFilters'
 import { formatPokemonName } from '@/utils/pokemon'
 import { STAT_NAMES } from '@/types/pokemon'
+import { useOverlayFocusReturn } from '@/composables/useOverlayFocusReturn'
 
 const props = defineProps<{
   filters: AdvancedFilters
@@ -19,6 +20,7 @@ const props = defineProps<{
 }>()
 
 const open = defineModel<boolean>({ required: true })
+useOverlayFocusReturn(open)
 
 const emit = defineEmits<{ update: [filters: AdvancedFilters]; clear: [] }>()
 
@@ -55,7 +57,7 @@ function setSort(key: SortKey): void {
 </script>
 
 <template>
-  <v-bottom-sheet v-model="open" scrollable inset>
+  <v-bottom-sheet v-model="open" scrollable inset :aria-label="t('filters.title')">
     <v-card rounded="t-xl" :title="t('filters.title')">
       <v-card-text class="advanced-sheet__body d-flex flex-column ga-4">
         <div class="d-flex flex-wrap align-center ga-2">
