@@ -83,9 +83,10 @@ function formOf(method: EvolutionMethod): string | null {
 
       <template v-if="others.length">
         <v-btn
-          size="x-small"
+          size="small"
           variant="text"
           class="px-1 text-none"
+          :aria-expanded="showAll"
           :append-icon="showAll ? mdiChevronUp : mdiChevronDown"
           @click.stop="showAll = !showAll"
         >

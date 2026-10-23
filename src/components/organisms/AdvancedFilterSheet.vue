@@ -80,8 +80,12 @@ function setSort(key: SortKey): void {
             :aria-label="t('filters.direction')"
             @update:model-value="set('desc', $event === 'desc')"
           >
-            <v-btn value="asc" size="small">{{ t('filters.asc') }}</v-btn>
-            <v-btn value="desc" size="small">{{ t('filters.desc') }}</v-btn>
+            <v-btn value="asc" size="small" :aria-pressed="!filters.desc">{{
+              t('filters.asc')
+            }}</v-btn>
+            <v-btn value="desc" size="small" :aria-pressed="filters.desc">{{
+              t('filters.desc')
+            }}</v-btn>
           </v-btn-toggle>
         </div>
 
@@ -108,7 +112,15 @@ function setSort(key: SortKey): void {
               )
             "
           >
-            <v-chip v-for="gen in GENERATIONS" :key="gen" :value="gen" filter variant="outlined">
+            <v-chip
+              v-for="gen in GENERATIONS"
+              :key="gen"
+              :value="gen"
+              filter
+              variant="outlined"
+              role="button"
+              :aria-pressed="filters.generations.includes(gen)"
+            >
               {{ gen }}
             </v-chip>
           </v-chip-group>
@@ -123,7 +135,15 @@ function setSort(key: SortKey): void {
             selected-class="text-primary"
             @update:model-value="set('categories', $event)"
           >
-            <v-chip v-for="cat in CATEGORIES" :key="cat" :value="cat" filter variant="outlined">
+            <v-chip
+              v-for="cat in CATEGORIES"
+              :key="cat"
+              :value="cat"
+              filter
+              variant="outlined"
+              role="button"
+              :aria-pressed="filters.categories.includes(cat)"
+            >
               {{ t(`filters.categories.${cat}`) }}
             </v-chip>
           </v-chip-group>

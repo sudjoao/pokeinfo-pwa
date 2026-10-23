@@ -37,9 +37,17 @@ function choose(slug: string | null): void {
   <v-bottom-sheet v-model="open" inset :aria-label="t('home.chooseGame')">
     <v-card class="game-picker" rounded="t-xl">
       <v-card-title class="text-title-large pt-4">{{ t('home.pickGame') }}</v-card-title>
-      <v-list class="game-picker__list" density="comfortable" nav>
+      <v-list
+        class="game-picker__list"
+        density="comfortable"
+        nav
+        role="radiogroup"
+        :aria-label="t('home.chooseGame')"
+      >
         <v-list-item
           :active="selected === null"
+          role="radio"
+          :aria-checked="selected === null"
           :prepend-icon="mdiEarth"
           :title="t('home.allGames')"
           :subtitle="t('home.nationalDex')"
@@ -53,6 +61,8 @@ function choose(slug: string | null): void {
             v-for="game in group.games"
             :key="game.slug"
             :active="game.slug === selected"
+            role="radio"
+            :aria-checked="game.slug === selected"
             :title="game.title"
             :subtitle="subtitle(game)"
             color="primary"

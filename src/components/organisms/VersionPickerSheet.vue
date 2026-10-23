@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { mdiCheckboxBlankOutline, mdiCheckboxMarked } from '@mdi/js'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { BOTH_VERSIONS } from '@/composables/usePokemonList'
@@ -63,22 +64,25 @@ const options = computed<Option[]>(() => {
       <v-card-subtitle class="text-wrap">
         {{ t('versionFilter.hint', { game: gameTitle }) }}
       </v-card-subtitle>
-      <v-list density="comfortable" nav :aria-label="t('versionFilter.label')">
+      <v-list density="comfortable" nav role="group" :aria-label="t('versionFilter.label')">
         <v-list-item
           v-for="option in options"
           :key="option.key"
           :title="option.title"
           :subtitle="option.subtitle"
           :active="selected.includes(option.key)"
+          role="checkbox"
+          :aria-checked="selected.includes(option.key)"
           color="primary"
           rounded="lg"
           @click="emit('toggle', option.key)"
         >
           <template #prepend>
-            <v-checkbox-btn
-              :model-value="selected.includes(option.key)"
-              tabindex="-1"
-              aria-hidden="true"
+            <!-- Só visual: o estado vai no aria-checked do item (um input aqui seria interativo aninhado). -->
+            <v-icon
+              :icon="selected.includes(option.key) ? mdiCheckboxMarked : mdiCheckboxBlankOutline"
+              :color="selected.includes(option.key) ? 'primary' : undefined"
+              class="me-4"
             />
           </template>
           <template #append>

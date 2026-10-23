@@ -26,11 +26,19 @@ function choose(locale: Locale): void {
   <v-bottom-sheet v-model="open" inset :aria-label="t('language.title')">
     <v-card class="language-sheet" rounded="t-xl">
       <v-card-title class="text-title-large pt-4">{{ t('language.title') }}</v-card-title>
-      <v-list class="language-sheet__list" density="comfortable" nav>
+      <v-list
+        class="language-sheet__list"
+        density="comfortable"
+        nav
+        role="radiogroup"
+        :aria-label="t('language.title')"
+      >
         <v-list-item
           v-for="locale in locales"
           :key="locale"
           :active="locale === selected"
+          role="radio"
+          :aria-checked="locale === selected"
           :title="t(`language.${locale}`)"
           :subtitle="t(`language.${locale}-hint`)"
           :append-icon="locale === selected ? mdiCheck : undefined"

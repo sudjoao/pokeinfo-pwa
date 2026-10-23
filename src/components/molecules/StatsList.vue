@@ -36,9 +36,15 @@ const ranges = computed(() =>
         divided
         class="align-self-start"
       >
-        <v-btn :value="0" size="small">{{ t('detail.statsBase') }}</v-btn>
-        <v-btn :value="50" size="small">{{ t('detail.statsAtLevel', { n: 50 }) }}</v-btn>
-        <v-btn :value="100" size="small">{{ t('detail.statsAtLevel', { n: 100 }) }}</v-btn>
+        <v-btn :value="0" size="small" :aria-pressed="level === 0">{{
+          t('detail.statsBase')
+        }}</v-btn>
+        <v-btn :value="50" size="small" :aria-pressed="level === 50">{{
+          t('detail.statsAtLevel', { n: 50 })
+        }}</v-btn>
+        <v-btn :value="100" size="small" :aria-pressed="level === 100">{{
+          t('detail.statsAtLevel', { n: 100 })
+        }}</v-btn>
       </v-btn-toggle>
       <StatBar
         v-for="(stat, index) in stats"

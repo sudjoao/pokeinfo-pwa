@@ -92,11 +92,12 @@ function goBack(): void {
         variant="outlined"
         density="comfortable"
         class="align-self-start"
+        :aria-label="t('types.title')"
         @update:model-value="setMode"
       >
-        <v-btn value="defense">{{ t('types.defense') }}</v-btn>
-        <v-btn value="attack">{{ t('types.attack') }}</v-btn>
-        <v-btn value="chart">{{ t('types.chart') }}</v-btn>
+        <v-btn value="defense" :aria-pressed="mode === 'defense'">{{ t('types.defense') }}</v-btn>
+        <v-btn value="attack" :aria-pressed="mode === 'attack'">{{ t('types.attack') }}</v-btn>
+        <v-btn value="chart" :aria-pressed="mode === 'chart'">{{ t('types.chart') }}</v-btn>
       </v-btn-toggle>
 
       <div>
@@ -115,6 +116,7 @@ function goBack(): void {
             :key="option.value"
             :value="option.value"
             size="small"
+            :aria-pressed="generation === option.value"
           >
             {{ t(option.key) }}
           </v-btn>

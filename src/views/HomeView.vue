@@ -232,13 +232,13 @@ function openTeamBuilder(): void {
           <v-btn
             value="cards"
             :icon="mdiViewGridOutline"
-            size="small"
+            :aria-pressed="layout === 'cards'"
             :aria-label="t('boxes.cards')"
           />
           <v-btn
             value="boxes"
             :icon="mdiPackageVariantClosed"
-            size="small"
+            :aria-pressed="layout === 'boxes'"
             :aria-label="t('boxes.boxes')"
           />
         </v-btn-toggle>

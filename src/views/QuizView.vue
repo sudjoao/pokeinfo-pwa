@@ -111,6 +111,8 @@ function goBack(): void {
             filter
             variant="outlined"
             size="small"
+            role="button"
+            :aria-pressed="generations.includes(gen)"
           >
             {{ gen }}
           </v-chip>

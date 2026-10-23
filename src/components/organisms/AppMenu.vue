@@ -98,33 +98,47 @@ function then(action: () => void): void {
         aria-labelledby="menu-theme-label"
         @update:model-value="emit('setTheme', $event)"
       >
-        <v-btn value="system" size="small">{{ t('menu.themeSystem') }}</v-btn>
-        <v-btn value="light" size="small">{{ t('menu.themeLight') }}</v-btn>
-        <v-btn value="dark" size="small">{{ t('menu.themeDark') }}</v-btn>
+        <v-btn value="system" size="small" :aria-pressed="theme === 'system'">{{
+          t('menu.themeSystem')
+        }}</v-btn>
+        <v-btn value="light" size="small" :aria-pressed="theme === 'light'">{{
+          t('menu.themeLight')
+        }}</v-btn>
+        <v-btn value="dark" size="small" :aria-pressed="theme === 'dark'">{{
+          t('menu.themeDark')
+        }}</v-btn>
       </v-btn-toggle>
     </div>
-    <v-list nav density="comfortable">
+    <!-- Itens de ação: botões num grupo (como listitem o leitor não diz que são clicáveis). -->
+    <v-list nav density="comfortable" role="group">
       <v-list-item
         :prepend-icon="mdiDiceMultipleOutline"
         :title="t('menu.random')"
+        role="button"
         rounded="lg"
         @click="then(() => emit('random'))"
       />
       <v-list-item
         :prepend-icon="mdiTranslate"
         :title="t('menu.language')"
+        role="button"
+        aria-haspopup="dialog"
         rounded="lg"
         @click="then(() => emit('openLanguage'))"
       />
       <v-list-item
         :prepend-icon="mdiDatabaseArrowDownOutline"
         :title="t('menu.backup')"
+        role="button"
+        aria-haspopup="dialog"
         rounded="lg"
         @click="then(() => emit('openBackup'))"
       />
       <v-list-item
         :prepend-icon="mdiInformationOutline"
         :title="t('menu.about')"
+        role="button"
+        aria-haspopup="dialog"
         rounded="lg"
         @click="then(() => emit('openAbout'))"
       />
