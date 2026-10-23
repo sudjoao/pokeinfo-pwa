@@ -26,6 +26,12 @@ const backup = useBackup()
 const notice = ref<string | null>(null)
 const canShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function'
 
+/** "Surpreenda-me": uma espécie qualquer (1..1025), como o botão da Pokédex oficial. */
+function openRandom(): void {
+  const id = 1 + Math.floor(Math.random() * 1025)
+  router.push({ name: 'pokemon', params: { id } })
+}
+
 function copyBackupLink(): void {
   navigator.clipboard
     .writeText(backup.link())
@@ -102,6 +108,7 @@ function skipToContent(): void {
       @open-language="menu.languageOpen.value = true"
       @open-backup="menu.backupOpen.value = true"
       @open-about="menu.aboutOpen.value = true"
+      @random="openRandom"
     />
     <!-- A Home fica em KeepAlive para preservar o scroll infinito e a busca ao voltar do detalhe. -->
     <!--

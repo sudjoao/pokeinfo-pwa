@@ -22,6 +22,21 @@ const router = createRouter({
       name: 'team',
       component: () => import('@/views/TeamView.vue'),
     },
+    {
+      path: '/compare',
+      name: 'compare',
+      component: () => import('@/views/CompareView.vue'),
+    },
+    {
+      path: '/quiz',
+      name: 'quiz',
+      component: () => import('@/views/QuizView.vue'),
+    },
+    {
+      path: '/types',
+      name: 'types',
+      component: () => import('@/views/TypesView.vue'),
+    },
   ],
   // Ao voltar, restaura a posição da lista (a Home fica viva via KeepAlive); ao abrir outra
   // tela, começa do topo. Mudança só de query (filtros, time) mantém a posição: quem precisa
@@ -38,6 +53,9 @@ trackInAppNavigation(router)
 router.afterEach((to) => {
   if (to.name === 'home') document.title = i18n.global.t('app.dexTitle')
   if (to.name === 'team') document.title = i18n.global.t('app.teamTitle')
+  if (to.name === 'types') document.title = i18n.global.t('app.typesTitle')
+  if (to.name === 'compare') document.title = i18n.global.t('app.compareTitle')
+  if (to.name === 'quiz') document.title = i18n.global.t('app.quizTitle')
 })
 
 export default router

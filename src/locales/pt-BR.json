@@ -3,7 +3,10 @@
     "name": "PokeInfo",
     "dexTitle": "PokeInfo",
     "detailTitle": "{name} · PokeInfo",
-    "teamTitle": "Montar time · PokeInfo"
+    "teamTitle": "Montar time · PokeInfo",
+    "typesTitle": "Calculadora de tipos · PokeInfo",
+    "compareTitle": "Comparar · PokeInfo",
+    "quizTitle": "Quem é esse Pokémon? · PokeInfo"
   },
   "common": {
     "retry": "Tentar novamente",
@@ -455,7 +458,11 @@
     "themeLight": "Claro",
     "themeDark": "Escuro",
     "backup": "Backup dos dados",
-    "about": "Sobre"
+    "about": "Sobre",
+    "types": "Calculadora de tipos",
+    "compare": "Comparar Pokémon",
+    "quiz": "Quem é esse Pokémon?",
+    "random": "Pokémon aleatório"
   },
   "backup": {
     "title": "Backup dos dados",
@@ -517,5 +524,46 @@
   "favorites": {
     "title": "Favoritos",
     "toggle": "Favoritar {name}"
+  },
+  "types": {
+    "title": "Calculadora de tipos",
+    "defense": "Defesa",
+    "attack": "Ataque",
+    "chart": "Tabela",
+    "pickDefense": "Escolha até 2 tipos do Pokémon que vai receber o golpe.",
+    "pickAttack": "Escolha o tipo do golpe.",
+    "generation": "Geração da tabela",
+    "gen1": "1ª",
+    "gen2to5": "2ª–5ª",
+    "gen6plus": "6ª em diante",
+    "superEffective": "Super efetivo contra",
+    "notVeryEffective": "Pouco efetivo contra",
+    "noEffect": "Sem efeito em",
+    "neutral": "Dano normal",
+    "empty": "Escolha um tipo acima.",
+    "chartCaption": "Linha: tipo do golpe. Coluna: tipo de quem recebe.",
+    "chartScroll": "Tabela de tipos (role para os lados)",
+    "attacker": "Ataque",
+    "defender": "Defesa"
+  },
+  "compare": {
+    "title": "Comparar",
+    "add": "Adicionar Pokémon",
+    "hint": "Até {n} Pokémon; busque por nome ou número.",
+    "empty": "Escolha Pokémon acima para comparar stats, tipos, habilidades e fraquezas.",
+    "remove": "Tirar {name} da comparação",
+    "withThis": "Comparar com outro Pokémon",
+    "bestHint": "Em destaque: o maior valor de cada linha."
+  },
+  "quiz": {
+    "title": "Quem é esse Pokémon?",
+    "question": "Quem é esse Pokémon?",
+    "silhouette": "Silhueta de um Pokémon",
+    "correct": "Acertou! É {name}.",
+    "wrong": "Era {name}.",
+    "hint": "Ouvir o grito",
+    "next": "Próximo",
+    "streak": "Sequência: {n}",
+    "best": "Recorde: {n}"
   }
 }

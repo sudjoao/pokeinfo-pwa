@@ -2,7 +2,13 @@
 import { computed, defineAsyncComponent, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { mdiChevronLeft, mdiChevronRight, mdiVolumeHigh, mdiVolumeOff } from '@mdi/js'
+import {
+  mdiChevronLeft,
+  mdiChevronRight,
+  mdiCompareHorizontal,
+  mdiVolumeHigh,
+  mdiVolumeOff,
+} from '@mdi/js'
 import { usePokemonDetail, type NeighborEntry } from '@/composables/usePokemonDetail'
 import { useCry } from '@/composables/useCry'
 import { useCaughtStore } from '@/stores/caught'
@@ -139,8 +145,15 @@ const egg = useEggCompatibility()
 
 <template>
   <DetailLayout :title="title" @back="goBack">
-    <template v-if="cry.supported" #actions>
+    <template #actions>
       <v-btn
+        v-if="detail"
+        :icon="mdiCompareHorizontal"
+        :aria-label="t('compare.withThis')"
+        :to="{ name: 'compare', query: { ids: String(detail.id) } }"
+      />
+      <v-btn
+        v-if="cry.supported"
         :icon="cry.muted.value ? mdiVolumeOff : mdiVolumeHigh"
         :aria-label="cry.muted.value ? t('cry.unmute') : t('cry.mute')"
         @click="cry.toggleMuted"

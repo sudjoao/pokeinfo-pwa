@@ -49,6 +49,12 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
   total mínimo e só favoritos. Tudo na URL (`?sort=total&desc=1&gen=1&cat=legendary`). Os stats e
   habilidades vêm de uma tabela gerada (~26 KB gz) baixada só quando algum desses filtros é usado.
 - **Favoritos**: coração no detalhe; o menu tem o atalho "Favoritos" (`/?fav=1`).
+- **Calculadora de tipos** (`/types`): defesa (até 2 tipos), ataque (1 tipo) e a tabela 18×18, com as
+  tabelas da 1ª geração, da 2ª à 5ª e da 6ª em diante; tudo na URL para compartilhar o cálculo.
+- **Comparar** (`/compare?ids=6,9,3`): até 3 Pokémon lado a lado (stats com o maior destacado, total,
+  altura, peso, habilidades e fraquezas). O detalhe tem um botão que já abre a comparação com ele.
+- **Quem é esse Pokémon?** (`/quiz`): silhueta com 4 opções, grito como dica, filtro por geração,
+  sequência e recorde salvo no aparelho. O menu também tem "Pokémon aleatório".
 - **Team builder** (`/team`): monte um time de até 6 Pokémon tocando nos cards da mesma listagem
   filtrada (jogo, Pokédex, versão, tipo, busca, capturados). No celular, uma bandeja fixa no rodapé
   mostra os 6 slots enquanto a lista rola e abre um sheet com o time completo; no desktop, o time

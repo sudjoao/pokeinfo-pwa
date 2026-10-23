@@ -3,7 +3,10 @@
     "name": "PokeInfo",
     "dexTitle": "PokeInfo",
     "detailTitle": "{name} · PokeInfo",
-    "teamTitle": "Team builder · PokeInfo"
+    "teamTitle": "Team builder · PokeInfo",
+    "typesTitle": "Type calculator · PokeInfo",
+    "compareTitle": "Compare · PokeInfo",
+    "quizTitle": "Who's that Pokémon? · PokeInfo"
   },
   "common": {
     "retry": "Try again",
@@ -455,7 +458,11 @@
     "themeLight": "Light",
     "themeDark": "Dark",
     "backup": "Data backup",
-    "about": "About"
+    "about": "About",
+    "types": "Type calculator",
+    "compare": "Compare Pokémon",
+    "quiz": "Who's that Pokémon?",
+    "random": "Random Pokémon"
   },
   "backup": {
     "title": "Data backup",
@@ -517,5 +524,46 @@
   "favorites": {
     "title": "Favorites",
     "toggle": "Favorite {name}"
+  },
+  "types": {
+    "title": "Type calculator",
+    "defense": "Defense",
+    "attack": "Attack",
+    "chart": "Chart",
+    "pickDefense": "Pick up to 2 types of the defending Pokémon.",
+    "pickAttack": "Pick the move type.",
+    "generation": "Chart generation",
+    "gen1": "Gen 1",
+    "gen2to5": "Gen 2–5",
+    "gen6plus": "Gen 6+",
+    "superEffective": "Super effective against",
+    "notVeryEffective": "Not very effective against",
+    "noEffect": "No effect on",
+    "neutral": "Normal damage",
+    "empty": "Pick a type above.",
+    "chartCaption": "Row: move type. Column: defending type.",
+    "chartScroll": "Type chart (scroll sideways)",
+    "attacker": "Attack",
+    "defender": "Defense"
+  },
+  "compare": {
+    "title": "Compare",
+    "add": "Add Pokémon",
+    "hint": "Up to {n} Pokémon; search by name or number.",
+    "empty": "Pick Pokémon above to compare stats, types, abilities and weaknesses.",
+    "remove": "Remove {name} from comparison",
+    "withThis": "Compare with another Pokémon",
+    "bestHint": "Highlighted: the highest value in each row."
+  },
+  "quiz": {
+    "title": "Who's that Pokémon?",
+    "question": "Who's that Pokémon?",
+    "silhouette": "Pokémon silhouette",
+    "correct": "Correct! It is {name}.",
+    "wrong": "It was {name}.",
+    "hint": "Hear the cry",
+    "next": "Next",
+    "streak": "Streak: {n}",
+    "best": "Best: {n}"
   }
 }

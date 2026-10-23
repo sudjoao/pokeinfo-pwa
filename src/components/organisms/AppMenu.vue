@@ -5,6 +5,10 @@ import {
   mdiHeartOutline,
   mdiDatabaseArrowDownOutline,
   mdiInformationOutline,
+  mdiShieldHalfFull,
+  mdiCompareHorizontal,
+  mdiHelpCircleOutline,
+  mdiDiceMultipleOutline,
   mdiSwordCross,
   mdiTranslate,
 } from '@mdi/js'
@@ -19,6 +23,7 @@ const emit = defineEmits<{
   openLanguage: []
   openBackup: []
   openAbout: []
+  random: []
 }>()
 
 const { t } = useI18n()
@@ -57,7 +62,33 @@ function then(action: () => void): void {
         rounded="lg"
         @click="open = false"
       />
-      <slot name="tools" :close="() => (open = false)" />
+      <v-list-item
+        :prepend-icon="mdiShieldHalfFull"
+        :title="t('menu.types')"
+        :to="{ name: 'types' }"
+        rounded="lg"
+        @click="open = false"
+      />
+      <v-list-item
+        :prepend-icon="mdiCompareHorizontal"
+        :title="t('menu.compare')"
+        :to="{ name: 'compare' }"
+        rounded="lg"
+        @click="open = false"
+      />
+      <v-list-item
+        :prepend-icon="mdiHelpCircleOutline"
+        :title="t('menu.quiz')"
+        :to="{ name: 'quiz' }"
+        rounded="lg"
+        @click="open = false"
+      />
+      <v-list-item
+        :prepend-icon="mdiDiceMultipleOutline"
+        :title="t('menu.random')"
+        rounded="lg"
+        @click="then(() => emit('random'))"
+      />
     </v-list>
 
     <v-divider class="my-2" />
