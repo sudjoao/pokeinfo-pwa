@@ -535,7 +535,12 @@
     "replaceHint": "Erases what is on this device and keeps only the backup.",
     "confirm": "Import",
     "cancel": "Cancel",
-    "restored": "Backup imported."
+    "restored": "Backup imported.",
+    "showQr": "Show QR code",
+    "hideQr": "Hide QR code",
+    "qrLabel": "QR code with the backup link",
+    "qrHint": "Point the other device's camera at it: the link opens PokeInfo and asks whether to merge or replace the data.",
+    "qrTooBig": "Too much data to fit in a QR code. Use the file or the link."
   },
   "boxes": {
     "layout": "Layout",

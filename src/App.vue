@@ -169,6 +169,7 @@ function skipToContent(): void {
       v-model="menu.backupOpen.value"
       :summary="backupSummary"
       :can-share="canShare"
+      :link="backup.link"
       @download="backup.downloadFile"
       @copy-link="copyBackupLink"
       @share="shareBackupLink"

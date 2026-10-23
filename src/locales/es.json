@@ -535,7 +535,12 @@
     "replaceHint": "Borra lo de este dispositivo y deja solo la copia.",
     "confirm": "Importar",
     "cancel": "Cancelar",
-    "restored": "Copia importada."
+    "restored": "Copia importada.",
+    "showQr": "Mostrar código QR",
+    "hideQr": "Ocultar código QR",
+    "qrLabel": "Código QR con el enlace de copia",
+    "qrHint": "Apunta la cámara del otro dispositivo: el enlace abre PokeInfo y pregunta si sumar o reemplazar los datos.",
+    "qrTooBig": "Hay demasiados datos para un código QR. Usa el archivo o el enlace."
   },
   "boxes": {
     "layout": "Vista",
