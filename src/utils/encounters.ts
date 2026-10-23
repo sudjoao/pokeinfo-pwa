@@ -1,5 +1,6 @@
 import { GAMES, type Game } from '@/data/games'
-import type { EncounterLocation, PokemonEncounters } from '@/types/pokemon'
+import type { ConditionVariant, EncounterLocation, PokemonEncounters } from '@/types/pokemon'
+import { conditionCategory } from './encounterConditions'
 import { formatPokemonName } from './pokemon'
 
 /** Sufixo genérico da PokéAPI para a área principal de um local ("kanto-route-1-area"). */
@@ -40,6 +41,37 @@ export function formatEncounterMethod(
 ): string {
   const key = `encounterMethod.${slug}`
   return te(key) ? t(key) : formatPokemonName(slug)
+}
+
+/** Condição de encontro ("time-night" -> "noite"); sem tradução, o slug formatado em inglês. */
+export function formatEncounterCondition(
+  slug: string,
+  t: Translate,
+  te: (key: string) => boolean,
+): string {
+  const key = `encounterCondition.${slug}`
+  return te(key) ? t(key) : formatPokemonName(slug)
+}
+
+/**
+ * Rótulo de uma variante: valores da mesma categoria são alternativas ("manhã/dia"), de
+ * categorias diferentes valem juntos ("Rádio: Som de Hoenn, noite"). Sem condição: "normal".
+ */
+export function formatConditionVariant(
+  variant: Pick<ConditionVariant, 'conditions'>,
+  t: Translate,
+  te: (key: string) => boolean,
+): string {
+  if (!variant.conditions.length) return t('encounterCondition.always')
+  const byCategory = new Map<string, string[]>()
+  for (const slug of variant.conditions) {
+    const category = conditionCategory(slug)
+    byCategory.set(category, [
+      ...(byCategory.get(category) ?? []),
+      formatEncounterCondition(slug, t, te),
+    ])
+  }
+  return [...byCategory.values()].map((labels) => labels.join('/')).join(', ')
 }
 
 /** "Nv. 2–5" ou "Nv. 18" quando a faixa é um nível só. */

@@ -230,9 +230,22 @@ export interface EncounterLocation {
 export type PokemonEncounters = Record<string, EncounterLocation[]>
 
 /** Um método de encontro numa rota, com a chance somada (capada em 100; covis de raid podem estourar). */
+/**
+ * Chance de um método sob um conjunto de condições da PokéAPI ("time-night", "swarm-yes"…).
+ * Valores da mesma categoria são alternativas ("manhã ou dia"); de categorias diferentes, valem
+ * juntos ("rádio Hoenn e noite"). `conditions` vazio = vale sempre.
+ */
+export interface ConditionVariant {
+  conditions: string[]
+  chance: number
+}
+
 export interface RouteEncounterMethod {
   slug: string
+  /** Maior chance entre as variantes (é a que ordena a lista). */
   chance: number
+  /** Só quando a chance depende de condição (hora, estação, swarm…); da maior para a menor. */
+  variants?: ConditionVariant[]
 }
 
 /**

@@ -2,8 +2,9 @@ import { GAME_ROUTES, type GameRoute } from '@/data/routes'
 import { BDSP_ROUTES, type StaticGameRoute } from '@/data/routes-bdsp'
 import { ROUTE_SECTIONS } from '@/data/routeOrder'
 import type { Game } from '@/data/games'
-import type { LocationAreaDto } from '@/services/pokeapi/dto'
-import type { RoutePokemon } from '@/types/pokemon'
+import type { EncounterDetailDto, LocationAreaDto } from '@/services/pokeapi/dto'
+import type { ConditionVariant, RouteEncounterMethod, RoutePokemon } from '@/types/pokemon'
+import { conditionDomain, methodVariants, type ConditionDomain } from './encounterConditions'
 import { findGameByVersion } from './games'
 import { idFromResourceUrl } from './pokemon'
 
@@ -22,8 +23,11 @@ interface Accumulator {
   name: string
   minLevel: number
   maxLevel: number
-  /** Chance por método, já capada; o maior valor entre as áreas somadas (não soma entre elas). */
-  methods: Map<string, number>
+  /**
+   * Variantes por método e por condições (chave `conditions.join('+')`); entre áreas e versões
+   * fica o maior valor de cada uma (não soma entre elas).
+   */
+  methods: Map<string, Map<string, ConditionVariant>>
   versions: Set<string>
 }
 
@@ -85,6 +89,7 @@ export function toRoutePokemon(dtos: readonly LocationAreaDto[], game: Game): Ro
   const byPokemon = new Map<string, Accumulator>()
 
   for (const dto of dtos) {
+    const domains = areaDomains(dto)
     for (const encounter of dto.pokemon_encounters) {
       for (const versionDetail of encounter.version_details) {
         const owner = findGameByVersion(versionDetail.version.name)
@@ -105,17 +110,23 @@ export function toRoutePokemon(dtos: readonly LocationAreaDto[], game: Game): Ro
 
         entry.versions.add(owner.version.slug)
 
-        const chanceByMethod = new Map<string, number>()
+        const detailsByMethod = new Map<string, EncounterDetailDto[]>()
         for (const detail of versionDetail.encounter_details) {
           entry.minLevel = Math.min(entry.minLevel, detail.min_level)
           entry.maxLevel = Math.max(entry.maxLevel, detail.max_level)
-          chanceByMethod.set(
-            detail.method.name,
-            (chanceByMethod.get(detail.method.name) ?? 0) + detail.chance,
-          )
+          const list = detailsByMethod.get(detail.method.name) ?? []
+          list.push(detail)
+          detailsByMethod.set(detail.method.name, list)
         }
-        for (const [method, chance] of chanceByMethod) {
-          entry.methods.set(method, Math.max(entry.methods.get(method) ?? 0, chance))
+        const domain = domains.get(versionDetail.version.name) ?? new Map()
+        for (const [method, details] of detailsByMethod) {
+          const merged = entry.methods.get(method) ?? new Map<string, ConditionVariant>()
+          for (const variant of methodVariants(details, domain)) {
+            const key = variant.conditions.join('+')
+            const chance = Math.min(variant.chance, MAX_CHANCE)
+            if (chance > (merged.get(key)?.chance ?? -1)) merged.set(key, { ...variant, chance })
+          }
+          entry.methods.set(method, merged)
         }
       }
     }
@@ -128,10 +139,38 @@ export function toRoutePokemon(dtos: readonly LocationAreaDto[], game: Game): Ro
       minLevel: Number.isFinite(entry.minLevel) ? entry.minLevel : 0,
       maxLevel: entry.maxLevel,
       methods: [...entry.methods]
-        .map(([slug, chance]) => ({ slug, chance: Math.min(chance, MAX_CHANCE) }))
+        .map(([slug, variants]) => toMethod(slug, [...variants.values()]))
         .sort((a, b) => b.chance - a.chance),
       onlyIn:
         game.versions.length > 1 && entry.versions.size === 1 ? [...entry.versions][0]! : null,
     }))
     .sort((a, b) => (b.methods[0]?.chance ?? 0) - (a.methods[0]?.chance ?? 0) || a.id - b.id)
+}
+
+/** Valores de hora/estação/dia vistos na área, por versão (ver `conditionDomain`). */
+function areaDomains(dto: LocationAreaDto): Map<string, ConditionDomain> {
+  const detailsByVersion = new Map<string, EncounterDetailDto[]>()
+  for (const encounter of dto.pokemon_encounters) {
+    for (const versionDetail of encounter.version_details) {
+      const list = detailsByVersion.get(versionDetail.version.name) ?? []
+      list.push(...versionDetail.encounter_details)
+      detailsByVersion.set(versionDetail.version.name, list)
+    }
+  }
+  return new Map(
+    [...detailsByVersion].map(([version, details]) => [version, conditionDomain(details)]),
+  )
+}
+
+/**
+ * Sem condição nenhuma, só a chance (o chip de sempre); com condições, as variantes com a que
+ * vale sempre primeiro. Sem variante (chance 0 em todo detalhe), o método aparece com 0%.
+ */
+function toMethod(slug: string, variants: ConditionVariant[]): RouteEncounterMethod {
+  const chance = Math.max(0, ...variants.map((v) => v.chance))
+  if (variants.every((v) => !v.conditions.length)) return { slug, chance }
+  const sorted = [...variants].sort(
+    (a, b) => Number(!!a.conditions.length) - Number(!!b.conditions.length) || b.chance - a.chance,
+  )
+  return { slug, chance, variants: sorted }
 }
