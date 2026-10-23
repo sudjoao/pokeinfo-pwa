@@ -14,7 +14,7 @@ defineProps<{ label: string; value?: string }>()
 <style scoped>
 .info-tile__label {
   display: block;
-  opacity: 0.6;
+  opacity: 0.7;
   margin-bottom: 2px;
 }
 </style>

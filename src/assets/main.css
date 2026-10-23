@@ -29,6 +29,56 @@ body {
 }
 
 /*
+ * Card ou linha inteira clicável com um único controle nativo (link ou botão) dentro do texto.
+ * O ::after estica a área de toque por cima do card (`.stretched-host`, que precisa de
+ * position: relative); outros botões no card (Poké Bola, remover) ficam por cima com z-index 1.
+ * Antes o clique ficava num v-card/li com @click: o Vuetify renderiza uma <div> sem tabindex,
+ * então nada disso era alcançável pelo teclado nem anunciado como botão/link pelo leitor de tela.
+ */
+.stretched-action {
+  all: unset;
+  cursor: pointer;
+}
+
+.stretched-action::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.stretched-host {
+  position: relative;
+}
+
+.stretched-host:has(.stretched-action:focus-visible) {
+  outline: 2px solid rgb(var(--v-theme-primary));
+  outline-offset: 2px;
+}
+
+/* Fica fora da tela até receber foco pelo teclado (App.vue). */
+.skip-link {
+  position: fixed;
+  top: calc(8px + var(--safe-top));
+  left: 8px;
+  z-index: 2000;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: rgb(var(--v-theme-surface));
+  color: rgb(var(--v-theme-on-surface));
+  transform: translateY(-200%);
+}
+
+.skip-link:focus-visible {
+  transform: none;
+}
+
+/* Título recebe foco programático ao trocar de tela (usePageFocus); sem anel para quem usa toque. */
+[tabindex='-1']:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/*
  * Transição simples entre telas (fade + leve slide), aplicada no App.vue. A raiz de cada tela
  * (DefaultLayout/DetailLayout) é um wrapper `display: contents` (ver esses componentes) só para
  * dar ao <Transition> uma raiz única — como esse wrapper não gera caixa própria, opacity/transform

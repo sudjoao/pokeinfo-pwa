@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
 import { i18n } from '@/plugins/i18n'
+import { trackInAppNavigation } from '@/composables/usePageFocus'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -31,6 +32,8 @@ const router = createRouter({
     return { top: 0 }
   },
 })
+
+trackInAppNavigation(router)
 
 router.afterEach((to) => {
   if (to.name === 'home') document.title = i18n.global.t('app.dexTitle')

@@ -2,7 +2,7 @@
 import { mdiCheck } from '@mdi/js'
 import { useI18n } from 'vue-i18n'
 import type { PokemonType } from '@/types/pokemon'
-import { TYPE_COLORS } from '@/utils/pokemon'
+import { TYPE_COLORS, TYPE_TEXT_COLORS } from '@/utils/pokemon'
 
 defineProps<{
   type: PokemonType
@@ -22,6 +22,8 @@ const { t } = useI18n()
     :prepend-icon="selected ? mdiCheck : undefined"
     class="type-toggle"
     :class="{ 'type-toggle--selected': selected }"
+    :style="{ color: TYPE_TEXT_COLORS[type] }"
+    role="button"
     :aria-pressed="selected"
     @click="emit('toggle', type)"
   >
@@ -30,20 +32,19 @@ const { t } = useI18n()
 </template>
 
 <style scoped>
-/* Mesma cara da TypeChip; a não selecionada fica esmaecida para a escolhida saltar aos olhos. */
+/*
+ * Mesma cara da TypeChip. A escolhida ganha o check e um anel duplo; as outras ficam com a cor
+ * cheia: esmaecer (como antes) derrubava o contraste do texto abaixo de 4,5:1 em vários tipos.
+ */
 .type-toggle {
-  color: #fff;
   font-weight: 600;
   letter-spacing: 0.02em;
-  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
-  opacity: 0.55;
-  transition:
-    opacity 0.15s ease,
-    box-shadow 0.15s ease;
+  transition: box-shadow 0.15s ease;
 }
 
 .type-toggle--selected {
-  opacity: 1;
-  box-shadow: 0 0 0 2px rgb(var(--v-theme-on-surface));
+  box-shadow:
+    0 0 0 2px rgb(var(--v-theme-surface)),
+    0 0 0 4px rgb(var(--v-theme-on-surface));
 }
 </style>

@@ -31,7 +31,7 @@ const { t } = useI18n()
       <div class="d-flex align-center justify-space-between mb-2">
         <h2 class="text-title-medium">
           {{ t('team.heading') }}
-          <span class="team-panel__count opacity-60">
+          <span class="team-panel__count opacity-70">
             {{ t('team.count', { n: members.length, max: TEAM_SIZE }) }}
           </span>
         </h2>

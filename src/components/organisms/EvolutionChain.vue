@@ -57,7 +57,7 @@ const babyItem = computed(() => {
         <p v-if="babyItem" class="text-body-small opacity-70 mt-4 mb-0">
           {{ t(chain.root.isBaby ? 'detail.babyHatch' : 'detail.hatch', { item: babyItem }) }}
         </p>
-        <p class="text-body-small opacity-60 mt-2 mb-0">{{ t('detail.tapStage') }}</p>
+        <p class="text-body-small opacity-70 mt-2 mb-0">{{ t('detail.tapStage') }}</p>
       </template>
     </v-card-text>
   </v-card>

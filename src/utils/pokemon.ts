@@ -8,6 +8,25 @@ export function artworkUrl(id: number): string {
   return `${ARTWORK_BASE_URL}/${id}.png`
 }
 
+/**
+ * Larguras (px) servidas pelo proxy. Poucas faixas fixas fazem cards, evolução e time
+ * reaproveitarem a mesma imagem no cache em vez de baixar uma por tamanho exibido.
+ */
+const ARTWORK_WIDTHS = [96, 240, 480] as const
+
+/**
+ * Artwork redimensionado e convertido para WebP pelo wsrv.nl (proxy de imagens na Cloudflare).
+ * O PNG original tem 475 px e ~120 KB; na largura de um card (240 px, 2× da tela) fica com ~13 KB.
+ * `size` é o lado exibido em px; a largura pedida cobre telas 2×. Se o proxy falhar, quem exibe
+ * volta para `artworkUrl` (ver PokemonArtwork e PokemonAvatar).
+ */
+export function artworkSrc(id: number, size: number): string {
+  const width =
+    ARTWORK_WIDTHS.find((w) => w >= size * 2) ?? ARTWORK_WIDTHS[ARTWORK_WIDTHS.length - 1]
+  const source = artworkUrl(id).replace(/^https:\/\//, '')
+  return `https://wsrv.nl/?url=${source}&w=${width}&we&output=webp`
+}
+
 /** 25 -> "#0025"; com `digits` 3 (Pokédex regionais): 25 -> "#025" */
 export function formatDexNumber(id: number, digits = 4): string {
   return `#${String(id).padStart(digits, '0')}`
@@ -50,6 +69,34 @@ export const TYPE_COLORS: Record<PokemonType, string> = {
   stellar: '#40B5A5',
   unknown: '#68A090',
 }
+
+const DARK_TEXT = '#1a1a1a'
+
+/** Luminância relativa (WCAG) de uma cor `#rrggbb`. */
+function luminance(hex: string): number {
+  const [r, g, b] = [1, 3, 5].map((i) => {
+    const channel = parseInt(hex.slice(i, i + 2), 16) / 255
+    return channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4
+  }) as [number, number, number]
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b
+}
+
+/** Texto branco ou escuro, o que tiver mais contraste com o fundo. */
+function readableTextOn(background: string): string {
+  const bg = luminance(background)
+  const onWhite = 1.05 / (bg + 0.05)
+  const onDark = (bg + 0.05) / (luminance(DARK_TEXT) + 0.05)
+  return onWhite >= onDark ? '#ffffff' : DARK_TEXT
+}
+
+/**
+ * Cor do texto sobre a cor de cada tipo (chips). Branco em todos ficava abaixo de 4,5:1 na maioria
+ * (Elétrico 1,5:1, Gelo 1,6:1); só os tipos escuros (Lutador, Venenoso, Fantasma, Dragão, Sombrio)
+ * seguem com texto branco.
+ */
+export const TYPE_TEXT_COLORS = Object.fromEntries(
+  Object.entries(TYPE_COLORS).map(([type, color]) => [type, readableTextOn(color)]),
+) as Record<PokemonType, string>
 
 export function isPokemonType(name: string): name is PokemonType {
   return (POKEMON_TYPES as readonly string[]).includes(name)

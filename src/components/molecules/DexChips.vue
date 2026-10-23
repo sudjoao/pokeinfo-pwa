@@ -20,6 +20,7 @@ const { dexLabel } = useDexLabel()
     :variant="dex.slug === selected ? 'flat' : 'tonal'"
     class="dex-chip flex-shrink-0"
     :class="{ 'dex-chip--selected': dex.slug === selected }"
+    role="button"
     :aria-pressed="dex.slug === selected"
     @click="emit('select', dex.slug)"
   >

@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { useTemplateRef } from 'vue'
 import AppHeader from '@/components/organisms/AppHeader.vue'
+import { usePageFocus } from '@/composables/usePageFocus'
 
 defineProps<{
   title: string
@@ -8,6 +10,8 @@ defineProps<{
 }>()
 
 const emit = defineEmits<{ back: [] }>()
+
+usePageFocus(useTemplateRef<HTMLElement>('root'))
 </script>
 
 <template>
@@ -15,7 +19,7 @@ const emit = defineEmits<{ back: [] }>()
     Raiz única (display: contents, não afeta o layout) para que o <Transition> de página em
     App.vue consiga animar: um componente com múltiplas raízes (Fragment) não é animável.
   -->
-  <div class="detail-layout-root">
+  <div ref="root" class="detail-layout-root">
     <AppHeader :title="title" back :extension-height="extensionHeight" @back="emit('back')">
       <template v-if="$slots.actions" #actions>
         <slot name="actions" />
@@ -25,7 +29,7 @@ const emit = defineEmits<{ back: [] }>()
       </template>
     </AppHeader>
 
-    <v-main class="detail-layout">
+    <v-main id="main-content" class="detail-layout" tabindex="-1">
       <v-container class="detail-layout__content" max-width="1280">
         <slot />
       </v-container>

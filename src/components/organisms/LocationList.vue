@@ -131,12 +131,12 @@ const missingGames = computed(() =>
             </v-expansion-panel-text>
           </v-expansion-panel>
         </v-expansion-panels>
-        <p class="text-body-small opacity-60 mt-3 mb-0">
+        <p class="text-body-small opacity-70 mt-3 mb-0">
           {{ t('detail.locationsMissingGames', { games: missingGames }) }}
         </p>
       </template>
 
-      <p v-if="status === 'ready' && encounters" class="text-body-small opacity-60 mt-2 mb-0">
+      <p v-if="status === 'ready' && encounters" class="text-body-small opacity-70 mt-2 mb-0">
         {{ t('detail.locationsHint') }}
       </p>
     </v-card-text>

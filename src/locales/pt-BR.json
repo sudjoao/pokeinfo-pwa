@@ -11,7 +11,8 @@
     "national": "Nac.",
     "less": "Menos",
     "clear": "Limpar",
-    "done": "Pronto"
+    "done": "Pronto",
+    "skipToContent": "Pular para o conteúdo"
   },
   "language": {
     "title": "Idioma",
@@ -48,7 +49,8 @@
     "onlyIn": "Só {version}",
     "exclusivesOf": "Exclusivos de {version}",
     "pokemonTab": "Pokémon",
-    "routesTab": "Rotas"
+    "routesTab": "Rotas",
+    "resultsCount": "Nenhum Pokémon encontrado | 1 Pokémon encontrado | {n} Pokémon encontrados"
   },
   "dex": {
     "crown-tundra": "Tundra da Coroa",
@@ -61,11 +63,11 @@
   },
   "catch": {
     "mark": "Marcar como capturado",
-    "unmark": "Desmarcar como capturado",
     "caught": "Capturado",
     "caughtIn": "Capturado em {game}",
     "notCaught": "Ainda não capturado",
-    "notCaughtIn": "Ainda não capturado em {game}"
+    "notCaughtIn": "Ainda não capturado em {game}",
+    "toggle": "Capturado: {name}"
   },
   "cry": {
     "play": "Ouvir o grito do Pokémon",

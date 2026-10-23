@@ -1,9 +1,25 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
+
+/**
+ * Pula o cabeçalho (ações, busca e chips de filtro) direto para a lista. É botão, não âncora
+ * `#main-content`: o hash entraria na URL e passaria pelo router. Durante a transição entre telas
+ * há dois v-main montados; o último é o da tela que está entrando.
+ */
+function skipToContent(): void {
+  const mains = document.querySelectorAll<HTMLElement>('#main-content')
+  mains[mains.length - 1]?.focus()
+}
 </script>
 
 <template>
   <v-app>
+    <button type="button" class="skip-link text-label-large" @click="skipToContent">
+      {{ t('common.skipToContent') }}
+    </button>
     <!-- A Home fica em KeepAlive para preservar o scroll infinito e a busca ao voltar do detalhe. -->
     <!--
       Transition fica fora do KeepAlive (ordem exigida pelo Vue Router). Sem mode="out-in": nessa

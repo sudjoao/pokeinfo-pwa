@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { mdiClose, mdiPlus } from '@mdi/js'
 import { useI18n } from 'vue-i18n'
 import type { TeamMember } from '@/composables/useTeam'
-import { artworkUrl, formatPokemonName, TYPE_COLORS } from '@/utils/pokemon'
+import { formatPokemonName, TYPE_COLORS } from '@/utils/pokemon'
 import PokemonArtwork from '@/components/atoms/PokemonArtwork.vue'
 import TypeChip from '@/components/atoms/TypeChip.vue'
 
@@ -25,16 +25,9 @@ const accent = computed(() => TYPE_COLORS[props.member?.types[0] ?? 'unknown'])
 </script>
 
 <template>
-  <v-card
-    v-if="member"
-    class="team-slot"
-    :style="{ '--accent': accent }"
-    hover
-    :aria-label="t('team.open', { name })"
-    @click="emit('select', member)"
-  >
+  <v-card v-if="member" class="team-slot stretched-host" :style="{ '--accent': accent }" hover link>
     <div class="team-slot__art pa-1">
-      <PokemonArtwork :src="artworkUrl(member.id)" :alt="name" :size="72" />
+      <PokemonArtwork :id="member.id" :alt="name" :size="72" />
       <v-btn
         :icon="mdiClose"
         size="x-small"
@@ -46,7 +39,16 @@ const accent = computed(() => TYPE_COLORS[props.member?.types[0] ?? 'unknown'])
       />
     </div>
     <div class="px-2 pb-2 pt-1">
-      <div class="text-label-medium text-truncate" :title="name">{{ name }}</div>
+      <div class="text-label-medium text-truncate" :title="name">
+        <button
+          type="button"
+          class="stretched-action"
+          :aria-label="t('team.open', { name })"
+          @click="emit('select', member)"
+        >
+          {{ name }}
+        </button>
+      </div>
       <div class="d-flex flex-wrap ga-1 mt-1">
         <TypeChip v-for="type in member.types" :key="type" :type="type" size="x-small" />
       </div>
@@ -55,6 +57,8 @@ const accent = computed(() => TYPE_COLORS[props.member?.types[0] ?? 'unknown'])
 
   <v-card
     v-else
+    tag="button"
+    type="button"
     variant="outlined"
     class="team-slot team-slot--empty d-flex flex-column align-center justify-center ga-1"
     :aria-label="t('team.addSlot')"
@@ -80,6 +84,7 @@ const accent = computed(() => TYPE_COLORS[props.member?.types[0] ?? 'unknown'])
 
 .team-slot__remove {
   position: absolute;
+  z-index: 1;
   top: 2px;
   right: 2px;
   opacity: 0.85;

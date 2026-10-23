@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, nextTick, onActivated, ref, watch } from 'vue'
+import { useRouter, type RouteLocationRaw } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { mdiInformationOutline, mdiSwordCross, mdiTranslate } from '@mdi/js'
 import { gameContextQuery } from '@/utils/games'
@@ -13,6 +13,7 @@ import type { PokemonSummary } from '@/types/pokemon'
 import DefaultLayout from '@/components/templates/DefaultLayout.vue'
 import SearchField from '@/components/molecules/SearchField.vue'
 import EmptyState from '@/components/molecules/EmptyState.vue'
+import ResultsAnnouncer from '@/components/atoms/ResultsAnnouncer.vue'
 import PokemonCardSkeleton from '@/components/molecules/PokemonCardSkeleton.vue'
 import ListFilters from '@/components/organisms/ListFilters.vue'
 import PokemonGrid from '@/components/organisms/PokemonGrid.vue'
@@ -45,6 +46,7 @@ const {
   missingCount,
   toggleCaught,
   items,
+  filtered,
   listKey,
   status,
   errorMessage,
@@ -106,19 +108,41 @@ const contextQuery = computed(() =>
   gameContextQuery(game.value && dex.value ? { game: game.value, dex: dex.value } : null),
 )
 
-/**
- * O grito toca aqui, dentro do toque, porque o iOS bloqueia áudio fora de um gesto do usuário.
- * O jogo selecionado vai junto na URL para o detalhe mostrar o número regional e navegar pela dex.
- */
-function openPokemon(pokemon: PokemonSummary): void {
-  openPokemonId(pokemon.id)
+/** Detalhe do Pokémon; o jogo selecionado vai junto para mostrar o número regional e navegar pela dex. */
+function pokemonRoute(pokemon: PokemonSummary): RouteLocationRaw {
+  return { name: 'pokemon', params: { id: pokemon.id }, query: contextQuery.value }
 }
 
-/** Mesma navegação, usada pela aba de rotas (que só tem o id, sem o resumo completo). */
+/** Último Pokémon aberto pela grade: ao voltar, o foco do teclado retorna ao card dele. */
+let lastOpenedId: number | null = null
+
+/**
+ * O card é um link e navega sozinho; aqui só toca o grito, dentro do toque, porque o iOS
+ * bloqueia áudio fora de um gesto do usuário.
+ */
+function onCardOpen(pokemon: PokemonSummary): void {
+  lastOpenedId = pokemon.id
+  cry.play(pokemon.id)
+}
+
+/** Navegação da aba de rotas (que só tem o id, sem o resumo completo). */
 function openPokemonId(id: number): void {
   cry.play(id)
   router.push({ name: 'pokemon', params: { id }, query: contextQuery.value })
 }
+
+// A Home fica em KeepAlive: ao voltar do detalhe, devolve o foco ao card que foi aberto (sem rolar,
+// a posição já é restaurada pelo router) em vez de mandar quem usa teclado para o topo da página.
+onActivated(() => {
+  const id = lastOpenedId
+  if (id === null) return
+  lastOpenedId = null
+  nextTick(() => {
+    document
+      .querySelector<HTMLElement>(`[data-pokemon-id="${id}"] .stretched-action`)
+      ?.focus({ preventScroll: true })
+  })
+})
 
 /** Abre o team builder já com o jogo e o filtro de tipo atuais. */
 function openTeamBuilder(): void {
@@ -168,6 +192,8 @@ function openTeamBuilder(): void {
     <RouteList v-if="view === 'routes' && game" :game="game" @select="openPokemonId" />
 
     <template v-else>
+      <ResultsAnnouncer :count="filtered.length" :ready="!sourceLoading && !sourceError" />
+
       <v-row v-if="sourceLoading" density="compact">
         <v-col v-for="n in 12" :key="n" cols="6" sm="4" md="3" lg="2">
           <PokemonCardSkeleton />
@@ -192,9 +218,10 @@ function openTeamBuilder(): void {
         :status="status"
         :error-message="errorMessage"
         :caught-ids="game ? caughtIds : undefined"
+        :link-to="pokemonRoute"
         @load="loadMore"
         @retry="retry"
-        @select="openPokemon"
+        @select="onCardOpen"
         @toggle-caught="toggleCaught"
       />
     </template>

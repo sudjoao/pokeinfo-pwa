@@ -2,7 +2,7 @@
 import { useI18n } from 'vue-i18n'
 import type { TeamMember } from '@/composables/useTeam'
 import type { CoverageRow, DefenseRow } from '@/utils/typeChart'
-import { TYPE_COLORS } from '@/utils/pokemon'
+import { TYPE_COLORS, TYPE_TEXT_COLORS } from '@/utils/pokemon'
 import TypeChip from '@/components/atoms/TypeChip.vue'
 import TeamDefenseTable from '@/components/organisms/TeamDefenseTable.vue'
 import TeamCoverage from '@/components/organisms/TeamCoverage.vue'
@@ -32,6 +32,7 @@ const { t } = useI18n()
             :color="TYPE_COLORS[row.type]"
             variant="flat"
             class="team-analysis__threat"
+            :style="{ color: TYPE_TEXT_COLORS[row.type] }"
           >
             {{ t(`type.${row.type}`) }} · {{ t('team.weakMembers', row.weak) }}
           </v-chip>
@@ -58,14 +59,12 @@ const { t } = useI18n()
       </v-card-text>
     </v-card>
 
-    <p class="text-body-small opacity-60 mb-0">{{ t('team.chartNote') }}</p>
+    <p class="text-body-small opacity-70 mb-0">{{ t('team.chartNote') }}</p>
   </div>
 </template>
 
 <style scoped>
 .team-analysis__threat {
-  color: #fff;
   font-weight: 600;
-  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
 }
 </style>

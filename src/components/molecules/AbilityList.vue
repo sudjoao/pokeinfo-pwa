@@ -40,11 +40,11 @@ function abilityLabel(name: string): string {
         color="secondary"
       >
         {{ abilityLabel(ability.name) }}
-        <span v-if="ability.isHidden" class="text-label-small ms-1 opacity-70">
+        <span v-if="ability.isHidden" class="text-label-small ms-1">
           {{ t('detail.hiddenAbility') }}
         </span>
       </v-chip>
-      <span v-if="!abilities.length" class="text-body-medium opacity-60">
+      <span v-if="!abilities.length" class="text-body-medium opacity-70">
         {{ t('detail.noAbilities') }}
       </span>
     </v-card-text>

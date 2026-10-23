@@ -6,7 +6,11 @@ const props = defineProps<{ multiplier: number }>()
 
 const label = computed(() => formatMultiplier(props.multiplier))
 
-/** Faixa do multiplicador, para a cor: fraqueza em vermelho, resistência em verde, imune em cinza. */
+/**
+ * Faixa do multiplicador, para a cor: fraqueza em vermelho, resistência em verde, imune em cinza.
+ * Os tons foram escurecidos para o texto branco passar de 4,5:1 (o vermelho e o verde claros de antes
+ * davam 3,8:1 e 2,3:1).
+ */
 const level = computed(() => {
   const m = props.multiplier
   if (m === 0) return 'immune'
@@ -22,6 +26,7 @@ const level = computed(() => {
   <span
     class="multiplier-badge text-label-medium"
     :class="`multiplier-badge--${level}`"
+    role="img"
     :aria-label="`${multiplier}×`"
   >
     {{ label || '·' }}
@@ -48,22 +53,22 @@ const level = computed(() => {
 }
 
 .multiplier-badge--weak {
-  background: #ef4444;
+  background: #dc2626;
 }
 
 .multiplier-badge--very-weak {
-  background: #b91c1c;
+  background: #991b1b;
 }
 
 .multiplier-badge--resistant {
-  background: #22c55e;
-}
-
-.multiplier-badge--very-resistant {
   background: #15803d;
 }
 
+.multiplier-badge--very-resistant {
+  background: #14532d;
+}
+
 .multiplier-badge--immune {
-  background: #6b7280;
+  background: #4b5563;
 }
 </style>

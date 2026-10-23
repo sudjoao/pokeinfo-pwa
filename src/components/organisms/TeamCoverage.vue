@@ -22,7 +22,7 @@ const { t } = useI18n()
       :class="{ 'team-coverage__row--gap': row.coveredBy.length === 0 }"
     >
       <TypeChip :type="row.type" size="x-small" class="flex-shrink-0" />
-      <span v-if="row.coveredBy.length === 0" class="text-label-small opacity-60">
+      <span v-if="row.coveredBy.length === 0" class="text-label-small opacity-70">
         {{ t('team.gaps') }}
       </span>
       <span v-else class="d-inline-flex flex-wrap ga-1">

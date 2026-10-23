@@ -1,22 +1,37 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { mdiPokeball } from '@mdi/js'
+import { artworkSrc, artworkUrl } from '@/utils/pokemon'
 
 const props = defineProps<{
-  src: string
+  /** Id do Pokémon (ou da forma); a URL do artwork é derivada dele. */
+  id: number
   alt: string
-  size?: number | string
+  /** Lado exibido em px (padrão 120); define a largura pedida ao proxy. */
+  size?: number
 }>()
 
 const loaded = ref(false)
+/** Se o proxy (wsrv.nl) falhar, tenta uma vez o PNG original do repositório de sprites. */
+const fallback = ref(false)
 
-// Reseta ao trocar de sprite (ex.: navegação interna entre Pokémon) para repetir a entrada.
+const src = computed(() =>
+  fallback.value ? artworkUrl(props.id) : artworkSrc(props.id, props.size ?? 120),
+)
+
+// Reseta ao trocar de Pokémon (ex.: navegação interna entre Pokémon) para repetir a entrada.
 watch(
-  () => props.src,
+  () => props.id,
   () => {
     loaded.value = false
+    fallback.value = false
   },
 )
+
+function onError(): void {
+  if (!fallback.value) fallback.value = true
+  else loaded.value = true
+}
 </script>
 
 <template>
@@ -25,10 +40,11 @@ watch(
     :alt="alt"
     :height="size ?? 120"
     contain
+    crossorigin="anonymous"
     :draggable="false"
     :image-class="['pokemon-artwork__img', loaded ? 'pokemon-artwork__img--loaded' : '']"
     @load="loaded = true"
-    @error="loaded = true"
+    @error="onError"
   >
     <template #placeholder>
       <div class="d-flex align-center justify-center fill-height">

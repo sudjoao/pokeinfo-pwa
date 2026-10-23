@@ -20,6 +20,7 @@ const { t } = useI18n()
     :prepend-icon="mdiGamepadVariant"
     :append-icon="mdiChevronDown"
     class="game-filter-chip flex-shrink-0"
+    role="button"
     aria-haspopup="dialog"
     @click="emit('click')"
   >

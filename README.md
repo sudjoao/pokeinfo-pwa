@@ -56,6 +56,13 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
   existem em inglês na PokéAPI mantidos assim) e *English* (tudo em inglês, inclusive tipos, stats,
   grupos de ovo e as frases de evolução). Começa no idioma do aparelho e a escolha fica salva.
 - Tema claro/escuro seguindo a preferência do sistema.
+- **Acessibilidade** (WCAG 2.2 AA, verificado com axe nas telas principais nos dois temas): cards,
+  estágios da evolução, membros do time e linhas de rota são links/botões nativos, alcançáveis pelo
+  teclado (o card da Pokédex é um link de verdade: abre em nova aba com cmd/ctrl+clique); chips de
+  tipo com texto claro ou escuro conforme o contraste com a cor do tipo; zoom liberado e orientação
+  livre; botão "Pular para o conteúdo"; ao trocar de tela o foco vai para o título (e, ao voltar
+  para a lista, para o card que foi aberto); a quantidade de resultados é anunciada ao leitor de
+  tela depois de buscar ou filtrar.
 - **Offline**: índice e mapa de tipos ficam em cache local; artworks e respostas recentes ficam no service worker.
 - Instalável no iOS/Android como app (manifest + service worker).
 
@@ -105,7 +112,7 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
 | Idiomas | [vue-i18n](https://vue-i18n.intlify.dev/) (mensagens em `src/locales`, pré-compiladas pelo `unplugin-vue-i18n`) |
 | Rotas | [Vue Router](https://router.vuejs.org/) |
 | PWA | [vite-plugin-pwa](https://vite-pwa-org.netlify.app/) (Workbox) |
-| Dados | [PokéAPI v2](https://pokeapi.co/docs/v2) |
+| Dados | [PokéAPI v2](https://pokeapi.co/docs/v2) (imagens redimensionadas pelo [wsrv.nl](https://wsrv.nl/)) |
 | Qualidade | ESLint, oxlint, Prettier, vue-tsc |
 | Deploy | [Vercel](https://vercel.com/) |
 
@@ -170,7 +177,10 @@ src/
    uma requisição de 12 a 45 KB por dex), e as formas regionais são resolvidas a partir do
    próprio índice (ex.: `zorua` na dex de Hisui vira `zorua-hisui`).
 3. O scroll infinito pede os resumos do próximo lote (`/pokemon/{id}`) apenas para os que ainda não estão em cache, e guarda só um objeto enxuto (`id`, `name`, `types`).
-4. O artwork é montado a partir do id, sem depender do JSON de detalhe.
+4. O artwork é montado a partir do id, sem depender do JSON de detalhe. Ele passa pelo proxy
+   [wsrv.nl](https://wsrv.nl/), que redimensiona e converte para WebP em três larguras fixas
+   (96, 240 e 480 px, para telas 2×): o PNG original tem 475 px e ~120 KB, o do card fica com ~13 KB.
+   Se o proxy falhar, a imagem cai para o PNG original do repositório de sprites.
 5. A tela de detalhes busca `/pokemon/{id}`, depois `/pokemon-species/{id}` e
    `/evolution-chain/{id}`; os tipos dos estágios da evolução vêm do cache de resumos.
    A URL do grito também é derivada do id, o que permite tocá-lo ainda no toque do card.
@@ -192,7 +202,8 @@ O objetivo é funcionar offline sem inflar o armazenamento do usuário:
 | Service worker `pokeapi-species` | espécies e cadeias de evolução (~2 a 50 KB) | 100 entradas, 7 dias |
 | Service worker `pokeapi-detail` | respostas de detalhe da PokéAPI (~300 KB cada) | 60 entradas, 7 dias |
 | Service worker `pokeapi-encounters` | locais de encontro por Pokémon (1 a 10 KB comprimidos) | 60 entradas, 7 dias |
-| Service worker `pokeapi-artwork` | artworks oficiais | 200 entradas, 30 dias |
+| Service worker `pokemon-artwork-webp` | artworks em WebP via wsrv.nl (~13 KB no card, ~40 KB no detalhe) | 400 entradas, 30 dias |
+| Service worker `pokeapi-artwork-v2` | PNG original, só quando o proxy falha (~120 KB cada) | 30 entradas, 30 dias |
 | Service worker `pokeapi-cries-v2` | gritos dos Pokémon (~7 KB cada) | 60 entradas, 30 dias |
 
 Os cards não fazem requisição por Pokémon: os tipos vêm de um mapa montado uma vez a partir dos

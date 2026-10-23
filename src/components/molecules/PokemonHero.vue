@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { mdiStarFourPoints } from '@mdi/js'
 import { useI18n } from 'vue-i18n'
 import type { PokemonDetail, PokemonSpecies } from '@/types/pokemon'
-import { artworkUrl, formatDexNumber, TYPE_COLORS } from '@/utils/pokemon'
+import { formatDexNumber, TYPE_COLORS } from '@/utils/pokemon'
 import { speciesDisplayName, speciesGenus } from '@/utils/species'
 import PokemonArtwork from '@/components/atoms/PokemonArtwork.vue'
 import DexNumber from '@/components/atoms/DexNumber.vue'
@@ -38,7 +38,6 @@ const { t, locale } = useI18n()
 const name = computed(() => speciesDisplayName(props.species, props.pokemon.name, locale.value))
 const genus = computed(() => speciesGenus(props.species, locale.value))
 const nationalLabel = computed(() => formatDexNumber(props.pokemon.speciesId))
-const image = computed(() => artworkUrl(props.pokemon.id))
 const accent = computed(() => TYPE_COLORS[props.pokemon.types[0] ?? 'unknown'])
 
 const caughtLabel = computed(() => {
@@ -51,7 +50,7 @@ const caughtLabel = computed(() => {
 <template>
   <v-card class="pokemon-hero" :style="{ '--accent': accent }">
     <div class="pokemon-hero__art pa-4">
-      <PokemonArtwork :src="image" :alt="name" :size="240" />
+      <PokemonArtwork :id="pokemon.id" :alt="name" :size="240" />
     </div>
     <v-card-item>
       <div class="d-flex align-start justify-space-between ga-2">
@@ -89,6 +88,7 @@ const caughtLabel = computed(() => {
           <CatchToggle
             v-if="caught !== undefined"
             :caught="caught"
+            :name="name"
             size="default"
             @toggle="emit('toggleCaught')"
           />
@@ -107,7 +107,7 @@ const caughtLabel = computed(() => {
 }
 
 .pokemon-hero__national {
-  opacity: 0.45;
+  opacity: 0.7;
   font-variant-numeric: tabular-nums;
 }
 

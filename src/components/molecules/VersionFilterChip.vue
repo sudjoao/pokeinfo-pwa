@@ -39,8 +39,9 @@ const label = computed(() => {
     :append-icon="mdiChevronDown"
     class="version-filter-chip flex-shrink-0"
     :class="{ 'version-filter-chip--active': active }"
+    role="button"
     aria-haspopup="dialog"
-    :aria-label="t('versionFilter.label')"
+    :aria-label="`${t('versionFilter.label')}: ${label}`"
     @click="emit('click')"
   >
     {{ label }}

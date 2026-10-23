@@ -11,7 +11,8 @@
     "national": "Nat.",
     "less": "Less",
     "clear": "Clear",
-    "done": "Done"
+    "done": "Done",
+    "skipToContent": "Skip to content"
   },
   "language": {
     "title": "Language",
@@ -48,7 +49,8 @@
     "onlyIn": "{version} only",
     "exclusivesOf": "{version} exclusives",
     "pokemonTab": "Pokémon",
-    "routesTab": "Routes"
+    "routesTab": "Routes",
+    "resultsCount": "No Pokémon found | 1 Pokémon found | {n} Pokémon found"
   },
   "dex": {
     "crown-tundra": "Crown Tundra",
@@ -61,11 +63,11 @@
   },
   "catch": {
     "mark": "Mark as caught",
-    "unmark": "Unmark as caught",
     "caught": "Caught",
     "caughtIn": "Caught in {game}",
     "notCaught": "Not caught yet",
-    "notCaughtIn": "Not caught yet in {game}"
+    "notCaughtIn": "Not caught yet in {game}",
+    "toggle": "Caught: {name}"
   },
   "cry": {
     "play": "Play the Pokémon's cry",

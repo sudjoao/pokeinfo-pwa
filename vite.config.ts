@@ -28,7 +28,9 @@ export default defineConfig({
         theme_color: '#dc2626',
         background_color: '#ffffff',
         display: 'standalone',
-        orientation: 'portrait',
+        // Sem travar a orientação: quem usa o aparelho fixo na horizontal (suporte de cadeira de
+        // rodas, tablet no teclado) precisa conseguir usar o app (WCAG 1.3.4).
+        orientation: 'any',
         icons: [
           {
             src: '/android-chrome-192x192.png',
@@ -150,13 +152,26 @@ export default defineConfig({
             },
           },
           {
-            // Artwork oficial dos Pokémon
+            // Artwork redimensionado em WebP pelo wsrv.nl (~13 KB no card, ~40 KB no detalhe).
+            // As imagens são pedidas com crossorigin: a resposta é CORS (status 200) e não opaca;
+            // respostas opacas contam ~7 MB cada na cota do Chrome, qualquer que seja o tamanho real.
+            urlPattern: /^https:\/\/wsrv\.nl\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'pokemon-artwork-webp',
+              expiration: { maxEntries: 400, maxAgeSeconds: 30 * DAY },
+              cacheableResponse: { statuses: [200] },
+            },
+          },
+          {
+            // PNG original (~120 KB cada): agora só quando o proxy falha, por isso o limite baixo.
+            // O cache antigo `pokeapi-artwork` (200 PNGs, ~24 MB) é apagado no main.ts.
             urlPattern: /^https:\/\/raw\.githubusercontent\.com\/PokeAPI\/sprites\/.*/i,
             handler: 'CacheFirst',
             options: {
-              cacheName: 'pokeapi-artwork',
-              expiration: { maxEntries: 200, maxAgeSeconds: 30 * DAY },
-              cacheableResponse: { statuses: [0, 200] },
+              cacheName: 'pokeapi-artwork-v2',
+              expiration: { maxEntries: 30, maxAgeSeconds: 30 * DAY },
+              cacheableResponse: { statuses: [200] },
             },
           },
         ],

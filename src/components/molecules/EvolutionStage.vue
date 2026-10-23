@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { PokemonSummary } from '@/types/pokemon'
-import { artworkUrl, formatPokemonName } from '@/utils/pokemon'
+import { formatPokemonName } from '@/utils/pokemon'
 import PokemonArtwork from '@/components/atoms/PokemonArtwork.vue'
 import DexNumber from '@/components/atoms/DexNumber.vue'
 import TypeChip from '@/components/atoms/TypeChip.vue'
@@ -26,18 +26,24 @@ const enterDelay = computed(() => `${(props.depth ?? 0) * 90}ms`)
 </script>
 
 <template>
+  <!-- `link` só dá o visual de clicável; o clique e o foco ficam no botão do nome (stretched). -->
   <v-card
-    class="evolution-stage text-center pa-2"
+    class="evolution-stage stretched-host text-center pa-2"
     :style="{ '--evo-delay': enterDelay }"
     :variant="current ? 'tonal' : 'outlined'"
     :color="current ? 'primary' : undefined"
     :hover="!current"
+    :link="!current"
     :aria-current="current ? 'page' : undefined"
-    @click="current ? undefined : emit('select', speciesId)"
   >
-    <PokemonArtwork :src="artworkUrl(speciesId)" :alt="label" :size="96" />
+    <PokemonArtwork :id="speciesId" :alt="label" :size="96" />
     <DexNumber :id="speciesId" />
-    <div class="text-title-small">{{ label }}</div>
+    <div class="text-title-small">
+      <span v-if="current">{{ label }}</span>
+      <button v-else type="button" class="stretched-action" @click="emit('select', speciesId)">
+        {{ label }}
+      </button>
+    </div>
     <div v-if="isBaby" class="text-label-small opacity-70">{{ t('detail.baby') }}</div>
     <div class="d-flex flex-wrap justify-center ga-1 mt-1">
       <TypeChip v-for="type in summary?.types ?? []" :key="type" :type="type" />

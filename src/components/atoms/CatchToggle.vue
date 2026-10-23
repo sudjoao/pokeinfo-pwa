@@ -7,6 +7,8 @@ import { prefersReducedMotion } from '@/composables/usePrefersReducedMotion'
 
 const props = defineProps<{
   caught: boolean
+  /** Nome do Pokémon, para o leitor de tela dizer qual está sendo marcado (cards em grade). */
+  name: string
   /** Tamanho do botão; o padrão cabe no canto do card e mantém área de toque confortável. */
   size?: 'small' | 'default'
 }>()
@@ -58,7 +60,7 @@ watch(
       class="catch-toggle"
       :class="{ 'catch-toggle--caught': caught }"
       :aria-pressed="caught"
-      :aria-label="caught ? t('catch.unmark') : t('catch.mark')"
+      :aria-label="t('catch.toggle', { name })"
       :title="caught ? t('catch.caught') : t('catch.mark')"
       @click.stop.prevent="emit('toggle')"
     />
@@ -74,8 +76,9 @@ watch(
   display: inline-flex;
 }
 
+/* 0.6 mantém o ícone desmarcado acima de 3:1 sobre o fundo colorido do card (era 0.4, ~2:1). */
 .catch-toggle {
-  opacity: 0.4;
+  opacity: 0.6;
   transition:
     opacity 0.15s ease,
     transform 0.15s ease;

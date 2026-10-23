@@ -2,6 +2,7 @@
 import { nextTick, ref, watch } from 'vue'
 import { mdiRefresh } from '@mdi/js'
 import { useI18n } from 'vue-i18n'
+import type { RouteLocationRaw } from 'vue-router'
 import type { PokemonListItem } from '@/types/pokemon'
 import PokemonCard from '@/components/molecules/PokemonCard.vue'
 import PokemonCardSkeleton from '@/components/molecules/PokemonCardSkeleton.vue'
@@ -19,6 +20,8 @@ const props = defineProps<{
   selectedIds?: ReadonlySet<number>
   /** Cards mais largos em telas grandes (quando o grid divide a largura com um painel). */
   wide?: boolean
+  /** Destino de cada card (vira link); sem ele o card é um botão de seleção (team builder). */
+  linkTo?: (pokemon: PokemonListItem) => RouteLocationRaw
 }>()
 
 const emit = defineEmits<{
@@ -81,6 +84,7 @@ const intersectOptions = { rootMargin: '0px 0px 1200px 0px' }
           :pokemon="pokemon"
           :caught="caughtOf(pokemon)"
           :selected="selectedIds?.has(pokemon.id)"
+          :to="linkTo?.(pokemon)"
           @select="emit('select', $event)"
           @toggle-caught="emit('toggleCaught', $event)"
         />
@@ -115,7 +119,7 @@ const intersectOptions = { rootMargin: '0px 0px 1200px 0px' }
 
     <p
       v-else-if="status === 'done' && items.length"
-      class="text-center text-body-medium py-6 opacity-60"
+      class="text-center text-body-medium py-6 opacity-70"
     >
       {{ t('home.endOfList') }}
     </p>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { artworkUrl, formatPokemonName } from '@/utils/pokemon'
+import { computed, ref, watch } from 'vue'
+import { artworkSrc, artworkUrl, formatPokemonName } from '@/utils/pokemon'
 
 const props = defineProps<{
   id: number
@@ -11,19 +11,31 @@ const props = defineProps<{
 
 const label = computed(() => formatPokemonName(props.name))
 const side = computed(() => `${props.size ?? 28}px`)
+
+/** Se o proxy (wsrv.nl) falhar, cai para o PNG original, como no PokemonArtwork. */
+const fallback = ref(false)
+watch(
+  () => props.id,
+  () => (fallback.value = false),
+)
+const src = computed(() =>
+  fallback.value ? artworkUrl(props.id) : artworkSrc(props.id, props.size ?? 28),
+)
 </script>
 
 <template>
   <img
-    :src="artworkUrl(id)"
+    :src="src"
     :alt="label"
     :title="label"
     :width="size ?? 28"
     :height="size ?? 28"
     loading="lazy"
     decoding="async"
+    crossorigin="anonymous"
     class="pokemon-avatar"
     :style="{ width: side, height: side }"
+    @error="fallback = true"
   />
 </template>
 

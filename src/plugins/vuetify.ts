@@ -11,6 +11,11 @@ const light: ThemeDefinition = {
     background: '#f6f6f8',
     surface: '#ffffff',
   },
+  variables: {
+    // Texto secundário (subtítulos, legendas): o padrão de 0.6 do Vuetify dá ~4,2:1 sobre o
+    // fundo cinza claro, abaixo dos 4,5:1 do WCAG AA. 0.7 é o mesmo que o tema escuro já usa.
+    'medium-emphasis-opacity': 0.7,
+  },
 }
 
 const dark: ThemeDefinition = {
@@ -18,6 +23,8 @@ const dark: ThemeDefinition = {
   colors: {
     primary: '#ef4444',
     secondary: '#8b9cff',
+    // O Vuetify escolhe texto branco sobre esse azul claro (2,5:1); o escuro passa de 7:1.
+    'on-secondary': '#0b1546',
     background: '#121212',
     surface: '#1e1e1e',
   },

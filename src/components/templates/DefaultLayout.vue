@@ -1,11 +1,15 @@
 <script setup lang="ts">
+import { useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { AUTHOR, AUTHOR_URL, POKEAPI_URL } from '@/data/credits'
 import AppHeader from '@/components/organisms/AppHeader.vue'
+import { usePageFocus } from '@/composables/usePageFocus'
 
 defineProps<{ extensionHeight?: number }>()
 
 const { t } = useI18n()
+
+usePageFocus(useTemplateRef<HTMLElement>('root'))
 </script>
 
 <template>
@@ -13,7 +17,7 @@ const { t } = useI18n()
     Raiz única (display: contents, não afeta o layout) para que o <Transition> de página em
     App.vue consiga animar: um componente com múltiplas raízes (Fragment) não é animável.
   -->
-  <div class="default-layout-root">
+  <div ref="root" class="default-layout-root">
     <AppHeader title="PokeInfo" :extension-height="extensionHeight">
       <template v-if="$slots.actions" #actions>
         <slot name="actions" />
@@ -23,10 +27,10 @@ const { t } = useI18n()
       </template>
     </AppHeader>
 
-    <v-main class="default-layout">
+    <v-main id="main-content" class="default-layout" tabindex="-1">
       <v-container class="default-layout__content" max-width="1280">
         <slot />
-        <footer class="default-layout__footer text-body-small text-center opacity-60 pt-6">
+        <footer class="default-layout__footer text-body-small text-center opacity-70 pt-6">
           <i18n-t keypath="about.madeBy" tag="span">
             <template #author>
               <a :href="AUTHOR_URL" target="_blank" rel="noopener">{{ AUTHOR }}</a>

@@ -26,7 +26,9 @@ const { t } = useI18n()
       />
       <v-icon v-else :icon="mdiPokeball" size="28" class="ms-2" />
     </template>
-    <v-app-bar-title class="font-weight-bold">{{ title }}</v-app-bar-title>
+    <v-app-bar-title tag="h1" tabindex="-1" class="app-header__title font-weight-bold">
+      {{ title }}
+    </v-app-bar-title>
     <template v-if="$slots.actions" #append>
       <slot name="actions" />
     </template>
@@ -41,6 +43,10 @@ const { t } = useI18n()
 <style scoped>
 .app-header {
   padding-top: var(--safe-top);
+}
+
+.app-header__title {
+  margin-block: 0;
 }
 
 .app-header__extension {

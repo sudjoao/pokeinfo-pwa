@@ -28,6 +28,7 @@ const label = computed(() =>
     :append-icon="mdiChevronDown"
     class="type-filter-chip flex-shrink-0"
     :class="{ 'type-filter-chip--active': active }"
+    role="button"
     aria-haspopup="dialog"
     @click="emit('click')"
   >

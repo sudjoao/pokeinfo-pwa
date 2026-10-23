@@ -7,8 +7,6 @@ const MUTED_KEY = 'pokeinfo:cry-muted:v1'
 const RECENT_PLAY_WINDOW_MS = 4000
 /** Quantos gritos ficam decodificados em memória (blobs de ~7 KB). */
 const MAX_CACHED_CRIES = 30
-/** Cache antigo do service worker que guardava respostas parciais; apagado uma vez. */
-const LEGACY_SW_CACHE = 'pokeapi-cries'
 
 /**
  * WAV de silêncio (16 amostras). Tocá-lo dentro do gesto do usuário "desbloqueia" o
@@ -40,10 +38,6 @@ let requestedId: number | null = null
 
 const blobUrls = new Map<number, string>()
 const downloads = new Map<number, Promise<string | null>>()
-
-if (typeof caches !== 'undefined') {
-  caches.delete(LEGACY_SW_CACHE).catch(() => {})
-}
 
 function debug(...args: unknown[]): void {
   if (import.meta.env.DEV) console.debug('[cry]', ...args)

@@ -33,6 +33,7 @@ function pick(value: Exclude<CaughtFilter, null>, selected: CaughtFilter): void 
     :prepend-icon="option.value === 'caught' ? mdiPokeball : undefined"
     class="caught-chip flex-shrink-0"
     :class="{ 'caught-chip--selected': option.value === selected }"
+    role="button"
     :aria-pressed="option.value === selected"
     @click="pick(option.value, selected)"
   >

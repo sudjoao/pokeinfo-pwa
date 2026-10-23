@@ -2,8 +2,9 @@
 import { computed } from 'vue'
 import { mdiCheckCircle, mdiStarFourPoints } from '@mdi/js'
 import { useI18n } from 'vue-i18n'
+import type { RouteLocationRaw } from 'vue-router'
 import type { PokemonListItem } from '@/types/pokemon'
-import { artworkUrl, formatDexNumber, formatPokemonName, TYPE_COLORS } from '@/utils/pokemon'
+import { formatDexNumber, formatPokemonName, TYPE_COLORS } from '@/utils/pokemon'
 import PokemonArtwork from '@/components/atoms/PokemonArtwork.vue'
 import DexNumber from '@/components/atoms/DexNumber.vue'
 import TypeChip from '@/components/atoms/TypeChip.vue'
@@ -15,6 +16,11 @@ const props = defineProps<{
   caught?: boolean
   /** Card escolhido (ex.: já está no time); undefined quando a lista não tem seleção. */
   selected?: boolean
+  /**
+   * Destino do card: vira um link de verdade (abre em nova aba, cmd/ctrl+clique). Sem ele, o card
+   * é um botão de alternância (team builder, com `selected` como estado).
+   */
+  to?: RouteLocationRaw
 }>()
 
 const emit = defineEmits<{
@@ -25,36 +31,40 @@ const emit = defineEmits<{
 const { t } = useI18n()
 
 const name = computed(() => formatPokemonName(props.pokemon.name))
-const image = computed(() => artworkUrl(props.pokemon.id))
 const accent = computed(() => TYPE_COLORS[props.pokemon.types[0] ?? 'unknown'])
 
 /** Com um jogo selecionado, o número regional vai em destaque e o nacional fica pequeno. */
 const regional = computed(() => props.pokemon.dexNumber !== undefined)
 const nationalLabel = computed(() => formatDexNumber(props.pokemon.speciesId ?? props.pokemon.id))
 const speciesId = computed(() => props.pokemon.speciesId ?? props.pokemon.id)
+
+/**
+ * O link navega sozinho; o `select` avisa a view para tocar o grito ainda dentro do gesto (iOS).
+ * Clique com modificador abre em outra aba/janela: aí não há grito nem navegação nesta tela.
+ */
+function onLinkClick(event: MouseEvent): void {
+  if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return
+  emit('select', props.pokemon)
+}
 </script>
 
 <template>
+  <!-- `link` só dá o visual de clicável; o clique e o foco ficam no link/botão do nome (stretched). -->
   <v-card
-    class="pokemon-card"
+    class="pokemon-card stretched-host"
     :class="{ 'pokemon-card--selected': selected }"
     :style="{ '--accent': accent }"
+    :data-pokemon-id="pokemon.id"
     hover
-    :aria-pressed="selected"
-    @click="emit('select', pokemon)"
+    link
   >
     <div class="pokemon-card__art pa-2">
-      <PokemonArtwork :src="image" :alt="name" :size="120" />
-      <v-icon
-        v-if="selected"
-        :icon="mdiCheckCircle"
-        color="primary"
-        class="pokemon-card__check"
-        :aria-label="t('team.inTeam')"
-      />
+      <PokemonArtwork :id="pokemon.id" alt="" :size="120" />
+      <v-icon v-if="selected" :icon="mdiCheckCircle" color="primary" class="pokemon-card__check" />
       <CatchToggle
         v-if="caught !== undefined"
         :caught="caught"
+        :name="name"
         class="pokemon-card__catch"
         @toggle="emit('toggleCaught', speciesId)"
       />
@@ -67,7 +77,20 @@ const speciesId = computed(() => props.pokemon.speciesId ?? props.pokemon.id)
           {{ t('common.national') }} {{ nationalLabel }}
         </span>
       </div>
-      <v-card-title class="text-title-medium pa-0">{{ name }}</v-card-title>
+      <v-card-title class="text-title-medium pa-0">
+        <RouterLink v-if="to" :to="to" class="stretched-action" @click="onLinkClick">
+          {{ name }}
+        </RouterLink>
+        <button
+          v-else
+          type="button"
+          class="stretched-action"
+          :aria-pressed="selected ?? false"
+          @click="emit('select', pokemon)"
+        >
+          {{ name }}
+        </button>
+      </v-card-title>
       <span
         v-if="pokemon.exclusiveTo"
         class="pokemon-card__exclusive text-label-small d-inline-flex align-center ga-1"
@@ -99,6 +122,7 @@ const speciesId = computed(() => props.pokemon.speciesId ?? props.pokemon.id)
 
 .pokemon-card__catch {
   position: absolute;
+  z-index: 1;
   top: 4px;
   right: 4px;
 }
@@ -117,7 +141,7 @@ const speciesId = computed(() => props.pokemon.speciesId ?? props.pokemon.id)
 }
 
 .pokemon-card__national {
-  opacity: 0.45;
+  opacity: 0.7;
   font-variant-numeric: tabular-nums;
 }
 

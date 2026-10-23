@@ -28,7 +28,9 @@ function label(variety: PokemonVariety, speciesName: string): string {
         size="default"
         :variant="variety.pokemonId === currentId ? 'flat' : 'tonal'"
         color="secondary"
-        :disabled="variety.pokemonId === currentId"
+        :link="variety.pokemonId !== currentId"
+        :role="variety.pokemonId === currentId ? undefined : 'button'"
+        :aria-current="variety.pokemonId === currentId ? 'true' : undefined"
         @click="emit('select', variety.pokemonId)"
       >
         {{ label(variety, speciesName) }}

@@ -98,7 +98,7 @@ function formOf(method: EvolutionMethod): string | null {
               <span v-if="formOf(method)" class="font-weight-bold">
                 {{ t('detail.resultForm', { form: formOf(method) }) }}
               </span>
-              <span v-if="method.versionGroup" class="opacity-60">
+              <span v-if="method.versionGroup" class="opacity-70">
                 ({{ formatVersionGroup(method.versionGroup) }})
               </span>
             </li>

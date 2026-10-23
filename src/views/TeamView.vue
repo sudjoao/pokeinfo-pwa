@@ -11,6 +11,7 @@ import type { PokemonSummary } from '@/types/pokemon'
 import DetailLayout from '@/components/templates/DetailLayout.vue'
 import SearchField from '@/components/molecules/SearchField.vue'
 import EmptyState from '@/components/molecules/EmptyState.vue'
+import ResultsAnnouncer from '@/components/atoms/ResultsAnnouncer.vue'
 import PokemonCardSkeleton from '@/components/molecules/PokemonCardSkeleton.vue'
 import ListFilters from '@/components/organisms/ListFilters.vue'
 import PokemonGrid from '@/components/organisms/PokemonGrid.vue'
@@ -42,6 +43,7 @@ const {
   missingCount,
   toggleCaught,
   items,
+  filtered,
   listKey,
   status,
   errorMessage,
@@ -122,7 +124,8 @@ function goBack(): void {
 
     <v-row class="team-view" :class="{ 'team-view--tray': !mdAndUp }">
       <v-col cols="12" md="8">
-        <p class="text-body-small opacity-60 mb-3">{{ t('team.pickHint') }}</p>
+        <p class="text-body-small opacity-70 mb-3">{{ t('team.pickHint') }}</p>
+        <ResultsAnnouncer :count="filtered.length" :ready="!sourceLoading && !sourceError" />
 
         <v-row v-if="sourceLoading" density="compact">
           <v-col v-for="n in 12" :key="n" cols="6" sm="4" md="4" lg="3">

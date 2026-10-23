@@ -5,6 +5,36 @@ Todas as mudanças relevantes deste projeto são registradas aqui.
 O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e o projeto adota
 [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [Não lançado]
+
+### Alterado
+
+- Artworks servidos em WebP redimensionado pelo proxy wsrv.nl, em três larguras fixas, com o PNG
+  original como plano B. O primeiro lote da Pokédex baixa ~70 KB de imagens em vez de ~700 KB, e o
+  cache de artworks do service worker deixa de ocupar ~24 MB (o cache antigo é apagado).
+- Chips de tipo, ameaças do time e multiplicadores com cores de texto/fundo que passam de 4,5:1;
+  textos secundários com opacidade 0.7 (antes 0.45–0.6); chip "secundário" do tema escuro com texto
+  escuro.
+- No seletor de tipos, os tipos não escolhidos não ficam mais esmaecidos (o texto ficava ilegível);
+  o escolhido ganha check e anel duplo.
+
+### Corrigido
+
+- Cards da Pokédex, do team builder, estágios da evolução, membros do time e Pokémon das rotas não
+  eram alcançáveis pelo teclado (o `v-card` com `@click` vira uma `<div>` sem `tabindex`). Agora o
+  card da Pokédex é um link de verdade e os demais são botões, sem elementos interativos aninhados.
+- Zoom bloqueado (`user-scalable=no`) e orientação travada em retrato no manifest.
+- Chips de filtro (jogo, versão, tipo, Pokédex, capturados) sem papel de botão para o leitor de tela.
+- Poké Bola de captura com rótulo que mudava junto com o estado; agora diz qual Pokémon é e usa só o
+  `aria-pressed`. O ícone desmarcado ficou mais visível (era ~2:1 sobre o card).
+- Forma atual nas formas alternativas aparecia desabilitada e quase ilegível; agora fica marcada
+  como atual.
+
+### Adicionado
+
+- Botão "Pular para o conteúdo", foco no título ao trocar de tela (e no card aberto ao voltar para a
+  lista) e anúncio da quantidade de resultados para leitores de tela.
+
 ## [1.0.0] - 2026-09-11
 
 Primeira versão estável da Pokédex em formato de PWA, consumindo a [PokéAPI](https://pokeapi.co/).
