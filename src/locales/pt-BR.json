@@ -10,7 +10,8 @@
     "offline": "Sem conexão: mostrando o que já está salvo neste aparelho.",
     "movesTitle": "Golpes · PokeInfo",
     "itemsTitle": "Itens · PokeInfo",
-    "statsTitle": "Naturezas e IVs · PokeInfo"
+    "statsTitle": "Naturezas e IVs · PokeInfo",
+    "speedTitle": "Velocidade · PokeInfo"
   },
   "common": {
     "retry": "Tentar novamente",
@@ -510,7 +511,8 @@
     "groupGames": "Jogos",
     "moves": "Golpes",
     "items": "Itens e berries",
-    "stats": "Naturezas e IVs"
+    "stats": "Naturezas e IVs",
+    "speed": "Velocidade (speed tiers)"
   },
   "backup": {
     "title": "Backup dos dados",
@@ -922,5 +924,32 @@
       "burn": "Queimado"
     },
     "hint": "Taxa de captura {rate}, fórmula da {gen}ª geração. Não inclui captura crítica, grama escura nem os bônus de nível e dificuldade dos jogos recentes."
+  },
+  "speed": {
+    "title": "Velocidade",
+    "intro": "Quem age primeiro: a Velocidade de cada Pokémon no nível escolhido, do mais rápido ao mais lento.",
+    "level": "Nível",
+    "national": "Pokédex Nacional",
+    "scarf": "Choice Scarf (×1,5)",
+    "tailwind": "Tailwind (×2)",
+    "stage": "Estágio {n}",
+    "stageUp": "Subir um estágio de Velocidade",
+    "stageDown": "Baixar um estágio de Velocidade",
+    "team": "Seu time",
+    "rank": "{n}º de {total}",
+    "searchPlaceholder": "Buscar Pokémon",
+    "searchLabel": "Buscar Pokémon na lista de velocidade",
+    "loadError": "Não foi possível carregar a Pokédex deste jogo.",
+    "caption": "Velocidade no nível {level}",
+    "pokemon": "Pokémon",
+    "column": {
+      "min": "Mín",
+      "neutral": "Neutro",
+      "max": "Máx",
+      "maxPlus": "Máx+"
+    },
+    "inTeam": "(no seu time)",
+    "fromTeam": "Ver velocidade",
+    "legend": "Mín: 0 IV, 0 EV, natureza que reduz. Neutro: 31 IV, 0 EV. Máx: 31 IV, 252 EV. Máx+: com natureza que aumenta (Jolly, Timid). O número cinza ao lado do nome é a base."
   }
 }

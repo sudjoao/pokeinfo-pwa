@@ -10,7 +10,8 @@
     "offline": "Offline: showing what is already saved on this device.",
     "movesTitle": "Moves · PokeInfo",
     "itemsTitle": "Items · PokeInfo",
-    "statsTitle": "Natures and IVs · PokeInfo"
+    "statsTitle": "Natures and IVs · PokeInfo",
+    "speedTitle": "Speed tiers · PokeInfo"
   },
   "common": {
     "retry": "Try again",
@@ -510,7 +511,8 @@
     "groupGames": "Games",
     "moves": "Moves",
     "items": "Items and berries",
-    "stats": "Natures and IVs"
+    "stats": "Natures and IVs",
+    "speed": "Speed tiers"
   },
   "backup": {
     "title": "Data backup",
@@ -922,5 +924,32 @@
       "burn": "Burned"
     },
     "hint": "Catch rate {rate}, Generation {gen} formula. Leaves out critical captures, dark grass and the level and difficulty bonuses of recent games."
+  },
+  "speed": {
+    "title": "Speed tiers",
+    "intro": "Who moves first: every Pokémon's Speed at the chosen level, fastest first.",
+    "level": "Level",
+    "national": "National Pokédex",
+    "scarf": "Choice Scarf (×1.5)",
+    "tailwind": "Tailwind (×2)",
+    "stage": "Stage {n}",
+    "stageUp": "Raise Speed one stage",
+    "stageDown": "Lower Speed one stage",
+    "team": "Your team",
+    "rank": "#{n} of {total}",
+    "searchPlaceholder": "Search Pokémon",
+    "searchLabel": "Search Pokémon in the speed list",
+    "loadError": "Could not load this game's Pokédex.",
+    "caption": "Speed at level {level}",
+    "pokemon": "Pokémon",
+    "column": {
+      "min": "Min",
+      "neutral": "Neutral",
+      "max": "Max",
+      "maxPlus": "Max+"
+    },
+    "inTeam": "(in your team)",
+    "fromTeam": "Speed tiers",
+    "legend": "Min: 0 IV, 0 EV, hindering nature. Neutral: 31 IV, 0 EV. Max: 31 IV, 252 EV. Max+: with a boosting nature (Jolly, Timid). The grey number next to the name is the base stat."
   }
 }

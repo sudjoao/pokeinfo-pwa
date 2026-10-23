@@ -10,7 +10,8 @@
     "offline": "Sin conexión: mostrando lo que ya está guardado en este dispositivo.",
     "movesTitle": "Movimientos · PokeInfo",
     "itemsTitle": "Objetos · PokeInfo",
-    "statsTitle": "Naturalezas e IV · PokeInfo"
+    "statsTitle": "Naturalezas e IV · PokeInfo",
+    "speedTitle": "Velocidad · PokeInfo"
   },
   "common": {
     "retry": "Reintentar",
@@ -510,7 +511,8 @@
     "groupGames": "Juegos",
     "moves": "Movimientos",
     "items": "Objetos y bayas",
-    "stats": "Naturalezas e IV"
+    "stats": "Naturalezas e IV",
+    "speed": "Velocidad (speed tiers)"
   },
   "backup": {
     "title": "Copia de seguridad",
@@ -922,5 +924,32 @@
       "burn": "Quemado"
     },
     "hint": "Ratio de captura {rate}, fórmula de la {gen}.ª generación. No incluye capturas críticas, hierba alta oscura ni las bonificaciones de nivel y dificultad de los juegos recientes."
+  },
+  "speed": {
+    "title": "Velocidad",
+    "intro": "Quién ataca primero: la Velocidad de cada Pokémon al nivel elegido, del más rápido al más lento.",
+    "level": "Nivel",
+    "national": "Pokédex Nacional",
+    "scarf": "Pañuelo Elección (×1,5)",
+    "tailwind": "Viento Afín (×2)",
+    "stage": "Nivel {n}",
+    "stageUp": "Subir un nivel de Velocidad",
+    "stageDown": "Bajar un nivel de Velocidad",
+    "team": "Tu equipo",
+    "rank": "{n}.º de {total}",
+    "searchPlaceholder": "Buscar Pokémon",
+    "searchLabel": "Buscar Pokémon en la lista de velocidad",
+    "loadError": "No se pudo cargar la Pokédex de este juego.",
+    "caption": "Velocidad al nivel {level}",
+    "pokemon": "Pokémon",
+    "column": {
+      "min": "Mín",
+      "neutral": "Neutra",
+      "max": "Máx",
+      "maxPlus": "Máx+"
+    },
+    "inTeam": "(en tu equipo)",
+    "fromTeam": "Ver velocidad",
+    "legend": "Mín: 0 IV, 0 EV, naturaleza que reduce. Neutra: 31 IV, 0 EV. Máx: 31 IV, 252 EV. Máx+: con naturaleza que aumenta (Alegre, Miedosa). El número gris junto al nombre es la base."
   }
 }

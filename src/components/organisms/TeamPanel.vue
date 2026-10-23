@@ -1,6 +1,13 @@
 <script setup lang="ts">
-import { mdiContentCopy, mdiDeleteSweepOutline, mdiImport, mdiShareVariant } from '@mdi/js'
-import { nextTick, useTemplateRef } from 'vue'
+import {
+  mdiContentCopy,
+  mdiDeleteSweepOutline,
+  mdiImport,
+  mdiShareVariant,
+  mdiSpeedometer,
+} from '@mdi/js'
+import { computed, nextTick, useTemplateRef } from 'vue'
+import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { TEAM_SIZE, type TeamMember } from '@/composables/useTeam'
 import type { CounterSuggestion, CoverageRow, DefenseRow } from '@/utils/typeChart'
@@ -8,7 +15,7 @@ import TeamBench from '@/components/organisms/TeamBench.vue'
 import TeamAnalysis from '@/components/organisms/TeamAnalysis.vue'
 
 /** Time completo + análise: vai no painel lateral (desktop) ou no sheet aberto pela bandeja (celular). */
-defineProps<{
+const props = defineProps<{
   members: readonly TeamMember[]
   defense: readonly DefenseRow[]
   threats: readonly DefenseRow[]
@@ -29,6 +36,16 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+const route = useRoute()
+
+/** Speed tiers com o time destacado, no mesmo jogo do team builder. */
+const speedRoute = computed(() => ({
+  name: 'speed',
+  query: {
+    team: props.members.map((member) => member.id).join(','),
+    ...(route.query.game ? { game: route.query.game } : {}),
+  },
+}))
 
 // Remover um membro ou limpar o time tira o botão focado da tela: o foco vai para o título.
 const heading = useTemplateRef<HTMLElement>('heading')
@@ -92,6 +109,15 @@ function clear(): void {
           @click="emit('exportShowdown')"
         >
           {{ t('team.export') }}
+        </v-btn>
+        <v-btn
+          v-if="members.length"
+          variant="tonal"
+          size="small"
+          :prepend-icon="mdiSpeedometer"
+          :to="speedRoute"
+        >
+          {{ t('speed.fromTeam') }}
         </v-btn>
         <v-btn
           variant="tonal"

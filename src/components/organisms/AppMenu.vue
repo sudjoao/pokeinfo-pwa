@@ -14,6 +14,7 @@ import {
   mdiLightningBolt,
   mdiBagPersonalOutline,
   mdiCalculatorVariantOutline,
+  mdiSpeedometer,
 } from '@mdi/js'
 import type { RouteLocationRaw } from 'vue-router'
 import type { ThemePreference } from '@/composables/useThemePreference'
@@ -60,6 +61,7 @@ const NAV_GROUPS: readonly { title: string; items: readonly NavItem[] }[] = [
       { icon: mdiLightningBolt, title: 'menu.moves', to: { name: 'moves' } },
       { icon: mdiBagPersonalOutline, title: 'menu.items', to: { name: 'items' } },
       { icon: mdiCalculatorVariantOutline, title: 'menu.stats', to: { name: 'stats' } },
+      { icon: mdiSpeedometer, title: 'menu.speed', to: { name: 'speed' } },
       { icon: mdiShieldHalfFull, title: 'menu.types', to: { name: 'types' } },
       { icon: mdiCompareHorizontal, title: 'menu.compare', to: { name: 'compare' } },
     ],

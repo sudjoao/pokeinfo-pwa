@@ -64,6 +64,11 @@ const router = createRouter({
       name: 'stats',
       component: () => import('@/views/StatsToolView.vue'),
     },
+    {
+      path: '/speed',
+      name: 'speed',
+      component: () => import('@/views/SpeedView.vue'),
+    },
   ],
   // Ao voltar, restaura a posição da lista (a Home fica viva via KeepAlive); ao abrir outra
   // tela, começa do topo. Mudança só de query (filtros, time) mantém a posição: quem precisa
@@ -87,6 +92,7 @@ const ROUTE_TITLES: Partial<Record<string, string>> = {
   moves: 'app.movesTitle',
   items: 'app.itemsTitle',
   stats: 'app.statsTitle',
+  speed: 'app.speedTitle',
 }
 
 function applyRouteTitle(): void {
