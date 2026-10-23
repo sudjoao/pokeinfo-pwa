@@ -9,7 +9,8 @@
     "quizTitle": "¿Quién es ese Pokémon? · PokeInfo",
     "offline": "Sin conexión: mostrando lo que ya está guardado en este dispositivo.",
     "movesTitle": "Movimientos · PokeInfo",
-    "itemsTitle": "Objetos · PokeInfo"
+    "itemsTitle": "Objetos · PokeInfo",
+    "statsTitle": "Naturalezas e IV · PokeInfo"
   },
   "common": {
     "retry": "Reintentar",
@@ -508,7 +509,8 @@
     "groupTools": "Herramientas",
     "groupGames": "Juegos",
     "moves": "Movimientos",
-    "items": "Objetos y bayas"
+    "items": "Objetos y bayas",
+    "stats": "Naturalezas e IV"
   },
   "backup": {
     "title": "Copia de seguridad",
@@ -851,5 +853,47 @@
     "sweet": "dulce",
     "bitter": "amargo",
     "sour": "ácido"
+  },
+  "statShort": {
+    "hp": "PS",
+    "attack": "Atq",
+    "defense": "Def",
+    "special-attack": "AtE",
+    "special-defense": "DfE",
+    "speed": "Vel"
+  },
+  "statsTool": {
+    "title": "Naturalezas e IV",
+    "natures": "Naturalezas",
+    "calculator": "Calculadora de IV",
+    "naturesIntro": "Cada naturaleza sube un stat un 10 % y baja otro un 10 %. Las 5 neutras están en la diagonal. Toca una para ver sus sabores.",
+    "naturesCaption": "Naturalezas: la fila es el stat que sube y la columna el que baja",
+    "natureEffect": "+10 % {up}, −10 % {down}",
+    "likes": "le gusta lo {flavor}",
+    "hates": "odia lo {flavor}",
+    "neutral": "neutra",
+    "neutralLong": "neutra, no cambia stats ni tiene sabor favorito.",
+    "formulaHint": "Fórmula de la 3.ª generación en adelante. Gen 1–2 (DV) y Let's Go (AV) usan otra.",
+    "pokemon": "Pokémon",
+    "level": "Nivel",
+    "nature": "Naturaleza",
+    "modeIv": "Calcular IV",
+    "modeStats": "Calcular stats",
+    "characteristic": "Carácter (opcional)",
+    "pickPokemon": "Elige un Pokémon para empezar.",
+    "stat": "Stat",
+    "base": "Base",
+    "ev": "EV",
+    "iv": "IV",
+    "actual": "En el juego",
+    "impossible": "imposible",
+    "raised": "sube por la naturaleza",
+    "lowered": "baja por la naturaleza",
+    "evFor": "EV de {stat}",
+    "actualFor": "{stat} en el juego",
+    "ivFor": "IV de {stat}",
+    "evTotal": "EV totales: {n} de 510",
+    "openCalculator": "Calcular IV",
+    "baseValue": "base {n}"
   }
 }

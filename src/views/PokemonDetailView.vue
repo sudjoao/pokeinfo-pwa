@@ -322,7 +322,7 @@ function share(): void {
 
             <AboutGrid :pokemon="detail" :species="species" />
             <AbilityList :abilities="detail.abilities" @open="ability.show" />
-            <StatsList :stats="detail.stats" />
+            <StatsList :stats="detail.stats" :pokemon-id="detail.id" />
           </v-col>
 
           <v-col cols="12" md="6">

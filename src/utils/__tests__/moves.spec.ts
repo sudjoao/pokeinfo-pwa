@@ -7,7 +7,14 @@ import {
   filterMoves,
   moveHistory,
 } from '@/utils/moves'
-import { captureChance, eggSteps, statRange } from '@/utils/stats'
+import {
+  applyCharacteristic,
+  captureChance,
+  eggSteps,
+  possibleIvs,
+  statRange,
+  statValue,
+} from '@/utils/stats'
 
 describe('moveInfo', () => {
   it('valores atuais sem grupo de versões', () => {
@@ -113,5 +120,83 @@ describe('lista de golpes', () => {
   it('histórico: Karate Chop era Normal antes de Gold/Silver', () => {
     const history = moveHistory('karate-chop')
     expect(history.some((h) => h.before === 'gold-silver' && h.type === 'normal')).toBe(true)
+  })
+})
+
+describe('stat real e IVs', () => {
+  // Exemplo da Bulbapedia (página "Stat"): Garchomp nível 78, Adamant.
+  const garchomp = {
+    base: {
+      hp: 108,
+      attack: 130,
+      defense: 95,
+      'special-attack': 80,
+      'special-defense': 85,
+      speed: 102,
+    },
+    ivs: { hp: 24, attack: 12, defense: 30, 'special-attack': 16, 'special-defense': 23, speed: 5 },
+    evs: {
+      hp: 74,
+      attack: 190,
+      defense: 91,
+      'special-attack': 48,
+      'special-defense': 84,
+      speed: 23,
+    },
+    nature: { attack: 110, 'special-attack': 90 } as Partial<Record<string, 110 | 90>>,
+    stats: {
+      hp: 289,
+      attack: 278,
+      defense: 193,
+      'special-attack': 135,
+      'special-defense': 171,
+      speed: 171,
+    },
+  }
+  const names = ['hp', 'attack', 'defense', 'special-attack', 'special-defense', 'speed'] as const
+
+  it('fórmula com IV, EV e natureza', () => {
+    for (const name of names) {
+      expect(
+        statValue(
+          name,
+          garchomp.base[name],
+          78,
+          garchomp.ivs[name],
+          garchomp.evs[name],
+          garchomp.nature[name] ?? 100,
+        ),
+      ).toBe(garchomp.stats[name])
+    }
+  })
+
+  it('IVs possíveis incluem o real; no nível 78 sobram no máximo 3', () => {
+    for (const name of names) {
+      const ivs = possibleIvs(
+        name,
+        garchomp.base[name],
+        78,
+        garchomp.evs[name],
+        garchomp.nature[name] ?? 100,
+        garchomp.stats[name],
+      )
+      expect(ivs).toContain(garchomp.ivs[name])
+      expect(ivs.length).toBeLessThanOrEqual(3)
+    }
+  })
+
+  it('característica: filtra pelo resto ÷5 e limita os outros ao maior IV', () => {
+    const ivs = {
+      hp: [20, 21, 22],
+      attack: [28, 29, 30, 31],
+      defense: [0, 1],
+      'special-attack': [5],
+      'special-defense': [9],
+      speed: [10],
+    }
+    const narrowed = applyCharacteristic(ivs, 'hp', 1)
+    expect(narrowed.hp).toEqual([21])
+    expect(narrowed.attack).toEqual([])
+    expect(narrowed.speed).toEqual([10])
   })
 })

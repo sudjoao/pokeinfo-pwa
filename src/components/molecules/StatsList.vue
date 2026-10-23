@@ -5,7 +5,11 @@ import type { PokemonStat } from '@/types/pokemon'
 import { statRange } from '@/utils/stats'
 import StatBar from '@/components/atoms/StatBar.vue'
 
-const props = defineProps<{ stats: PokemonStat[] }>()
+const props = defineProps<{
+  stats: PokemonStat[]
+  /** Id do Pokémon, para o atalho "Calcular IVs" (sem ele o link não aparece). */
+  pokemonId?: number
+}>()
 
 const { t } = useI18n()
 
@@ -55,6 +59,15 @@ const ranges = computed(() =>
         :range="ranges?.[index]"
       />
       <p v-if="ranges" class="text-body-small opacity-70 mb-0">{{ t('detail.statsRangeHint') }}</p>
+      <v-btn
+        v-if="pokemonId"
+        :to="{ name: 'stats', query: { tab: 'iv', id: pokemonId } }"
+        variant="tonal"
+        size="small"
+        class="align-self-start"
+      >
+        {{ t('statsTool.openCalculator') }}
+      </v-btn>
     </v-card-text>
   </v-card>
 </template>

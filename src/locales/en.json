@@ -9,7 +9,8 @@
     "quizTitle": "Who's that Pokémon? · PokeInfo",
     "offline": "Offline: showing what is already saved on this device.",
     "movesTitle": "Moves · PokeInfo",
-    "itemsTitle": "Items · PokeInfo"
+    "itemsTitle": "Items · PokeInfo",
+    "statsTitle": "Natures and IVs · PokeInfo"
   },
   "common": {
     "retry": "Try again",
@@ -508,7 +509,8 @@
     "groupTools": "Tools",
     "groupGames": "Games",
     "moves": "Moves",
-    "items": "Items and berries"
+    "items": "Items and berries",
+    "stats": "Natures and IVs"
   },
   "backup": {
     "title": "Data backup",
@@ -851,5 +853,47 @@
     "sweet": "sweet",
     "bitter": "bitter",
     "sour": "sour"
+  },
+  "statShort": {
+    "hp": "HP",
+    "attack": "Atk",
+    "defense": "Def",
+    "special-attack": "SpA",
+    "special-defense": "SpD",
+    "speed": "Spe"
+  },
+  "statsTool": {
+    "title": "Natures and IVs",
+    "natures": "Natures",
+    "calculator": "IV calculator",
+    "naturesIntro": "Each nature raises one stat by 10% and lowers another by 10%. The 5 neutral ones are on the diagonal. Tap one to see its flavors.",
+    "naturesCaption": "Natures: row is the raised stat, column the lowered one",
+    "natureEffect": "+10% {up}, −10% {down}",
+    "likes": "likes {flavor}",
+    "hates": "dislikes {flavor}",
+    "neutral": "neutral",
+    "neutralLong": "neutral, changes no stat and has no favorite flavor.",
+    "formulaHint": "Formula from Generation 3 on. Gen 1–2 (DVs) and Let's Go (AVs) use a different one.",
+    "pokemon": "Pokémon",
+    "level": "Level",
+    "nature": "Nature",
+    "modeIv": "Find IVs",
+    "modeStats": "Calculate stats",
+    "characteristic": "Characteristic (optional)",
+    "pickPokemon": "Pick a Pokémon to start.",
+    "stat": "Stat",
+    "base": "Base",
+    "ev": "EV",
+    "iv": "IV",
+    "actual": "In game",
+    "impossible": "impossible",
+    "raised": "raised by nature",
+    "lowered": "lowered by nature",
+    "evFor": "{stat} EVs",
+    "actualFor": "{stat} in game",
+    "ivFor": "{stat} IV",
+    "evTotal": "Total EVs: {n} of 510",
+    "openCalculator": "Calculate IVs",
+    "baseValue": "base {n}"
   }
 }
