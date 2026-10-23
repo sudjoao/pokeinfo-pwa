@@ -895,5 +895,32 @@
     "evTotal": "Total EVs: {n} of 510",
     "openCalculator": "Calculate IVs",
     "baseValue": "base {n}"
+  },
+  "capture": {
+    "open": "Calculate catch chance",
+    "title": "Catching {name}",
+    "perThrow": "chance per throw",
+    "within": "{pct} within {n} throws",
+    "throwsFor": "~{n} throws for 90%",
+    "ball": "Ball",
+    "level": "Wild level",
+    "turns": "Turn {n}",
+    "dark": "At night or in a cave",
+    "water": "In water (surfing, fishing or diving)",
+    "repeatCaught": "You marked this Pokémon as caught in this game: the Repeat Ball gets its bonus.",
+    "repeatNotCaught": "Only gets its bonus if you already caught this species (mark it with a game selected).",
+    "netYes": "Water or Bug Pokémon: the Net Ball gets its bonus.",
+    "netNo": "The Net Ball only helps with Water or Bug Pokémon.",
+    "hp": "HP left: {n}%",
+    "statusLabel": "Status",
+    "status": {
+      "none": "None",
+      "sleep": "Asleep",
+      "freeze": "Frozen",
+      "paralysis": "Paralyzed",
+      "poison": "Poisoned",
+      "burn": "Burned"
+    },
+    "hint": "Catch rate {rate}, Generation {gen} formula. Leaves out critical captures, dark grass and the level and difficulty bonuses of recent games."
   }
 }

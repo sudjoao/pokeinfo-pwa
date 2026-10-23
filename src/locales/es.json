@@ -895,5 +895,32 @@
     "evTotal": "EV totales: {n} de 510",
     "openCalculator": "Calcular IV",
     "baseValue": "base {n}"
+  },
+  "capture": {
+    "open": "Calcular probabilidad de captura",
+    "title": "Capturar a {name}",
+    "perThrow": "de probabilidad por lanzamiento",
+    "within": "{pct} en hasta {n} lanzamientos",
+    "throwsFor": "~{n} lanzamientos para el 90 %",
+    "ball": "Ball",
+    "level": "Nivel del salvaje",
+    "turns": "Turno {n}",
+    "dark": "De noche o en una cueva",
+    "water": "En el agua (surfeando, pescando o buceando)",
+    "repeatCaught": "Marcaste este Pokémon como capturado en este juego: la Acopio Ball tiene bonificación.",
+    "repeatNotCaught": "Solo tiene bonificación si ya capturaste esta especie (márcala con un juego seleccionado).",
+    "netYes": "Pokémon Agua o Bicho: la Malla Ball tiene bonificación.",
+    "netNo": "La Malla Ball solo ayuda con Pokémon Agua o Bicho.",
+    "hp": "PS restantes: {n} %",
+    "statusLabel": "Estado",
+    "status": {
+      "none": "Ninguno",
+      "sleep": "Dormido",
+      "freeze": "Congelado",
+      "paralysis": "Paralizado",
+      "poison": "Envenenado",
+      "burn": "Quemado"
+    },
+    "hint": "Ratio de captura {rate}, fórmula de la {gen}.ª generación. No incluye capturas críticas, hierba alta oscura ni las bonificaciones de nivel y dificultad de los juegos recientes."
   }
 }

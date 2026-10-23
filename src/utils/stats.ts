@@ -71,15 +71,6 @@ export function applyCharacteristic(
   return result
 }
 
-/**
- * Chance aproximada de captura numa tentativa (fórmula da 3ª/4ª geração, sem status): com HP
- * cheio `a = taxa × bola / 3`, com 1 HP `a ≈ taxa × bola`; a chance é `a / 255`, limitada a 100%.
- */
-export function captureChance(captureRate: number, hpRatio: 'full' | 'min', ball = 1): number {
-  const a = hpRatio === 'full' ? (captureRate * ball) / 3 : captureRate * ball
-  return Math.min(1, a / 255)
-}
-
 /** Passos para chocar o ovo: ciclos × 257 (a partir da 4ª geração; antes eram 256). */
 export function eggSteps(hatchCounter: number): number {
   return hatchCounter * 257

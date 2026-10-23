@@ -16,6 +16,8 @@ import { useDexLabel } from '@/composables/useDexLabel'
 import { gameContextFromQuery, gameContextQuery } from '@/utils/games'
 import { exclusiveVersionOf } from '@/utils/exclusives'
 import { formatDexNumber, formatPokemonName } from '@/utils/pokemon'
+import { LATEST_GENERATION } from '@/utils/typeChart'
+import { useMountOnOpen } from '@/composables/useMountOnOpen'
 import { useAbilityInfo } from '@/composables/useAbilityInfo'
 import { useEggCompatibility } from '@/composables/useEggCompatibility'
 import { useSwipe } from '@/composables/useSwipe'
@@ -42,6 +44,7 @@ import PokemonDetailSkeleton from '@/components/organisms/PokemonDetailSkeleton.
 const MovesCard = defineAsyncComponent(() => import('@/components/organisms/MovesCard.vue'))
 const SpritesCard = defineAsyncComponent(() => import('@/components/organisms/SpritesCard.vue'))
 const HeldItemsCard = defineAsyncComponent(() => import('@/components/organisms/HeldItemsCard.vue'))
+const CaptureSheet = defineAsyncComponent(() => import('@/components/organisms/CaptureSheet.vue'))
 const GenerationChangesCard = defineAsyncComponent(
   () => import('@/components/organisms/GenerationChangesCard.vue'),
 )
@@ -106,6 +109,8 @@ function neighborNumber(entry: NeighborEntry): string {
 const cry = useCry()
 
 const caughtStore = useCaughtStore()
+const captureOpen = ref(false)
+const captureMounted = useMountOnOpen(captureOpen)
 /** Estado de captura no jogo da URL; undefined (sem jogo) esconde o botão no hero. */
 const caught = computed(() =>
   context.value && detail.value
@@ -326,7 +331,13 @@ function share(): void {
           </v-col>
 
           <v-col cols="12" md="6">
-            <TrainingCard :pokemon="detail" :species="species" class="fill-height" />
+            <TrainingCard
+              :pokemon="detail"
+              :species="species"
+              :generation="context?.game.generation"
+              class="fill-height"
+              @open-capture="captureOpen = true"
+            />
           </v-col>
           <v-col v-if="species" cols="12" md="6">
             <BreedingCard
@@ -440,6 +451,15 @@ function share(): void {
           :holders="ability.holders.value"
           @select="goTo"
           @retry="ability.retry"
+        />
+        <CaptureSheet
+          v-if="captureMounted && species"
+          v-model="captureOpen"
+          :name="formatPokemonName(detail.name)"
+          :capture-rate="species.captureRate"
+          :types="detail.types"
+          :generation="context?.game.generation ?? LATEST_GENERATION"
+          :caught="caught ?? false"
         />
         <EggCompatSheet
           v-model="egg.open.value"

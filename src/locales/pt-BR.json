@@ -895,5 +895,32 @@
     "evTotal": "Total de EVs: {n} de 510",
     "openCalculator": "Calcular IVs",
     "baseValue": "base {n}"
+  },
+  "capture": {
+    "open": "Calcular chance de captura",
+    "title": "Captura de {name}",
+    "perThrow": "de chance por arremesso",
+    "within": "{pct} em até {n} arremessos",
+    "throwsFor": "~{n} arremessos para 90%",
+    "ball": "Bola",
+    "level": "Nível do selvagem",
+    "turns": "Turno {n}",
+    "dark": "À noite ou numa caverna",
+    "water": "Na água (surfando, pescando ou mergulhando)",
+    "repeatCaught": "Você já marcou este Pokémon como capturado neste jogo: a Repeat Ball vale mais.",
+    "repeatNotCaught": "Só vale mais se você já tiver capturado esta espécie (marque a Poké Bola com um jogo selecionado).",
+    "netYes": "Pokémon Água ou Inseto: a Net Ball vale mais.",
+    "netNo": "A Net Ball só vale mais em Pokémon Água ou Inseto.",
+    "hp": "HP restante: {n}%",
+    "statusLabel": "Status",
+    "status": {
+      "none": "Nenhum",
+      "sleep": "Dormindo",
+      "freeze": "Congelado",
+      "paralysis": "Paralisado",
+      "poison": "Envenenado",
+      "burn": "Queimado"
+    },
+    "hint": "Taxa de captura {rate}, fórmula da {gen}ª geração. Não inclui captura crítica, grama escura nem os bônus de nível e dificuldade dos jogos recentes."
   }
 }

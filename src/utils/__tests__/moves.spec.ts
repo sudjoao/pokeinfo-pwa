@@ -7,14 +7,7 @@ import {
   filterMoves,
   moveHistory,
 } from '@/utils/moves'
-import {
-  applyCharacteristic,
-  captureChance,
-  eggSteps,
-  possibleIvs,
-  statRange,
-  statValue,
-} from '@/utils/stats'
+import { applyCharacteristic, eggSteps, possibleIvs, statRange, statValue } from '@/utils/stats'
 
 describe('moveInfo', () => {
   it('valores atuais sem grupo de versões', () => {
@@ -76,10 +69,7 @@ describe('stats', () => {
     expect(statRange('hp', 1, 100)).toEqual({ min: 1, max: 1 })
   })
 
-  it('captura e ovo', () => {
-    expect(captureChance(255, 'full')).toBeCloseTo(1 / 3)
-    expect(captureChance(3, 'min')).toBeCloseTo(3 / 255)
-    expect(captureChance(255, 'min')).toBe(1)
+  it('passos do ovo', () => {
     expect(eggSteps(20)).toBe(5140)
   })
 })
