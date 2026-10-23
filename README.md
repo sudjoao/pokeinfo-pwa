@@ -149,7 +149,9 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
 geração, flags e habilidades de todos os Pokémon (`pokemon.ts`), golpes com os valores antigos
 (`moves.ts`) e as exceções da tabela de tipos e os tipos antigos de Pokémon (`typesPast.ts`). Usa o
 GraphQL beta só no script (o app não depende dele) e completa pelo REST o que ainda não estiver lá.
-Rodar de novo quando sair jogo ou geração nova: `node scripts/gen-pokemon-data.mjs`.
+Rodar de novo quando sair jogo ou geração nova: `node scripts/gen-pokemon-data.mjs`. As rotas
+(`src/data/routes.ts`) vêm de `scripts/gen-routes.mjs`; os exclusivos e as rotas de BDSP vêm da
+Bulbapedia, com o procedimento descrito em [`scripts/README.md`](scripts/README.md).
 
 ## Tecnologias
 

@@ -7,7 +7,8 @@
  * (Ilha da Armadura, Tundra da Coroa, Kitakami, Blueberry) e da White Forest entram no jogo base.
  * Uma espécie com uma forma em cada versão (Basculin, Tauros de Paldea, Kyurem…) não é exclusiva
  * de nenhuma das duas e fica de fora. Red/Blue segue a distribuição internacional (Blue = Green japonês).
- * Os slugs das versões são os do endpoint `/version` da PokéAPI.
+ * Os slugs das versões são os do endpoint `/version` da PokéAPI. Procedimento para refazer em
+ * scripts/README.md.
  */
 
 export interface ExclusiveVersion {

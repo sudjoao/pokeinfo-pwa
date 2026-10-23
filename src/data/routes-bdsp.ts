@@ -9,7 +9,7 @@
  * em runtime (`RouteList.vue`), só o id nacional fica salvo aqui. Locais sem tabela de selvagens
  * na wiki (Floaroma Meadow, Flower Paradise, Newmoon Island, Spear Pillar — só têm encontro fixo
  * de lendário) ficam de fora, assim como "ruin-maniac-cave" (mesma página da Bulbapedia que
- * "maniac-tunnel"). Script descartável, não versionado.
+ * "maniac-tunnel"). Procedimento para refazer em scripts/README.md.
  */
 
 import type { StaticRoutePokemon } from '@/types/pokemon'

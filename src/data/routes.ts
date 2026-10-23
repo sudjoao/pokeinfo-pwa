@@ -2,12 +2,10 @@
  * Locais com pelo menos um encontro selvagem (ou presente/troca fixa) por jogo, com as áreas
  * da PokéAPI que sustentam cada um.
  *
- * Lista estática de propósito: a PokéAPI não diz quais dos ~90 a ~130 locais de cada região têm
- * encontro selvagem, só `/location-area/{slug}`. Gerada em 2026-09-12 varrendo `/region`,
- * `/location` e `/location-area` das 8 regiões com dado de encontro (kanto, johto, hoenn, sinnoh,
- * unova, kalos, alola, galar) e cruzando com as versões de cada jogo em `data/games.ts` (incluindo
- * os alias de DLC, ex.: "the-isle-of-armor-sword"). Cidades, prédios e locais sem bater nenhuma
- * versão do jogo ficam de fora. Script descartável, não versionado.
+ * Gerado por scripts/gen-routes.mjs (não editar à mão): a PokéAPI não diz quais dos ~90 a ~130
+ * locais de cada região têm encontro, só `/location-area`. Cruza as áreas das 8 regiões com dado
+ * de encontro com as versões de cada jogo em `data/games.ts` (incluindo os alias de DLC, ex.:
+ * "the-isle-of-armor-sword"). Cidades, prédios e locais sem nenhuma versão do jogo ficam de fora.
  *
  * Locais com várias áreas (covis de Dynamax, andares de caverna) somam os pokémon de todas elas
  * numa lista só ao expandir a rota.
@@ -770,6 +768,8 @@ export const GAME_ROUTES: Readonly<Record<string, readonly GameRoute[]>> = {
     { location: 'team-aqua-hideout', areas: ['team-aqua-hideout-area'] },
     { location: 'team-magma-hideout', areas: ['team-magma-hideout-area'] },
     { location: 'terra-cave', areas: ['terra-cave-area'] },
+    { location: 'birth-island', areas: ['birth-island-area'] },
+    { location: 'navel-rock', areas: ['navel-rock-area'] },
   ],
   'firered-leafgreen': [
     { location: 'berry-forest', areas: ['berry-forest-area'] },
@@ -2527,6 +2527,7 @@ export const GAME_ROUTES: Readonly<Record<string, readonly GameRoute[]>> = {
     },
     { location: 'verdant-cavern', areas: ['verdant-cavern-trial-site'] },
     { location: 'wela-volcano-park', areas: ['wela-volcano-park-area'] },
+    { location: 'trainers-school', areas: ['trainers-school-area'] },
   ],
   'lets-go-pikachu-lets-go-eevee': [
     { location: 'celadon-city', areas: ['celadon-city-area'] },
