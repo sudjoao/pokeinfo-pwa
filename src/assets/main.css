@@ -110,12 +110,12 @@ body {
 
 .page-enter-from > * {
   opacity: 0;
-  transform: translateY(20px) scale(0.98);
+  transform: translateY(20px);
 }
 
 .page-leave-to > * {
   opacity: 0;
-  transform: translateY(-8px) scale(0.98);
+  transform: translateY(-8px);
 }
 
 .page-leave-active > .v-main {
@@ -133,6 +133,7 @@ body {
   .team-slot-leave-active,
   .team-slot-move,
   .evolution-stage,
+  .evolution-stage__ring,
   .cry-button--playing {
     transition: none !important;
     animation: none !important;

@@ -5,6 +5,10 @@ import type { Game } from '@/data/games'
 import type { RoutePokemon } from '@/types/pokemon'
 import { usePokedexStore } from '@/stores/pokedex'
 import { isStaticRoute, routesForGame, toRoutePokemon, type AnyGameRoute } from '@/utils/routes'
+import { mapLimit } from '@/utils/async'
+
+/** Áreas de um local baixadas ao mesmo tempo. */
+const AREA_CONCURRENCY = 4
 import { formatAreaName } from '@/utils/encounters'
 import { speciesIdOf } from '@/utils/forms'
 import RoutePokemonRow from '@/components/molecules/RoutePokemonRow.vue'
@@ -74,8 +78,9 @@ async function loadRoute(route: AnyGameRoute): Promise<void> {
   loading.value = { ...loading.value, [route.location]: true }
   failed.value = { ...failed.value, [route.location]: false }
   try {
-    const dtos = await Promise.all(
-      route.areas.map((area) => pokedexStore.ensureAreaEncounters(area)),
+    // Covis de Dynamax chegam a 22 áreas: em lotes, para não abrir dezenas de requisições juntas.
+    const dtos = await mapLimit(route.areas, AREA_CONCURRENCY, (area) =>
+      pokedexStore.ensureAreaEncounters(area),
     )
     results.value = { ...results.value, [route.location]: toRoutePokemon(dtos, props.game) }
   } catch {

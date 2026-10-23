@@ -1,4 +1,4 @@
-import { ref, watch, type Ref } from 'vue'
+import { onScopeDispose, ref, watch, type Ref } from 'vue'
 
 /** Retorna uma ref que só reflete o valor de `source` após `delay` ms sem mudanças. */
 export function useDebouncedRef<T>(source: Ref<T>, delay = 300): Ref<T> {
@@ -11,6 +11,8 @@ export function useDebouncedRef<T>(source: Ref<T>, delay = 300): Ref<T> {
       debounced.value = value
     }, delay)
   })
+  // Sem isso, um valor digitado logo antes de sair da tela ainda dispararia depois.
+  onScopeDispose(() => clearTimeout(timer))
 
   return debounced
 }

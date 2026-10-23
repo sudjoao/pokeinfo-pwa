@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { onActivated, onBeforeUnmount, onDeactivated, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { mdiArrowUp } from '@mdi/js'
 import { prefersReducedMotion } from '@/composables/usePrefersReducedMotion'
@@ -21,8 +21,21 @@ function onScroll(): void {
   frame = requestAnimationFrame(() => (visible.value = window.scrollY > THRESHOLD))
 }
 
-onMounted(() => window.addEventListener('scroll', onScroll, { passive: true }))
-onBeforeUnmount(() => window.removeEventListener('scroll', onScroll))
+function listen(): void {
+  window.addEventListener('scroll', onScroll, { passive: true })
+  onScroll()
+}
+
+function stop(): void {
+  window.removeEventListener('scroll', onScroll)
+  cancelAnimationFrame(frame)
+}
+
+onMounted(listen)
+onBeforeUnmount(stop)
+// A Home fica em KeepAlive: escondida, ela não deve seguir escutando a rolagem das outras telas.
+onActivated(listen)
+onDeactivated(stop)
 
 /** Volta ao topo e leva o foco para o conteúdo (quem usa teclado não fica no fim da lista). */
 function toTop(): void {

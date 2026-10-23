@@ -36,6 +36,7 @@ const enterDelay = computed(() => `${(props.depth ?? 0) * 90}ms`)
     :link="!current"
     :aria-current="current ? 'page' : undefined"
   >
+    <span v-if="current" class="evolution-stage__ring" aria-hidden="true" />
     <PokemonArtwork :id="speciesId" alt="" :size="96" />
     <DexNumber :id="speciesId" />
     <div class="text-title-small">
@@ -69,20 +70,28 @@ const enterDelay = computed(() => `${(props.depth ?? 0) * 90}ms`)
   }
 }
 
-/* Destaque contínuo e sutil no estágio atual: um anel que respira, sem chamar atenção demais. */
-.evolution-stage[aria-current='page'] {
-  animation:
-    evo-stage-in 0.5s var(--evo-delay, 0s) cubic-bezier(0.34, 1.56, 0.64, 1) both,
-    evo-current-pulse 2.4s ease-in-out 0.5s infinite;
+/*
+ * Destaque contínuo e sutil no estágio atual: um anel que respira, sem chamar atenção demais.
+ * Anima só a opacidade de uma camada própria (composição na GPU); animar o box-shadow do card
+ * repintava a cada quadro enquanto a tela estivesse aberta.
+ */
+.evolution-stage__ring {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 3px color-mix(in srgb, rgb(var(--v-theme-primary)) 55%, transparent);
+  pointer-events: none;
+  will-change: opacity;
+  animation: evo-current-pulse 2.4s ease-in-out 0.5s infinite;
 }
 
 @keyframes evo-current-pulse {
   0%,
   100% {
-    box-shadow: 0 0 0 0 color-mix(in srgb, rgb(var(--v-theme-primary)) 40%, transparent);
+    opacity: 0;
   }
   50% {
-    box-shadow: 0 0 0 7px color-mix(in srgb, rgb(var(--v-theme-primary)) 0%, transparent);
+    opacity: 1;
   }
 }
 </style>

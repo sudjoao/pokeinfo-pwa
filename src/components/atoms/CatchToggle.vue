@@ -19,19 +19,23 @@ const { t } = useI18n()
 const wrapRef = useTemplateRef<HTMLElement>('wrap')
 
 const bursting = ref(false)
-let skipNextWatch = true
+/** O toque foi aqui: só a mudança causada por ele anima (não a troca de Pokémon no detalhe). */
+let toggledHere = false
 let burstTimer: ReturnType<typeof setTimeout> | undefined
 
-// Só anima o "pop" quando a captura passa de não-marcado para marcado — nunca no mount
-// (mesmo já capturado) nem ao desmarcar, onde só a transição de opacidade já existente basta.
+function onClick(): void {
+  toggledHere = true
+  emit('toggle')
+}
+
+// Só anima o "pop" quando a pessoa marca (não-marcado → marcado) — nunca no mount, ao desmarcar
+// (a transição de opacidade basta) ou quando o valor muda por fora.
 watch(
   () => props.caught,
   (caught, wasCaught) => {
-    if (skipNextWatch) {
-      skipNextWatch = false
-      return
-    }
-    if (!caught || wasCaught) return
+    const fromClick = toggledHere
+    toggledHere = false
+    if (!fromClick || !caught || wasCaught) return
     if (prefersReducedMotion()) return
     bursting.value = true
     clearTimeout(burstTimer)
@@ -65,9 +69,10 @@ watch(
       :aria-pressed="caught"
       :aria-label="t('catch.toggle', { name })"
       :title="caught ? t('catch.caught') : t('catch.mark')"
-      @click.stop.prevent="emit('toggle')"
+      @click.stop.prevent="onClick"
     />
-    <span class="catch-burst" aria-hidden="true">
+    <!-- Só existe durante a animação: são 6 nós a mais em cada card da lista. -->
+    <span v-if="bursting" class="catch-burst" aria-hidden="true">
       <span v-for="n in 6" :key="n" class="catch-burst__dot" />
     </span>
   </span>

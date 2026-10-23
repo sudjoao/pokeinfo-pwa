@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { loadPokemonData } from '@/composables/usePokemonData'
 import {
   getAbilityDescription,
   getAbilityNameEs,
@@ -32,10 +33,15 @@ export const useVocabularyStore = defineStore('vocabulary', () => {
   const itemRequests = new Map<string, Promise<string | null>>()
   const moveRequests = new Map<string, Promise<string | null>>()
 
+  // Os nomes em espanhol de habilidades e golpes já vêm nos dados gerados (src/data/generated):
+  // a PokéAPI (/ability, /move, respostas grandes com todos os idiomas) fica só de reserva.
   function ensureAbilityNameEs(slug: string): Promise<string | null> {
     if (slug in abilities.value) return Promise.resolve(abilities.value[slug]!)
     return dedupe(abilityRequests, slug, async () => {
-      const name = await getAbilityNameEs(slug)
+      const data = await loadPokemonData().catch(() => null)
+      const index = data?.abilityIndex.get(slug)
+      const bundled = index === undefined ? undefined : data?.abilities[index]?.[1]
+      const name = bundled || (await getAbilityNameEs(slug))
       abilities.value[slug] = name
       return name
     })
@@ -53,7 +59,10 @@ export const useVocabularyStore = defineStore('vocabulary', () => {
   function ensureMoveNameEs(slug: string): Promise<string | null> {
     if (slug in moves.value) return Promise.resolve(moves.value[slug]!)
     return dedupe(moveRequests, slug, async () => {
-      const name = await getMoveNameEs(slug)
+      const bundled = await import('@/data/generated/moves')
+        .then(({ MOVES }) => MOVES[slug]?.[5])
+        .catch(() => undefined)
+      const name = bundled || (await getMoveNameEs(slug))
       moves.value[slug] = name
       return name
     })
