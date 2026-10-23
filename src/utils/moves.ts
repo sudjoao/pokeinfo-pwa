@@ -1,5 +1,6 @@
 import { MOVE_CHANGES, MOVES, VERSION_GROUPS } from '@/data/generated/moves'
 import { POKEMON_TYPES, type PokemonMoveLearn, type PokemonType } from '@/types/pokemon'
+import { formatPokemonName } from './pokemon'
 
 export type MoveCategory = 'status' | 'physical' | 'special'
 
@@ -106,4 +107,101 @@ export function movesByMethod(
     groups[group].sort((a, b) => a.info.slug.localeCompare(b.info.slug))
   }
   return groups
+}
+
+/** Sem diferenciar maiúsculas nem acentos ("acrobacias" acha "Acróbata"). */
+function normalize(text: string): string {
+  return text.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
+}
+
+export type MoveSort = 'name' | 'power' | 'accuracy' | 'pp'
+
+export interface MoveListFilter {
+  query: string
+  type: PokemonType | null
+  category: MoveCategory | null
+  sort: MoveSort
+  /** Ordem decrescente (padrão nos números: mais forte primeiro). */
+  desc: boolean
+}
+
+/** Nome do golpe no idioma atual (só o espanhol vem traduzido; o resto fica em inglês). */
+export function moveName(info: Pick<MoveInfo, 'slug' | 'nameEs'>, locale: string): string {
+  return (locale === 'es' && info.nameEs) || formatPokemonName(info.slug)
+}
+
+/**
+ * Golpes que nenhum Pokémon aprende: Z-moves (uma variante física e outra especial com o mesmo
+ * nome, PP 1) e golpes Max/G-Max (criados pelo Dynamax). Sketch é o único golpe normal com PP 1.
+ */
+function isBattleOnlyMove(slug: string, pp: number): boolean {
+  return slug.includes('--') || /^(g-)?max-/.test(slug) || (pp === 1 && slug !== 'sketch')
+}
+
+/**
+ * Golpes de um jogo com os valores dele. Com `available` (golpes do learnset do jogo), só os que
+ * existem nele; sem, todos os aprendíveis com os valores atuais. Golpes sem tipo da série principal (os "shadow"
+ * de Colosseum/XD) ficam de fora.
+ */
+export function moveList(
+  versionGroup: string | null,
+  available?: ReadonlySet<string> | null,
+): MoveInfo[] {
+  return Object.entries(MOVES).flatMap(([slug, row]) => {
+    if (available ? !available.has(slug) : isBattleOnlyMove(slug, row[4])) return []
+    const info = moveInfo(slug, versionGroup)
+    return info && info.type !== 'unknown' ? [info] : []
+  })
+}
+
+export function filterMoves(
+  moves: readonly MoveInfo[],
+  filter: MoveListFilter,
+  locale: string,
+): MoveInfo[] {
+  const term = normalize(filter.query.trim())
+  const list = moves.filter(
+    (move) =>
+      (!filter.type || move.type === filter.type) &&
+      (!filter.category || move.category === filter.category) &&
+      (!term ||
+        normalize(moveName(move, locale)).includes(term) ||
+        normalize(move.slug.replace(/-/g, ' ')).includes(term)),
+  )
+  const byName = (a: MoveInfo, b: MoveInfo) =>
+    moveName(a, locale).localeCompare(moveName(b, locale), locale)
+  const value = (move: MoveInfo) => (filter.sort === 'name' ? 0 : (move[filter.sort] ?? -1))
+  const direction = filter.desc ? -1 : 1
+  return list.sort((a, b) =>
+    filter.sort === 'name'
+      ? direction * byName(a, b)
+      : direction * (value(a) - value(b)) || byName(a, b),
+  )
+}
+
+/** Versão de cada mudança do golpe: valores que valiam antes do grupo de versões `before`. */
+export interface MoveHistoryEntry {
+  /** Slug do grupo de versões em que o golpe passou a ter o valor seguinte. */
+  before: string
+  power: number | null
+  accuracy: number | null
+  pp: number | null
+  type: PokemonType | null
+}
+
+export function moveHistory(slug: string): MoveHistoryEntry[] {
+  const groupByOrder = new Map(Object.entries(VERSION_GROUPS).map(([vg, [order]]) => [order, vg]))
+  return (MOVE_CHANGES[slug] ?? []).flatMap(([order, power, accuracy, pp, type]) => {
+    const before = groupByOrder.get(order)
+    if (!before) return []
+    return [
+      {
+        before,
+        power,
+        accuracy,
+        pp,
+        type: type === null ? null : (POKEMON_TYPES[type] ?? null),
+      },
+    ]
+  })
 }

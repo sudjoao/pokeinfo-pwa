@@ -7,7 +7,8 @@
     "typesTitle": "Calculadora de tipos · PokeInfo",
     "compareTitle": "Comparar · PokeInfo",
     "quizTitle": "Quem é esse Pokémon? · PokeInfo",
-    "offline": "Sem conexão: mostrando o que já está salvo neste aparelho."
+    "offline": "Sem conexão: mostrando o que já está salvo neste aparelho.",
+    "movesTitle": "Golpes · PokeInfo"
   },
   "common": {
     "retry": "Tentar novamente",
@@ -501,7 +502,11 @@
     "types": "Calculadora de tipos",
     "compare": "Comparar Pokémon",
     "quiz": "Quem é esse Pokémon?",
-    "random": "Pokémon aleatório"
+    "random": "Pokémon aleatório",
+    "groupMain": "PokeInfo",
+    "groupTools": "Ferramentas",
+    "groupGames": "Jogos",
+    "moves": "Golpes"
   },
   "backup": {
     "title": "Backup dos dados",
@@ -684,5 +689,89 @@
     "until": "Até a {n}ª geração",
     "abilities": "Habilidade: {abilities}",
     "statWas": "{stat} {old} (hoje {now})"
+  },
+  "movesPage": {
+    "title": "Golpes",
+    "modeList": "Lista",
+    "modeLearn": "Quem aprende",
+    "searchPlaceholder": "Buscar golpe",
+    "searchLabel": "Buscar golpe pelo nome",
+    "allGames": "Todos os jogos (valores atuais)",
+    "type": "Tipo",
+    "anyType": "Qualquer tipo",
+    "sortLabel": "Ordenar por",
+    "sort": {
+      "name": "Nome",
+      "power": "Poder",
+      "accuracy": "Precisão",
+      "pp": "PP"
+    },
+    "category": "Categoria",
+    "loadError": "Não foi possível carregar os golpes deste jogo.",
+    "empty": "Nenhum golpe com esses filtros.",
+    "results": "{n} golpe | {n} golpes",
+    "showMore": "Mostrar mais ({n} restantes)",
+    "learnIntro": "Escolha até {n} golpes e um jogo para ver quais Pokémon aprendem todos eles.",
+    "learnMoves": "Golpes",
+    "learnEmpty": "Escolha pelo menos um golpe.",
+    "learnResults": "Nenhum Pokémon aprende todos | {n} Pokémon aprende todos | {n} Pokémon aprendem todos"
+  },
+  "movePage": {
+    "notFound": "Golpe não encontrado.",
+    "priority": "Prioridade",
+    "targetLabel": "Alvo",
+    "loadError": "Não foi possível carregar a descrição do golpe.",
+    "ailmentChance": "{chance}% de chance de {ailment}",
+    "flinch": "{chance}% de chance de fazer o alvo recuar",
+    "crit": "Chance de crítico aumentada (+{stage})",
+    "drain": "Recupera {pct}% do dano causado",
+    "recoil": "Recuo de {pct}% do dano causado",
+    "healing": "Recupera {pct}% do HP máximo",
+    "hitsFixed": "Acerta {n} vezes",
+    "hits": "Acerta de {min} a {max} vezes",
+    "statChance": "{chance}% de chance: {changes}",
+    "history": "Mudanças entre jogos",
+    "before": "Antes de {game}",
+    "learners": "Quem aprende",
+    "noLearnset": "A PokéAPI ainda não tem os golpes de {game}.",
+    "noneInGame": "Nenhum Pokémon aprende este golpe em {game}.",
+    "allGamesHint": "Em algum jogo. Escolha um jogo para ver por nível, TM, ovo e tutor.",
+    "method": {
+      "L": "Por nível",
+      "M": "TM/HM",
+      "E": "Ovo",
+      "T": "Tutor",
+      "O": "Outros"
+    },
+    "target": {
+      "selected-pokemon": "Um alvo",
+      "all-opponents": "Todos os oponentes",
+      "all-other-pokemon": "Todos os outros",
+      "user": "O usuário",
+      "users-field": "Lado do usuário",
+      "opponents-field": "Lado do oponente",
+      "entire-field": "Campo inteiro",
+      "ally": "Um aliado",
+      "user-or-ally": "Usuário ou aliado",
+      "user-and-allies": "Usuário e aliados",
+      "all-allies": "Todos os aliados",
+      "all-pokemon": "Todos os Pokémon",
+      "random-opponent": "Oponente aleatório",
+      "specific-move": "Depende do golpe",
+      "selected-pokemon-me-first": "Um alvo",
+      "fainting-pokemon": "Pokémon desmaiado"
+    },
+    "ailment": {
+      "paralysis": "paralisar",
+      "sleep": "fazer dormir",
+      "freeze": "congelar",
+      "burn": "queimar",
+      "poison": "envenenar",
+      "confusion": "confundir",
+      "infatuation": "atrair",
+      "trap": "prender",
+      "leech-seed": "drenar a cada turno",
+      "yawn": "dar sono"
+    }
   }
 }

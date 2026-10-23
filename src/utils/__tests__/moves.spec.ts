@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { moveInfo, movesByMethod, versionGroupsWithMoves } from '@/utils/moves'
+import {
+  moveInfo,
+  movesByMethod,
+  versionGroupsWithMoves,
+  moveList,
+  filterMoves,
+  moveHistory,
+} from '@/utils/moves'
 import { captureChance, eggSteps, statRange } from '@/utils/stats'
 
 describe('moveInfo', () => {
@@ -67,5 +74,44 @@ describe('stats', () => {
     expect(captureChance(3, 'min')).toBeCloseTo(3 / 255)
     expect(captureChance(255, 'min')).toBe(1)
     expect(eggSteps(20)).toBe(5140)
+  })
+})
+
+describe('lista de golpes', () => {
+  it('sem jogo: só golpes aprendíveis (sem Z-moves nem Max/G-Max), com Sketch', () => {
+    const slugs = new Set(moveList(null).map((m) => m.slug))
+    expect(slugs.has('thunderbolt')).toBe(true)
+    expect(slugs.has('sketch')).toBe(true)
+    expect(slugs.has('acid-downpour--physical')).toBe(false)
+    expect(slugs.has('max-flare')).toBe(false)
+    expect(slugs.has('g-max-wildfire')).toBe(false)
+  })
+
+  it('com o learnset do jogo: só os golpes dele, com os valores dele', () => {
+    const list = moveList('red-blue', new Set(['karate-chop', 'tackle']))
+    expect(list.map((m) => m.slug).sort()).toEqual(['karate-chop', 'tackle'])
+    expect(list.find((m) => m.slug === 'karate-chop')?.type).toBe('normal')
+  })
+
+  it('filtra por nome sem acento, tipo e categoria, e ordena por poder', () => {
+    const moves = moveList(null)
+    const fire = filterMoves(
+      moves,
+      { query: '', type: 'fire', category: 'special', sort: 'power', desc: true },
+      'en',
+    )
+    expect(fire.every((m) => m.type === 'fire' && m.category === 'special')).toBe(true)
+    expect(fire[0]!.power).toBeGreaterThanOrEqual(fire[fire.length - 1]!.power ?? 0)
+    const es = filterMoves(
+      moves,
+      { query: 'acrobata', type: null, category: null, sort: 'name', desc: false },
+      'es',
+    )
+    expect(es.map((m) => m.slug)).toContain('acrobatics')
+  })
+
+  it('histórico: Karate Chop era Normal antes de Gold/Silver', () => {
+    const history = moveHistory('karate-chop')
+    expect(history.some((h) => h.before === 'gold-silver' && h.type === 'normal')).toBe(true)
   })
 })

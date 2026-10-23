@@ -7,7 +7,8 @@
     "typesTitle": "Calculadora de tipos · PokeInfo",
     "compareTitle": "Comparar · PokeInfo",
     "quizTitle": "¿Quién es ese Pokémon? · PokeInfo",
-    "offline": "Sin conexión: mostrando lo que ya está guardado en este dispositivo."
+    "offline": "Sin conexión: mostrando lo que ya está guardado en este dispositivo.",
+    "movesTitle": "Movimientos · PokeInfo"
   },
   "common": {
     "retry": "Reintentar",
@@ -501,7 +502,11 @@
     "types": "Calculadora de tipos",
     "compare": "Comparar Pokémon",
     "quiz": "¿Quién es ese Pokémon?",
-    "random": "Pokémon aleatorio"
+    "random": "Pokémon aleatorio",
+    "groupMain": "PokeInfo",
+    "groupTools": "Herramientas",
+    "groupGames": "Juegos",
+    "moves": "Movimientos"
   },
   "backup": {
     "title": "Copia de seguridad",
@@ -684,5 +689,89 @@
     "until": "Hasta la {n}.ª generación",
     "abilities": "Habilidad: {abilities}",
     "statWas": "{stat} {old} (ahora {now})"
+  },
+  "movesPage": {
+    "title": "Movimientos",
+    "modeList": "Lista",
+    "modeLearn": "Quién aprende",
+    "searchPlaceholder": "Buscar movimiento",
+    "searchLabel": "Buscar movimiento por nombre",
+    "allGames": "Todos los juegos (valores actuales)",
+    "type": "Tipo",
+    "anyType": "Cualquier tipo",
+    "sortLabel": "Ordenar por",
+    "sort": {
+      "name": "Nombre",
+      "power": "Potencia",
+      "accuracy": "Precisión",
+      "pp": "PP"
+    },
+    "category": "Categoría",
+    "loadError": "No se pudieron cargar los movimientos de este juego.",
+    "empty": "Ningún movimiento con estos filtros.",
+    "results": "{n} movimiento | {n} movimientos",
+    "showMore": "Mostrar más (quedan {n})",
+    "learnIntro": "Elige hasta {n} movimientos y un juego para ver qué Pokémon aprenden todos.",
+    "learnMoves": "Movimientos",
+    "learnEmpty": "Elige al menos un movimiento.",
+    "learnResults": "Ningún Pokémon aprende todos | {n} Pokémon aprende todos | {n} Pokémon aprenden todos"
+  },
+  "movePage": {
+    "notFound": "Movimiento no encontrado.",
+    "priority": "Prioridad",
+    "targetLabel": "Objetivo",
+    "loadError": "No se pudo cargar la descripción del movimiento.",
+    "ailmentChance": "{chance} % de probabilidad de {ailment}",
+    "flinch": "{chance} % de probabilidad de hacer retroceder",
+    "crit": "Mayor probabilidad de crítico (+{stage})",
+    "drain": "Recupera el {pct} % del daño causado",
+    "recoil": "Retroceso del {pct} % del daño causado",
+    "healing": "Recupera el {pct} % de los PS máximos",
+    "hitsFixed": "Golpea {n} veces",
+    "hits": "Golpea de {min} a {max} veces",
+    "statChance": "{chance} % de probabilidad: {changes}",
+    "history": "Cambios entre juegos",
+    "before": "Antes de {game}",
+    "learners": "Lo aprenden",
+    "noLearnset": "La PokéAPI aún no tiene los movimientos de {game}.",
+    "noneInGame": "Ningún Pokémon aprende este movimiento en {game}.",
+    "allGamesHint": "En algún juego. Elige un juego para ver por nivel, MT, huevo y tutor.",
+    "method": {
+      "L": "Por nivel",
+      "M": "MT/MO",
+      "E": "Huevo",
+      "T": "Tutor",
+      "O": "Otros"
+    },
+    "target": {
+      "selected-pokemon": "Un objetivo",
+      "all-opponents": "Todos los rivales",
+      "all-other-pokemon": "Todos los demás",
+      "user": "El usuario",
+      "users-field": "Lado del usuario",
+      "opponents-field": "Lado del rival",
+      "entire-field": "Todo el campo",
+      "ally": "Un aliado",
+      "user-or-ally": "Usuario o aliado",
+      "user-and-allies": "Usuario y aliados",
+      "all-allies": "Todos los aliados",
+      "all-pokemon": "Todos los Pokémon",
+      "random-opponent": "Rival aleatorio",
+      "specific-move": "Depende del movimiento",
+      "selected-pokemon-me-first": "Un objetivo",
+      "fainting-pokemon": "Pokémon debilitado"
+    },
+    "ailment": {
+      "paralysis": "paralizar",
+      "sleep": "dormir",
+      "freeze": "congelar",
+      "burn": "quemar",
+      "poison": "envenenar",
+      "confusion": "confundir",
+      "infatuation": "enamorar",
+      "trap": "atrapar",
+      "leech-seed": "drenar cada turno",
+      "yawn": "dar sueño"
+    }
   }
 }

@@ -38,6 +38,17 @@ const router = createRouter({
       name: 'types',
       component: () => import('@/views/TypesView.vue'),
     },
+    {
+      path: '/moves',
+      name: 'moves',
+      component: () => import('@/views/MovesView.vue'),
+    },
+    {
+      path: '/move/:slug',
+      name: 'move',
+      // Título próprio (leva o nome do golpe), como o detalhe do Pokémon.
+      component: () => import('@/views/MoveView.vue'),
+    },
   ],
   // Ao voltar, restaura a posição da lista (a Home fica viva via KeepAlive); ao abrir outra
   // tela, começa do topo. Mudança só de query (filtros, time) mantém a posição: quem precisa
@@ -58,6 +69,7 @@ const ROUTE_TITLES: Partial<Record<string, string>> = {
   types: 'app.typesTitle',
   compare: 'app.compareTitle',
   quiz: 'app.quizTitle',
+  moves: 'app.movesTitle',
 }
 
 function applyRouteTitle(): void {

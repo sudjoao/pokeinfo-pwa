@@ -119,7 +119,16 @@ const dash = '—'
                   <template v-else>{{ levelLabel(move) }}</template>
                 </td>
                 <td>
-                  <div class="font-weight-medium">{{ moveName(move) }}</div>
+                  <RouterLink
+                    :to="{
+                      name: 'move',
+                      params: { slug: move.info.slug },
+                      query: { game: selected },
+                    }"
+                    class="moves-card__link font-weight-medium"
+                  >
+                    {{ moveName(move) }}
+                  </RouterLink>
                   <div class="d-flex align-center ga-1 my-1">
                     <TypeChip :type="move.info.type" size="x-small" />
                     <span class="text-label-small opacity-70">
@@ -143,6 +152,14 @@ const dash = '—'
 </template>
 
 <style scoped>
+.moves-card__link {
+  display: block;
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: rgba(var(--v-theme-on-surface), 0.4);
+  text-underline-offset: 3px;
+}
+
 .moves-card__game {
   max-width: 320px;
 }

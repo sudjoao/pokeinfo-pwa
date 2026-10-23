@@ -11,7 +11,9 @@ import {
   mdiDiceMultipleOutline,
   mdiSwordCross,
   mdiTranslate,
+  mdiLightningBolt,
 } from '@mdi/js'
+import type { RouteLocationRaw } from 'vue-router'
 import type { ThemePreference } from '@/composables/useThemePreference'
 
 defineProps<{ theme: ThemePreference }>()
@@ -28,6 +30,42 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 
+interface NavItem {
+  icon: string
+  /** Chave i18n do título. */
+  title: string
+  to: RouteLocationRaw
+  exact?: boolean
+}
+
+/** Navegação em três grupos: coleção, ferramentas de consulta e jogos. */
+const NAV_GROUPS: readonly { title: string; items: readonly NavItem[] }[] = [
+  {
+    title: 'menu.groupMain',
+    items: [
+      { icon: mdiBookOpenVariant, title: 'menu.pokedex', to: { name: 'home' }, exact: true },
+      {
+        icon: mdiHeartOutline,
+        title: 'favorites.title',
+        to: { name: 'home', query: { fav: '1' } },
+      },
+      { icon: mdiSwordCross, title: 'menu.team', to: { name: 'team' } },
+    ],
+  },
+  {
+    title: 'menu.groupTools',
+    items: [
+      { icon: mdiLightningBolt, title: 'menu.moves', to: { name: 'moves' } },
+      { icon: mdiShieldHalfFull, title: 'menu.types', to: { name: 'types' } },
+      { icon: mdiCompareHorizontal, title: 'menu.compare', to: { name: 'compare' } },
+    ],
+  },
+  {
+    title: 'menu.groupGames',
+    items: [{ icon: mdiHelpCircleOutline, title: 'menu.quiz', to: { name: 'quiz' } }],
+  },
+]
+
 /** Abre uma sheet e fecha o menu (as duas sobrepostas confundem leitor de tela e foco). */
 function then(action: () => void): void {
   open.value = false
@@ -40,50 +78,19 @@ function then(action: () => void): void {
   <v-navigation-drawer v-model="open" temporary tag="div">
     <!-- role="navigation": o v-list põe role="list", que não aceita os links como filhos. -->
     <v-list nav density="comfortable" role="navigation" :aria-label="t('menu.title')">
-      <v-list-subheader>PokeInfo</v-list-subheader>
-      <v-list-item
-        :prepend-icon="mdiBookOpenVariant"
-        :title="t('menu.pokedex')"
-        :to="{ name: 'home' }"
-        exact
-        rounded="lg"
-        @click="open = false"
-      />
-      <v-list-item
-        :prepend-icon="mdiHeartOutline"
-        :title="t('favorites.title')"
-        :to="{ name: 'home', query: { fav: '1' } }"
-        rounded="lg"
-        @click="open = false"
-      />
-      <v-list-item
-        :prepend-icon="mdiSwordCross"
-        :title="t('menu.team')"
-        :to="{ name: 'team' }"
-        rounded="lg"
-        @click="open = false"
-      />
-      <v-list-item
-        :prepend-icon="mdiShieldHalfFull"
-        :title="t('menu.types')"
-        :to="{ name: 'types' }"
-        rounded="lg"
-        @click="open = false"
-      />
-      <v-list-item
-        :prepend-icon="mdiCompareHorizontal"
-        :title="t('menu.compare')"
-        :to="{ name: 'compare' }"
-        rounded="lg"
-        @click="open = false"
-      />
-      <v-list-item
-        :prepend-icon="mdiHelpCircleOutline"
-        :title="t('menu.quiz')"
-        :to="{ name: 'quiz' }"
-        rounded="lg"
-        @click="open = false"
-      />
+      <template v-for="group in NAV_GROUPS" :key="group.title">
+        <v-list-subheader>{{ t(group.title) }}</v-list-subheader>
+        <v-list-item
+          v-for="item in group.items"
+          :key="item.title"
+          :prepend-icon="item.icon"
+          :title="t(item.title)"
+          :to="item.to"
+          :exact="item.exact"
+          rounded="lg"
+          @click="open = false"
+        />
+      </template>
     </v-list>
 
     <v-divider class="my-2" />

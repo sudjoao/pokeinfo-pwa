@@ -7,7 +7,8 @@
     "typesTitle": "Type calculator · PokeInfo",
     "compareTitle": "Compare · PokeInfo",
     "quizTitle": "Who's that Pokémon? · PokeInfo",
-    "offline": "Offline: showing what is already saved on this device."
+    "offline": "Offline: showing what is already saved on this device.",
+    "movesTitle": "Moves · PokeInfo"
   },
   "common": {
     "retry": "Try again",
@@ -501,7 +502,11 @@
     "types": "Type calculator",
     "compare": "Compare Pokémon",
     "quiz": "Who's that Pokémon?",
-    "random": "Random Pokémon"
+    "random": "Random Pokémon",
+    "groupMain": "PokeInfo",
+    "groupTools": "Tools",
+    "groupGames": "Games",
+    "moves": "Moves"
   },
   "backup": {
     "title": "Data backup",
@@ -684,5 +689,89 @@
     "until": "Until Generation {n}",
     "abilities": "Ability: {abilities}",
     "statWas": "{stat} {old} (now {now})"
+  },
+  "movesPage": {
+    "title": "Moves",
+    "modeList": "List",
+    "modeLearn": "Who learns",
+    "searchPlaceholder": "Search move",
+    "searchLabel": "Search move by name",
+    "allGames": "All games (current values)",
+    "type": "Type",
+    "anyType": "Any type",
+    "sortLabel": "Sort by",
+    "sort": {
+      "name": "Name",
+      "power": "Power",
+      "accuracy": "Accuracy",
+      "pp": "PP"
+    },
+    "category": "Category",
+    "loadError": "Could not load this game's moves.",
+    "empty": "No move matches these filters.",
+    "results": "{n} move | {n} moves",
+    "showMore": "Show more ({n} left)",
+    "learnIntro": "Pick up to {n} moves and a game to see which Pokémon learn all of them.",
+    "learnMoves": "Moves",
+    "learnEmpty": "Pick at least one move.",
+    "learnResults": "No Pokémon learns all of them | {n} Pokémon learns all of them | {n} Pokémon learn all of them"
+  },
+  "movePage": {
+    "notFound": "Move not found.",
+    "priority": "Priority",
+    "targetLabel": "Target",
+    "loadError": "Could not load the move's description.",
+    "ailmentChance": "{chance}% chance of {ailment}",
+    "flinch": "{chance}% chance to make the target flinch",
+    "crit": "Increased critical-hit ratio (+{stage})",
+    "drain": "Restores {pct}% of the damage dealt",
+    "recoil": "Recoil of {pct}% of the damage dealt",
+    "healing": "Restores {pct}% of max HP",
+    "hitsFixed": "Hits {n} times",
+    "hits": "Hits {min} to {max} times",
+    "statChance": "{chance}% chance: {changes}",
+    "history": "Changes across games",
+    "before": "Before {game}",
+    "learners": "Learned by",
+    "noLearnset": "PokéAPI has no move data for {game} yet.",
+    "noneInGame": "No Pokémon learns this move in {game}.",
+    "allGamesHint": "In any game. Pick a game to see level-up, TM, egg and tutor.",
+    "method": {
+      "L": "Level-up",
+      "M": "TM/HM",
+      "E": "Egg",
+      "T": "Tutor",
+      "O": "Other"
+    },
+    "target": {
+      "selected-pokemon": "One target",
+      "all-opponents": "All opponents",
+      "all-other-pokemon": "All others",
+      "user": "The user",
+      "users-field": "User's side",
+      "opponents-field": "Opponent's side",
+      "entire-field": "Entire field",
+      "ally": "An ally",
+      "user-or-ally": "User or ally",
+      "user-and-allies": "User and allies",
+      "all-allies": "All allies",
+      "all-pokemon": "All Pokémon",
+      "random-opponent": "Random opponent",
+      "specific-move": "Depends on the move",
+      "selected-pokemon-me-first": "One target",
+      "fainting-pokemon": "Fainted Pokémon"
+    },
+    "ailment": {
+      "paralysis": "paralysis",
+      "sleep": "sleep",
+      "freeze": "freeze",
+      "burn": "burn",
+      "poison": "poison",
+      "confusion": "confusion",
+      "infatuation": "infatuation",
+      "trap": "trapping",
+      "leech-seed": "leech seed",
+      "yawn": "drowsiness"
+    }
   }
 }
