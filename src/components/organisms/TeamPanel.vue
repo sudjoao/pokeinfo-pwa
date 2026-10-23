@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { mdiDeleteSweepOutline } from '@mdi/js'
+import { mdiContentCopy, mdiDeleteSweepOutline, mdiImport } from '@mdi/js'
 import { useI18n } from 'vue-i18n'
 import { TEAM_SIZE, type TeamMember } from '@/composables/useTeam'
-import type { CoverageRow, DefenseRow } from '@/utils/typeChart'
+import type { CounterSuggestion, CoverageRow, DefenseRow } from '@/utils/typeChart'
 import TeamBench from '@/components/organisms/TeamBench.vue'
 import TeamAnalysis from '@/components/organisms/TeamAnalysis.vue'
 
@@ -13,6 +13,7 @@ defineProps<{
   threats: readonly DefenseRow[]
   coverage: readonly CoverageRow[]
   gaps: readonly CoverageRow[]
+  suggestions: readonly CounterSuggestion[]
 }>()
 
 const emit = defineEmits<{
@@ -20,6 +21,9 @@ const emit = defineEmits<{
   remove: [member: TeamMember]
   add: []
   clear: []
+  addSuggestion: [id: number]
+  exportShowdown: []
+  importShowdown: []
 }>()
 
 const { t } = useI18n()
@@ -52,6 +56,26 @@ const { t } = useI18n()
         @remove="emit('remove', $event)"
         @add="emit('add')"
       />
+      <div class="d-flex flex-wrap ga-2 mt-2">
+        <v-btn
+          v-if="members.length"
+          variant="tonal"
+          size="small"
+          :prepend-icon="mdiContentCopy"
+          @click="emit('exportShowdown')"
+        >
+          {{ t('team.export') }}
+        </v-btn>
+        <v-btn
+          variant="tonal"
+          size="small"
+          :prepend-icon="mdiImport"
+          aria-haspopup="dialog"
+          @click="emit('importShowdown')"
+        >
+          {{ t('team.import') }}
+        </v-btn>
+      </div>
     </section>
 
     <p v-if="members.length === 0" class="text-body-medium opacity-70 mb-0">
@@ -64,6 +88,9 @@ const { t } = useI18n()
       :threats="threats"
       :coverage="coverage"
       :gaps="gaps"
+      :suggestions="suggestions"
+      :full="members.length >= TEAM_SIZE"
+      @add="emit('addSuggestion', $event)"
     />
   </div>
 </template>

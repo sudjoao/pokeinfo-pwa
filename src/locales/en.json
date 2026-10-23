@@ -306,7 +306,18 @@
     "noGaps": "The team hits every type super effectively.",
     "chartNote": "With a game selected, uses that generation's type chart and Pokémon types (e.g. no Fairy before Gen 6, Clefairy as Normal). Without a game, uses the current chart.",
     "close": "Close",
-    "trayEmpty": "Build your team"
+    "trayEmpty": "Build your team",
+    "export": "Copy for Showdown",
+    "import": "Import from Showdown",
+    "exported": "Team copied in Pokémon Showdown format.",
+    "importTitle": "Import team",
+    "importHint": "Paste a team exported from Pokémon Showdown (or just names separated by blank lines). Items, moves and EVs are ignored.",
+    "importLabel": "Showdown team",
+    "imported": "{n} Pokémon imported.",
+    "importUnknown": "Not recognized: {names}.",
+    "suggestions": "Suggestions for the weaknesses",
+    "suggestionsHint": "From the current list, Pokémon that resist the team's weaknesses without being weak to them. Tap to add.",
+    "suggestionsFull": "Team is full: remove someone to swap in a suggestion."
   },
   "versionFilter": {
     "chip": "Version",

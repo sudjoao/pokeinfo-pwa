@@ -92,7 +92,8 @@ const accent = computed(() => TYPE_COLORS[props.member?.types[0] ?? 'unknown'])
 
 .team-slot--empty {
   border-style: dashed;
-  opacity: 0.6;
+  /* Esmaecer o slot inteiro deixava o texto em 4,2:1; só a cor do texto fica mais suave. */
+  color: rgba(var(--v-theme-on-surface), 0.75);
   cursor: pointer;
 }
 </style>

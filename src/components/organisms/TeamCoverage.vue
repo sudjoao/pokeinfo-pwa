@@ -51,7 +51,8 @@ const { t } = useI18n()
   align-items: flex-start;
 }
 
-.team-coverage__row--gap :deep(.type-chip) {
-  opacity: 0.6;
+.team-coverage__row--gap {
+  border-radius: 8px;
+  background: color-mix(in srgb, rgb(var(--v-theme-error)) 8%, transparent);
 }
 </style>

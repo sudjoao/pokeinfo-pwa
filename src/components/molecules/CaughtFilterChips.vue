@@ -53,7 +53,8 @@ function pick(value: Exclude<CaughtFilter, null>, selected: CaughtFilter): void 
 }
 
 .caught-chip__count {
-  opacity: 0.7;
+  /* Sem opacidade: sobre o vermelho do cabeçalho ficava em 2,6:1. O peso menor já diferencia. */
+  font-weight: 400;
   font-variant-numeric: tabular-nums;
 }
 </style>

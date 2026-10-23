@@ -306,7 +306,18 @@
     "noGaps": "El equipo golpea a todos los tipos de forma súper efectiva.",
     "chartNote": "Con un juego seleccionado, usa la tabla de tipos y los tipos de los Pokémon de esa generación (p. ej., sin Hada antes de la 6.ª, Clefairy Normal). Sin juego, usa la tabla actual.",
     "close": "Cerrar",
-    "trayEmpty": "Crea tu equipo"
+    "trayEmpty": "Crea tu equipo",
+    "export": "Copiar para Showdown",
+    "import": "Importar de Showdown",
+    "exported": "Equipo copiado en formato de Pokémon Showdown.",
+    "importTitle": "Importar equipo",
+    "importHint": "Pega un equipo exportado de Pokémon Showdown (o solo los nombres separados por líneas en blanco). Se ignoran objetos, movimientos y EV.",
+    "importLabel": "Equipo de Showdown",
+    "imported": "{n} Pokémon importado(s).",
+    "importUnknown": "No reconocidos: {names}.",
+    "suggestions": "Sugerencias para las debilidades",
+    "suggestionsHint": "De la lista actual, quienes resisten las debilidades del equipo sin ser débiles a ellas. Toca para añadir.",
+    "suggestionsFull": "Equipo completo: quita a alguien para cambiarlo por una sugerencia."
   },
   "versionFilter": {
     "chip": "Versión",

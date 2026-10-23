@@ -4,6 +4,8 @@ import type { TeamMember } from '@/composables/useTeam'
 import type { CoverageRow, DefenseRow } from '@/utils/typeChart'
 import { TYPE_COLORS, TYPE_TEXT_COLORS } from '@/utils/pokemon'
 import TypeChip from '@/components/atoms/TypeChip.vue'
+import PokemonButtonGrid from '@/components/molecules/PokemonButtonGrid.vue'
+import type { CounterSuggestion } from '@/utils/typeChart'
 import TeamDefenseTable from '@/components/organisms/TeamDefenseTable.vue'
 import TeamCoverage from '@/components/organisms/TeamCoverage.vue'
 
@@ -14,9 +16,23 @@ defineProps<{
   threats: readonly DefenseRow[]
   coverage: readonly CoverageRow[]
   gaps: readonly CoverageRow[]
+  /** Quem resiste às fraquezas do time (da lista atual); vazio esconde o card. */
+  suggestions: readonly CounterSuggestion[]
+  /** Time cheio: as sugestões viram só informação (tocar não adiciona). */
+  full: boolean
 }>()
 
+const emit = defineEmits<{ add: [id: number] }>()
+
 const { t } = useI18n()
+
+function suggestionItems(list: readonly CounterSuggestion[]) {
+  return list.map((item) => ({
+    id: item.id,
+    name: item.name,
+    note: item.covers.map((type) => t(`type.${type}`)).join(', '),
+  }))
+}
 </script>
 
 <template>
@@ -37,6 +53,16 @@ const { t } = useI18n()
             {{ t(`type.${row.type}`) }} · {{ t('team.weakMembers', row.weak) }}
           </v-chip>
         </div>
+      </v-card-text>
+    </v-card>
+
+    <v-card v-if="suggestions.length">
+      <v-card-title class="text-title-medium">{{ t('team.suggestions') }}</v-card-title>
+      <v-card-subtitle class="text-wrap">
+        {{ full ? t('team.suggestionsFull') : t('team.suggestionsHint') }}
+      </v-card-subtitle>
+      <v-card-text class="pt-2">
+        <PokemonButtonGrid :items="suggestionItems(suggestions)" @select="emit('add', $event)" />
       </v-card-text>
     </v-card>
 

@@ -62,8 +62,10 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
   a tabela defensiva (quanto cada tipo de ataque causa em cada membro) e a cobertura ofensiva por
   STAB (tipos que o time acerta de forma super efetiva e os que ficam sem cobertura). O time não é
   salvo: fica só na URL (`/team?game=scarlet-violet&team=906,909,912`), o que sobrevive a recarregar
-  e permite compartilhar o link. A tabela de tipos é a atual (6ª geração em diante) e fica em
-  `src/data/typeChart.ts`.
+  e permite compartilhar o link. A análise usa a tabela de tipos da geração do jogo selecionado.
+  O time pode ser **copiado e importado no formato do Pokémon Showdown** (só as espécies; itens,
+  golpes e EVs são ignorados na importação), e o painel sugere Pokémon da lista atual que
+  **resistem às fraquezas do time** sem serem fracos a elas (tocar adiciona).
 - **Exclusivos de versão**: com um jogo de duas versões selecionado (Sword/Shield, Scarlet/Violet…),
   o card mostra um selo "Só Sword" quando a espécie só existe naquela versão, e a chip "Versão" abre
   um seletor com três grupos que cobrem a Pokédex inteira: "Sword e Shield", "Só Sword" e "Só Shield",

@@ -80,6 +80,11 @@ export function useTeam(generation: () => number | undefined = () => undefined) 
     ids.value = []
   }
 
+  /** Troca o time inteiro (ex.: importado do Showdown). */
+  function replace(next: readonly number[]): void {
+    ids.value = [...new Set(next)].slice(0, TEAM_SIZE)
+  }
+
   // Um id fora do mapa de tipos (Pokémon lançado depois do cache) é buscado uma vez;
   // o mapa atualizado re-renderiza o membro com os tipos certos.
   watch(
@@ -118,6 +123,7 @@ export function useTeam(generation: () => number | undefined = () => undefined) 
     remove,
     toggle,
     clear,
+    replace,
     defense,
     threats,
     coverage,

@@ -306,7 +306,18 @@
     "noGaps": "O time acerta todos os tipos de forma super efetiva.",
     "chartNote": "Com um jogo selecionado, usa a tabela de tipos e os tipos dos Pokémon daquela geração (ex.: sem Fada antes da 6ª, Clefairy Normal). Sem jogo, usa a tabela atual.",
     "close": "Fechar",
-    "trayEmpty": "Monte seu time"
+    "trayEmpty": "Monte seu time",
+    "export": "Copiar para o Showdown",
+    "import": "Importar do Showdown",
+    "exported": "Time copiado no formato do Pokémon Showdown.",
+    "importTitle": "Importar time",
+    "importHint": "Cole um time exportado do Pokémon Showdown (ou só os nomes, um por linha em branco). Itens, golpes e EVs são ignorados.",
+    "importLabel": "Time do Showdown",
+    "imported": "{n} Pokémon importado(s).",
+    "importUnknown": "Não reconhecidos: {names}.",
+    "suggestions": "Sugestões para as fraquezas",
+    "suggestionsHint": "Da lista atual, quem resiste às fraquezas do time sem ser fraco a elas. Toque para adicionar.",
+    "suggestionsFull": "Time cheio: tire alguém para trocar por uma sugestão."
   },
   "versionFilter": {
     "chip": "Versão",

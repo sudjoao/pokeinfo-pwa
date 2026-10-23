@@ -7,6 +7,10 @@ import { gameContextQuery } from '@/utils/games'
 import { usePokemonList } from '@/composables/usePokemonList'
 import { useTeam, type TeamMember } from '@/composables/useTeam'
 import { useCry } from '@/composables/useCry'
+import { usePokedexStore } from '@/stores/pokedex'
+import { exportShowdown, importShowdown } from '@/utils/showdown'
+import { suggestCounters } from '@/utils/typeChart'
+import ShowdownImportDialog from '@/components/organisms/ShowdownImportDialog.vue'
 import type { PokemonSummary } from '@/types/pokemon'
 import DetailLayout from '@/components/templates/DetailLayout.vue'
 import SearchField from '@/components/molecules/SearchField.vue'
@@ -81,6 +85,41 @@ function openAdvanced(): void {
 }
 const teamOpen = ref(false)
 const fullNotice = ref(false)
+const notice = ref<string | null>(null)
+const importOpen = ref(false)
+const pokedex = usePokedexStore()
+
+/** Quem da lista atual (jogo, dex e filtros) cobre as fraquezas do time. */
+const suggestions = computed(() =>
+  suggestCounters(
+    filtered.value,
+    team.threats.value.map((row) => row.type),
+    (id) => pokedex.typesOf(id),
+    teamIds.value,
+    game.value?.generation,
+  ),
+)
+
+function addSuggestion(id: number): void {
+  if (team.toggle(id) === 'full') fullNotice.value = true
+}
+
+function copyShowdown(): void {
+  const text = exportShowdown(team.members.value)
+  navigator.clipboard
+    .writeText(text)
+    .then(() => (notice.value = t('team.exported')))
+    .catch(() => (notice.value = text))
+}
+
+function pasteShowdown(text: string): void {
+  const result = importShowdown(text, pokedex.index)
+  if (result.ids.length) team.replace(result.ids)
+  const parts = [t('team.imported', { n: result.ids.length })]
+  if (result.unknown.length)
+    parts.push(t('team.importUnknown', { names: result.unknown.join(', ') }))
+  notice.value = parts.join(' ')
+}
 
 /** Altura do cabeçalho: busca (48) + linha de chips (32) + espaçamentos (igual à Home). */
 const HEADER_EXTENSION_HEIGHT = 108
@@ -189,9 +228,13 @@ function goBack(): void {
             :threats="team.threats.value"
             :coverage="team.coverage.value"
             :gaps="team.gaps.value"
+            :suggestions="suggestions"
             @select="openMember"
             @remove="team.remove($event.id)"
             @clear="team.clear"
+            @add-suggestion="addSuggestion"
+            @export-showdown="copyShowdown"
+            @import-showdown="importOpen = true"
           />
         </div>
       </v-col>
@@ -209,10 +252,14 @@ function goBack(): void {
               :threats="team.threats.value"
               :coverage="team.coverage.value"
               :gaps="team.gaps.value"
+              :suggestions="suggestions"
               @select="openMember"
               @remove="team.remove($event.id)"
               @add="onAddSlot"
               @clear="team.clear"
+              @add-suggestion="addSuggestion"
+              @export-showdown="copyShowdown"
+              @import-showdown="importOpen = true"
             />
           </v-card-text>
           <v-card-actions class="team-view__sheet-actions">
@@ -261,6 +308,15 @@ function goBack(): void {
     <v-snackbar v-model="fullNotice" :timeout="2500" location="top">{{
       t('team.full')
     }}</v-snackbar>
+    <v-snackbar
+      :model-value="notice !== null"
+      :timeout="4000"
+      location="top"
+      @update:model-value="(open: boolean) => !open && (notice = null)"
+    >
+      {{ notice }}
+    </v-snackbar>
+    <ShowdownImportDialog v-model="importOpen" @import="pasteShowdown" />
   </DetailLayout>
 </template>
 

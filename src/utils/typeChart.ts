@@ -146,3 +146,37 @@ export function analyzeCoverage(
 export function coverageGaps(rows: readonly CoverageRow[]): CoverageRow[] {
   return rows.filter((row) => row.coveredBy.length === 0)
 }
+
+/** Um candidato a entrar no time: resiste (ou é imune) a estas fraquezas do time. */
+export interface CounterSuggestion {
+  id: number
+  name: string
+  covers: PokemonType[]
+}
+
+/**
+ * Sugestões para as fraquezas do time: quem da lista (a Pokédex/filtros atuais) resiste a mais
+ * tipos que ameaçam o time, sem ser fraco a nenhum deles. Empate: a ordem da lista.
+ */
+export function suggestCounters(
+  candidates: readonly { id: number; name: string }[],
+  threats: readonly PokemonType[],
+  typesOf: (id: number) => readonly PokemonType[] | undefined,
+  exclude: ReadonlySet<number>,
+  generation = LATEST_GENERATION,
+  limit = 6,
+): CounterSuggestion[] {
+  if (!threats.length) return []
+  const result: CounterSuggestion[] = []
+  for (const candidate of candidates) {
+    if (exclude.has(candidate.id)) continue
+    const own = typesOf(candidate.id)
+    if (!own) continue
+    const types = typesInGeneration(candidate.id, own, generation)
+    const multipliers = threats.map((threat) => attackMultiplier(threat, types, generation))
+    if (multipliers.some((m) => m > 1)) continue
+    const covers = threats.filter((_, index) => multipliers[index]! < 1)
+    if (covers.length) result.push({ id: candidate.id, name: candidate.name, covers })
+  }
+  return result.sort((a, b) => b.covers.length - a.covers.length).slice(0, limit)
+}
