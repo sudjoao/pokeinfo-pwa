@@ -1,19 +1,28 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
   <head>
-    <meta charset="UTF-8">
-    <link rel="icon" href="/favicon.ico">
+    <meta charset="UTF-8" />
+    <link rel="icon" href="/favicon.ico" />
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
     <title>PokeInfo</title>
 
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="PokeInfo">
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="PokeInfo" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
-    <meta name="theme-color" content="#dc2626">
+    <meta name="theme-color" content="#dc2626" />
+
+    <!--
+      As primeiras requisições (índice da PokéAPI e artwork pelo wsrv.nl) só saem depois do JS
+      rodar; abrir a conexão (DNS + TLS) já agora tira essa espera do caminho. Os gritos vêm do
+      GitHub só ao tocar, então lá basta resolver o DNS.
+    -->
+    <link rel="preconnect" href="https://pokeapi.co" crossorigin />
+    <link rel="preconnect" href="https://wsrv.nl" crossorigin />
+    <link rel="dns-prefetch" href="https://raw.githubusercontent.com" />
   </head>
   <body>
     <div id="app"></div>

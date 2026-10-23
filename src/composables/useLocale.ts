@@ -1,5 +1,5 @@
 import { computed } from 'vue'
-import { i18n, LOCALES, LOCALE_KEY, type Locale } from '@/plugins/i18n'
+import { i18n, loadLocaleMessages, LOCALES, LOCALE_KEY, type Locale } from '@/plugins/i18n'
 import { vuetify } from '@/plugins/vuetify'
 import { writeStorage } from '@/utils/storage'
 
@@ -15,10 +15,11 @@ function apply(locale: Locale): void {
 export function useLocale() {
   const locale = computed(() => i18n.global.locale.value)
 
-  function setLocale(next: Locale): void {
+  async function setLocale(next: Locale): Promise<void> {
     if (next === i18n.global.locale.value) return
-    i18n.global.locale.value = next
     writeStorage(LOCALE_KEY, next)
+    await loadLocaleMessages(next)
+    i18n.global.locale.value = next
     apply(next)
   }
 

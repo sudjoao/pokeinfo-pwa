@@ -34,11 +34,6 @@ export function routesForGame(game: Game): readonly AnyGameRoute[] {
   return GAME_ROUTES[game.slug] ?? BDSP_ROUTES[game.slug] ?? []
 }
 
-/** Se a aba "Rotas" deve aparecer pra esse jogo (alguma das duas fontes tem dado). */
-export function hasRoutes(game: Game): boolean {
-  return routesForGame(game).length > 0
-}
-
 /**
  * Pokémon de uma rota, somando as áreas do local (andares de caverna, covis de raid) e
  * filtrando só as versões do jogo selecionado. Ordenados da maior chance pra menor.

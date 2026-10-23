@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { computed, nextTick, onActivated, ref, watch } from 'vue'
+import { computed, defineAsyncComponent, nextTick, onActivated, ref, watch } from 'vue'
 import { useRoute, useRouter, type RouteLocationRaw } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { mdiPackageVariantClosed, mdiSwordCross, mdiViewGridOutline } from '@mdi/js'
 import { gameContextQuery } from '@/utils/games'
-import { hasRoutes } from '@/utils/routes'
+import { ROUTE_GAMES } from '@/data/routeGames'
 import { usePokemonList } from '@/composables/usePokemonList'
 import { useCry } from '@/composables/useCry'
 import { useDexLabel } from '@/composables/useDexLabel'
@@ -18,12 +18,18 @@ import ListFilters from '@/components/organisms/ListFilters.vue'
 import PokemonGrid from '@/components/organisms/PokemonGrid.vue'
 import PokemonBoxes from '@/components/organisms/PokemonBoxes.vue'
 import BackToTop from '@/components/atoms/BackToTop.vue'
-import RouteList from '@/components/organisms/RouteList.vue'
 import GamePickerSheet from '@/components/organisms/GamePickerSheet.vue'
 import TypePickerSheet from '@/components/organisms/TypePickerSheet.vue'
 import VersionPickerSheet from '@/components/organisms/VersionPickerSheet.vue'
-import AdvancedFilterSheet from '@/components/organisms/AdvancedFilterSheet.vue'
+import { useMountOnOpen } from '@/composables/useMountOnOpen'
 import { usePokemonData } from '@/composables/usePokemonData'
+
+// Só usados ao abrir a aba "Rotas" (com ~170 KB de dados) e o sheet de filtros (VSelect, VSlider…):
+// ficam fora do carregamento inicial.
+const RouteList = defineAsyncComponent(() => import('@/components/organisms/RouteList.vue'))
+const AdvancedFilterSheet = defineAsyncComponent(
+  () => import('@/components/organisms/AdvancedFilterSheet.vue'),
+)
 
 const {
   query,
@@ -91,6 +97,7 @@ const pickerOpen = ref(false)
 const typesOpen = ref(false)
 const versionsOpen = ref(false)
 const advancedOpen = ref(false)
+const advancedMounted = useMountOnOpen(advancedOpen)
 const pokemonData = usePokemonData()
 
 /** Abre "Filtros" e já baixa a tabela (lista de habilidades, ordenação por stats). */
@@ -203,7 +210,7 @@ function openTeamBuilder(): void {
       />
     </template>
 
-    <v-tabs v-if="game && hasRoutes(game)" v-model="view" class="mb-3" density="compact">
+    <v-tabs v-if="game && ROUTE_GAMES.has(game.slug)" v-model="view" class="mb-3" density="compact">
       <v-tab value="pokemon">{{ t('home.pokemonTab') }}</v-tab>
       <v-tab value="routes">{{ t('home.routesTab') }}</v-tab>
     </v-tabs>
@@ -312,6 +319,7 @@ function openTeamBuilder(): void {
     <BackToTop />
 
     <AdvancedFilterSheet
+      v-if="advancedMounted"
       v-model="advancedOpen"
       :filters="advanced"
       :abilities="pokemonData.table.value?.abilities ?? null"

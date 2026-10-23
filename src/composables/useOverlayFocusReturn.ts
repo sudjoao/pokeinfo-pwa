@@ -14,14 +14,27 @@ function usable(element: HTMLElement | null): element is HTMLElement {
  */
 export function useOverlayFocusReturn(open: Readonly<Ref<boolean>>): void {
   let origin: HTMLElement | null = null
+  let wasOpen = false
 
-  // flush 'pre' (padrão): roda antes do Vuetify mover o foco para dentro do conteúdo.
-  watch(open, (value) => {
-    if (value) {
-      const active = document.activeElement
-      origin = active instanceof HTMLElement && active !== document.body ? active : null
-      return
-    }
+  // flush 'pre' (padrão): roda antes do Vuetify mover o foco para dentro do conteúdo. `immediate`
+  // cobre o sheet montado já aberto (carregado sob demanda no primeiro toque).
+  watch(
+    open,
+    (value) => {
+      if (value) {
+        wasOpen = true
+        const active = document.activeElement
+        origin = active instanceof HTMLElement && active !== document.body ? active : null
+        return
+      }
+      if (!wasOpen) return
+      wasOpen = false
+      restore()
+    },
+    { immediate: true },
+  )
+
+  function restore(): void {
     const target = origin
     origin = null
     nextTick(() => {
@@ -31,5 +44,5 @@ export function useOverlayFocusReturn(open: Readonly<Ref<boolean>>): void {
       if (usable(target)) target.focus({ preventScroll: true })
       else focusPageTitle()
     })
-  })
+  }
 }

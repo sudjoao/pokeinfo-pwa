@@ -1,30 +1,48 @@
 <script setup lang="ts">
-import { ref, shallowRef, watch } from 'vue'
+import { computed, defineAsyncComponent, ref, shallowRef, watch } from 'vue'
 import { RouterView, useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAppMenu } from '@/composables/useAppMenu'
 import { useLocale } from '@/composables/useLocale'
 import { useThemePreference } from '@/composables/useThemePreference'
 import { useOnline } from '@/composables/useOnline'
-import { summarize, useBackup } from '@/composables/useBackup'
+import { summarize, useBackup, type BackupSummary } from '@/composables/useBackup'
 import { announcement } from '@/composables/useAnnouncer'
 import AppNotice from '@/components/molecules/AppNotice.vue'
 import { decodeBackupParam, parseBackup, type Backup } from '@/utils/backup'
 import type { ImportMode } from '@/stores/gameSet'
 import AppMenu from '@/components/organisms/AppMenu.vue'
-import LanguageSheet from '@/components/organisms/LanguageSheet.vue'
-import AboutSheet from '@/components/organisms/AboutSheet.vue'
-import BackupSheet from '@/components/organisms/BackupSheet.vue'
-import BackupImportDialog from '@/components/organisms/BackupImportDialog.vue'
+import { useMountOnOpen } from '@/composables/useMountOnOpen'
+
+// Sheets do menu: raros, carregados só na primeira abertura (BackupImportDialog também pode abrir
+// por um link ?backup=, e aí carrega na hora).
+const LanguageSheet = defineAsyncComponent(() => import('@/components/organisms/LanguageSheet.vue'))
+const AboutSheet = defineAsyncComponent(() => import('@/components/organisms/AboutSheet.vue'))
+const BackupSheet = defineAsyncComponent(() => import('@/components/organisms/BackupSheet.vue'))
+const BackupImportDialog = defineAsyncComponent(
+  () => import('@/components/organisms/BackupImportDialog.vue'),
+)
 
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 
 const menu = useAppMenu()
+const languageMounted = useMountOnOpen(menu.languageOpen)
+const aboutMounted = useMountOnOpen(menu.aboutOpen)
+const backupMounted = useMountOnOpen(menu.backupOpen)
 const { locale, locales, setLocale } = useLocale()
 const { preference: theme, setPreference: setTheme } = useThemePreference()
 const backup = useBackup()
+/**
+ * O resumo reencoda todos os jogos: só é recalculado com o sheet aberto. Fechado, mantém o último
+ * valor (para a animação de saída) e não reage a cada captura marcada.
+ */
+let lastSummary: BackupSummary | null = null
+const backupSummary = computed(() => {
+  if (menu.backupOpen.value || !lastSummary) lastSummary = backup.summary.value
+  return lastSummary
+})
 const online = useOnline()
 /** Aviso de offline: abre a cada queda de conexão e pode ser fechado. */
 const offlineOpen = ref(!online.value)
@@ -53,6 +71,7 @@ function shareBackupLink(): void {
 /** Backup lido de arquivo ou link, aguardando a pessoa confirmar como importar. */
 const pending = shallowRef<Backup | null>(null)
 const importOpen = ref(false)
+const importMounted = useMountOnOpen(importOpen)
 
 function askImport(value: Backup | null): void {
   if (!value) {
@@ -138,15 +157,17 @@ function skipToContent(): void {
     </RouterView>
 
     <LanguageSheet
+      v-if="languageMounted"
       v-model="menu.languageOpen.value"
       :locales="locales"
       :selected="locale"
       @select="setLocale"
     />
-    <AboutSheet v-model="menu.aboutOpen.value" />
+    <AboutSheet v-if="aboutMounted" v-model="menu.aboutOpen.value" />
     <BackupSheet
+      v-if="backupMounted"
       v-model="menu.backupOpen.value"
-      :summary="backup.summary.value"
+      :summary="backupSummary"
       :can-share="canShare"
       @download="backup.downloadFile"
       @copy-link="copyBackupLink"
@@ -154,6 +175,7 @@ function skipToContent(): void {
       @import-file="importFile"
     />
     <BackupImportDialog
+      v-if="importMounted"
       v-model="importOpen"
       :summary="pending ? summarize(pending) : null"
       :exported-at="pending?.exportedAt ?? null"

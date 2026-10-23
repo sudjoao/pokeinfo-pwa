@@ -18,7 +18,8 @@ export default defineConfig({
     VueI18nPlugin({ include: [fileURLToPath(new URL('./src/locales/**', import.meta.url))] }),
     VitePWA({
       registerType: 'autoUpdate',
-      injectRegister: 'auto',
+      // Com 'auto' o registerSW.js entra no <head> sem defer e segura a primeira pintura.
+      injectRegister: 'script-defer',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png'],
       manifest: {
         name: 'PokeInfo',

@@ -6,20 +6,23 @@ import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
 import { vuetify } from './plugins/vuetify'
-import { i18n } from './plugins/i18n'
+import { i18n, loadLocaleMessages } from './plugins/i18n'
 import { applyInitialLocale } from './composables/useLocale'
 import { applyInitialTheme } from './composables/useThemePreference'
 
 const app = createApp(App)
 
-app.use(createPinia())
-app.use(router)
-app.use(vuetify)
-app.use(i18n)
-applyInitialLocale()
-applyInitialTheme()
+// As mensagens do idioma chegam antes do router: a primeira navegação já define o título da aba.
+loadLocaleMessages(i18n.global.locale.value).then(() => {
+  app.use(createPinia())
+  app.use(router)
+  app.use(vuetify)
+  app.use(i18n)
+  applyInitialLocale()
+  applyInitialTheme()
 
-app.mount('#app')
+  app.mount('#app')
+})
 
 // Caches do service worker que não são mais usados: os gritos guardados com respostas parciais
 // (ver useCry.ts) e os PNGs de artwork de 120 KB, trocados pelo WebP do wsrv.nl.
