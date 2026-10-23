@@ -5,6 +5,59 @@ Todas as mudanças relevantes deste projeto são registradas aqui.
 O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e o projeto adota
 [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [1.4.0] - 2026-10-23
+
+Sons opcionais, revisão completa de acessibilidade (axe zerado com sheets e dialogs abertos) e
+carregamento inicial 31% menor.
+
+### Adicionado
+
+- Botão de som no cabeçalho de todas as telas e, na primeira visita, um aviso "Toque aqui para
+  ativar os sons dos Pokémon" (some ao ativar, fechar, apertar Esc ou trocar de tela).
+- Botão "Fechar" nos avisos (snackbars); avisos longos ficam até a pessoa fechar.
+- Aviso quando compartilhar um link falha.
+
+### Alterado
+
+- Os gritos começam desligados. Tocar no card, ir ao vizinho ou abrir pela URL só toca com o som
+  ligado; o alto-falante do detalhe e a dica do quiz tocam sempre. Quem já tinha reativado o som
+  continua com ele.
+- Acessibilidade:
+  - Sheets e dialogs devolvem o foco a quem os abriu e têm nome acessível.
+  - Seleção exposta a leitores de tela: botões de alternância e chips informam se estão
+    pressionados; jogo e idioma são radio, versões são checkbox.
+  - Trocar de Pokémon no detalhe (vizinho, swipe, evolução) leva o foco ao nome ou o anuncia.
+  - O foco não se perde quando o botão focado some (quiz, caçada shiny, time, comparador).
+  - Avisos, erros e o resumo da calculadora de tipos são anunciados por uma região viva única;
+    os "Carregando" repetidos dos esqueletos saíram.
+  - Quiz mostra certo/errado com ícone e texto, não só cor.
+  - Comparador e tabela de defesas do time são tabelas de verdade; seções com h2.
+  - Textos em inglês da PokéAPI marcados com `lang`.
+  - O título da aba acompanha o idioma.
+- Performance:
+  - Abertura: de 1.283 KB para 885 KB de JS+CSS (gzip: 323 → 253 KB). Rotas, idiomas e sheets
+    raros carregam sob demanda.
+  - Preconnect para a PokéAPI e o proxy de imagens; registro do service worker sem bloquear a
+    pintura.
+  - Marcar um capturado re-renderiza só aquele card; artwork com `<img>` nativo (lazy, com
+    tamanho reservado).
+  - No detalhe, o artwork baixa junto com os dados, com prioridade alta, e os locais de encontro
+    (até ~500 KB) só quando a lista chega perto da tela.
+  - Detalhes guardados sem reatividade profunda e com limite de 30 por sessão.
+  - Caixas fora da tela não são diagramadas.
+  - Áreas de uma rota baixadas no máximo 4 por vez.
+  - Nomes em espanhol de habilidades e golpes vêm dos dados gerados.
+  - Ícones do manifest recomprimidos sem perda (−61 KB).
+
+### Corrigido
+
+- Contraste do chip de Pokédex selecionado no tema escuro, da contagem do filtro de versões e do
+  subtítulo do idioma ativo.
+- Membros do time eram todos anunciados como "Abrir o time".
+- Imagens ao lado do nome escrito eram lidas duas vezes ("Pikachu Pikachu").
+- O primeiro toque para marcar um capturado não animava.
+- Alvos de toque pequenos (remover do time e do comparador, "outros jogos" da evolução).
+
 ## [1.3.0] - 2026-10-23
 
 Tela de detalhes completa, ferramentas novas (tipos, comparação, quiz), recursos de coleção
@@ -203,6 +256,7 @@ Primeira versão estável da Pokédex em formato de PWA, consumindo a [PokéAPI]
 - As marcações de captura ficam só no aparelho, sem sincronização entre dispositivos.
 - Os gritos vêm só em `.ogg`; em navegadores sem suporte o botão de som não aparece.
 
+[1.4.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.0.0...v1.1.0

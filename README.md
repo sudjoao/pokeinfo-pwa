@@ -34,7 +34,8 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
 - **Cadeia de evolução** com o "como evoluir" em português para todos os gatilhos da PokéAPI
   (nível, item, troca, amizade, local, hora do dia, golpe conhecido, stats, formas regionais…).
   O método padrão dos jogos atuais fica em destaque; métodos de jogos antigos ficam recolhidos.
-- **Grito do Pokémon** ao abrir a tela de detalhes (com botão para repetir e para silenciar).
+- **Grito do Pokémon**: começa desligado; o botão de som no cabeçalho liga os gritos ao abrir
+  um Pokémon (um aviso aponta para ele na primeira visita). O alto-falante do detalhe toca sempre.
 - **Onde encontrar**: a tela de detalhes lista os locais em que o Pokémon aparece, com método de
   encontro (grama, surf, pesca, presente, troca, raid…) e faixa de nível. Ao abrir a partir de um
   jogo, mostra só os locais daquele jogo (com um botão para ver os outros); sem jogo, agrupa por
