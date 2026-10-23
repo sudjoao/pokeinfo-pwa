@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { mdiArrowLeft, mdiPokeball } from '@mdi/js'
+import { mdiArrowLeft, mdiMenu } from '@mdi/js'
+import { useAppMenu } from '@/composables/useAppMenu'
 import { useI18n } from 'vue-i18n'
 
 defineProps<{
@@ -13,6 +14,7 @@ defineProps<{
 const emit = defineEmits<{ back: [] }>()
 
 const { t } = useI18n()
+const { drawer } = useAppMenu()
 </script>
 
 <template>
@@ -24,7 +26,13 @@ const { t } = useI18n()
         :aria-label="t('common.back')"
         @click="emit('back')"
       />
-      <v-icon v-else :icon="mdiPokeball" size="28" class="ms-2" />
+      <v-btn
+        v-else
+        :icon="mdiMenu"
+        :aria-label="t('menu.open')"
+        aria-haspopup="dialog"
+        @click="drawer = true"
+      />
     </template>
     <v-app-bar-title tag="h1" tabindex="-1" class="app-header__title font-weight-bold">
       {{ title }}

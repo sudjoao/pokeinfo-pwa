@@ -399,7 +399,10 @@
     "emptyRoute": "No Pokémon catalogued here for {game}.",
     "loadError": "Could not load this route's Pokémon.",
     "pokemonCount": "{n} Pokémon | {n} Pokémon",
-    "chance": "{pct}%"
+    "chance": "{pct}%",
+    "onlyMissing": "Show only Pokémon not caught yet",
+    "caughtCount": "{caught}/{total} caught",
+    "allCaught": "You have caught everything on this route."
   },
   "ability": {
     "pokemonWith": "Pokémon with this ability ({n})",
@@ -439,5 +442,47 @@
     "medium-slow": "Medium Slow",
     "slow-then-very-fast": "Erratic",
     "fast-then-very-slow": "Fluctuating"
+  },
+  "menu": {
+    "open": "Open menu",
+    "title": "Menu",
+    "pokedex": "Pokédex",
+    "team": "Team builder",
+    "preferences": "Preferences",
+    "language": "Language",
+    "theme": "Theme",
+    "themeSystem": "System",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "backup": "Data backup",
+    "about": "About"
+  },
+  "backup": {
+    "title": "Data backup",
+    "intro": "Caught, shinies, favorites and hunts are stored only on this device. Export them to keep a copy or move to another device.",
+    "summary": "{caught} caught in {games} games · {shiny} shinies · {favorites} favorites · {hunts} hunts",
+    "download": "Download file",
+    "copyLink": "Copy link",
+    "share": "Share link",
+    "import": "Import file",
+    "linkCopied": "Link copied. Open it on the other device to import.",
+    "linkHint": "The link carries the data: whoever opens it can import it.",
+    "invalid": "Invalid backup file or link.",
+    "importTitle": "Import backup",
+    "importFrom": "Backup from {date}",
+    "merge": "Merge with current data",
+    "mergeHint": "Keeps what is on this device and adds the backup.",
+    "replace": "Replace everything",
+    "replaceHint": "Erases what is on this device and keeps only the backup.",
+    "confirm": "Import",
+    "cancel": "Cancel",
+    "restored": "Backup imported."
+  },
+  "boxes": {
+    "layout": "Layout",
+    "cards": "Cards",
+    "boxes": "Boxes (living dex)",
+    "box": "Box {n}",
+    "caught": "{caught}/{total}"
   }
 }

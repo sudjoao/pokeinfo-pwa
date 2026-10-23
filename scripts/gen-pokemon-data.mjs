@@ -8,6 +8,7 @@
  *                   Pokémon/forma (filtros, ordenação e comparação sem baixar /pokemon/{id}).
  *   - moves.ts:     tipo, categoria, poder, precisão e PP de cada golpe, com os valores antigos
  *                   por grupo de versões (ex.: Karate Chop era Normal na 1ª geração).
+ *   - forms.ts:     espécie de cada forma alternativa (id > 10000), para a marcação de captura.
  *   - typesPast.ts: exceções da tabela de tipos em gerações antigas e tipos antigos de Pokémon
  *                   (ex.: Clefairy era Normal até a 5ª geração).
  *
@@ -67,6 +68,7 @@ async function missingPokemonFromRest(knownIds) {
     const species = await rest(`pokemon-species/${idOf(p.species.url)}`)
     result.push({
       id,
+      pokemon_species_id: idOf(p.species.url),
       height: p.height,
       weight: p.weight,
       pokemon_v2_pokemonstats: p.stats.map((s) => ({ base_stat: s.base_stat, pokemon_v2_stat: { name: s.stat.name } })),
@@ -133,7 +135,7 @@ async function main() {
   for (let offset = 0; ; offset += 500) {
     const page = await query(`{
       pokemon_v2_pokemon(order_by: { id: asc }, limit: 500, offset: ${offset}) {
-        id height weight
+        id height weight pokemon_species_id
         pokemon_v2_pokemonstats { base_stat pokemon_v2_stat { name } }
         pokemon_v2_pokemonabilities(order_by: { slot: asc }) { is_hidden slot pokemon_v2_ability { name } }
         pokemon_v2_pokemonspecy { is_legendary is_mythical is_baby generation_id }
@@ -190,6 +192,16 @@ export const POKEMON_DATA: Readonly<Record<number, PokemonDataRow>> = {${rows.jo
 `,
   )
   console.log(`pokemon.ts: ${rows.length} Pokémon, ${abilities.length} habilidades`)
+
+  const forms = pokemon.filter((p) => p.id !== p.pokemon_species_id).map((p) => `${p.id}:${p.pokemon_species_id}`)
+  await writeFile(
+    `${OUT_DIR}forms.ts`,
+    `${header('pokemon.pokemon_species_id')}
+/** Forma alternativa (id > 10000, ex.: 10091 = rattata-alola) -> espécie (19 = rattata). */
+export const FORM_SPECIES: Readonly<Record<number, number>> = {${forms.join(',')}}
+`,
+  )
+  console.log(`forms.ts: ${forms.length} formas`)
 
   // ---- Golpes -------------------------------------------------------------------------------
   const moves = (

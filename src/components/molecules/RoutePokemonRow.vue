@@ -6,14 +6,17 @@ import type { RoutePokemon } from '@/types/pokemon'
 import { formatPokemonName } from '@/utils/pokemon'
 import { formatEncounterMethod, formatLevelRange, versionTitle } from '@/utils/encounters'
 import PokemonArtwork from '@/components/atoms/PokemonArtwork.vue'
+import CatchToggle from '@/components/atoms/CatchToggle.vue'
 
 const props = defineProps<{
   pokemon: RoutePokemon
   /** Jogo da rota, pra nomear a versão do selo "Só Sword". */
   game: Game
+  /** Capturado no jogo; undefined esconde a Poké Bola. */
+  caught?: boolean
 }>()
 
-const emit = defineEmits<{ select: [id: number] }>()
+const emit = defineEmits<{ select: [id: number]; toggleCaught: [] }>()
 
 const { t, te } = useI18n()
 
@@ -48,6 +51,13 @@ const onlyIn = computed(() =>
         </v-chip>
       </div>
     </div>
+    <CatchToggle
+      v-if="caught !== undefined"
+      :caught="caught"
+      :name="name"
+      class="route-pokemon-row__catch"
+      @toggle="emit('toggleCaught')"
+    />
   </li>
 </template>
 
@@ -59,6 +69,11 @@ const onlyIn = computed(() =>
 
 .route-pokemon-row + .route-pokemon-row {
   border-top: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+}
+
+.route-pokemon-row__catch {
+  position: relative;
+  z-index: 1;
 }
 
 .min-width-0 {

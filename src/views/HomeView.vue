@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { computed, nextTick, onActivated, ref, watch } from 'vue'
-import { useRouter, type RouteLocationRaw } from 'vue-router'
+import { useRoute, useRouter, type RouteLocationRaw } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { mdiInformationOutline, mdiSwordCross, mdiTranslate } from '@mdi/js'
+import { mdiPackageVariantClosed, mdiSwordCross, mdiViewGridOutline } from '@mdi/js'
 import { gameContextQuery } from '@/utils/games'
 import { hasRoutes } from '@/utils/routes'
 import { usePokemonList } from '@/composables/usePokemonList'
 import { useCry } from '@/composables/useCry'
-import { useLocale } from '@/composables/useLocale'
 import { useDexLabel } from '@/composables/useDexLabel'
 import type { PokemonSummary } from '@/types/pokemon'
 import DefaultLayout from '@/components/templates/DefaultLayout.vue'
@@ -17,12 +16,11 @@ import ResultsAnnouncer from '@/components/atoms/ResultsAnnouncer.vue'
 import PokemonCardSkeleton from '@/components/molecules/PokemonCardSkeleton.vue'
 import ListFilters from '@/components/organisms/ListFilters.vue'
 import PokemonGrid from '@/components/organisms/PokemonGrid.vue'
+import PokemonBoxes from '@/components/organisms/PokemonBoxes.vue'
 import RouteList from '@/components/organisms/RouteList.vue'
 import GamePickerSheet from '@/components/organisms/GamePickerSheet.vue'
 import TypePickerSheet from '@/components/organisms/TypePickerSheet.vue'
 import VersionPickerSheet from '@/components/organisms/VersionPickerSheet.vue'
-import LanguageSheet from '@/components/organisms/LanguageSheet.vue'
-import AboutSheet from '@/components/organisms/AboutSheet.vue'
 
 const {
   query,
@@ -58,9 +56,21 @@ const {
 } = usePokemonList()
 
 const router = useRouter()
+const route = useRoute()
+
+/** Cards (padrão) ou caixas de 30, como no Pokémon HOME (`?layout=boxes`). */
+const layout = computed<'cards' | 'boxes'>(() =>
+  route.query.layout === 'boxes' ? 'boxes' : 'cards',
+)
+
+function setLayout(value: 'cards' | 'boxes'): void {
+  const query = { ...route.query }
+  if (value === 'boxes') query.layout = 'boxes'
+  else delete query.layout
+  router.replace({ query })
+}
 const cry = useCry()
 const { t } = useI18n()
-const { locale, locales, setLocale } = useLocale()
 const { dexLabel } = useDexLabel()
 
 /** Aba ativa na Home; "routes" só existe com um jogo com dados de encontro selecionado. */
@@ -73,8 +83,6 @@ watch(
 const pickerOpen = ref(false)
 const typesOpen = ref(false)
 const versionsOpen = ref(false)
-const languageOpen = ref(false)
-const aboutOpen = ref(false)
 
 /** Altura do cabeçalho: busca (48) + linha de chips (32) + espaçamentos. */
 const HEADER_EXTENSION_HEIGHT = 108
@@ -156,12 +164,6 @@ function openTeamBuilder(): void {
   <DefaultLayout :extension-height="HEADER_EXTENSION_HEIGHT">
     <template #actions>
       <v-btn :icon="mdiSwordCross" :aria-label="t('home.teamBuilder')" @click="openTeamBuilder" />
-      <v-btn :icon="mdiTranslate" :aria-label="t('language.title')" @click="languageOpen = true" />
-      <v-btn
-        :icon="mdiInformationOutline"
-        :aria-label="t('about.open')"
-        @click="aboutOpen = true"
-      />
     </template>
     <template #header>
       <SearchField v-model="query" />
@@ -189,10 +191,41 @@ function openTeamBuilder(): void {
       <v-tab value="routes">{{ t('home.routesTab') }}</v-tab>
     </v-tabs>
 
-    <RouteList v-if="view === 'routes' && game" :game="game" @select="openPokemonId" />
+    <RouteList
+      v-if="view === 'routes' && game"
+      :game="game"
+      :caught-ids="caughtIds"
+      @select="openPokemonId"
+      @toggle-caught="toggleCaught"
+    />
 
     <template v-else>
       <ResultsAnnouncer :count="filtered.length" :ready="!sourceLoading && !sourceError" />
+
+      <div class="d-flex justify-end mb-2">
+        <v-btn-toggle
+          :model-value="layout"
+          mandatory
+          density="compact"
+          variant="outlined"
+          divided
+          :aria-label="t('boxes.layout')"
+          @update:model-value="setLayout"
+        >
+          <v-btn
+            value="cards"
+            :icon="mdiViewGridOutline"
+            size="small"
+            :aria-label="t('boxes.cards')"
+          />
+          <v-btn
+            value="boxes"
+            :icon="mdiPackageVariantClosed"
+            size="small"
+            :aria-label="t('boxes.boxes')"
+          />
+        </v-btn-toggle>
+      </div>
 
       <v-row v-if="sourceLoading" density="compact">
         <v-col v-for="n in 12" :key="n" cols="6" sm="4" md="3" lg="2">
@@ -210,6 +243,14 @@ function openTeamBuilder(): void {
       />
 
       <EmptyState v-else-if="isEmpty" :title="emptyTitle" :message="emptyMessage" />
+
+      <PokemonBoxes
+        v-else-if="layout === 'boxes'"
+        :items="filtered"
+        :caught-ids="game ? caughtIds : undefined"
+        @toggle-caught="toggleCaught"
+        @open="openPokemonId"
+      />
 
       <PokemonGrid
         v-else
@@ -250,14 +291,5 @@ function openTeamBuilder(): void {
       @toggle="toggleAvailability"
       @clear="clearAvailability"
     />
-
-    <LanguageSheet
-      v-model="languageOpen"
-      :locales="locales"
-      :selected="locale"
-      @select="setLocale"
-    />
-
-    <AboutSheet v-model="aboutOpen" />
   </DefaultLayout>
 </template>

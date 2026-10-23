@@ -399,7 +399,10 @@
     "emptyRoute": "Nenhum pokémon catalogado aqui para {game}.",
     "loadError": "Não foi possível carregar os pokémon desta rota.",
     "pokemonCount": "{n} pokémon | {n} pokémon",
-    "chance": "{pct}%"
+    "chance": "{pct}%",
+    "onlyMissing": "Mostrar só os que faltam capturar",
+    "caughtCount": "{caught}/{total} capturados",
+    "allCaught": "Você já capturou todos desta rota."
   },
   "ability": {
     "pokemonWith": "Pokémon com esta habilidade ({n})",
@@ -439,5 +442,47 @@
     "medium-slow": "Médio-lento",
     "slow-then-very-fast": "Errático",
     "fast-then-very-slow": "Flutuante"
+  },
+  "menu": {
+    "open": "Abrir menu",
+    "title": "Menu",
+    "pokedex": "Pokédex",
+    "team": "Montar time",
+    "preferences": "Preferências",
+    "language": "Idioma",
+    "theme": "Tema",
+    "themeSystem": "Sistema",
+    "themeLight": "Claro",
+    "themeDark": "Escuro",
+    "backup": "Backup dos dados",
+    "about": "Sobre"
+  },
+  "backup": {
+    "title": "Backup dos dados",
+    "intro": "Capturados, shinies, favoritos e caçadas ficam só neste aparelho. Exporte para guardar ou para passar a outro aparelho.",
+    "summary": "{caught} capturados em {games} jogos · {shiny} shinies · {favorites} favoritos · {hunts} caçadas",
+    "download": "Baixar arquivo",
+    "copyLink": "Copiar link",
+    "share": "Compartilhar link",
+    "import": "Importar arquivo",
+    "linkCopied": "Link copiado. Abra no outro aparelho para importar.",
+    "linkHint": "O link leva os dados junto: quem abrir pode importá-los.",
+    "invalid": "Arquivo ou link de backup inválido.",
+    "importTitle": "Importar backup",
+    "importFrom": "Backup de {date}",
+    "merge": "Somar ao que já existe",
+    "mergeHint": "Mantém o que está neste aparelho e acrescenta o do backup.",
+    "replace": "Substituir tudo",
+    "replaceHint": "Apaga o que está neste aparelho e fica só com o backup.",
+    "confirm": "Importar",
+    "cancel": "Cancelar",
+    "restored": "Backup importado."
+  },
+  "boxes": {
+    "layout": "Exibição",
+    "cards": "Cards",
+    "boxes": "Caixas (living dex)",
+    "box": "Caixa {n}",
+    "caught": "{caught}/{total}"
   }
 }

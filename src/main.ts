@@ -9,6 +9,7 @@ import router from './router'
 import { vuetify } from './plugins/vuetify'
 import { i18n } from './plugins/i18n'
 import { applyInitialLocale } from './composables/useLocale'
+import { applyInitialTheme } from './composables/useThemePreference'
 
 const app = createApp(App)
 
@@ -18,6 +19,7 @@ app.use(vuetify)
 app.use(i18n)
 app.use(MotionPlugin)
 applyInitialLocale()
+applyInitialTheme()
 
 app.mount('#app')
 

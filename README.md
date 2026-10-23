@@ -64,6 +64,16 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
   "Faltam" filtram a lista e mostram a contagem da Pokédex atual; o filtro vai na URL (`?caught=0`).
   A marcação é por espécie, então as ilhas de Alola e as formas regionais compartilham o mesmo
   estado dentro de um jogo. Fica salva no aparelho em um bitset base64 (~170 bytes por jogo).
+  Na aba **Rotas** cada Pokémon também tem a Poké Bola, a rota mostra quantos já foram capturados
+  ("3/14") e dá para esconder os capturados.
+- **Caixas (living dex)**: um botão alterna a lista entre cards e caixas de 30 (6×5, como no Pokémon
+  HOME), na ordem da Pokédex atual e com os filtros aplicados (`?layout=boxes`). Cada caixa mostra o
+  intervalo de números e quantos foram capturados; com um jogo selecionado, tocar marca/desmarca.
+- **Backup**: no menu (☰), "Backup dos dados" baixa um JSON com capturados, shinies capturados,
+  favoritos e caçadas, importa esse arquivo e gera um **link** (`/?backup=...`, ~200 caracteres por
+  jogo marcado) que, aberto em outro aparelho, pergunta se deve somar ou substituir os dados.
+- **Menu lateral** com navegação, idioma, **tema** (sistema, claro ou escuro, salvo no aparelho),
+  backup e créditos.
 - **Idioma**: botão no cabeçalho alterna entre *Português* (interface em pt-BR, com os textos que só
   existem em inglês na PokéAPI mantidos assim) e *English* (tudo em inglês, inclusive tipos, stats,
   grupos de ovo e as frases de evolução). Começa no idioma do aparelho e a escolha fica salva.
@@ -86,7 +96,8 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
   adicioná-lo ali. Versões japonesas, Colosseum/XD (sem Pokédex) e jogos fora da série principal
   ficam de fora; DLCs aparecem como Pokédex do jogo base.
 - Na Pokédex de Alola o app mostra a forma de Alola mesmo quando a forma de Kanto também é obtível.
-- As marcações de captura ficam só no aparelho (não há conta nem sincronização entre Mac e iPhone).
+- As marcações ficam só no aparelho (não há conta nem sincronização automática entre Mac e iPhone;
+  o backup por arquivo ou link faz essa ponte).
 - Os exclusivos de versão são por espécie: uma espécie com uma forma em cada versão (Basculin,
   Tauros de Paldea, Kyurem…) não conta como exclusiva. Exclusivos das DLCs e da White Forest entram
   no jogo base, e Red/Blue segue a distribuição internacional. Jogos de versão única (Yellow,
@@ -109,7 +120,6 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
 
 ### Roadmap
 
-- Exportar/importar as marcações de captura (backup em JSON).
 - Favoritos.
 
 ## Dados gerados

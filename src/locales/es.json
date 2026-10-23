@@ -399,7 +399,10 @@
     "emptyRoute": "Ningún Pokémon catalogado aquí para {game}.",
     "loadError": "No se pudieron cargar los Pokémon de esta ruta.",
     "pokemonCount": "{n} Pokémon | {n} Pokémon",
-    "chance": "{pct} %"
+    "chance": "{pct} %",
+    "onlyMissing": "Mostrar solo los que faltan",
+    "caughtCount": "{caught}/{total} capturados",
+    "allCaught": "Ya capturaste todos los de esta ruta."
   },
   "ability": {
     "pokemonWith": "Pokémon con esta habilidad ({n})",
@@ -439,5 +442,47 @@
     "medium-slow": "Parabólico",
     "slow-then-very-fast": "Errático",
     "fast-then-very-slow": "Fluctuante"
+  },
+  "menu": {
+    "open": "Abrir menú",
+    "title": "Menú",
+    "pokedex": "Pokédex",
+    "team": "Crear equipo",
+    "preferences": "Preferencias",
+    "language": "Idioma",
+    "theme": "Tema",
+    "themeSystem": "Sistema",
+    "themeLight": "Claro",
+    "themeDark": "Oscuro",
+    "backup": "Copia de seguridad",
+    "about": "Acerca de"
+  },
+  "backup": {
+    "title": "Copia de seguridad",
+    "intro": "Capturados, variocolor, favoritos y cacerías se guardan solo en este dispositivo. Expórtalos para guardarlos o pasarlos a otro dispositivo.",
+    "summary": "{caught} capturados en {games} juegos · {shiny} variocolor · {favorites} favoritos · {hunts} cacerías",
+    "download": "Descargar archivo",
+    "copyLink": "Copiar enlace",
+    "share": "Compartir enlace",
+    "import": "Importar archivo",
+    "linkCopied": "Enlace copiado. Ábrelo en el otro dispositivo para importar.",
+    "linkHint": "El enlace lleva los datos: quien lo abra puede importarlos.",
+    "invalid": "Archivo o enlace de copia no válido.",
+    "importTitle": "Importar copia",
+    "importFrom": "Copia del {date}",
+    "merge": "Sumar a lo que ya existe",
+    "mergeHint": "Mantiene lo de este dispositivo y añade la copia.",
+    "replace": "Reemplazar todo",
+    "replaceHint": "Borra lo de este dispositivo y deja solo la copia.",
+    "confirm": "Importar",
+    "cancel": "Cancelar",
+    "restored": "Copia importada."
+  },
+  "boxes": {
+    "layout": "Vista",
+    "cards": "Tarjetas",
+    "boxes": "Cajas (living dex)",
+    "box": "Caja {n}",
+    "caught": "{caught}/{total}"
   }
 }
