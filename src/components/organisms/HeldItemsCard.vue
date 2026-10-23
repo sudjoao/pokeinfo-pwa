@@ -42,7 +42,16 @@ function rarityText(rarity: HeldRarity): string {
             class="held-items__sprite"
           />
           <div class="min-width-0">
-            <div class="text-body-medium font-weight-medium">{{ itemName(row.item) }}</div>
+            <RouterLink
+              :to="{
+                name: 'item',
+                params: { slug: row.item },
+                query: game ? { game: game.slug } : {},
+              }"
+              class="held-items__link text-body-medium font-weight-medium"
+            >
+              {{ itemName(row.item) }}
+            </RouterLink>
             <div class="text-label-small opacity-70">
               {{ row.rarities.map(rarityText).join(' · ') }}
               <template v-if="row.more">· {{ t('heldItems.more', { n: row.more }) }}</template>
@@ -68,6 +77,13 @@ function rarityText(rarity: HeldRarity): string {
 .held-items__sprite {
   flex: 0 0 32px;
   image-rendering: pixelated;
+}
+
+.held-items__link {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: rgba(var(--v-theme-on-surface), 0.4);
+  text-underline-offset: 3px;
 }
 
 .min-width-0 {

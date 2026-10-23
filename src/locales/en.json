@@ -8,7 +8,8 @@
     "compareTitle": "Compare · PokeInfo",
     "quizTitle": "Who's that Pokémon? · PokeInfo",
     "offline": "Offline: showing what is already saved on this device.",
-    "movesTitle": "Moves · PokeInfo"
+    "movesTitle": "Moves · PokeInfo",
+    "itemsTitle": "Items · PokeInfo"
   },
   "common": {
     "retry": "Try again",
@@ -506,7 +507,8 @@
     "groupMain": "PokeInfo",
     "groupTools": "Tools",
     "groupGames": "Games",
-    "moves": "Moves"
+    "moves": "Moves",
+    "items": "Items and berries"
   },
   "backup": {
     "title": "Data backup",
@@ -773,5 +775,81 @@
       "leech-seed": "leech seed",
       "yawn": "drowsiness"
     }
+  },
+  "itemsPage": {
+    "title": "Items",
+    "searchPlaceholder": "Search item",
+    "searchLabel": "Search item by name",
+    "pocket": "Pocket",
+    "pockets": {
+      "medicine": "Medicine",
+      "pokeballs": "Poké Balls",
+      "battle": "Battle",
+      "berries": "Berries",
+      "misc": "Other items",
+      "machines": "TMs and HMs",
+      "mail": "Mail",
+      "key": "Key items"
+    },
+    "results": "{n} item | {n} items",
+    "empty": "No item matches these filters.",
+    "category": {
+      "standard-balls": "Standard balls",
+      "special-balls": "Special balls",
+      "healing": "Healing",
+      "status-cures": "Status cures",
+      "revival": "Revival",
+      "pp-recovery": "PP recovery",
+      "vitamins": "Vitamins",
+      "evolution": "Evolution",
+      "held-items": "Held items",
+      "choice": "Choice",
+      "type-enhancement": "Type enhancement",
+      "mega-stones": "Mega Stones",
+      "z-crystals": "Z-Crystals",
+      "all-machines": "TMs, HMs and TRs",
+      "medicine": "Healing berries",
+      "picky-healing": "Picky healing",
+      "in-a-pinch": "In a pinch",
+      "type-protection": "Type protection",
+      "baking-only": "Baking only",
+      "effort-drop": "EV drop",
+      "other": "Other berries"
+    }
+  },
+  "itemPage": {
+    "notFound": "Item not found.",
+    "allGames": "All games",
+    "price": "Price",
+    "priceValue": "₽{n}",
+    "notSold": "Not sold",
+    "fling": "Fling power",
+    "loadError": "Could not load the item's description.",
+    "berry": "Berry",
+    "firmness": "Firmness",
+    "firmnessValue": {
+      "very-soft": "Very soft",
+      "soft": "Soft",
+      "hard": "Hard",
+      "very-hard": "Very hard",
+      "super-hard": "Super hard"
+    },
+    "growth": "Growth",
+    "growthValue": "{n} h per stage",
+    "harvest": "Max harvest",
+    "size": "Size",
+    "sizeValue": "{n} cm",
+    "naturalGift": "Natural Gift:",
+    "naturalGiftPower": "power {n}",
+    "flavors": "Flavors",
+    "heldBy": "Held by wild Pokémon",
+    "heldByNone": "PokéAPI lists no wild Pokémon holding this item in that game."
+  },
+  "flavor": {
+    "spicy": "spicy",
+    "dry": "dry",
+    "sweet": "sweet",
+    "bitter": "bitter",
+    "sour": "sour"
   }
 }

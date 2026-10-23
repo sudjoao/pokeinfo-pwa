@@ -163,11 +163,12 @@ export default defineConfig({
             },
           },
           {
-            // Vocabulário sob demanda (habilidades, itens, golpes, stats, grupos de ovo) em
-            // espanhol: respostas pequenas e praticamente imutáveis, cache maior e mais longo
+            // Vocabulário e referência sob demanda (habilidades, itens, golpes, berries, máquinas,
+            // stats, grupos de ovo): respostas praticamente imutáveis, cache maior e mais longo
             // que o catch-all abaixo. Precisa vir antes dele (o Workbox usa a primeira regra
             // cujo urlPattern casar).
-            urlPattern: /^https:\/\/pokeapi\.co\/api\/v2\/(ability|item|move|stat|egg-group)\/.*/i,
+            urlPattern:
+              /^https:\/\/pokeapi\.co\/api\/v2\/(ability|item|move|stat|egg-group|berry|machine)\/.*/i,
             handler: 'CacheFirst',
             options: {
               cacheName: 'pokeapi-vocabulary',

@@ -1,9 +1,15 @@
 import { defineStore } from 'pinia'
 import { markRaw } from 'vue'
 import { getMachineItem, getMoveDetail, type MoveDetail } from '@/services/pokeapi/move.service'
+import {
+  getBerryDetail,
+  getItemDetail,
+  type BerryDetail,
+  type ItemDetail,
+} from '@/services/pokeapi/item.service'
 
 /**
- * Cache em memória (só da sessão) das páginas de referência: golpes e máquinas. Mesmo padrão do
+ * Cache em memória (só da sessão) das páginas de referência: golpes, máquinas, itens e berries. Mesmo padrão do
  * store `pokemonDetail`: Maps com objetos `markRaw`, requisições deduplicadas e só os últimos
  * MAX_CACHED golpes (cada `/move` traz a lista de aprendizes). O offline fica com o service worker.
  */
@@ -20,6 +26,8 @@ export const useReferenceStore = defineStore('reference', () => {
   const moves = new Map<string, MoveDetail>()
   /** URL de `/machine/{id}` -> item ("tm24"); pequeno e imutável, sem limite. */
   const machines = new Map<string, string>()
+  const items = new Map<string, ItemDetail>()
+  const berries = new Map<string, BerryDetail>()
 
   const inFlight = new Map<string, Promise<unknown>>()
   function dedupe<T>(key: string, run: () => Promise<T>): Promise<T> {
@@ -48,5 +56,21 @@ export const useReferenceStore = defineStore('reference', () => {
     })
   }
 
-  return { ensureMove, ensureMachineItem }
+  function ensureItem(slug: string): Promise<ItemDetail> {
+    const cached = items.get(slug)
+    if (cached) return Promise.resolve(remember(items, slug, cached, MAX_CACHED))
+    return dedupe(`item:${slug}`, async () =>
+      remember(items, slug, await getItemDetail(slug), MAX_CACHED),
+    )
+  }
+
+  function ensureBerry(itemSlug: string): Promise<BerryDetail> {
+    const cached = berries.get(itemSlug)
+    if (cached) return Promise.resolve(cached)
+    return dedupe(`berry:${itemSlug}`, async () =>
+      remember(berries, itemSlug, await getBerryDetail(itemSlug)),
+    )
+  }
+
+  return { ensureMove, ensureMachineItem, ensureItem, ensureBerry }
 })

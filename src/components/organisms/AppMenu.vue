@@ -12,6 +12,7 @@ import {
   mdiSwordCross,
   mdiTranslate,
   mdiLightningBolt,
+  mdiBagPersonalOutline,
 } from '@mdi/js'
 import type { RouteLocationRaw } from 'vue-router'
 import type { ThemePreference } from '@/composables/useThemePreference'
@@ -56,6 +57,7 @@ const NAV_GROUPS: readonly { title: string; items: readonly NavItem[] }[] = [
     title: 'menu.groupTools',
     items: [
       { icon: mdiLightningBolt, title: 'menu.moves', to: { name: 'moves' } },
+      { icon: mdiBagPersonalOutline, title: 'menu.items', to: { name: 'items' } },
       { icon: mdiShieldHalfFull, title: 'menu.types', to: { name: 'types' } },
       { icon: mdiCompareHorizontal, title: 'menu.compare', to: { name: 'compare' } },
     ],

@@ -8,7 +8,8 @@
     "compareTitle": "Comparar · PokeInfo",
     "quizTitle": "¿Quién es ese Pokémon? · PokeInfo",
     "offline": "Sin conexión: mostrando lo que ya está guardado en este dispositivo.",
-    "movesTitle": "Movimientos · PokeInfo"
+    "movesTitle": "Movimientos · PokeInfo",
+    "itemsTitle": "Objetos · PokeInfo"
   },
   "common": {
     "retry": "Reintentar",
@@ -506,7 +507,8 @@
     "groupMain": "PokeInfo",
     "groupTools": "Herramientas",
     "groupGames": "Juegos",
-    "moves": "Movimientos"
+    "moves": "Movimientos",
+    "items": "Objetos y bayas"
   },
   "backup": {
     "title": "Copia de seguridad",
@@ -773,5 +775,81 @@
       "leech-seed": "drenar cada turno",
       "yawn": "dar sueño"
     }
+  },
+  "itemsPage": {
+    "title": "Objetos",
+    "searchPlaceholder": "Buscar objeto",
+    "searchLabel": "Buscar objeto por nombre",
+    "pocket": "Bolsillo",
+    "pockets": {
+      "medicine": "Botiquín",
+      "pokeballs": "Poké Balls",
+      "battle": "Combate",
+      "berries": "Bayas",
+      "misc": "Otros objetos",
+      "machines": "MT y MO",
+      "mail": "Cartas",
+      "key": "Objetos clave"
+    },
+    "results": "{n} objeto | {n} objetos",
+    "empty": "Ningún objeto con estos filtros.",
+    "category": {
+      "standard-balls": "Poké Balls comunes",
+      "special-balls": "Poké Balls especiales",
+      "healing": "Curación",
+      "status-cures": "Cura de estados",
+      "revival": "Revivir",
+      "pp-recovery": "Recuperar PP",
+      "vitamins": "Vitaminas",
+      "evolution": "Evolución",
+      "held-items": "Para llevar",
+      "choice": "Elección",
+      "type-enhancement": "Potenciador de tipo",
+      "mega-stones": "Megapiedras",
+      "z-crystals": "Cristales Z",
+      "all-machines": "MT, MO y DT",
+      "medicine": "Bayas curativas",
+      "picky-healing": "Curación (sabor exigente)",
+      "in-a-pinch": "En apuros",
+      "type-protection": "Protección de tipo",
+      "baking-only": "Solo repostería",
+      "effort-drop": "Reduce EV",
+      "other": "Otras bayas"
+    }
+  },
+  "itemPage": {
+    "notFound": "Objeto no encontrado.",
+    "allGames": "Todos los juegos",
+    "price": "Precio",
+    "priceValue": "{n} ₽",
+    "notSold": "No se vende",
+    "fling": "Potencia con Lanzamiento",
+    "loadError": "No se pudo cargar la descripción del objeto.",
+    "berry": "Baya",
+    "firmness": "Firmeza",
+    "firmnessValue": {
+      "very-soft": "Muy blanda",
+      "soft": "Blanda",
+      "hard": "Dura",
+      "very-hard": "Muy dura",
+      "super-hard": "Durísima"
+    },
+    "growth": "Crecimiento",
+    "growthValue": "{n} h por fase",
+    "harvest": "Cosecha máxima",
+    "size": "Tamaño",
+    "sizeValue": "{n} cm",
+    "naturalGift": "Don Natural:",
+    "naturalGiftPower": "potencia {n}",
+    "flavors": "Sabores",
+    "heldBy": "Lo llevan en estado salvaje",
+    "heldByNone": "La PokéAPI no registra Pokémon salvajes con este objeto en ese juego."
+  },
+  "flavor": {
+    "spicy": "picante",
+    "dry": "seco",
+    "sweet": "dulce",
+    "bitter": "amargo",
+    "sour": "ácido"
   }
 }

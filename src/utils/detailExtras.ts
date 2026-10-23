@@ -51,7 +51,7 @@ export interface HeldItemSummary {
 const MAX_GAMES = 3
 
 /** Versões com a mesma chance viram uma só ("50%"); senão, uma por versão ("Sword 5%"). */
-function byVersion(game: Game, rarity: Record<string, number>): HeldRarity[] {
+export function raritiesInGame(game: Game, rarity: Record<string, number>): HeldRarity[] {
   const entries = game.versions.flatMap((version) => {
     const value = [version.slug, ...(version.aliases ?? [])]
       .map((slug) => rarity[slug])
@@ -74,14 +74,14 @@ export function heldItemsForGame(
 ): HeldItemSummary[] {
   return items.flatMap((held) => {
     if (game) {
-      const rarities = byVersion(game, held.rarity)
+      const rarities = raritiesInGame(game, held.rarity)
       return rarities.length ? [{ item: held.item, rarities, more: 0 }] : []
     }
     const games = GAMES.filter((g) =>
       g.versions.some((v) => [v.slug, ...(v.aliases ?? [])].some((s) => s in held.rarity)),
     ).reverse()
     const rarities = games.slice(0, MAX_GAMES).flatMap((g) => {
-      const list = byVersion(g, held.rarity)
+      const list = raritiesInGame(g, held.rarity)
       return list.length === 1 && list[0]!.label === null
         ? [{ label: g.title, rarity: list[0]!.rarity }]
         : list
@@ -90,4 +90,15 @@ export function heldItemsForGame(
       ? [{ item: held.item, rarities, more: Math.max(0, games.length - MAX_GAMES) }]
       : []
   })
+}
+
+/** Jogo mais recente (da lista) em que alguma versão tem chance registrada. */
+export function latestGameWith(rarity: Record<string, number>): Game | null {
+  for (let i = GAMES.length - 1; i >= 0; i--) {
+    const game = GAMES[i]!
+    if (game.versions.some((v) => [v.slug, ...(v.aliases ?? [])].some((s) => s in rarity))) {
+      return game
+    }
+  }
+  return null
 }
