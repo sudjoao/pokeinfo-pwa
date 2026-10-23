@@ -1,7 +1,13 @@
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter, type LocationQueryRaw } from 'vue-router'
 import { usePokedexStore } from '@/stores/pokedex'
-import { analyzeCoverage, analyzeDefense, coverageGaps, teamThreats } from '@/utils/typeChart'
+import {
+  analyzeCoverage,
+  analyzeDefense,
+  coverageGaps,
+  teamThreats,
+  typesInGeneration,
+} from '@/utils/typeChart'
 import type { PokemonIndexEntry, PokemonType } from '@/types/pokemon'
 
 export const TEAM_SIZE = 6
@@ -30,7 +36,7 @@ function teamParam(value: unknown): number[] {
  * o que sobrevive a recarregar a página e permite compartilhar o link. Nomes e tipos vêm do
  * índice e do mapa de tipos já em memória, então montar o time não faz requisição nenhuma.
  */
-export function useTeam() {
+export function useTeam(generation: () => number | undefined = () => undefined) {
   const store = usePokedexStore()
   const route = useRoute()
   const router = useRouter()
@@ -41,7 +47,7 @@ export function useTeam() {
     ids.value.map((id) => ({
       id,
       name: store.entryOf(id)?.name ?? String(id),
-      types: store.typesOf(id) ?? [],
+      types: [...typesInGeneration(id, store.typesOf(id) ?? [], generation())],
     })),
   )
 
@@ -96,9 +102,10 @@ export function useTeam() {
     router.replace({ query })
   })
 
-  const defense = computed(() => analyzeDefense(members.value))
+  // Com um jogo selecionado, a análise usa a tabela de tipos e os tipos dos Pokémon da geração dele.
+  const defense = computed(() => analyzeDefense(members.value, generation()))
   const threats = computed(() => teamThreats(defense.value))
-  const coverage = computed(() => analyzeCoverage(members.value))
+  const coverage = computed(() => analyzeCoverage(members.value, generation()))
   const gaps = computed(() => coverageGaps(coverage.value))
 
   return {

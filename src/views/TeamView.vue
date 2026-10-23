@@ -54,7 +54,7 @@ const {
   retry,
 } = usePokemonList()
 
-const team = useTeam()
+const team = useTeam(() => game.value?.generation)
 
 const router = useRouter()
 const cry = useCry()

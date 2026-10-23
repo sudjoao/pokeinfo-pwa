@@ -3,9 +3,11 @@ import {
   analyzeCoverage,
   analyzeDefense,
   attackMultiplier,
+  battleTypes,
   coverageGaps,
   formatMultiplier,
   teamThreats,
+  typesInGeneration,
 } from '@/utils/typeChart'
 
 describe('attackMultiplier', () => {
@@ -55,5 +57,35 @@ describe('análise do time', () => {
     const rows = analyzeCoverage(team)
     expect(rows.find((row) => row.type === 'fire')!.coveredBy).toEqual([2])
     expect(coverageGaps(rows).map((row) => row.type)).toContain('steel')
+  })
+})
+
+describe('tabelas por geração', () => {
+  it('Fantasma não afetava Psíquico e Inseto/Venenoso se acertavam na 1ª geração', () => {
+    expect(attackMultiplier('ghost', ['psychic'], 1)).toBe(0)
+    expect(attackMultiplier('ghost', ['psychic'], 2)).toBe(2)
+    expect(attackMultiplier('bug', ['poison'], 1)).toBe(2)
+    expect(attackMultiplier('ice', ['fire'], 1)).toBe(1)
+  })
+
+  it('Aço resistia a Fantasma e Sombrio até a 5ª', () => {
+    expect(attackMultiplier('ghost', ['steel'], 5)).toBe(0.5)
+    expect(attackMultiplier('ghost', ['steel'], 6)).toBe(1)
+  })
+
+  it('tipos que ainda não existiam ficam fora da análise', () => {
+    expect(battleTypes(1)).not.toContain('dark')
+    expect(battleTypes(1)).not.toContain('fairy')
+    expect(battleTypes(5)).toContain('steel')
+    expect(battleTypes(5)).not.toContain('fairy')
+    expect(battleTypes()).toHaveLength(18)
+    expect(analyzeDefense([{ types: ['normal'] }], 1)).toHaveLength(15)
+  })
+
+  it('tipos antigos dos Pokémon', () => {
+    expect(typesInGeneration(35, ['fairy'], 5)).toEqual(['normal'])
+    expect(typesInGeneration(35, ['fairy'], 6)).toEqual(['fairy'])
+    expect(typesInGeneration(81, ['electric', 'steel'], 1)).toEqual(['electric'])
+    expect(typesInGeneration(25, ['electric'], 1)).toEqual(['electric'])
   })
 })

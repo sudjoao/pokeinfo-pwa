@@ -79,9 +79,10 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
   Tauros de Paldea, Kyurem…) não conta como exclusiva. Exclusivos das DLCs e da White Forest entram
   no jogo base, e Red/Blue segue a distribuição internacional. Jogos de versão única (Yellow,
   Emerald, Platinum, Legends) não têm o filtro.
-- A análise do time usa a tabela de tipos atual e os tipos atuais de cada Pokémon mesmo em jogos
-  antigos (ex.: Clefairy conta como Fada em Red/Blue). A cobertura ofensiva olha só os tipos do
-  próprio Pokémon (STAB), não os golpes que ele aprende, e cada tipo defensor isolado.
+- A análise de tipos segue a geração do jogo selecionado (tabela da 1ª geração, da 2ª à 5ª e da 6ª em
+  diante, e os tipos antigos de Pokémon como Clefairy e Magnemite), a partir das tabelas geradas em
+  `src/data/generated/`. A cobertura ofensiva olha só os tipos do próprio Pokémon (STAB), não os
+  golpes que ele aprende, e cada tipo defensor isolado.
 - Os locais de encontro cobrem as gerações 1 a 7 e Sword/Shield (com as DLCs). A PokéAPI ainda
   não tem esse dado para Brilliant Diamond / Shining Pearl, Legends: Arceus, Scarlet / Violet e
   Legends: Z-A, e só lista encontros selvagens, presentes e trocas (evoluções e ovos não entram).

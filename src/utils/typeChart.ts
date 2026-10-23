@@ -1,14 +1,63 @@
 import { BATTLE_TYPES, TYPE_CHART } from '@/data/typeChart'
+import { PAST_TYPES, TYPE_CHART_PAST } from '@/data/generated/typesPast'
 import type { PokemonType } from '@/types/pokemon'
+
+/** Geração da tabela atual; também o padrão quando não há jogo selecionado. */
+export const LATEST_GENERATION = 9
+
+/** Tipos que existem em batalha na geração: Sombrio e Aço chegam na 2ª, Fada na 6ª. */
+export function battleTypes(generation = LATEST_GENERATION): readonly PokemonType[] {
+  return BATTLE_TYPES.filter((type) => {
+    if (type === 'fairy') return generation >= 6
+    if (type === 'dark' || type === 'steel') return generation >= 2
+    return true
+  })
+}
+
+/**
+ * Multiplicador de um tipo contra outro na geração. As exceções antigas (ex.: Fantasma não afetava
+ * Psíquico na 1ª geração) valem até a geração indicada; vale a mais antiga que ainda cobre `generation`.
+ */
+function singleMultiplier(
+  attacking: PokemonType,
+  defending: PokemonType,
+  generation: number,
+): number {
+  let override: number | undefined
+  let overrideUntil = Infinity
+  for (const [until, attacker, defender, multiplier] of TYPE_CHART_PAST) {
+    if (attacker === attacking && defender === defending && generation <= until && until < overrideUntil) {
+      override = multiplier
+      overrideUntil = until
+    }
+  }
+  return override ?? TYPE_CHART[attacking]?.[defending] ?? 1
+}
 
 /** Multiplicador de um golpe do tipo `attacking` contra um Pokémon com os tipos `defending`. */
 export function attackMultiplier(
   attacking: PokemonType,
   defending: readonly PokemonType[],
+  generation = LATEST_GENERATION,
 ): number {
   let multiplier = 1
-  for (const type of defending) multiplier *= TYPE_CHART[attacking]?.[type] ?? 1
+  for (const type of defending) multiplier *= singleMultiplier(attacking, type, generation)
   return multiplier
+}
+
+/**
+ * Tipos do Pokémon na geração: alguns mudaram (Clefairy era Normal até a 5ª, Magnemite era só
+ * Elétrico na 1ª). Sem registro antigo, valem os tipos atuais.
+ */
+export function typesInGeneration(
+  pokemonId: number,
+  current: readonly PokemonType[],
+  generation = LATEST_GENERATION,
+): readonly PokemonType[] {
+  for (const [until, types] of PAST_TYPES[pokemonId] ?? []) {
+    if (generation <= until) return types
+  }
+  return current
 }
 
 /** Rótulo curto do multiplicador para a tabela: "4×", "2×", "½", "¼", "0" ou "" (neutro). */
@@ -36,10 +85,10 @@ export interface DefenseRow {
   resistant: number
 }
 
-/** Tabela defensiva do time: uma linha por tipo de ataque. */
-export function analyzeDefense(team: readonly Typed[]): DefenseRow[] {
-  return BATTLE_TYPES.map((type) => {
-    const multipliers = team.map((member) => attackMultiplier(type, member.types))
+/** Tabela defensiva do time: uma linha por tipo de ataque que existe na geração. */
+export function analyzeDefense(team: readonly Typed[], generation = LATEST_GENERATION): DefenseRow[] {
+  return battleTypes(generation).map((type) => {
+    const multipliers = team.map((member) => attackMultiplier(type, member.types, generation))
     return {
       type,
       multipliers,
@@ -71,11 +120,16 @@ export interface CoverageRow {
  * Cobertura ofensiva por STAB: considera só os tipos do próprio Pokémon (golpes do mesmo tipo
  * ganham bônus), contra cada tipo defensor isolado. É uma simplificação: não olha os golpes reais.
  */
-export function analyzeCoverage(team: readonly Typed[]): CoverageRow[] {
-  return BATTLE_TYPES.map((defending) => ({
+export function analyzeCoverage(
+  team: readonly Typed[],
+  generation = LATEST_GENERATION,
+): CoverageRow[] {
+  return battleTypes(generation).map((defending) => ({
     type: defending,
     coveredBy: team.flatMap((member, index) =>
-      member.types.some((attacking) => attackMultiplier(attacking, [defending]) > 1) ? [index] : [],
+      member.types.some((attacking) => attackMultiplier(attacking, [defending], generation) > 1)
+        ? [index]
+        : [],
     ),
   }))
 }

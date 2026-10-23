@@ -269,7 +269,7 @@
     "coverageHint": "Types the team hits super effectively with same-type (STAB) moves.",
     "gaps": "Not covered",
     "noGaps": "The team hits every type super effectively.",
-    "chartNote": "Uses the current type chart (Generation VI onwards) and the current types of each Pokémon, even for older games.",
+    "chartNote": "With a game selected, uses that generation's type chart and Pokémon types (e.g. no Fairy before Gen 6, Clefairy as Normal). Without a game, uses the current chart.",
     "close": "Close",
     "trayEmpty": "Build your team"
   },

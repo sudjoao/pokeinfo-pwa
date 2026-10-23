@@ -269,7 +269,7 @@
     "coverageHint": "Tipos que o time acerta de forma super efetiva com golpes do próprio tipo (STAB).",
     "gaps": "Sem cobertura",
     "noGaps": "O time acerta todos os tipos de forma super efetiva.",
-    "chartNote": "Usa a tabela de tipos atual (6ª geração em diante) e os tipos atuais de cada Pokémon, mesmo em jogos antigos.",
+    "chartNote": "Com um jogo selecionado, usa a tabela de tipos e os tipos dos Pokémon daquela geração (ex.: sem Fada antes da 6ª, Clefairy Normal). Sem jogo, usa a tabela atual.",
     "close": "Fechar",
     "trayEmpty": "Monte seu time"
   },
