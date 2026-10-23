@@ -4,7 +4,12 @@ import { useI18n } from 'vue-i18n'
 import type { Game } from '@/data/games'
 import type { RoutePokemon } from '@/types/pokemon'
 import { usePokedexStore } from '@/stores/pokedex'
-import { isStaticRoute, routesForGame, toRoutePokemon, type AnyGameRoute } from '@/utils/routes'
+import {
+  isStaticRoute,
+  routeSectionsForGame,
+  toRoutePokemon,
+  type AnyGameRoute,
+} from '@/utils/routes'
 import { mapLimit } from '@/utils/async'
 
 /** Áreas de um local baixadas ao mesmo tempo. */
@@ -42,7 +47,9 @@ function speciesCount(list: readonly RoutePokemon[]): number {
 const { t } = useI18n()
 const pokedexStore = usePokedexStore()
 
-const routes = computed(() => routesForGame(props.game))
+/** Na ordem da história, por região/DLC; o título só aparece quando há mais de uma seção. */
+const sections = computed(() => routeSectionsForGame(props.game))
+const routes = computed(() => sections.value.flatMap((section) => section.routes))
 
 const openPanel = ref<string | undefined>(undefined)
 const results = ref<Record<string, RoutePokemon[]>>({})
@@ -112,73 +119,87 @@ watch(openPanel, (location) => {
         hide-details
         class="mb-2"
       />
-      <v-expansion-panels v-model="openPanel" variant="accordion">
-        <v-expansion-panel v-for="route in routes" :key="route.location" :value="route.location">
-          <v-expansion-panel-title>
-            <span class="text-body-medium font-weight-medium">{{
-              formatAreaName(route.location)
-            }}</span>
-            <span v-if="results[route.location]" class="text-label-small opacity-70 ms-2">
-              {{ t('routes.pokemonCount', results[route.location]!.length) }}
-              <template v-if="caughtIds">
-                ·
-                {{
-                  t('routes.caughtCount', {
-                    caught: caughtCount(results[route.location]!),
-                    total: speciesCount(results[route.location]!),
-                  })
-                }}
-              </template>
-            </span>
-          </v-expansion-panel-title>
-          <v-expansion-panel-text>
-            <v-skeleton-loader
-              aria-hidden="true"
-              v-if="loading[route.location]"
-              type="list-item-two-line@3"
-            />
+      <section v-for="section in sections" :key="section.key" class="route-section">
+        <h2 v-if="sections.length > 1" class="text-title-small mb-2">
+          {{ t(`routes.section.${section.key}`) }}
+        </h2>
+        <!-- Um grupo por seção, todos no mesmo openPanel: abrir um painel fecha o dos outros. -->
+        <v-expansion-panels v-model="openPanel" variant="accordion">
+          <v-expansion-panel
+            v-for="route in section.routes"
+            :key="route.location"
+            :value="route.location"
+          >
+            <v-expansion-panel-title>
+              <span class="text-body-medium font-weight-medium">{{
+                formatAreaName(route.location)
+              }}</span>
+              <span v-if="results[route.location]" class="text-label-small opacity-70 ms-2">
+                {{ t('routes.pokemonCount', results[route.location]!.length) }}
+                <template v-if="caughtIds">
+                  ·
+                  {{
+                    t('routes.caughtCount', {
+                      caught: caughtCount(results[route.location]!),
+                      total: speciesCount(results[route.location]!),
+                    })
+                  }}
+                </template>
+              </span>
+            </v-expansion-panel-title>
+            <v-expansion-panel-text>
+              <v-skeleton-loader
+                aria-hidden="true"
+                v-if="loading[route.location]"
+                type="list-item-two-line@3"
+              />
 
-            <div v-else-if="failed[route.location]" class="d-flex flex-column align-start ga-2">
-              <span>{{ t('routes.loadError') }}</span>
-              <v-btn color="primary" variant="tonal" size="small" @click="loadRoute(route)">
-                {{ t('common.retry') }}
-              </v-btn>
-            </div>
+              <div v-else-if="failed[route.location]" class="d-flex flex-column align-start ga-2">
+                <span>{{ t('routes.loadError') }}</span>
+                <v-btn color="primary" variant="tonal" size="small" @click="loadRoute(route)">
+                  {{ t('common.retry') }}
+                </v-btn>
+              </div>
 
-            <p
-              v-else-if="results[route.location] && !results[route.location]!.length"
-              class="text-body-medium opacity-70 mb-0"
-            >
-              {{ t('routes.emptyRoute', { game: game.title }) }}
-            </p>
-
-            <template v-else-if="results[route.location]">
               <p
-                v-if="!visible(results[route.location]!).length"
+                v-else-if="results[route.location] && !results[route.location]!.length"
                 class="text-body-medium opacity-70 mb-0"
               >
-                {{ t('routes.allCaught') }}
+                {{ t('routes.emptyRoute', { game: game.title }) }}
               </p>
-              <ul v-else class="route-pokemon-list">
-                <RoutePokemonRow
-                  v-for="pokemon in visible(results[route.location]!)"
-                  :key="pokemon.id"
-                  :pokemon="pokemon"
-                  :game="game"
-                  :caught="caughtIds ? isCaught(pokemon) : undefined"
-                  @select="emit('select', $event)"
-                  @toggle-caught="emit('toggleCaught', speciesIdOf(pokemon.id))"
-                />
-              </ul>
-            </template>
-          </v-expansion-panel-text>
-        </v-expansion-panel>
-      </v-expansion-panels>
+
+              <template v-else-if="results[route.location]">
+                <p
+                  v-if="!visible(results[route.location]!).length"
+                  class="text-body-medium opacity-70 mb-0"
+                >
+                  {{ t('routes.allCaught') }}
+                </p>
+                <ul v-else class="route-pokemon-list">
+                  <RoutePokemonRow
+                    v-for="pokemon in visible(results[route.location]!)"
+                    :key="pokemon.id"
+                    :pokemon="pokemon"
+                    :game="game"
+                    :caught="caughtIds ? isCaught(pokemon) : undefined"
+                    @select="emit('select', $event)"
+                    @toggle-caught="emit('toggleCaught', speciesIdOf(pokemon.id))"
+                  />
+                </ul>
+              </template>
+            </v-expansion-panel-text>
+          </v-expansion-panel>
+        </v-expansion-panels>
+      </section>
     </template>
   </div>
 </template>
 
 <style scoped>
+.route-section + .route-section {
+  margin-top: 16px;
+}
+
 .route-pokemon-list {
   padding: 0;
   margin: 0;

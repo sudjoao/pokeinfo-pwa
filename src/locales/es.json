@@ -426,7 +426,21 @@
     "chance": "{pct} %",
     "onlyMissing": "Mostrar solo los que faltan",
     "caughtCount": "{caught}/{total} capturados",
-    "allCaught": "Ya capturaste todos los de esta ruta."
+    "allCaught": "Ya capturaste todos los de esta ruta.",
+    "section": {
+      "kanto": "Kanto",
+      "sevii": "Islas Sete",
+      "johto": "Johto",
+      "hoenn": "Hoenn",
+      "sinnoh": "Sinnoh",
+      "unova": "Teselia",
+      "kalos": "Kalos",
+      "alola": "Alola",
+      "galar": "Galar",
+      "isleOfArmor": "Isla de la Armadura",
+      "crownTundra": "Nieves de la Corona",
+      "other": "Otros encuentros"
+    }
   },
   "ability": {
     "pokemonWith": "Pokémon con esta habilidad ({n})",

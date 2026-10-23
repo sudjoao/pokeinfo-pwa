@@ -1,5 +1,6 @@
 import { GAME_ROUTES, type GameRoute } from '@/data/routes'
 import { BDSP_ROUTES, type StaticGameRoute } from '@/data/routes-bdsp'
+import { ROUTE_SECTIONS } from '@/data/routeOrder'
 import type { Game } from '@/data/games'
 import type { LocationAreaDto } from '@/services/pokeapi/dto'
 import type { RoutePokemon } from '@/types/pokemon'
@@ -32,6 +33,48 @@ interface Accumulator {
  */
 export function routesForGame(game: Game): readonly AnyGameRoute[] {
   return GAME_ROUTES[game.slug] ?? BDSP_ROUTES[game.slug] ?? []
+}
+
+export interface RouteListSection {
+  /** Sufixo da chave i18n `routes.section.*`. */
+  key: string
+  routes: AnyGameRoute[]
+}
+
+const sectionsCache = new Map<string, RouteListSection[]>()
+
+/**
+ * Rotas do jogo na ordem da história, divididas em seções (região, ilhas, DLC; ver
+ * `data/routeOrder.ts`). Seções sem nenhum local do jogo ficam de fora. Um local que ainda não
+ * esteja na ordem vai para o fim, em ordem natural, para nunca sumir da lista.
+ */
+export function routeSectionsForGame(game: Game): readonly RouteListSection[] {
+  const cached = sectionsCache.get(game.slug)
+  if (cached) return cached
+
+  const remaining = new Map(routesForGame(game).map((route) => [route.location, route]))
+  const sections: RouteListSection[] = []
+  for (const { key, locations } of ROUTE_SECTIONS[game.slug] ?? []) {
+    const routes: AnyGameRoute[] = []
+    for (const location of locations) {
+      const route = remaining.get(location)
+      if (!route) continue
+      routes.push(route)
+      remaining.delete(location)
+    }
+    if (routes.length) sections.push({ key, routes })
+  }
+  if (remaining.size) {
+    const rest = [...remaining.values()].sort((a, b) =>
+      a.location.localeCompare(b.location, 'en', { numeric: true }),
+    )
+    const last = sections[sections.length - 1]
+    if (last?.key === 'other') last.routes.push(...rest)
+    else sections.push({ key: 'other', routes: rest })
+  }
+
+  sectionsCache.set(game.slug, sections)
+  return sections
 }
 
 /**

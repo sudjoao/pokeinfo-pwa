@@ -426,7 +426,21 @@
     "chance": "{pct}%",
     "onlyMissing": "Show only Pokémon not caught yet",
     "caughtCount": "{caught}/{total} caught",
-    "allCaught": "You have caught everything on this route."
+    "allCaught": "You have caught everything on this route.",
+    "section": {
+      "kanto": "Kanto",
+      "sevii": "Sevii Islands",
+      "johto": "Johto",
+      "hoenn": "Hoenn",
+      "sinnoh": "Sinnoh",
+      "unova": "Unova",
+      "kalos": "Kalos",
+      "alola": "Alola",
+      "galar": "Galar",
+      "isleOfArmor": "Isle of Armor",
+      "crownTundra": "Crown Tundra",
+      "other": "Other encounters"
+    }
   },
   "ability": {
     "pokemonWith": "Pokémon with this ability ({n})",

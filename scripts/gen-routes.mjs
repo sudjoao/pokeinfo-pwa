@@ -104,7 +104,8 @@ function buildRoutes(areas) {
       byLocation.get(area.location).areas.push(area.name)
     }
     // A região do jogo (a com mais locais) vem antes das outras (ex.: Kanto depois de Johto em
-    // Gold/Silver); dentro de cada região, ordem natural. As áreas ficam na ordem da API.
+    // Gold/Silver); dentro de cada região, ordem natural. As áreas ficam na ordem da API. Esta
+    // ordem só deixa o arquivo estável: a tela usa a da história, de src/data/routeOrder.ts.
     const main = [...regionCount].sort((a, b) => b[1] - a[1])[0]?.[0]
     const rank = (region) => (region === main ? 0 : 1)
     result[game.slug] = [...byLocation]
