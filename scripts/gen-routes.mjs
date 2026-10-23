@@ -45,7 +45,7 @@ async function rest(path) {
 
 /** Executa `task` em todos os itens com no máximo CONCURRENCY ao mesmo tempo, mantendo a ordem. */
 async function mapLimit(items, task) {
-  const results = new Array(items.length)
+  const results = Array.from({ length: items.length })
   let next = 0
   async function worker() {
     while (next < items.length) {
