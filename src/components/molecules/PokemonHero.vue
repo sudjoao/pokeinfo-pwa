@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { mdiStarFourPoints } from '@mdi/js'
+import { mdiShimmer, mdiStarFourPoints } from '@mdi/js'
 import { useI18n } from 'vue-i18n'
 import type { PokemonDetail, PokemonSpecies } from '@/types/pokemon'
 import { formatDexNumber, TYPE_COLORS } from '@/utils/pokemon'
@@ -29,9 +29,11 @@ const props = defineProps<{
   showCry?: boolean
   cryPlaying?: boolean
   cryMuted?: boolean
+  /** Mostra o artwork shiny. */
+  shiny?: boolean
 }>()
 
-const emit = defineEmits<{ playCry: []; toggleCaught: [] }>()
+const emit = defineEmits<{ playCry: []; toggleCaught: []; toggleShiny: [] }>()
 
 const { t, locale } = useI18n()
 
@@ -50,7 +52,18 @@ const caughtLabel = computed(() => {
 <template>
   <v-card class="pokemon-hero" :style="{ '--accent': accent }">
     <div class="pokemon-hero__art pa-4">
-      <PokemonArtwork :id="pokemon.id" :alt="name" :size="240" />
+      <PokemonArtwork :id="pokemon.id" :alt="name" :size="240" :shiny="shiny" />
+      <v-btn
+        :icon="mdiShimmer"
+        size="small"
+        :variant="shiny ? 'flat' : 'tonal'"
+        :color="shiny ? 'secondary' : undefined"
+        class="pokemon-hero__shiny"
+        :aria-pressed="shiny ?? false"
+        :aria-label="t('detail.showShiny')"
+        :title="t('detail.shiny')"
+        @click="emit('toggleShiny')"
+      />
     </div>
     <v-card-item>
       <div class="d-flex align-start justify-space-between ga-2">
@@ -111,12 +124,19 @@ const caughtLabel = computed(() => {
   font-variant-numeric: tabular-nums;
 }
 
+.pokemon-hero__shiny {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+}
+
 .pokemon-hero__exclusive {
   color: rgb(var(--v-theme-secondary));
   font-weight: 600;
 }
 
 .pokemon-hero__art {
+  position: relative;
   background: radial-gradient(
     circle at 50% 40%,
     color-mix(in srgb, var(--accent) 45%, rgb(var(--v-theme-surface))),

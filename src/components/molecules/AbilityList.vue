@@ -7,6 +7,8 @@ import { useVocabularyStore } from '@/stores/vocabulary'
 
 const props = defineProps<{ abilities: PokemonAbility[] }>()
 
+const emit = defineEmits<{ open: [ability: PokemonAbility] }>()
+
 const { t, locale } = useI18n()
 const vocabulary = useVocabularyStore()
 
@@ -38,6 +40,9 @@ function abilityLabel(name: string): string {
         size="default"
         :variant="ability.isHidden ? 'outlined' : 'tonal'"
         color="secondary"
+        role="button"
+        aria-haspopup="dialog"
+        @click="emit('open', ability)"
       >
         {{ abilityLabel(ability.name) }}
         <span v-if="ability.isHidden" class="text-label-small ms-1">

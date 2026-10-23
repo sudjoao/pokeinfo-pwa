@@ -1,7 +1,9 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import {
+  getAbilityDescription,
   getAbilityNameEs,
+  type AbilityDescription,
   getItemNameEs,
   getMoveNameEs,
 } from '@/services/pokeapi/vocabulary.service'
@@ -16,6 +18,7 @@ export const useVocabularyStore = defineStore('vocabulary', () => {
   const abilities = ref<Record<string, string | null>>({})
   const items = ref<Record<string, string | null>>({})
   const moves = ref<Record<string, string | null>>({})
+  const abilityDescriptions = ref<Record<string, AbilityDescription>>({})
 
   function dedupe<T>(inFlight: Map<string, Promise<T>>, key: string, run: () => Promise<T>) {
     const pending = inFlight.get(key)
@@ -56,5 +59,28 @@ export const useVocabularyStore = defineStore('vocabulary', () => {
     })
   }
 
-  return { abilities, items, moves, ensureAbilityNameEs, ensureItemNameEs, ensureMoveNameEs }
+  const descriptionRequests = new Map<string, Promise<AbilityDescription>>()
+
+  /** Descrição da habilidade (também preenche o nome em espanhol, que vem na mesma resposta). */
+  function ensureAbilityDescription(slug: string): Promise<AbilityDescription> {
+    const cached = abilityDescriptions.value[slug]
+    if (cached) return Promise.resolve(cached)
+    return dedupe(descriptionRequests, slug, async () => {
+      const description = await getAbilityDescription(slug)
+      abilityDescriptions.value[slug] = description
+      abilities.value[slug] = description.nameEs
+      return description
+    })
+  }
+
+  return {
+    abilities,
+    items,
+    moves,
+    abilityDescriptions,
+    ensureAbilityNameEs,
+    ensureItemNameEs,
+    ensureMoveNameEs,
+    ensureAbilityDescription,
+  }
 })

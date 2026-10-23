@@ -34,10 +34,22 @@ export interface PokemonCriesDto {
   legacy: string | null
 }
 
+export interface PokemonMoveVersionDto {
+  level_learned_at: number
+  move_learn_method: NamedApiResource
+  version_group: NamedApiResource
+}
+
+export interface PokemonMoveDto {
+  move: NamedApiResource
+  version_group_details: PokemonMoveVersionDto[]
+}
+
 export interface PokemonDto {
   id: number
   name: string
   is_default: boolean
+  base_experience: number | null
   /** Decímetros. */
   height: number
   /** Hectogramas. */
@@ -47,6 +59,7 @@ export interface PokemonDto {
   stats: PokemonStatSlot[]
   cries: PokemonCriesDto | null
   species: NamedApiResource
+  moves: PokemonMoveDto[]
 }
 
 export interface LocalizedText {
@@ -84,6 +97,8 @@ export interface PokemonSpeciesDto {
   evolves_from_species: NamedApiResource | null
   evolution_chain: { url: string } | null
   generation: NamedApiResource | null
+  growth_rate: NamedApiResource | null
+  hatch_counter: number | null
   flavor_text_entries: FlavorTextEntry[]
   genera: GenusEntry[]
   names: NameEntry[]

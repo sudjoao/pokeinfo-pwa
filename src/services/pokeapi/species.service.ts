@@ -1,4 +1,4 @@
-import type { PokemonSpecies } from '@/types/pokemon'
+import type { PokedexText, PokemonSpecies } from '@/types/pokemon'
 import { generationNumber, idFromResourceUrl } from '@/utils/pokemon'
 import { fetchJson } from './client'
 import type { PokemonSpeciesDto } from './dto'
@@ -13,6 +13,23 @@ function cleanFlavorText(text: string): string {
     .replace(/[\n\f\r]+/g, ' ')
     .replace(/\s+/g, ' ')
     .trim()
+}
+
+/** Um texto por versão, com inglês e espanhol lado a lado. */
+function toPokedexTexts(dto: PokemonSpeciesDto): PokedexText[] {
+  const byVersion = new Map<string, PokedexText>()
+  for (const entry of dto.flavor_text_entries) {
+    const language = entry.language.name
+    if (language !== TEXT_LANGUAGE && language !== ES_LANGUAGE) continue
+    const version = entry.version.name
+    let text = byVersion.get(version)
+    if (!text) {
+      text = { version, en: null, es: null }
+      byVersion.set(version, text)
+    }
+    text[language === TEXT_LANGUAGE ? 'en' : 'es'] = cleanFlavorText(entry.flavor_text)
+  }
+  return [...byVersion.values()]
 }
 
 function toSpecies(dto: PokemonSpeciesDto): PokemonSpecies {
@@ -36,6 +53,9 @@ function toSpecies(dto: PokemonSpeciesDto): PokemonSpecies {
     eggGroups: dto.egg_groups.map((group) => group.name),
     captureRate: dto.capture_rate,
     baseHappiness: dto.base_happiness,
+    growthRate: dto.growth_rate?.name ?? null,
+    hatchCounter: dto.hatch_counter,
+    pokedexTexts: toPokedexTexts(dto),
     isBaby: dto.is_baby,
     isLegendary: dto.is_legendary,
     isMythical: dto.is_mythical,

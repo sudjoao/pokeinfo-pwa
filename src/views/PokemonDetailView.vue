@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue'
+import { computed, defineAsyncComponent, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { mdiChevronLeft, mdiChevronRight, mdiVolumeHigh, mdiVolumeOff } from '@mdi/js'
@@ -10,7 +10,8 @@ import { useDexLabel } from '@/composables/useDexLabel'
 import { gameContextFromQuery, gameContextQuery } from '@/utils/games'
 import { exclusiveVersionOf } from '@/utils/exclusives'
 import { formatDexNumber, formatPokemonName } from '@/utils/pokemon'
-import { speciesDescription } from '@/utils/species'
+import { useAbilityInfo } from '@/composables/useAbilityInfo'
+import { useEggCompatibility } from '@/composables/useEggCompatibility'
 import DetailLayout from '@/components/templates/DetailLayout.vue'
 import EmptyState from '@/components/molecules/EmptyState.vue'
 import PokemonHero from '@/components/molecules/PokemonHero.vue'
@@ -18,13 +19,22 @@ import AboutGrid from '@/components/molecules/AboutGrid.vue'
 import AbilityList from '@/components/molecules/AbilityList.vue'
 import StatsList from '@/components/molecules/StatsList.vue'
 import VarietyChips from '@/components/molecules/VarietyChips.vue'
+import PokedexCard from '@/components/molecules/PokedexCard.vue'
+import TrainingCard from '@/components/molecules/TrainingCard.vue'
+import BreedingCard from '@/components/molecules/BreedingCard.vue'
+import TypeDefenses from '@/components/organisms/TypeDefenses.vue'
+import AbilitySheet from '@/components/organisms/AbilitySheet.vue'
+import EggCompatSheet from '@/components/organisms/EggCompatSheet.vue'
 import EvolutionChain from '@/components/organisms/EvolutionChain.vue'
 import LocationList from '@/components/organisms/LocationList.vue'
 import PokemonDetailSkeleton from '@/components/organisms/PokemonDetailSkeleton.vue'
 
+// A tabela de golpes (~16 KB gz) vem num chunk próprio, em paralelo com o resto da tela.
+const MovesCard = defineAsyncComponent(() => import('@/components/organisms/MovesCard.vue'))
+
 const route = useRoute()
 const router = useRouter()
-const { t, locale } = useI18n()
+const { t } = useI18n()
 const { dexLabel } = useDexLabel()
 
 const idParam = computed(() => String(route.params.id ?? ''))
@@ -116,7 +126,11 @@ function goBack(): void {
 
 const showVarieties = computed(() => (species.value?.varieties.length ?? 0) > 1)
 
-const description = computed(() => speciesDescription(species.value, locale.value))
+/** Artwork shiny no hero; continua ligado ao navegar entre Pokémon (para comparar shinies). */
+const shiny = ref(false)
+
+const ability = useAbilityInfo()
+const egg = useEggCompatibility()
 </script>
 
 <template>
@@ -185,8 +199,17 @@ const description = computed(() => speciesDescription(species.value, locale.valu
             :show-cry="cry.supported"
             :cry-playing="cry.playing.value"
             :cry-muted="cry.muted.value"
+            :shiny="shiny"
             @play-cry="cry.play(detail.id, detail.cryUrl ?? undefined)"
             @toggle-caught="toggleCaught"
+            @toggle-shiny="shiny = !shiny"
+          />
+          <TypeDefenses
+            class="mt-4"
+            :pokemon-id="detail.id"
+            :types="detail.types"
+            :generation="context?.game.generation"
+            :game-title="context?.game.title"
           />
         </v-col>
 
@@ -194,14 +217,26 @@ const description = computed(() => speciesDescription(species.value, locale.valu
           <v-card v-if="speciesStatus === 'loading'">
             <v-skeleton-loader type="paragraph" />
           </v-card>
-          <v-card v-else-if="description">
-            <v-card-title class="text-title-medium">{{ t('detail.pokedex') }}</v-card-title>
-            <v-card-text class="text-body-large">{{ description }}</v-card-text>
-          </v-card>
+          <PokedexCard
+            v-else-if="species"
+            :texts="species.pokedexTexts"
+            :game="context?.game ?? null"
+          />
 
           <AboutGrid :pokemon="detail" :species="species" />
-          <AbilityList :abilities="detail.abilities" />
+          <AbilityList :abilities="detail.abilities" @open="ability.show" />
           <StatsList :stats="detail.stats" />
+        </v-col>
+
+        <v-col cols="12" md="6">
+          <TrainingCard :pokemon="detail" :species="species" class="fill-height" />
+        </v-col>
+        <v-col v-if="species" cols="12" md="6">
+          <BreedingCard
+            :species="species"
+            class="fill-height"
+            @open-compatible="egg.show(species)"
+          />
         </v-col>
 
         <v-col cols="12">
@@ -228,6 +263,10 @@ const description = computed(() => speciesDescription(species.value, locale.valu
         </v-col>
 
         <v-col cols="12">
+          <MovesCard :moves="detail.moves" :version-group="context?.game.slug ?? null" />
+        </v-col>
+
+        <v-col cols="12">
           <LocationList
             :encounters="encounters"
             :status="encountersStatus"
@@ -245,6 +284,24 @@ const description = computed(() => speciesDescription(species.value, locale.valu
           />
         </v-col>
       </v-row>
+
+      <AbilitySheet
+        v-model="ability.open.value"
+        :title="ability.title.value"
+        :description="ability.description.value"
+        :status="ability.status.value"
+        :holders="ability.holders.value"
+        @select="goTo"
+        @retry="ability.retry"
+      />
+      <EggCompatSheet
+        v-model="egg.open.value"
+        :status="egg.status.value"
+        :species="egg.species.value"
+        :is-ditto="egg.isDitto.value"
+        @select="goTo"
+        @retry="egg.retry"
+      />
     </template>
   </DetailLayout>
 </template>

@@ -26,7 +26,12 @@ function singleMultiplier(
   let override: number | undefined
   let overrideUntil = Infinity
   for (const [until, attacker, defender, multiplier] of TYPE_CHART_PAST) {
-    if (attacker === attacking && defender === defending && generation <= until && until < overrideUntil) {
+    if (
+      attacker === attacking &&
+      defender === defending &&
+      generation <= until &&
+      until < overrideUntil
+    ) {
       override = multiplier
       overrideUntil = until
     }
@@ -86,7 +91,10 @@ export interface DefenseRow {
 }
 
 /** Tabela defensiva do time: uma linha por tipo de ataque que existe na geração. */
-export function analyzeDefense(team: readonly Typed[], generation = LATEST_GENERATION): DefenseRow[] {
+export function analyzeDefense(
+  team: readonly Typed[],
+  generation = LATEST_GENERATION,
+): DefenseRow[] {
   return battleTypes(generation).map((type) => {
     const multipliers = team.map((member) => attackMultiplier(type, member.types, generation))
     return {

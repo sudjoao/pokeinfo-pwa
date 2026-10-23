@@ -16,9 +16,21 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
   (`?game=sword-shield&dex=crown-tundra&q=snom`). Ao abrir um Pokémon a partir de um jogo, a tela
   de detalhes mostra o número regional e o anterior/próximo seguem a ordem da Pokédex daquele jogo.
 - Cards no padrão **Material Design 3** com artwork oficial, número, nome e tipos traduzidos.
-- **Tela de detalhes** (`/pokemon/:id`, aceita número ou nome): artwork, categoria da espécie,
-  descrição da Pokédex, altura/peso, gênero, grupos de ovo, habilidades (com a oculta marcada),
-  stats base com barras, formas alternativas e navegação anterior/próximo.
+- **Tela de detalhes** (`/pokemon/:id`, aceita número ou nome): artwork (com botão para ver a versão
+  shiny), categoria da espécie, altura/peso, habilidades (com a oculta marcada), stats base com barras,
+  formas alternativas e navegação anterior/próximo. Também:
+  - **Pokédex por jogo**: com um jogo selecionado, o texto da Pokédex é o de uma versão dele; dá para
+    abrir todas as entradas (textos repetidos entre versões aparecem uma vez só).
+  - **Fraquezas e resistências** (4×, 2×, ½, ¼, imune) com a tabela de tipos da geração do jogo.
+  - **Stats mínimos e máximos** nos níveis 50 e 100 (natureza, IV e EV extremos).
+  - **Treino** (EVs ao derrotar, exp. base, taxa de captura com a chance aproximada, felicidade base,
+    curva de crescimento) e **reprodução** (grupos de ovo, gênero, ciclos/passos e a lista de
+    Pokémon compatíveis para cruzar, vinda de `/egg-group`).
+  - **Habilidades**: tocar numa habilidade abre a descrição e todos os Pokémon que a têm.
+  - **Golpes por jogo**: por nível, TM/HM, ovo, tutor e outros, com tipo, categoria, poder, precisão
+    e PP do jogo escolhido (inclusive valores antigos, como Karate Chop Normal na 1ª geração). Os
+    golpes já vêm em `/pokemon/{id}`; os dados de cada golpe ficam numa tabela gerada
+    (`src/data/generated/moves.ts`), carregada num chunk próprio.
 - **Cadeia de evolução** com o "como evoluir" em português para todos os gatilhos da PokéAPI
   (nível, item, troca, amizade, local, hora do dia, golpe conhecido, stats, formas regionais…).
   O método padrão dos jogos atuais fica em destaque; métodos de jogos antigos ficam recolhidos.
@@ -97,10 +109,16 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
 
 ### Roadmap
 
-- Fraquezas e resistências na tela de detalhes (a tabela já existe em `data/typeChart.ts`).
-- Descrição das habilidades.
 - Exportar/importar as marcações de captura (backup em JSON).
 - Favoritos.
+
+## Dados gerados
+
+`scripts/gen-pokemon-data.mjs` monta `src/data/generated/` a partir da PokéAPI: stats, altura, peso,
+geração, flags e habilidades de todos os Pokémon (`pokemon.ts`), golpes com os valores antigos
+(`moves.ts`) e as exceções da tabela de tipos e os tipos antigos de Pokémon (`typesPast.ts`). Usa o
+GraphQL beta só no script (o app não depende dele) e completa pelo REST o que ainda não estiver lá.
+Rodar de novo quando sair jogo ou geração nova: `node scripts/gen-pokemon-data.mjs`.
 
 ## Tecnologias
 

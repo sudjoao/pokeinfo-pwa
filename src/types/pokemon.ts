@@ -72,6 +72,18 @@ export interface PokemonAbility {
   isHidden: boolean
 }
 
+/** Um jeito de aprender um golpe num grupo de versões (ex.: nível 16 em Scarlet/Violet). */
+export interface PokemonMoveLearn {
+  /** Slug do golpe (`/move`). */
+  move: string
+  /** Slug do grupo de versões (o mesmo de `Game.slug`). */
+  versionGroup: string
+  /** "level-up", "machine", "egg", "tutor"… (`/move-learn-method`). */
+  method: string
+  /** Nível (só em "level-up"; 0 = ao evoluir ou no nível 1 conforme o jogo). */
+  level: number
+}
+
 /** Detalhe de um Pokémon (forma), já mapeado e enxuto. Fica só em memória. */
 export interface PokemonDetail extends PokemonSummary {
   speciesId: number
@@ -82,7 +94,20 @@ export interface PokemonDetail extends PokemonSummary {
   weight: number
   abilities: PokemonAbility[]
   stats: PokemonStat[]
+  /** EVs que o Pokémon dá ao ser derrotado (só os stats com valor > 0). */
+  evYield: PokemonStat[]
+  baseExperience: number | null
   cryUrl: string | null
+  /** Golpes por grupo de versões, já sem o resto da resposta (~260 KB crus). */
+  moves: PokemonMoveLearn[]
+}
+
+/** Texto da Pokédex de uma versão de jogo. */
+export interface PokedexText {
+  /** Slug da versão (`/version`, ex.: "scarlet"). */
+  version: string
+  en: string | null
+  es: string | null
 }
 
 export interface PokemonVariety {
@@ -112,6 +137,12 @@ export interface PokemonSpecies {
   eggGroups: string[]
   captureRate: number
   baseHappiness: number | null
+  /** Slug da curva de experiência (`/growth-rate`: "slow", "medium-slow"…). */
+  growthRate: string | null
+  /** Ciclos de ovo (passos para chocar ≈ ciclos × 257). */
+  hatchCounter: number | null
+  /** Textos da Pokédex por versão, na ordem da API (mais antigas primeiro). */
+  pokedexTexts: PokedexText[]
   isBaby: boolean
   isLegendary: boolean
   isMythical: boolean

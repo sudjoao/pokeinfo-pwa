@@ -4,8 +4,8 @@ const ARTWORK_BASE_URL =
   'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork'
 
 /** URL do artwork oficial, derivada só do id (não precisa do JSON de detalhe). */
-export function artworkUrl(id: number): string {
-  return `${ARTWORK_BASE_URL}/${id}.png`
+export function artworkUrl(id: number, shiny = false): string {
+  return `${ARTWORK_BASE_URL}${shiny ? '/shiny' : ''}/${id}.png`
 }
 
 /**
@@ -20,10 +20,10 @@ const ARTWORK_WIDTHS = [96, 240, 480] as const
  * `size` é o lado exibido em px; a largura pedida cobre telas 2×. Se o proxy falhar, quem exibe
  * volta para `artworkUrl` (ver PokemonArtwork e PokemonAvatar).
  */
-export function artworkSrc(id: number, size: number): string {
+export function artworkSrc(id: number, size: number, shiny = false): string {
   const width =
     ARTWORK_WIDTHS.find((w) => w >= size * 2) ?? ARTWORK_WIDTHS[ARTWORK_WIDTHS.length - 1]
-  const source = artworkUrl(id).replace(/^https:\/\//, '')
+  const source = artworkUrl(id, shiny).replace(/^https:\/\//, '')
   return `https://wsrv.nl/?url=${source}&w=${width}&we&output=webp`
 }
 

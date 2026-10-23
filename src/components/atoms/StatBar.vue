@@ -4,7 +4,12 @@ import { useI18n } from 'vue-i18n'
 import type { StatName } from '@/types/pokemon'
 import { MAX_BASE_STAT, statColor } from '@/utils/pokemon'
 
-const props = defineProps<{ name: StatName; value: number }>()
+const props = defineProps<{
+  name: StatName
+  value: number
+  /** Faixa mínima–máxima num nível (StatsList), exibida depois da barra. */
+  range?: { min: number; max: number }
+}>()
 
 const { t } = useI18n()
 
@@ -25,6 +30,11 @@ const color = computed(() => statColor(props.value))
       class="flex-grow-1"
       :aria-label="`${label}: ${value}`"
     />
+    <span v-if="range" class="stat-bar__range text-label-medium">
+      <span class="d-sr-only">{{ t('detail.statsMin') }}</span
+      >{{ range.min }}–<span class="d-sr-only">{{ t('detail.statsMax') }}</span
+      >{{ range.max }}
+    </span>
   </div>
 </template>
 
@@ -32,6 +42,12 @@ const color = computed(() => statColor(props.value))
 .stat-bar__label {
   flex: 0 0 8.5rem;
   opacity: 0.8;
+}
+
+.stat-bar__range {
+  flex: 0 0 4.75rem;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
 .stat-bar__value {

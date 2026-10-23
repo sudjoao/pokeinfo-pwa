@@ -107,7 +107,6 @@ const header = (what) =>
 async function main() {
   const base = await query(`{
     pokemon_v2_type { id name }
-    pokemon_v2_versiongroup(order_by: { order: asc }) { id name order generation_id }
     pokemon_v2_ability(order_by: { name: asc }) {
       id name pokemon_v2_abilitynames(where: { language_id: { _eq: ${SPANISH} } }) { name }
     }
@@ -116,7 +115,15 @@ async function main() {
   const typeIdByName = new Map(base.pokemon_v2_type.map((t) => [t.name, t.id]))
   /** -1 para tipos fora de batalha na série principal (ex.: "shadow", de Colosseum). */
   const typeIndex = (id) => POKEMON_TYPES.indexOf(typeName.get(id))
-  const versionGroups = base.pokemon_v2_versiongroup
+  // Grupos de versões pelo REST: o GraphQL usa outros slugs em alguns (BDSP) e não tem os mais
+  // novos (Legends: Z-A, Champions). Os ids são os mesmos nos dois.
+  const vgIndex = await rest('version-group?limit=100')
+  const versionGroups = []
+  for (const { url } of vgIndex.results) {
+    const vg = await rest(`version-group/${idOf(url)}`)
+    versionGroups.push({ id: vg.id, name: vg.name, order: vg.order, generation_id: idOf(vg.generation.url) })
+  }
+  versionGroups.sort((a, b) => a.order - b.order)
   const vgOrder = new Map(versionGroups.map((vg) => [vg.id, vg.order]))
 
   // ---- Pokémon ------------------------------------------------------------------------------

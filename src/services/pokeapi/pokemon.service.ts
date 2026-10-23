@@ -3,6 +3,7 @@ import {
   STAT_NAMES,
   type PokemonDetail,
   type PokemonIndexEntry,
+  type PokemonMoveLearn,
   type PokemonStat,
   type PokemonSummary,
   type PokemonType,
@@ -30,6 +31,17 @@ function toStats(dto: PokemonDto): PokemonStat[] {
   return STAT_NAMES.map((name) => ({ name, value: byName.get(name) ?? 0 }))
 }
 
+function toMoves(dto: PokemonDto): PokemonMoveLearn[] {
+  return dto.moves.flatMap((entry) =>
+    entry.version_group_details.map((detail) => ({
+      move: entry.move.name,
+      versionGroup: detail.version_group.name,
+      method: detail.move_learn_method.name,
+      level: detail.level_learned_at,
+    })),
+  )
+}
+
 function toDetail(dto: PokemonDto): PokemonDetail {
   return {
     ...toSummary(dto),
@@ -41,7 +53,13 @@ function toDetail(dto: PokemonDto): PokemonDetail {
       .sort((a, b) => a.slot - b.slot)
       .map((slot) => ({ name: slot.ability.name, isHidden: slot.is_hidden })),
     stats: toStats(dto),
+    evYield: STAT_NAMES.flatMap((name) => {
+      const value = dto.stats.find((slot) => slot.stat.name === name)?.effort ?? 0
+      return value > 0 ? [{ name, value }] : []
+    }),
+    baseExperience: dto.base_experience,
     cryUrl: dto.cries?.latest ?? dto.cries?.legacy ?? null,
+    moves: toMoves(dto),
   }
 }
 

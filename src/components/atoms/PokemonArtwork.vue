@@ -9,6 +9,8 @@ const props = defineProps<{
   alt: string
   /** Lado exibido em px (padrão 120); define a largura pedida ao proxy. */
   size?: number
+  /** Versão shiny (cores alternativas) do artwork. */
+  shiny?: boolean
 }>()
 
 const loaded = ref(false)
@@ -16,12 +18,14 @@ const loaded = ref(false)
 const fallback = ref(false)
 
 const src = computed(() =>
-  fallback.value ? artworkUrl(props.id) : artworkSrc(props.id, props.size ?? 120),
+  fallback.value
+    ? artworkUrl(props.id, props.shiny)
+    : artworkSrc(props.id, props.size ?? 120, props.shiny),
 )
 
 // Reseta ao trocar de Pokémon (ex.: navegação interna entre Pokémon) para repetir a entrada.
 watch(
-  () => props.id,
+  () => [props.id, props.shiny],
   () => {
     loaded.value = false
     fallback.value = false
