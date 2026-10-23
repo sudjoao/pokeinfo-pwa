@@ -440,7 +440,10 @@
       "isleOfArmor": "Isle of Armor",
       "crownTundra": "Crown Tundra",
       "other": "Outros encontros"
-    }
+    },
+    "searchPlaceholder": "Buscar local",
+    "searchLabel": "Buscar local pelo nome",
+    "noMatch": "Nenhum local encontrado para “{query}”."
   },
   "ability": {
     "pokemonWith": "Pokémon com esta habilidade ({n})",

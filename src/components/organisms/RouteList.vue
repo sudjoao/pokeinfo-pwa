@@ -17,6 +17,7 @@ const AREA_CONCURRENCY = 4
 import { formatAreaName } from '@/utils/encounters'
 import { speciesIdOf } from '@/utils/forms'
 import RoutePokemonRow from '@/components/molecules/RoutePokemonRow.vue'
+import SearchField from '@/components/molecules/SearchField.vue'
 
 const props = defineProps<{
   game: Game
@@ -51,6 +52,29 @@ const pokedexStore = usePokedexStore()
 const sections = computed(() => routeSectionsForGame(props.game))
 const routes = computed(() => sections.value.flatMap((section) => section.routes))
 
+/** Sem diferenciar maiúsculas nem acentos ("cave" acha "Cave of Origin"). */
+function normalize(text: string): string {
+  return text
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+}
+
+const search = ref('')
+/** Seções com os locais que batem com a busca; as que ficam vazias somem. */
+const visibleSections = computed(() => {
+  const term = normalize(search.value?.trim() ?? '')
+  if (!term) return sections.value
+  return sections.value
+    .map((section) => ({
+      ...section,
+      routes: section.routes.filter((route) =>
+        normalize(formatAreaName(route.location)).includes(term),
+      ),
+    }))
+    .filter((section) => section.routes.length)
+})
+
 const openPanel = ref<string | undefined>(undefined)
 const results = ref<Record<string, RoutePokemon[]>>({})
 const loading = ref<Record<string, boolean>>({})
@@ -61,6 +85,7 @@ watch(
   () => props.game.slug,
   () => {
     openPanel.value = undefined
+    search.value = ''
     results.value = {}
     loading.value = {}
     failed.value = {}
@@ -110,6 +135,13 @@ watch(openPanel, (location) => {
     </p>
 
     <template v-else>
+      <SearchField
+        v-model="search"
+        :placeholder="t('routes.searchPlaceholder')"
+        :label="t('routes.searchLabel')"
+        density="compact"
+        class="mb-2"
+      />
       <v-switch
         v-if="caughtIds"
         v-model="onlyMissing"
@@ -119,7 +151,10 @@ watch(openPanel, (location) => {
         hide-details
         class="mb-2"
       />
-      <section v-for="section in sections" :key="section.key" class="route-section">
+      <p v-if="!visibleSections.length" class="text-body-medium opacity-70 mb-0">
+        {{ t('routes.noMatch', { query: search.trim() }) }}
+      </p>
+      <section v-for="section in visibleSections" :key="section.key" class="route-section">
         <h2 v-if="sections.length > 1" class="text-title-small mb-2">
           {{ t(`routes.section.${section.key}`) }}
         </h2>

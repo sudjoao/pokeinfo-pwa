@@ -3,6 +3,8 @@ import { mdiMagnify } from '@mdi/js'
 import { useI18n } from 'vue-i18n'
 
 const model = defineModel<string>({ default: '' })
+/** Textos do campo; sem eles, os da busca de pokémon da Home. */
+defineProps<{ placeholder?: string; label?: string }>()
 
 const { t } = useI18n()
 </script>
@@ -11,8 +13,8 @@ const { t } = useI18n()
   <v-text-field
     v-model="model"
     :prepend-inner-icon="mdiMagnify"
-    :placeholder="t('home.searchPlaceholder')"
-    :aria-label="t('home.searchLabel')"
+    :placeholder="placeholder ?? t('home.searchPlaceholder')"
+    :aria-label="label ?? t('home.searchLabel')"
     type="search"
     inputmode="search"
     autocomplete="off"

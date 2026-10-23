@@ -440,7 +440,10 @@
       "isleOfArmor": "Isla de la Armadura",
       "crownTundra": "Nieves de la Corona",
       "other": "Otros encuentros"
-    }
+    },
+    "searchPlaceholder": "Buscar lugar",
+    "searchLabel": "Buscar lugar por nombre",
+    "noMatch": "Ningún lugar coincide con «{query}»."
   },
   "ability": {
     "pokemonWith": "Pokémon con esta habilidad ({n})",
