@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { reactive, toRaw } from 'vue'
 import { decodeBitset, encodeBitset } from '@/utils/bitset'
 import { readStorage, writeStorage } from '@/utils/storage'
+import { notifyLocalChange } from '@/utils/localChanges'
 
 /** Formato persistido (e do backup): um bitset em base64 por jogo (slug do version-group). */
 export type PersistedGameSet = Record<string, string>
@@ -41,7 +42,16 @@ export function defineGameSetStore(id: string, storageKey: string) {
     let persistTimer: ReturnType<typeof setTimeout> | undefined
     function schedulePersist(): void {
       clearTimeout(persistTimer)
-      persistTimer = setTimeout(() => writeStorage(storageKey, snapshot()), 300)
+      persistTimer = setTimeout(flush, 300)
+      notifyLocalChange()
+    }
+
+    /** Grava já o que estiver pendente (a sincronização precisa do disco em dia). */
+    function flush(): void {
+      if (persistTimer === undefined) return
+      clearTimeout(persistTimer)
+      persistTimer = undefined
+      writeStorage(storageKey, snapshot())
     }
 
     const EMPTY: ReadonlySet<number> = new Set()
@@ -102,6 +112,16 @@ export function defineGameSetStore(id: string, storageKey: string) {
       return Object.fromEntries([...byGame].map(([game, ids]) => [game, ids.size]))
     }
 
-    return { caughtIn, caughtInRaw, isCaught, setCaught, toggle, exportData, importData, counts }
+    return {
+      caughtIn,
+      caughtInRaw,
+      isCaught,
+      setCaught,
+      toggle,
+      exportData,
+      importData,
+      counts,
+      flush,
+    }
   })
 }

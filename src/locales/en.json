@@ -12,7 +12,8 @@
     "itemsTitle": "Items · PokeInfo",
     "statsTitle": "Natures and IVs · PokeInfo",
     "speedTitle": "Speed tiers · PokeInfo",
-    "dailyTitle": "Pokémon of the day · PokeInfo"
+    "dailyTitle": "Pokémon of the day · PokeInfo",
+    "signInTitle": "Sign in · PokeInfo"
   },
   "common": {
     "retry": "Try again",
@@ -1040,5 +1041,52 @@
     "usage": "Space used by PokeInfo on this device: {used} of {quota} available.",
     "hint": "What is already saved is skipped: you can cancel and continue later. Data does not update by itself; clear and download again to get PokéAPI updates.",
     "clear": "Clear offline data"
+  },
+  "account": {
+    "title": "Account",
+    "menuSignIn": "Sign in with Google",
+    "menuSignInHint": "Sync across devices",
+    "restoring": "Connecting…",
+    "intro": "Sign in with Google to keep your caught Pokémon, shinies, favorites, hunts and Pokémon of the day in your account and see the same thing on every device.",
+    "privacy": "Only your Google email, name and photo and what you mark in the app are stored. Everything stays on this device and works offline; your account gets a copy whenever you are online.",
+    "signIn": "Continue with Google",
+    "signInOffline": "Connect to the internet to sign in.",
+    "signInError": "Could not open Google sign-in. Please try again.",
+    "signedIn": "Signed in. Your collection is synced.",
+    "signedOut": "You signed out. Your data stays on this device.",
+    "deleted": "Account deleted.",
+    "actionError": "Could not finish. Check your connection and try again.",
+    "status": {
+      "idle": "Waiting to sync",
+      "syncing": "Syncing…",
+      "synced": "Synced at {time}",
+      "offline": "Offline: will sync when you are back online",
+      "error": "Could not sync. Retrying shortly."
+    },
+    "syncHint": "Each change reaches your account within seconds; when you open the app, it fetches what changed on your other device.",
+    "syncNow": "Sync now",
+    "signOut": "Sign out",
+    "signOutHint": "Your data stays on this device after you sign out.",
+    "delete": "Delete account",
+    "deleteTitle": "Delete account?",
+    "deleteText": "Deletes your account and everything stored in it. What is on this device stays here. This cannot be undone.",
+    "deleteConfirm": "Delete",
+    "firstSyncTitle": "Combine with your account?",
+    "firstSyncText": "This device and your account both have data. How do you want to combine them?",
+    "firstSyncDevice": "On this device",
+    "firstSyncCloud": "In your account",
+    "firstSyncConfirm": "Continue",
+    "choice": {
+      "merge": "Combine both",
+      "mergeHint": "Adds what is on this device to what is in your account.",
+      "cloud": "Keep only the account",
+      "cloudHint": "Discards what is on this device.",
+      "device": "Keep only this device",
+      "deviceHint": "Replaces what is in your account."
+    },
+    "callbackLoading": "Signing in…",
+    "callbackError": "Could not sign in",
+    "callbackErrorHint": "Sign-in was canceled or expired. On iPhone, sign in from the installed app and finish without switching windows.",
+    "backHome": "Back to start"
   }
 }

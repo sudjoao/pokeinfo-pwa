@@ -12,7 +12,8 @@
     "itemsTitle": "Itens · PokeInfo",
     "statsTitle": "Naturezas e IVs · PokeInfo",
     "speedTitle": "Velocidade · PokeInfo",
-    "dailyTitle": "Pokémon do dia · PokeInfo"
+    "dailyTitle": "Pokémon do dia · PokeInfo",
+    "signInTitle": "Entrar · PokeInfo"
   },
   "common": {
     "retry": "Tentar novamente",
@@ -1040,5 +1041,52 @@
     "usage": "Espaço usado pelo PokeInfo neste aparelho: {used} de {quota} disponíveis.",
     "hint": "O que já está salvo é pulado: dá para cancelar e continuar depois. Os dados não se atualizam sozinhos; apague e baixe de novo para pegar novidades da PokéAPI.",
     "clear": "Apagar dados offline"
+  },
+  "account": {
+    "title": "Conta",
+    "menuSignIn": "Entrar com o Google",
+    "menuSignInHint": "Sincronize entre aparelhos",
+    "restoring": "Conectando…",
+    "intro": "Entre com o Google para guardar capturados, shinies, favoritos, caçadas e o Pokémon do dia na sua conta e ver tudo igual no Mac e no iPhone.",
+    "privacy": "Ficam salvos só o seu e-mail, nome e foto do Google e o que você marca no app. Tudo continua neste aparelho e funciona sem internet; a conta recebe uma cópia quando houver conexão.",
+    "signIn": "Continuar com o Google",
+    "signInOffline": "Conecte-se à internet para entrar.",
+    "signInError": "Não foi possível abrir o login do Google. Tente de novo.",
+    "signedIn": "Conectado. Sua coleção está sincronizada.",
+    "signedOut": "Você saiu da conta. Os dados continuam neste aparelho.",
+    "deleted": "Conta excluída.",
+    "actionError": "Não foi possível concluir. Verifique a conexão e tente de novo.",
+    "status": {
+      "idle": "Aguardando sincronização",
+      "syncing": "Sincronizando…",
+      "synced": "Sincronizado às {time}",
+      "offline": "Sem conexão: sincroniza quando a internet voltar",
+      "error": "Não foi possível sincronizar. Tentando de novo em instantes."
+    },
+    "syncHint": "Cada marcação vai para a conta em segundos; ao abrir o app, ele busca o que mudou no outro aparelho.",
+    "syncNow": "Sincronizar agora",
+    "signOut": "Sair",
+    "signOutHint": "Ao sair, os dados continuam neste aparelho.",
+    "delete": "Excluir conta",
+    "deleteTitle": "Excluir conta?",
+    "deleteText": "Apaga a sua conta e tudo o que está salvo nela. O que está neste aparelho continua aqui. Não dá para desfazer.",
+    "deleteConfirm": "Excluir",
+    "firstSyncTitle": "Juntar com a sua conta?",
+    "firstSyncText": "Este aparelho e a sua conta já têm dados. Como você quer juntar?",
+    "firstSyncDevice": "Neste aparelho",
+    "firstSyncCloud": "Na conta",
+    "firstSyncConfirm": "Continuar",
+    "choice": {
+      "merge": "Somar os dois",
+      "mergeHint": "Junta o que está neste aparelho com o que está na conta.",
+      "cloud": "Usar só o da conta",
+      "cloudHint": "Descarta o que está neste aparelho.",
+      "device": "Usar só o deste aparelho",
+      "deviceHint": "Substitui o que está na conta."
+    },
+    "callbackLoading": "Entrando…",
+    "callbackError": "Não foi possível entrar",
+    "callbackErrorHint": "O login foi cancelado ou expirou. No iPhone, entre pelo app instalado e conclua o login sem trocar de janela.",
+    "backHome": "Voltar ao início"
   }
 }

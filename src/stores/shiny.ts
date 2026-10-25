@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { reactive } from 'vue'
 import { readStorage, writeStorage } from '@/utils/storage'
+import { notifyLocalChange } from '@/utils/localChanges'
 import { defineGameSetStore } from './gameSet'
 
 /** Shinies capturados por jogo (separados dos capturados normais). */
@@ -45,7 +46,15 @@ export const useHuntsStore = defineStore('hunts', () => {
   let timer: ReturnType<typeof setTimeout> | undefined
   function persist(): void {
     clearTimeout(timer)
-    timer = setTimeout(() => writeStorage(HUNTS_KEY, { ...hunts }), 300)
+    timer = setTimeout(flush, 300)
+    notifyLocalChange()
+  }
+
+  function flush(): void {
+    if (timer === undefined) return
+    clearTimeout(timer)
+    timer = undefined
+    writeStorage(HUNTS_KEY, { ...hunts })
   }
 
   function huntOf(game: string, speciesId: number): ShinyHunt | null {
@@ -84,5 +93,5 @@ export const useHuntsStore = defineStore('hunts', () => {
     persist()
   }
 
-  return { hunts, huntOf, update, reset, exportData, importData }
+  return { hunts, huntOf, update, reset, exportData, importData, flush }
 })

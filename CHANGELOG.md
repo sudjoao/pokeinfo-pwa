@@ -5,6 +5,21 @@ Todas as mudanças relevantes deste projeto são registradas aqui.
 O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e o projeto adota
 [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [Não lançado]
+
+### Adicionado
+
+- Entrar com o Google (opcional, menu > Conta): capturados, shinies, favoritos, caçadas e o Pokémon
+  do dia ficam na conta (Supabase) e sincronizam entre aparelhos. O app continua local-first e
+  funciona offline; a conta recebe uma cópia em segundo plano, com mescla de 3 vias (marcações
+  feitas sem internet em dois aparelhos entram todas) e trava otimista de versão.
+- Primeiro login num aparelho com dados: escolher entre somar, usar só a conta ou só o aparelho.
+- Sair (os dados ficam no aparelho) e excluir a conta pelo app.
+- Tabela `user_collections` com Row Level Security e função `delete_account` em
+  `supabase/migrations/`, guia de configuração em `supabase/README.md`.
+- Cabeçalhos de segurança na Vercel (`X-Content-Type-Options`, `X-Frame-Options`,
+  `Referrer-Policy`, `Permissions-Policy`).
+
 ## [1.6.0] - 2026-10-23
 
 Páginas de referência (golpes, itens, naturezas), ferramentas de batalha e captura, o Pokémon do

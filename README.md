@@ -123,6 +123,12 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
   favoritos e caçadas, importa esse arquivo e gera um **link** (`/?backup=...`, ~200 caracteres por
   jogo marcado) que, aberto em outro aparelho, pergunta se deve somar ou substituir os dados. O
   link também aparece como **QR code**, para passar os dados apontando a câmera.
+- **Conta Google (opcional)**: "Entrar com o Google" no menu guarda capturados, shinies, favoritos,
+  caçadas e o Pokémon do dia na conta (Supabase) e sincroniza o Mac e o iPhone. O app continua
+  funcionando no aparelho e sem internet; a conta recebe uma cópia em segundo plano, com mescla de
+  3 vias para não perder marcações feitas offline nos dois aparelhos. Sair mantém os dados no
+  aparelho; dá para excluir a conta pelo app. Detalhes e configuração em
+  [`supabase/README.md`](supabase/README.md).
 - **Menu lateral** com navegação, idioma, **tema** (sistema, claro ou escuro, salvo no aparelho),
   backup e créditos.
 - **Idioma**: botão no cabeçalho alterna entre *Português* (interface em pt-BR, com os textos que só
@@ -159,8 +165,9 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
   adicioná-lo ali. Versões japonesas, Colosseum/XD (sem Pokédex) e jogos fora da série principal
   ficam de fora; DLCs aparecem como Pokédex do jogo base.
 - Na Pokédex de Alola o app mostra a forma de Alola mesmo quando a forma de Kanto também é obtível.
-- As marcações ficam só no aparelho (não há conta nem sincronização automática entre Mac e iPhone;
-  o backup por arquivo ou link faz essa ponte).
+- Sem entrar com o Google, as marcações ficam só no aparelho (o backup por arquivo ou link faz a
+  ponte). Com a conta, a sincronização acontece ao abrir o app e logo depois de cada marcação, não em
+  tempo real.
 - Os exclusivos de versão são por espécie: uma espécie com uma forma em cada versão (Basculin,
   Tauros de Paldea, Kyurem…) não conta como exclusiva. Exclusivos das DLCs e da White Forest entram
   no jogo base, e Red/Blue segue a distribuição internacional. Jogos de versão única (Yellow,
@@ -210,6 +217,7 @@ Bulbapedia, com o procedimento descrito em [`scripts/README.md`](scripts/README.
 | PWA | [vite-plugin-pwa](https://vite-pwa-org.netlify.app/) (Workbox) |
 | Dados | [PokéAPI v2](https://pokeapi.co/docs/v2) (imagens redimensionadas pelo [wsrv.nl](https://wsrv.nl/)) |
 | QR code | [uqr](https://github.com/unjs/uqr) (MIT, só no backup) |
+| Conta e sincronização | [Supabase](https://supabase.com/) (Auth com Google + Postgres com RLS), SDK carregado sob demanda |
 | Qualidade | ESLint, oxlint, Prettier, vue-tsc |
 | Deploy | [Vercel](https://vercel.com/) |
 
@@ -307,6 +315,7 @@ O objetivo é funcionar offline sem inflar o armazenamento do usuário:
 | Service worker `generated-learnsets` | learnsets por jogo (5 a 99 KB gz), fora do precache | 30 entradas, 90 dias |
 | Caches `pokeinfo-offline-*-v1` | só o que a pessoa baixa em "Usar offline" (fichas, imagens, gritos) | sem limite de entradas; apagar pela sheet |
 | `localStorage` | Pokémon do dia (`pokeinfo:daily:v1`) e recentes (`pokeinfo:recent:v1`) | poucos KB |
+| `localStorage` | só com conta: sessão do Supabase (`pokeinfo:auth:v1`) e a base da última sincronização (`pokeinfo:sync:v1`, mesmo tamanho da coleção) | poucos KB |
 
 Os cards não fazem requisição por Pokémon: os tipos vêm de um mapa montado uma vez a partir dos
 18 endpoints `/type/{nome}` (~385 KB no total, renovado em segundo plano a cada 7 dias). Ler os tipos
@@ -338,8 +347,13 @@ npm run format     # prettier
 
 ## Deploy
 
-O projeto está configurado para a Vercel (`vercel.json`): rewrites para SPA, `sw.js` sem cache
-e o content-type correto para o `manifest.webmanifest`. Basta conectar o repositório.
+O projeto está configurado para a Vercel (`vercel.json`): rewrites para SPA, `sw.js` sem cache,
+o content-type correto para o `manifest.webmanifest` e cabeçalhos de segurança (`nosniff`, sem
+iframe, `Referrer-Policy` e `Permissions-Policy`). Basta conectar o repositório.
+
+Para a conta Google, configure o Supabase e o Google Cloud e adicione `VITE_SUPABASE_URL` e
+`VITE_SUPABASE_PUBLISHABLE_KEY` nas variáveis da Vercel: passo a passo em
+[`supabase/README.md`](supabase/README.md).
 
 ## Créditos
 

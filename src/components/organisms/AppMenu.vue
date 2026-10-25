@@ -17,11 +17,17 @@ import {
   mdiSpeedometer,
   mdiCalendarStar,
   mdiCloudDownloadOutline,
+  mdiAccountCircleOutline,
 } from '@mdi/js'
 import type { RouteLocationRaw } from 'vue-router'
 import type { ThemePreference } from '@/composables/useThemePreference'
+import type { AccountUser } from '@/stores/account'
 
-defineProps<{ theme: ThemePreference }>()
+defineProps<{
+  theme: ThemePreference
+  /** Conta: null quando o build não tem Supabase configurado (o item some). */
+  account: { user: AccountUser | null; restoring: boolean; statusText: string } | null
+}>()
 
 const open = defineModel<boolean>({ required: true })
 
@@ -31,6 +37,7 @@ const emit = defineEmits<{
   openBackup: []
   openOffline: []
   openAbout: []
+  openAccount: []
   random: []
 }>()
 
@@ -88,6 +95,37 @@ function then(action: () => void): void {
 <template>
   <!-- tag="div": o drawer seria um <nav> em volta do outro, com o mesmo rótulo. -->
   <v-navigation-drawer v-model="open" temporary tag="div">
+    <v-list v-if="account" nav density="comfortable" role="group" class="pb-0">
+      <v-list-item
+        :title="
+          account.user
+            ? account.user.name || account.user.email
+            : account.restoring
+              ? t('account.restoring')
+              : t('account.menuSignIn')
+        "
+        :subtitle="account.user ? account.statusText : t('account.menuSignInHint')"
+        role="button"
+        aria-haspopup="dialog"
+        rounded="lg"
+        @click="then(() => emit('openAccount'))"
+      >
+        <template #prepend>
+          <!-- img simples em vez de v-avatar: o VAvatar entraria na carga inicial só por isto. -->
+          <img
+            v-if="account.user?.avatar"
+            :src="account.user.avatar"
+            alt=""
+            width="32"
+            height="32"
+            referrerpolicy="no-referrer"
+            class="app-menu__photo"
+          />
+          <v-icon v-else :icon="mdiAccountCircleOutline" />
+        </template>
+      </v-list-item>
+    </v-list>
+    <v-divider v-if="account" class="my-1" />
     <!-- role="navigation": o v-list põe role="list", que não aceita os links como filhos. -->
     <v-list nav density="comfortable" role="navigation" :aria-label="t('menu.title')">
       <template v-for="group in NAV_GROUPS" :key="group.title">
@@ -173,3 +211,12 @@ function then(action: () => void): void {
     </v-list>
   </v-navigation-drawer>
 </template>
+
+<style scoped>
+.app-menu__photo {
+  /* Mesmo recuo do ícone das outras linhas (o v-list-item usa 32px para o ícone). */
+  margin-inline-end: 16px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+</style>

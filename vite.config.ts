@@ -117,8 +117,9 @@ export default defineConfig({
       },
       workbox: {
         // Learnsets (um chunk por jogo, ~920 KB gz no total) ficam fora do precache: só o jogo
-        // aberto é baixado, e fica no cache `generated-learnsets` abaixo.
-        globIgnores: ['**/learnset-*.js'],
+        // aberto é baixado, e fica no cache `generated-learnsets` abaixo. O SDK do Supabase
+        // (~55 KB gz) também: só quem entra na conta baixa, e ele fica no cache `supabase-sdk`.
+        globIgnores: ['**/learnset-*.js', '**/supabase-*.js'],
         // Caches em runtime da PokéAPI, separados por tipo de recurso para
         // manter o armazenamento do usuário pequeno (ver README > Cache).
         runtimeCaching: [
@@ -130,6 +131,15 @@ export default defineConfig({
               cacheName: 'generated-learnsets',
               // O hash muda a cada geração: entradas antigas saem pelo limite.
               expiration: { maxEntries: 30, maxAgeSeconds: 90 * DAY },
+              cacheableResponse: { statuses: [200] },
+            },
+          },
+          {
+            urlPattern: /\/assets\/supabase-[^/]+\.js$/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'supabase-sdk',
+              expiration: { maxEntries: 3, maxAgeSeconds: 90 * DAY },
               cacheableResponse: { statuses: [200] },
             },
           },
@@ -278,11 +288,14 @@ export default defineConfig({
   build: {
     rolldownOptions: {
       output: {
-        // Nome reconhecível para o service worker deixar os learnsets fora do precache.
+        // Nomes reconhecíveis para o service worker deixar learnsets e o SDK do Supabase fora do
+        // precache.
         chunkFileNames: (chunk) =>
           chunk.facadeModuleId?.includes('/data/generated/learnsets/')
             ? 'assets/learnset-[name]-[hash].js'
-            : 'assets/[name]-[hash].js',
+            : chunk.facadeModuleId?.includes('/node_modules/@supabase/supabase-js/')
+              ? 'assets/supabase-[hash].js'
+              : 'assets/[name]-[hash].js',
       },
     },
   },

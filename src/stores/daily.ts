@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { readStorage, writeStorage } from '@/utils/storage'
+import { notifyLocalChange } from '@/utils/localChanges'
 import {
   DAILY_MAX_GUESSES,
   EMPTY_STATS,
@@ -24,6 +25,7 @@ export const useDailyStore = defineStore('daily', () => {
 
   function persist(): void {
     writeStorage(DAILY_KEY, { stats: stats.value, game: game.value } satisfies PersistedDaily)
+    notifyLocalChange()
   }
 
   /** Partida de `day`: a salva, se for do mesmo dia; senão uma nova. */

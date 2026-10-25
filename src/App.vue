@@ -13,6 +13,9 @@ import { decodeBackupParam, parseBackup, type Backup } from '@/utils/backup'
 import type { ImportMode } from '@/stores/gameSet'
 import AppMenu from '@/components/organisms/AppMenu.vue'
 import { useMountOnOpen } from '@/composables/useMountOnOpen'
+import { useSyncStatusText } from '@/composables/useSyncStatusText'
+import { useAccountStore, type FirstSyncChoice } from '@/stores/account'
+import { storeToRefs } from 'pinia'
 
 // Sheets do menu: raros, carregados só na primeira abertura (BackupImportDialog também pode abrir
 // por um link ?backup=, e aí carrega na hora).
@@ -22,6 +25,10 @@ const BackupSheet = defineAsyncComponent(() => import('@/components/organisms/Ba
 const OfflineSheet = defineAsyncComponent(() => import('@/components/organisms/OfflineSheet.vue'))
 const BackupImportDialog = defineAsyncComponent(
   () => import('@/components/organisms/BackupImportDialog.vue'),
+)
+const AccountSheet = defineAsyncComponent(() => import('@/components/organisms/AccountSheet.vue'))
+const FirstSyncDialog = defineAsyncComponent(
+  () => import('@/components/organisms/FirstSyncDialog.vue'),
 )
 
 const { t } = useI18n()
@@ -33,6 +40,7 @@ const languageMounted = useMountOnOpen(menu.languageOpen)
 const aboutMounted = useMountOnOpen(menu.aboutOpen)
 const backupMounted = useMountOnOpen(menu.backupOpen)
 const offlineMounted = useMountOnOpen(menu.offlineOpen)
+const accountMounted = useMountOnOpen(menu.accountOpen)
 const { locale, locales, setLocale } = useLocale()
 const { preference: theme, setPreference: setTheme } = useThemePreference()
 const backup = useBackup()
@@ -49,6 +57,66 @@ const online = useOnline()
 /** Aviso de offline: abre a cada queda de conexão e pode ser fechado. */
 const offlineOpen = ref(!online.value)
 watch(online, (value) => (offlineOpen.value = !value))
+
+// Conta Google e sincronização (some do menu quando o build não tem Supabase configurado).
+const account = useAccountStore()
+const {
+  user: accountUser,
+  status: syncStatus,
+  lastSyncedAt,
+  restoring,
+  firstSync,
+} = storeToRefs(account)
+account.start()
+const syncStatusText = useSyncStatusText(syncStatus, lastSyncedAt, online)
+const accountMenu = computed(() =>
+  account.enabled
+    ? { user: accountUser.value, restoring: restoring.value, statusText: syncStatusText.value }
+    : null,
+)
+const accountBusy = ref<'signIn' | 'signOut' | 'delete' | null>(null)
+
+function signIn(): void {
+  accountBusy.value = 'signIn'
+  // Em caso de sucesso a página vai para o Google; o "carregando" fica até lá.
+  account.signIn(route.fullPath).catch(() => {
+    accountBusy.value = null
+    notice.value = t('account.signInError')
+  })
+}
+
+function runAccountAction(kind: 'signOut' | 'delete', action: () => Promise<void>, done: string) {
+  accountBusy.value = kind
+  action()
+    .then(() => {
+      menu.accountOpen.value = false
+      notice.value = t(done)
+    })
+    .catch(() => (notice.value = t('account.actionError')))
+    .finally(() => (accountBusy.value = null))
+}
+
+watch(
+  () => account.justSignedIn,
+  (value) => {
+    if (!value) return
+    account.justSignedIn = false
+    notice.value = t('account.signedIn')
+  },
+)
+
+/** Resumos do aparelho e da conta para o diálogo da primeira sincronização. */
+const firstSyncSummaries = computed(() =>
+  firstSync.value
+    ? { device: summarize(firstSync.value.local), cloud: summarize(firstSync.value.remote.data) }
+    : null,
+)
+const firstSyncOpen = ref(false)
+watch(firstSyncSummaries, (value) => (firstSyncOpen.value = value !== null), { immediate: true })
+
+function chooseFirstSync(choice: FirstSyncChoice): void {
+  account.resolveFirstSync(choice)
+}
 
 const notice = ref<string | null>(null)
 const canShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function'
@@ -132,11 +200,13 @@ function skipToContent(): void {
     <AppMenu
       v-model="menu.drawer.value"
       :theme="theme"
+      :account="accountMenu"
       @set-theme="setTheme"
       @open-language="menu.languageOpen.value = true"
       @open-backup="menu.backupOpen.value = true"
       @open-offline="menu.offlineOpen.value = true"
       @open-about="menu.aboutOpen.value = true"
+      @open-account="menu.accountOpen.value = true"
       @random="openRandom"
     />
     <!-- A Home fica em KeepAlive para preservar o scroll infinito e a busca ao voltar do detalhe. -->
@@ -185,6 +255,26 @@ function skipToContent(): void {
       :summary="pending ? summarize(pending) : null"
       :exported-at="pending?.exportedAt ?? null"
       @confirm="confirmImport"
+    />
+    <AccountSheet
+      v-if="accountMounted"
+      v-model="menu.accountOpen.value"
+      :user="accountUser"
+      :status="syncStatus"
+      :status-text="syncStatusText"
+      :online="online"
+      :busy="accountBusy"
+      @sign-in="signIn"
+      @sync-now="account.sync()"
+      @sign-out="runAccountAction('signOut', account.signOut, 'account.signedOut')"
+      @delete-account="runAccountAction('delete', account.deleteAccount, 'account.deleted')"
+    />
+    <FirstSyncDialog
+      v-if="firstSyncSummaries"
+      v-model="firstSyncOpen"
+      :device="firstSyncSummaries.device"
+      :cloud="firstSyncSummaries.cloud"
+      @choose="chooseFirstSync"
     />
     <AppNotice
       :text="offlineOpen ? t('app.offline') : null"

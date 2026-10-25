@@ -34,6 +34,25 @@ function isStringRecord(value: unknown): value is Record<string, string> {
   )
 }
 
+/**
+ * Valida os dados de um backup (ou da coleção salva na conta): campos ausentes ou inválidos viram
+ * vazios. Nunca confia no que veio de fora do aparelho.
+ */
+export function parseBackupData(value: unknown): BackupData {
+  const data = (typeof value === 'object' && value !== null ? value : {}) as Partial<BackupData>
+  const daily = parseDaily(data.daily)
+  return {
+    caught: isStringRecord(data.caught) ? data.caught : {},
+    shiny: isStringRecord(data.shiny) ? data.shiny : {},
+    favorites: typeof data.favorites === 'string' ? data.favorites : '',
+    hunts:
+      typeof data.hunts === 'object' && data.hunts !== null && !Array.isArray(data.hunts)
+        ? data.hunts
+        : {},
+    ...(daily ? { daily } : {}),
+  }
+}
+
 /** Valida um backup lido de arquivo ou link; null quando não é um backup do PokeInfo. */
 export function parseBackup(text: string): Backup | null {
   let value: unknown
@@ -48,14 +67,7 @@ export function parseBackup(text: string): Backup | null {
     app: 'pokeinfo',
     version: 1,
     exportedAt: typeof backup.exportedAt === 'string' ? backup.exportedAt : '',
-    caught: isStringRecord(backup.caught) ? backup.caught : {},
-    shiny: isStringRecord(backup.shiny) ? backup.shiny : {},
-    favorites: typeof backup.favorites === 'string' ? backup.favorites : '',
-    hunts:
-      typeof backup.hunts === 'object' && backup.hunts !== null && !Array.isArray(backup.hunts)
-        ? backup.hunts
-        : {},
-    ...(parseDaily(backup.daily) ? { daily: parseDaily(backup.daily)! } : {}),
+    ...parseBackupData(backup),
   }
 }
 

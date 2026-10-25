@@ -4,7 +4,13 @@ import { useFavoritesStore } from '@/stores/favorites'
 import { useHuntsStore, useShinyCaughtStore } from '@/stores/shiny'
 import { useDailyStore } from '@/stores/daily'
 import type { ImportMode } from '@/stores/gameSet'
-import { backupFileName, createBackup, encodeBackupParam, type Backup } from '@/utils/backup'
+import {
+  backupFileName,
+  createBackup,
+  encodeBackupParam,
+  type Backup,
+  type BackupData,
+} from '@/utils/backup'
 import { decodeBitset } from '@/utils/bitset'
 
 /** Resumo de um backup (ou do que está no aparelho) para mostrar antes de exportar/importar. */
@@ -20,7 +26,7 @@ function countSets(sets: Record<string, string>): number {
   return Object.values(sets).reduce((sum, encoded) => sum + decodeBitset(encoded).size, 0)
 }
 
-export function summarize(backup: Backup): BackupSummary {
+export function summarize(backup: BackupData): BackupSummary {
   return {
     caught: countSets(backup.caught),
     games: Object.keys(backup.caught).length,
@@ -38,14 +44,27 @@ export function useBackup() {
   const hunts = useHuntsStore()
   const daily = useDailyStore()
 
-  function current(): Backup {
-    return createBackup({
+  /** Tudo o que é salvo no backup e sincronizado com a conta. */
+  function data(): BackupData {
+    return {
       caught: caught.exportData(),
       shiny: shiny.exportData(),
       favorites: favorites.exportData(),
       hunts: hunts.exportData(),
       daily: daily.exportData(),
-    })
+    }
+  }
+
+  function current(): Backup {
+    return createBackup(data())
+  }
+
+  /** Grava no aparelho o que os stores ainda estão segurando no debounce. */
+  function flush(): void {
+    caught.flush()
+    shiny.flush()
+    favorites.flush()
+    hunts.flush()
   }
 
   const summary = computed(() => summarize(current()))
@@ -66,7 +85,7 @@ export function useBackup() {
     return url.toString()
   }
 
-  function restore(backup: Backup, mode: ImportMode): void {
+  function restore(backup: BackupData, mode: ImportMode): void {
     caught.importData(backup.caught, mode)
     shiny.importData(backup.shiny, mode)
     favorites.importData(backup.favorites, mode)
@@ -74,5 +93,5 @@ export function useBackup() {
     if (backup.daily) daily.importData(backup.daily, mode)
   }
 
-  return { summary, downloadFile, link, restore }
+  return { summary, data, flush, downloadFile, link, restore }
 }

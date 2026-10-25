@@ -12,7 +12,8 @@
     "itemsTitle": "Objetos · PokeInfo",
     "statsTitle": "Naturalezas e IV · PokeInfo",
     "speedTitle": "Velocidad · PokeInfo",
-    "dailyTitle": "Pokémon del día · PokeInfo"
+    "dailyTitle": "Pokémon del día · PokeInfo",
+    "signInTitle": "Iniciar sesión · PokeInfo"
   },
   "common": {
     "retry": "Reintentar",
@@ -1040,5 +1041,52 @@
     "usage": "Espacio usado por PokeInfo en este dispositivo: {used} de {quota} disponibles.",
     "hint": "Lo ya guardado se omite: puedes cancelar y seguir después. Los datos no se actualizan solos; borra y descarga de nuevo para obtener novedades de la PokéAPI.",
     "clear": "Borrar datos sin conexión"
+  },
+  "account": {
+    "title": "Cuenta",
+    "menuSignIn": "Iniciar sesión con Google",
+    "menuSignInHint": "Sincroniza entre dispositivos",
+    "restoring": "Conectando…",
+    "intro": "Inicia sesión con Google para guardar capturados, shinies, favoritos, cacerías y el Pokémon del día en tu cuenta y ver lo mismo en todos tus dispositivos.",
+    "privacy": "Solo se guardan tu correo, nombre y foto de Google y lo que marcas en la app. Todo sigue en este dispositivo y funciona sin conexión; la cuenta recibe una copia cuando hay internet.",
+    "signIn": "Continuar con Google",
+    "signInOffline": "Conéctate a internet para iniciar sesión.",
+    "signInError": "No se pudo abrir el inicio de sesión de Google. Inténtalo de nuevo.",
+    "signedIn": "Sesión iniciada. Tu colección está sincronizada.",
+    "signedOut": "Cerraste sesión. Los datos siguen en este dispositivo.",
+    "deleted": "Cuenta eliminada.",
+    "actionError": "No se pudo completar. Revisa la conexión e inténtalo de nuevo.",
+    "status": {
+      "idle": "Esperando sincronización",
+      "syncing": "Sincronizando…",
+      "synced": "Sincronizado a las {time}",
+      "offline": "Sin conexión: se sincroniza cuando vuelva internet",
+      "error": "No se pudo sincronizar. Reintentando en unos instantes."
+    },
+    "syncHint": "Cada cambio llega a la cuenta en segundos; al abrir la app, busca lo que cambió en el otro dispositivo.",
+    "syncNow": "Sincronizar ahora",
+    "signOut": "Cerrar sesión",
+    "signOutHint": "Al cerrar sesión, los datos siguen en este dispositivo.",
+    "delete": "Eliminar cuenta",
+    "deleteTitle": "¿Eliminar cuenta?",
+    "deleteText": "Elimina tu cuenta y todo lo guardado en ella. Lo que está en este dispositivo sigue aquí. No se puede deshacer.",
+    "deleteConfirm": "Eliminar",
+    "firstSyncTitle": "¿Combinar con tu cuenta?",
+    "firstSyncText": "Este dispositivo y tu cuenta ya tienen datos. ¿Cómo quieres combinarlos?",
+    "firstSyncDevice": "En este dispositivo",
+    "firstSyncCloud": "En la cuenta",
+    "firstSyncConfirm": "Continuar",
+    "choice": {
+      "merge": "Sumar ambos",
+      "mergeHint": "Junta lo de este dispositivo con lo de la cuenta.",
+      "cloud": "Usar solo la cuenta",
+      "cloudHint": "Descarta lo que hay en este dispositivo.",
+      "device": "Usar solo este dispositivo",
+      "deviceHint": "Reemplaza lo que hay en la cuenta."
+    },
+    "callbackLoading": "Iniciando sesión…",
+    "callbackError": "No se pudo iniciar sesión",
+    "callbackErrorHint": "El inicio de sesión se canceló o caducó. En iPhone, inicia sesión desde la app instalada y termina sin cambiar de ventana.",
+    "backHome": "Volver al inicio"
   }
 }

@@ -74,6 +74,12 @@ const router = createRouter({
       name: 'daily',
       component: () => import('@/views/DailyView.vue'),
     },
+    {
+      // Volta do login com o Google (Supabase Auth, fluxo PKCE).
+      path: '/auth/callback',
+      name: 'auth-callback',
+      component: () => import('@/views/AuthCallbackView.vue'),
+    },
   ],
   // Ao voltar, restaura a posição da lista (a Home fica viva via KeepAlive); ao abrir outra
   // tela, começa do topo. Mudança só de query (filtros, time) mantém a posição: quem precisa
@@ -99,6 +105,7 @@ const ROUTE_TITLES: Partial<Record<string, string>> = {
   stats: 'app.statsTitle',
   speed: 'app.speedTitle',
   daily: 'app.dailyTitle',
+  'auth-callback': 'app.signInTitle',
 }
 
 function applyRouteTitle(): void {

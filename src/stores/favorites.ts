@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { computed, reactive } from 'vue'
 import { decodeBitset, encodeBitset } from '@/utils/bitset'
 import { readStorage, writeStorage } from '@/utils/storage'
+import { notifyLocalChange } from '@/utils/localChanges'
 
 const FAVORITES_KEY = 'pokeinfo:favorites:v1'
 
@@ -15,7 +16,15 @@ export const useFavoritesStore = defineStore('favorites', () => {
   let timer: ReturnType<typeof setTimeout> | undefined
   function persist(): void {
     clearTimeout(timer)
-    timer = setTimeout(() => writeStorage(FAVORITES_KEY, encodeBitset(ids)), 300)
+    timer = setTimeout(flush, 300)
+    notifyLocalChange()
+  }
+
+  function flush(): void {
+    if (timer === undefined) return
+    clearTimeout(timer)
+    timer = undefined
+    writeStorage(FAVORITES_KEY, encodeBitset(ids))
   }
 
   const count = computed(() => ids.size)
@@ -40,5 +49,5 @@ export const useFavoritesStore = defineStore('favorites', () => {
     persist()
   }
 
-  return { ids, count, isFavorite, toggle, exportData, importData }
+  return { ids, count, isFavorite, toggle, exportData, importData, flush }
 })
