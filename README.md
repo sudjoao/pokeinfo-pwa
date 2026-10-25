@@ -210,7 +210,7 @@ Bulbapedia, com o procedimento descrito em [`scripts/README.md`](scripts/README.
 | --- | --- |
 | Framework | [Vue 3](https://vuejs.org/) (Composition API + `<script setup>`) e TypeScript |
 | Build | [Vite 8](https://vite.dev/) |
-| UI / Material Design | [Vuetify 4](https://vuetifyjs.com/) com ícones SVG de [`@mdi/js`](https://pictogrammers.com/library/mdi/) |
+| UI / Material Design | [Vuetify 4](https://vuetifyjs.com/) com ícones SVG de [`@mdi/js`](https://pictogrammers.com/library/mdi/); no build, `build/purgeVuetifyUtilities.ts` tira do CSS os utilitários do Vuetify que o código não usa (CSS inicial de 277 KB para 113 KB) |
 | Estado | [Pinia](https://pinia.vuejs.org/) |
 | Idiomas | [vue-i18n](https://vue-i18n.intlify.dev/) (mensagens em `src/locales`, pré-compiladas pelo `unplugin-vue-i18n`) |
 | Rotas | [Vue Router](https://router.vuejs.org/) |

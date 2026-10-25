@@ -5,6 +5,7 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 import vuetify from 'vite-plugin-vuetify'
 import { VitePWA } from 'vite-plugin-pwa'
 import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite'
+import { purgeVuetifyUtilities } from './build/purgeVuetifyUtilities'
 
 const DAY = 60 * 60 * 24
 
@@ -46,6 +47,7 @@ export default defineConfig({
     vue(),
     vueDevTools(),
     vuetify({ autoImport: true }),
+    purgeVuetifyUtilities(),
     // Pré-compila os JSON de src/locales e usa o build runtime-only do vue-i18n. Sem mensagem
     // nenhuma para compilar em runtime, o compilador (~17 KB) também sai do bundle.
     VueI18nPlugin({
