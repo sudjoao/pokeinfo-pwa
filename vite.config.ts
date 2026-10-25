@@ -7,6 +7,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite'
 import { purgeVuetifyUtilities } from './build/purgeVuetifyUtilities.ts'
 import { preloadLocale } from './build/preloadLocale.ts'
+import { contentSecurityPolicy } from './build/contentSecurityPolicy.ts'
 
 const DAY = 60 * 60 * 24
 
@@ -282,6 +283,8 @@ export default defineConfig({
         ],
       },
     }),
+    // Por último: o hash dos scripts inline precisa ver o HTML com tudo o que os outros injetam.
+    contentSecurityPolicy(),
   ],
   build: {
     rolldownOptions: {
