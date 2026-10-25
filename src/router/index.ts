@@ -5,6 +5,9 @@ import { i18n } from '@/plugins/i18n'
 import { trackInAppNavigation } from '@/composables/usePageFocus'
 import { CARD_ARTWORK_SIZE, preloadArtwork } from '@/utils/pokemon'
 import { usePokemonDetailStore } from '@/stores/pokemonDetail'
+import { usePokedexStore } from '@/stores/pokedex'
+import { gameContextFromQuery } from '@/utils/games'
+import { queryWithSavedGame } from '@/utils/lastGame'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -15,8 +18,17 @@ const router = createRouter({
       component: HomeView,
       // Abrindo o app na Pokédex sem filtro (o início do PWA instalado), os primeiros cards são
       // sempre os #1 a #4: as imagens (o LCP) começam a baixar já, e não depois da montagem.
+      // Com um jogo (o salvo da última visita), a Pokédex dele já começa a baixar aqui.
       beforeEnter: (to, from) => {
-        if (from !== START_LOCATION || Object.keys(to.query).length) return
+        if (from !== START_LOCATION) return
+        const context = gameContextFromQuery(to.query)
+        if (context) {
+          usePokedexStore()
+            .ensureDexEntries(context.dex.slug)
+            .catch(() => {})
+          return
+        }
+        if (Object.keys(to.query).length) return
         for (let id = 1; id <= 4; id++) preloadArtwork(id, CARD_ARTWORK_SIZE)
       },
     },
@@ -112,6 +124,15 @@ const router = createRouter({
 })
 
 trackInAppNavigation(router)
+
+// Quem entra na Pokédex, no time ou numa ferramenta sem dizer o jogo (o início do PWA, um item do
+// menu) continua no último jogo escolhido. Só na entrada da tela: dentro dela, "Todos os jogos" é
+// uma escolha e a URL sem jogo é respeitada.
+router.beforeEach((to, from) => {
+  if (from.name === to.name) return
+  const query = queryWithSavedGame(String(to.name), to.query)
+  if (query) return { path: to.path, query, hash: to.hash }
+})
 
 /** Título da aba por tela; o do detalhe é definido pela própria view (leva o nome do Pokémon). */
 const ROUTE_TITLES: Partial<Record<string, string>> = {

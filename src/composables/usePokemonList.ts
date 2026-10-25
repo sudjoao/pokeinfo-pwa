@@ -20,6 +20,7 @@ import {
 } from '@/utils/advancedFilters'
 import { useDebouncedRef } from '@/composables/useDebouncedRef'
 import { buildDexList, findGame, resolveDex } from '@/utils/games'
+import { saveGame } from '@/utils/lastGame'
 import { describeError } from '@/utils/errors'
 import { formatHeight, formatWeight, isPokemonType } from '@/utils/pokemon'
 import { exclusiveVersionOf, exclusiveVersions } from '@/utils/exclusives'
@@ -180,7 +181,15 @@ export function usePokemonList() {
       const parsed = parseAdvanced(query)
       const same =
         JSON.stringify(advancedToQuery(parsed)) === JSON.stringify(advancedToQuery(advanced.value))
-      if (!same) advanced.value = parsed
+      if (!same) {
+        advanced.value = parsed
+        return
+      }
+      // "Pokédex" no menu (`/`) com a lista já aberta num jogo: a URL volta a dizer o jogo e os
+      // filtros que estão na tela (senão um recarregar ou compartilhar perderia o contexto).
+      const canonical = { ...foreignQuery(query), ...buildQuery() }
+      if (JSON.stringify(canonical) !== JSON.stringify({ ...query }))
+        router.replace({ query: canonical })
     },
   )
 
@@ -441,6 +450,9 @@ export function usePokemonList() {
   )
 
   watch(dex, () => loadDex())
+
+  // A escolha de jogo/Pokédex vale para a próxima visita (o router a devolve à URL).
+  watch([() => game.value?.slug, () => dex.value?.slug], () => saveGame(game.value, dex.value))
 
   // Qualquer filtro novo reinicia a lista e volta ao topo (a URL muda por replace, que não rola).
   watch(
