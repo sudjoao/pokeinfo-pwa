@@ -7,6 +7,8 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 
 ## [Não lançado]
 
+## [1.7.1] - 2026-10-25
+
 Rodada de desempenho, medida num celular emulado (CPU 4× mais lenta, 4G lento): na primeira
 visita, a Pokédex aparece com o LCP em ~2,9 s (era ~4,2 s) e o detalhe em ~3,0 s (era ~4,3 s).
 
@@ -27,6 +29,9 @@ visita, a Pokédex aparece com o LCP em ~2,9 s (era ~4,2 s) e o detalhe em ~3,0 
   a rolagem tem menos travadas.
 - Assets com hash saem com cache imutável de um ano na Vercel (antes cada visita sem o service
   worker revalidava dezenas de arquivos); chunk de deploy antigo dá 404 em vez do `index.html`.
+- Cada tag enviada vira uma release do GitHub com as notas do CHANGELOG (workflow `release.yml` e
+  `scripts/release-notes.mjs`); as releases que faltavam (1.6.0 e 1.7.0) e as notas resumidas de
+  1.1.0 a 1.3.0 foram preenchidas.
 
 ### Removido
 
@@ -372,6 +377,8 @@ Primeira versão estável da Pokédex em formato de PWA, consumindo a [PokéAPI]
 - As marcações de captura ficam só no aparelho, sem sincronização entre dispositivos.
 - Os gritos vêm só em `.ogg`; em navegadores sem suporte o botão de som não aparece.
 
+[Não lançado]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.7.1...HEAD
+[1.7.1]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.7.0...v1.7.1
 [1.7.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.6.0...v1.7.0
 [1.6.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.4.0...v1.5.0
