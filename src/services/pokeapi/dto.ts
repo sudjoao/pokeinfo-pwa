@@ -200,18 +200,6 @@ export interface PokedexDto {
   pokemon_entries: PokedexEntryDto[]
 }
 
-export interface TypePokemonDto {
-  slot: number
-  pokemon: NamedApiResource
-}
-
-/** Só o que usamos de `/type/{nome}`: a lista de Pokémon daquele tipo com o slot. */
-export interface TypeDto {
-  id: number
-  name: string
-  pokemon: TypePokemonDto[]
-}
-
 export interface EncounterDetailDto {
   min_level: number
   max_level: number

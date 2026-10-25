@@ -58,7 +58,6 @@ const notice = ref<string | null>(null)
 const now = ref(Date.now())
 let timer: ReturnType<typeof setInterval> | undefined
 onMounted(() => {
-  pokedex.load()
   pokemonData.load().catch(() => {})
   timer = setInterval(() => {
     now.value = Date.now()

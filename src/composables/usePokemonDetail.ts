@@ -232,7 +232,6 @@ export function usePokemonDetail(idOrName: Ref<string>, context: Ref<GameContext
   })
 
   watch(idOrName, load, { immediate: true })
-  pokedex.load()
 
   return {
     detail,

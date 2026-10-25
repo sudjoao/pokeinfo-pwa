@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, shallowRef, watch } from 'vue'
+import { computed, ref, shallowRef, watch } from 'vue'
 import { useRoute, useRouter, type LocationQueryRaw } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { GAMES } from '@/data/games'
@@ -30,9 +30,6 @@ const route = useRoute()
 const router = useRouter()
 const { t, locale } = useI18n()
 const pokedex = usePokedexStore()
-// Nomes do "quem aprende" vêm do índice (em cache local; a Home pode nem ter sido aberta).
-onMounted(() => pokedex.load())
-
 /** Quantos golpes aparecem por vez (são ~900): "Mostrar mais" adiciona outro lote. */
 const PAGE = 60
 /** Golpes na busca "quem aprende" (como num moveset). */

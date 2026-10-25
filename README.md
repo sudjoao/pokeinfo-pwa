@@ -49,7 +49,7 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
   Vem de `/pokemon/{id}/encounters` (uma requisição por Pokémon, só na tela de detalhes).
 - **Filtro por tipo**: chip "Tipo" abre um seletor com os 18 tipos; dá para escolher até dois
   (o Pokémon precisa ter os dois, ex.: Água/Terra). Combina com jogo, busca e captura e vai na URL
-  (`?type=water,ground`). Não faz requisição: usa o mapa de tipos que já fica em cache.
+  (`?type=water,ground`). Não faz requisição: usa o mapa de tipos embutido no app.
 - **Filtros e ordenação** (chip "Filtros", também no team builder): ordenar por número, nome, total de
   stats, cada stat, altura ou peso (o card mostra o valor), e filtrar por geração, categoria
   (lendário, mítico, bebê, comum), "fraco a" um tipo (com a tabela da geração do jogo), habilidade,
@@ -150,7 +150,7 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
   livre; botão "Pular para o conteúdo"; ao trocar de tela o foco vai para o título (e, ao voltar
   para a lista, para o card que foi aberto); a quantidade de resultados é anunciada ao leitor de
   tela depois de buscar ou filtrar.
-- **Offline**: índice e mapa de tipos ficam em cache local; artworks e respostas recentes ficam no service worker.
+- **Offline**: índice e mapa de tipos vêm embutidos no app; artworks e respostas recentes ficam no service worker.
   Em **Usar offline** (menu) dá para baixar, por geração, as fichas completas, as imagens e os gritos
   (com estimativa de tamanho, progresso, cancelar/retomar e apagar), guardados em caches próprios.
 - Instalável no iOS/Android como app (manifest + service worker).
@@ -250,7 +250,7 @@ src/
     encounters.ts             # nome da área a partir do slug, método e faixa de nível
     storage.ts
   stores/
-    pokedex.ts                # Pinia: índice + cache de resumos (persistido) e Pokédex regionais (memória)
+    pokedex.ts                # Pinia: índice e tipos (do build + novos da API) e Pokédex regionais (memória)
     pokemonDetail.ts          # Pinia: detalhes, espécies, cadeias e locais (só em memória)
   composables/
     usePokemonList.ts         # busca + filtros (jogo, captura, tipo, versão) + lotes do scroll infinito
@@ -276,18 +276,23 @@ src/
 
 ### Fluxo de dados
 
-1. A página carrega **uma vez** o índice completo da Pokédex (`/pokemon?limit=100000`, ~110 KB) e guarda `{ id, name }` de cada Pokémon.
+1. O índice completo da Pokédex (`{ id, name }` de cada Pokémon e forma) e os tipos de cada um vêm
+   embutidos no build (`src/data/generated/dexIndex.ts`, ~9 KB comprimidos, gerado por
+   `scripts/gen-dex-index.mjs`): a lista abre sem nenhuma requisição à PokéAPI. Uma vez por semana,
+   em segundo plano, o app confere o índice da API (`/pokemon?limit=100000`) atrás de Pokémon
+   lançados depois do build e guarda só esses (`pokeinfo:index-extra:v1`).
 2. A busca filtra esse índice localmente, sem novas requisições.
    Com um jogo selecionado, a fonte da lista passa a ser a Pokédex regional (`/pokedex/{slug}`,
    uma requisição de 12 a 45 KB por dex), e as formas regionais são resolvidas a partir do
    próprio índice (ex.: `zorua` na dex de Hisui vira `zorua-hisui`).
-3. O scroll infinito pede os resumos do próximo lote (`/pokemon/{id}`) apenas para os que ainda não estão em cache, e guarda só um objeto enxuto (`id`, `name`, `types`).
+3. O scroll infinito monta os cards do próximo lote com o índice e o mapa de tipos; só um Pokémon fora
+   do mapa (mais novo que o build) busca `/pokemon/{id}`, uma vez, e guarda só os tipos.
 4. O artwork é montado a partir do id, sem depender do JSON de detalhe. Ele passa pelo proxy
    [wsrv.nl](https://wsrv.nl/), que redimensiona e converte para WebP em três larguras fixas
    (96, 240 e 480 px, para telas 2×): o PNG original tem 475 px e ~120 KB, o do card fica com ~13 KB.
    Se o proxy falhar, a imagem cai para o PNG original do repositório de sprites.
 5. A tela de detalhes busca `/pokemon/{id}`, depois `/pokemon-species/{id}` e
-   `/evolution-chain/{id}`; os tipos dos estágios da evolução vêm do cache de resumos.
+   `/evolution-chain/{id}`; os tipos dos estágios da evolução vêm do mapa de tipos.
    A URL do grito também é derivada do id, o que permite tocá-lo ainda no toque do card.
 6. Os locais de encontro vêm de `/pokemon/{id}/encounters` em paralelo com a espécie; a resposta
    crua é repetitiva (uma entrada por área × versão × nível), então o app guarda só uma linha por
@@ -299,10 +304,9 @@ O objetivo é funcionar offline sem inflar o armazenamento do usuário:
 
 | Onde | O que | Limite |
 | --- | --- | --- |
-| `localStorage` | índice (`pokeinfo:index:v1`, ~40 KB) e mapa de tipos (`pokeinfo:types:v1`, ~16 KB) | ~60 KB para a Pokédex inteira |
+| `localStorage` | só os Pokémon mais novos que o build e a data da última conferência (`pokeinfo:index-extra:v1`) | quase sempre ~50 bytes |
 | `localStorage` | capturados por jogo (`pokeinfo:caught:v1`), um bitset em base64 por jogo | ~170 bytes por jogo (~4 KB no total) |
-| Service worker `pokeapi-index` | resposta do índice | 3 entradas, 7 dias |
-| Service worker `pokeapi-types` | os 18 `/type/{nome}` que montam o mapa de tipos (~20 KB cada) | 24 entradas, 30 dias |
+| Service worker `pokeapi-index` | resposta do índice (conferência semanal) | 3 entradas, 7 dias |
 | Service worker `pokeapi-pokedex` | Pokédex regionais por jogo (12 a 45 KB) | 12 entradas, 30 dias |
 | Service worker `pokeapi-species` | espécies e cadeias de evolução (~2 a 50 KB) | 100 entradas, 7 dias |
 | Service worker `pokeapi-detail` | respostas de detalhe da PokéAPI (~300 KB cada) | 60 entradas, 7 dias |
@@ -317,10 +321,11 @@ O objetivo é funcionar offline sem inflar o armazenamento do usuário:
 | `localStorage` | Pokémon do dia (`pokeinfo:daily:v1`) e recentes (`pokeinfo:recent:v1`) | poucos KB |
 | `localStorage` | só com conta: sessão do Supabase (`pokeinfo:auth:v1`) e a base da última sincronização (`pokeinfo:sync:v1`, mesmo tamanho da coleção) | poucos KB |
 
-Os cards não fazem requisição por Pokémon: os tipos vêm de um mapa montado uma vez a partir dos
-18 endpoints `/type/{nome}` (~385 KB no total, renovado em segundo plano a cada 7 dias). Ler os tipos
-de `/pokemon/{id}` custaria ~290 KB por card, quase tudo lista de golpes. Só um Pokémon que não
-esteja no mapa (lançado depois do cache) dispara uma busca individual.
+Os cards não fazem requisição por Pokémon: os tipos vêm do mapa embutido no build, montado pelo
+script a partir dos 18 endpoints `/type/{nome}`. Antes o app fazia essas 18 requisições (~385 KB,
+~70 KB comprimidos) mais a do índice na primeira visita, antes de mostrar o primeiro card; ler os
+tipos de `/pokemon/{id}` custaria ~290 KB por card, quase tudo lista de golpes. Só um Pokémon que
+não esteja no mapa (lançado depois do build) dispara uma busca individual.
 
 Detalhes, espécies, cadeias e locais ficam só em memória durante a sessão (store `pokemonDetail`),
 assim como as entradas das Pokédex regionais (store `pokedex`); nada disso vai para o `localStorage`.

@@ -88,9 +88,8 @@ export function useTeam(generation: () => number | undefined = () => undefined) 
   // Um id fora do mapa de tipos (Pokémon lançado depois do cache) é buscado uma vez;
   // o mapa atualizado re-renderiza o membro com os tipos certos.
   watch(
-    [ids, () => store.ready],
-    ([list, ready]) => {
-      if (!ready) return
+    ids,
+    (list) => {
       const missing = list
         .filter((id) => store.typesOf(id) === undefined)
         .map((id) => store.entryOf(id))

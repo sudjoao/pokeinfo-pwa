@@ -31,7 +31,6 @@ const store = usePokedexStore()
 const pokemonData = usePokemonData()
 
 onMounted(() => {
-  store.load()
   pokemonData.load().catch(() => {})
 })
 

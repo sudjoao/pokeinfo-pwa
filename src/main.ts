@@ -25,8 +25,9 @@ loadLocale(i18n.global.locale.value).then(() => {
 })
 
 // Caches do service worker que não são mais usados: os gritos guardados com respostas parciais
-// (ver useCry.ts) e os PNGs de artwork de 120 KB, trocados pelo WebP do wsrv.nl.
-const LEGACY_SW_CACHES = ['pokeapi-cries', 'pokeapi-artwork']
+// (ver useCry.ts), os PNGs de artwork de 120 KB, trocados pelo WebP do wsrv.nl, e os 18 /type
+// que montavam o mapa de tipos, hoje embutido no build.
+const LEGACY_SW_CACHES = ['pokeapi-cries', 'pokeapi-artwork', 'pokeapi-types']
 if (typeof caches !== 'undefined') {
   LEGACY_SW_CACHES.forEach((name) => caches.delete(name).catch(() => {}))
 }

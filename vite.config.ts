@@ -148,7 +148,8 @@ export default defineConfig({
             },
           },
           {
-            // Índice completo de nomes (1 requisição grande, raramente muda)
+            // Índice completo de nomes: o app já traz um no build e só confere este uma vez por
+            // semana, atrás de Pokémon mais novos (stores/pokedex.ts).
             urlPattern: /^https:\/\/pokeapi\.co\/api\/v2\/pokemon\?limit=/i,
             handler: 'StaleWhileRevalidate',
             options: {
@@ -164,17 +165,6 @@ export default defineConfig({
             options: {
               cacheName: 'pokeapi-pokedex',
               expiration: { maxEntries: 12, maxAgeSeconds: 30 * DAY },
-              cacheableResponse: { statuses: [0, 200] },
-            },
-          },
-          {
-            // Mapa de tipos: 18 respostas de /type/{nome} (~20 KB cada) que substituem
-            // a leitura de /pokemon/{id} (~290 KB) para os tipos dos cards.
-            urlPattern: /^https:\/\/pokeapi\.co\/api\/v2\/type\/.*/i,
-            handler: 'StaleWhileRevalidate',
-            options: {
-              cacheName: 'pokeapi-types',
-              expiration: { maxEntries: 24, maxAgeSeconds: 30 * DAY },
               cacheableResponse: { statuses: [0, 200] },
             },
           },

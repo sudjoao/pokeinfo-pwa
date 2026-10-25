@@ -340,14 +340,12 @@ export function usePokemonList() {
   /** Muda a cada reset; usado como :key para reiniciar o scroll infinito. */
   const listKey = ref(0)
 
-  const sourceLoading = computed(() => store.loading || dexLoading.value || tableLoading.value)
-  const sourceError = computed(() => {
-    const error = store.sourceError ?? dexError.value
-    return error ? describeError(error, t, 'error.loadDex') : null
-  })
+  const sourceLoading = computed(() => dexLoading.value || tableLoading.value)
+  const sourceError = computed(() =>
+    dexError.value ? describeError(dexError.value, t, 'error.loadDex') : null,
+  )
   const sourceReady = computed(
     () =>
-      store.ready &&
       !sourceLoading.value &&
       !sourceError.value &&
       (!dex.value || Boolean(store.dexEntries[dex.value.slug])),
@@ -406,10 +404,6 @@ export function usePokemonList() {
   }
 
   async function retry(): Promise<void> {
-    if (!store.ready) {
-      await store.load(true)
-      return
-    }
     if (dexError.value) {
       await loadDex()
       return
@@ -465,7 +459,6 @@ export function usePokemonList() {
     },
   )
 
-  store.load()
   loadDex()
 
   return {

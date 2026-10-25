@@ -24,7 +24,6 @@ const pokemonData = usePokemonData()
 const cry = useCry()
 
 onMounted(() => {
-  store.load()
   pokemonData.load().catch(() => {})
 })
 

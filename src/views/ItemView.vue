@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, shallowRef, watch } from 'vue'
+import { computed, ref, shallowRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { GAMES } from '@/data/games'
@@ -20,9 +20,6 @@ const router = useRouter()
 const { t, te, locale, n } = useI18n()
 const reference = useReferenceStore()
 const pokedex = usePokedexStore()
-// Nomes de quem segura vêm do índice (em cache local; a Home pode nem ter sido aberta).
-onMounted(() => pokedex.load())
-
 const slug = computed(() => String(route.params.slug ?? ''))
 const entry = computed(() => findItem(slug.value))
 const title = computed(() =>
