@@ -129,6 +129,8 @@ export default defineConfig({
         // aberto é baixado, e fica no cache `generated-learnsets` abaixo. O SDK do Supabase
         // (~55 KB gz) também: só quem entra na conta baixa, e ele fica no cache `supabase-sdk`.
         globIgnores: ['**/learnset-*.js', '**/supabase-*.js'],
+        // Arquivos de /.well-known (security.txt) vêm do servidor, não do app.
+        navigateFallbackDenylist: [/^\/\.well-known\//],
         // Caches em runtime da PokéAPI, separados por tipo de recurso para
         // manter o armazenamento do usuário pequeno (ver README > Cache).
         runtimeCaching: [

@@ -40,6 +40,9 @@ conta não aparece no cabeçalho.
 - **Excluir conta** (LGPD) chama `delete_account()`, que apaga só quem chama: o usuário do Auth e,
   em cascata, a coleção.
 - A chave publicável vai no bundle por design; a `service_role`/secret **nunca** entra no app.
+- A Content Security Policy do app só deixa conectar com o projeto do `VITE_SUPABASE_URL` do build,
+  então um script injetado não consegue mandar a sessão para outro lugar.
+- Vale abrir **Advisors > Security Advisor** no painel depois de cada migration.
 
 As regras foram testadas num Postgres local (inserir/ler/alterar linha de outro usuário, forjar
 versão, trocar o dono da linha, payload grande, acesso anônimo, exclusão em cascata).
@@ -75,8 +78,11 @@ versão, trocar o dono da linha, payload grande, acesso anônimo, exclusão em c
 2. **Authentication > URL Configuration**:
    - *Site URL*: `https://<seu-app>.vercel.app`
    - *Redirect URLs*: `https://<seu-app>.vercel.app/auth/callback`,
-     `http://localhost:5173/auth/callback` e `http://localhost:4173/auth/callback` (e, se quiser
-     testar previews da Vercel, `https://*-<sua-conta>.vercel.app/auth/callback`).
+     `http://localhost:5173/auth/callback` e `http://localhost:4173/auth/callback`.
+   - **Não use curinga** (`https://*-<sua-conta>.vercel.app/...`): qualquer pessoa pode criar um
+     projeto na Vercel com um nome que case com o padrão e, com um link de login montado por ela,
+     receber o código de quem clicar (o PKCE não protege quando é o atacante que inicia o fluxo).
+     Para testar um preview, acrescente a URL exata dele e tire depois.
 
 ### 4. Variáveis de ambiente
 

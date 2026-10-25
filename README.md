@@ -218,7 +218,7 @@ Bulbapedia, com o procedimento descrito em [`scripts/README.md`](scripts/README.
 | Dados | [PokéAPI v2](https://pokeapi.co/docs/v2) (imagens redimensionadas pelo [wsrv.nl](https://wsrv.nl/)) |
 | QR code | [uqr](https://github.com/unjs/uqr) (MIT, só no backup) |
 | Conta e sincronização | [Supabase](https://supabase.com/) (Auth com Google + Postgres com RLS), SDK carregado sob demanda |
-| Qualidade | ESLint, oxlint, Prettier, vue-tsc |
+| Qualidade | ESLint, oxlint, Prettier, vue-tsc; CodeQL, Dependabot e `npm audit` no CI |
 | Deploy | [Vercel](https://vercel.com/) |
 
 ## Arquitetura
@@ -353,8 +353,8 @@ npm run format     # prettier
 ## Deploy
 
 O projeto está configurado para a Vercel (`vercel.json`): rewrites para SPA, `sw.js` sem cache,
-o content-type correto para o `manifest.webmanifest` e cabeçalhos de segurança (`nosniff`, sem
-iframe, `Referrer-Policy` e `Permissions-Policy`). Basta conectar o repositório.
+o content-type correto para o `manifest.webmanifest` e cabeçalhos de segurança (ver
+[Segurança](#segurança)). Basta conectar o repositório.
 
 Os arquivos de `/assets` têm hash no nome e saem com `immutable` (um ano): quem abre pelo navegador,
 sem o service worker, não revalida dezenas de chunks a cada visita. Eles ficam fora do rewrite da
@@ -364,6 +364,34 @@ SPA, então um chunk de um deploy antigo dá 404 em vez de receber o `index.html
 Para a conta Google, configure o Supabase e o Google Cloud e adicione `VITE_SUPABASE_URL` e
 `VITE_SUPABASE_PUBLISHABLE_KEY` nas variáveis da Vercel: passo a passo em
 [`supabase/README.md`](supabase/README.md).
+
+## Segurança
+
+O app guarda pouca coisa sensível (a coleção e, para quem entra, a sessão da conta Google), mas a
+sessão fica no `localStorage`: um script injetado conseguiria lê-la. Por isso as camadas abaixo.
+
+- **Content Security Policy** gerada no build (`build/contentSecurityPolicy.ts`) num `<meta>` do
+  `index.html`: scripts só do próprio site (o inline de pré-carga do idioma entra pelo hash),
+  conexões só com a PokéAPI, o wsrv.nl, o GitHub e o projeto Supabase do `.env`, imagens também
+  da foto do Google; sem `eval`, plugins nem iframes. O build falha se o hash não bater com o
+  HTML final. Ao usar uma origem nova (outra API, CDN de imagem), acrescente-a em `SOURCES`.
+- **Cabeçalhos** (`vercel.json`): `frame-ancestors 'none'` e `X-Frame-Options` (sem iframe),
+  `nosniff`, `Referrer-Policy`, `Cross-Origin-Opener-Policy` e `Cross-Origin-Resource-Policy`,
+  `Permissions-Policy` fechando câmera, microfone, localização, pagamento e hardware. HSTS vem da
+  Vercel (`max-age` de 2 anos com `preload`).
+- **Entrada validada**: backups (arquivo até 1 MB, link e conta) passam por `parseBackupData`, com
+  tamanho máximo de cada campo; caminhos da PokéAPI montados com parâmetros da URL só saem no
+  formato da API (`SAFE_PATH` em `services/pokeapi/client.ts`); o destino depois do login só aceita
+  caminhos do app (`safeNextPath`). Nenhum `v-html` (o ESLint barra, junto com `eval` e
+  `new Function`).
+- **Conta**: login Google por PKCE, Row Level Security em todas as operações e chave publicável no
+  bundle por design; detalhes em [`supabase/README.md`](supabase/README.md#segurança).
+- **Dependências e CI**: `npm audit` (alto ou crítico no bundle derruba o CI), `npm audit signatures`,
+  CodeQL (`security-extended`) a cada push e toda segunda, Dependabot semanal, ações do GitHub
+  fixadas por SHA com token só de leitura, e `allowScripts` no `package.json` (só `esbuild` e
+  `fsevents` rodam script de instalação).
+- **Relatos**: [`SECURITY.md`](SECURITY.md) e `/.well-known/security.txt` (renovar o `Expires`
+  todo ano).
 
 ## Versões
 

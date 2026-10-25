@@ -7,6 +7,25 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 
 ## [Não lançado]
 
+Revisão de segurança ponta a ponta (web e PWA).
+
+### Adicionado
+
+- Content Security Policy gerada no build: scripts só do próprio site, conexões só com a PokéAPI,
+  o wsrv.nl, o GitHub e o Supabase; sem `eval`, plugins nem iframes.
+- Cabeçalhos `Cross-Origin-Opener-Policy`, `Cross-Origin-Resource-Policy` e `frame-ancestors`, e
+  `Permissions-Policy` cobrindo mais APIs de hardware.
+- CodeQL, Dependabot, `npm audit` e conferência das assinaturas do npm no CI; ações do GitHub
+  fixadas por SHA e com token só de leitura.
+- `SECURITY.md` e `/.well-known/security.txt` com o caminho para relatar falhas.
+
+### Corrigido
+
+- Dependências de desenvolvimento com vulnerabilidades conhecidas (Vite 8.3.5 e outras).
+- Backups e links adulterados com campos enormes ou valores absurdos não travam mais a tela.
+- Links com `..` ou `%2F` no nome de um item ou golpe não levam o app a buscar outro recurso da
+  PokéAPI.
+
 ## [1.8.0] - 2026-10-25
 
 Revisão de UX ponta a ponta (usabilidade, acessibilidade, textos e animação), no PWA e na web.
