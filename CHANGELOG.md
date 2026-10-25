@@ -7,6 +7,14 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 
 ## [Não lançado]
 
+## [1.9.1] - 2026-10-25
+
+### Corrigido
+
+- No iPhone, ao abrir um Pokémon com a lista rolada (ou voltar para ela), a tela ficava preta,
+  inteira ou pela metade, por um instante antes do detalhe aparecer. No Safari a troca entre lista
+  e detalhe agora é imediata; a animação do artwork continua nos outros navegadores.
+
 ## [1.9.0] - 2026-10-25
 
 Revisão de segurança ponta a ponta (web e PWA).
@@ -433,7 +441,8 @@ Primeira versão estável da Pokédex em formato de PWA, consumindo a [PokéAPI]
 - As marcações de captura ficam só no aparelho, sem sincronização entre dispositivos.
 - Os gritos vêm só em `.ogg`; em navegadores sem suporte o botão de som não aparece.
 
-[Não lançado]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.9.0...HEAD
+[Não lançado]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.9.1...HEAD
+[1.9.1]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.9.0...v1.9.1
 [1.9.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.8.0...v1.9.0
 [1.8.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.7.1...v1.8.0
 [1.7.1]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.7.0...v1.7.1
