@@ -4,11 +4,11 @@ import { START_LOCATION, type RouteLocationNormalized, type Router } from 'vue-r
 /**
  * Transição "compartilhada" entre a lista e o detalhe: o artwork do card voa até o topo do
  * detalhe (e volta ao card no "voltar"), com a View Transitions API (Safari 18+, Chrome 111+).
- * Sem suporte, com movimento reduzido ou no gesto de voltar do iOS (que já anima a troca de
- * página), fica a transição de página do App.vue.
+ * Sem suporte, com movimento reduzido ou no gesto de voltar do iOS (que já anima a troca de página),
+ * fica a transição de página do App.vue. No Safari (ver `appleWebKit`) a troca é imediata.
  */
 
-/** Enquanto true, o <Transition> de página do App.vue troca as telas sem CSS: quem anima é o navegador. */
+/** Enquanto true, o <Transition> de página do App.vue troca as telas sem CSS: quem anima é o navegador (ou ninguém). */
 export const nativePageTransition = ref(false)
 
 const ARTWORK_NAME = 'pokemon-artwork'
@@ -34,6 +34,17 @@ if (typeof window !== 'undefined') {
     )
   })
 }
+
+/**
+ * WebKit da Apple (Safari e todo navegador do iOS): quando a troca muda a rolagem da janela (a lista
+ * rolada vai para o detalhe no topo, ou volta restaurando a posição), o compositor só aplica a
+ * rolagem nova alguns quadros depois de começar a desenhar a View Transition, e nesse intervalo a
+ * camada dela fica fora da tela: a tela some inteira (ou metade). O crossfade do App.vue também não
+ * serve: a página que sai aparece já rolada para o topo, com o cabeçalho cortado. Medido no Safari
+ * do simulador do iPhone gravando a tela; sem mudar a rolagem não acontece, mas lista↔detalhe quase
+ * sempre muda.
+ */
+const appleWebKit = typeof navigator !== 'undefined' && navigator.vendor.startsWith('Apple')
 
 const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms))
 
@@ -73,10 +84,27 @@ function canAnimate(to: RouteLocationNormalized, from: RouteLocationNormalized):
   if (typeof document.startViewTransition !== 'function') return false
   if (from === START_LOCATION || browserAnimated) return false
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false
+  return isListDetail(to, from)
+}
+
+function isListDetail(to: RouteLocationNormalized, from: RouteLocationNormalized): boolean {
   return (
     (from.name === 'home' && to.name === 'pokemon') ||
     (from.name === 'pokemon' && to.name === 'home')
   )
+}
+
+/** Resolve quando a navegação termina (afterEach); o prazo cobre uma cancelada ou redirecionada. */
+function navigationEnd(router: Router): Promise<void> {
+  return Promise.race([
+    new Promise<void>((resolve) => {
+      const stop = router.afterEach(() => {
+        stop()
+        resolve()
+      })
+    }),
+    sleep(1000),
+  ])
 }
 
 export function installArtworkTransition(router: Router): void {
@@ -85,6 +113,19 @@ export function installArtworkTransition(router: Router): void {
   })
 
   router.beforeResolve((to, from) => {
+    if (appleWebKit && from !== START_LOCATION && isListDetail(to, from)) {
+      nativePageTransition.value = true
+      if (to.name === 'home') document.documentElement.classList.add(RESTORING_CLASS)
+      void navigationEnd(router)
+        .then(() => nextTick())
+        .then(() => sleep(0))
+        .then(() => {
+          // O router já restaurou a posição da lista (logo depois do nextTick).
+          nativePageTransition.value = false
+          document.documentElement.classList.remove(RESTORING_CLASS)
+        })
+      return
+    }
     if (!canAnimate(to, from)) return
     const forward = to.name === 'pokemon'
     const id = pokemonIdOf(forward ? to : from)
@@ -99,16 +140,7 @@ export function installArtworkTransition(router: Router): void {
     // Estado de saída: o card tocado (ida) ou o artwork do detalhe (volta).
     name(forward ? cardArtwork(id) : heroArtwork())
 
-    // A navegação termina no afterEach; o prazo cobre uma navegação cancelada ou redirecionada.
-    const navigated = Promise.race([
-      new Promise<void>((resolve) => {
-        const stop = router.afterEach(() => {
-          stop()
-          resolve()
-        })
-      }),
-      sleep(1000),
-    ])
+    const navigated = navigationEnd(router)
 
     nativePageTransition.value = true
     document.documentElement.classList.add(ACTIVE_CLASS)
