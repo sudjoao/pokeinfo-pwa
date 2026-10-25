@@ -53,7 +53,13 @@ function onLinkClick(event: MouseEvent): void {
 </script>
 
 <template>
-  <!-- `link` só dá o visual de clicável; o clique e o foco ficam no link/botão do nome (stretched). -->
+  <!--
+    `link` só dá o visual de clicável; o clique e o foco ficam no link/botão do nome (stretched).
+    A lista chega a mais de mil cards, então o card evita componentes que não precisa: o `#loader`
+    vazio tira a barra de progresso que o v-card monta mesmo sem `loading` (com um
+    IntersectionObserver por card), e item/título/texto são o mesmo HTML que v-card-item,
+    v-card-title e v-card-text gerariam, sem uma instância de componente cada.
+  -->
   <v-card
     class="pokemon-card stretched-host"
     :class="{ 'pokemon-card--selected': selected }"
@@ -62,6 +68,7 @@ function onLinkClick(event: MouseEvent): void {
     hover
     link
   >
+    <template #loader />
     <div class="pokemon-card__art pa-2">
       <PokemonArtwork :id="pokemon.id" alt="" :size="CARD_ARTWORK_SIZE" :priority="priority" />
       <v-icon v-if="selected" :icon="mdiCheckCircle" color="primary" class="pokemon-card__check" />
@@ -73,42 +80,44 @@ function onLinkClick(event: MouseEvent): void {
         @toggle="emit('toggleCaught', speciesId)"
       />
     </div>
-    <v-card-item class="pt-2">
-      <div class="d-flex align-baseline flex-wrap ga-1">
-        <DexNumber v-if="regional" :id="pokemon.dexNumber!" :digits="3" />
-        <DexNumber v-else :id="pokemon.id" />
-        <span v-if="regional" class="pokemon-card__national text-label-small">
-          {{ t('common.national') }} {{ nationalLabel }}
+    <div class="v-card-item pt-2">
+      <div class="v-card-item__content">
+        <div class="d-flex align-baseline flex-wrap ga-1">
+          <DexNumber v-if="regional" :id="pokemon.dexNumber!" :digits="3" />
+          <DexNumber v-else :id="pokemon.id" />
+          <span v-if="regional" class="pokemon-card__national text-label-small">
+            {{ t('common.national') }} {{ nationalLabel }}
+          </span>
+        </div>
+        <span v-if="pokemon.sortLabel" class="pokemon-card__sort text-label-small">
+          {{ pokemon.sortLabel }}
+        </span>
+        <div class="v-card-title text-title-medium pa-0">
+          <RouterLink v-if="to" :to="to" class="stretched-action" @click="onLinkClick">
+            {{ name }}
+          </RouterLink>
+          <button
+            v-else
+            type="button"
+            class="stretched-action"
+            :aria-pressed="selected ?? false"
+            @click="emit('select', pokemon)"
+          >
+            {{ name }}
+          </button>
+        </div>
+        <span
+          v-if="pokemon.exclusiveTo"
+          class="pokemon-card__exclusive text-label-small d-inline-flex align-center ga-1"
+        >
+          <v-icon :icon="mdiStarFourPoints" size="12" />
+          {{ t('home.onlyIn', { version: pokemon.exclusiveTo }) }}
         </span>
       </div>
-      <span v-if="pokemon.sortLabel" class="pokemon-card__sort text-label-small">
-        {{ pokemon.sortLabel }}
-      </span>
-      <v-card-title class="text-title-medium pa-0">
-        <RouterLink v-if="to" :to="to" class="stretched-action" @click="onLinkClick">
-          {{ name }}
-        </RouterLink>
-        <button
-          v-else
-          type="button"
-          class="stretched-action"
-          :aria-pressed="selected ?? false"
-          @click="emit('select', pokemon)"
-        >
-          {{ name }}
-        </button>
-      </v-card-title>
-      <span
-        v-if="pokemon.exclusiveTo"
-        class="pokemon-card__exclusive text-label-small d-inline-flex align-center ga-1"
-      >
-        <v-icon :icon="mdiStarFourPoints" size="12" />
-        {{ t('home.onlyIn', { version: pokemon.exclusiveTo }) }}
-      </span>
-    </v-card-item>
-    <v-card-text class="d-flex flex-wrap ga-1 pt-0">
+    </div>
+    <div class="v-card-text d-flex flex-wrap ga-1 pt-0">
       <TypeChip v-for="type in pokemon.types" :key="type" :type="type" />
-    </v-card-text>
+    </div>
   </v-card>
 </template>
 
