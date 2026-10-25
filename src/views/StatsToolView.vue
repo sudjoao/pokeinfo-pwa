@@ -256,6 +256,9 @@ function goBack(): void {
           <v-card-text class="d-flex flex-column ga-3">
             <p class="text-body-small opacity-70 mb-0">{{ t('statsTool.formulaHint') }}</p>
             <v-autocomplete
+              autocorrect="off"
+              autocapitalize="off"
+              spellcheck="false"
               v-model="pokemonId"
               :items="pokemonItems"
               :label="t('statsTool.pokemon')"

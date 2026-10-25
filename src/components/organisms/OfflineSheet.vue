@@ -176,6 +176,6 @@ function start(): void {
 
 <style scoped>
 .offline-sheet__body {
-  max-height: 75vh;
+  max-height: 75dvh;
 }
 </style>

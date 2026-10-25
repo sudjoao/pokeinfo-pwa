@@ -3,6 +3,8 @@ import { onBeforeUnmount, onMounted, type Ref } from 'vue'
 /** Distância mínima (px) e quanto o gesto precisa ser mais horizontal que vertical. */
 const MIN_DISTANCE = 70
 const DIRECTION_RATIO = 1.8
+/** Faixa nas bordas da tela onde começa o voltar/avançar do próprio iOS: dali o gesto é dele. */
+const EDGE = 24
 
 /** Áreas que rolam na horizontal: o gesto ali é rolagem, não troca de Pokémon. */
 const IGNORE =
@@ -21,8 +23,9 @@ export function useSwipe(
   function onStart(event: TouchEvent): void {
     const touch = event.touches[0]
     const element = event.target as Element | null
+    const fromEdge = touch && (touch.clientX < EDGE || touch.clientX > window.innerWidth - EDGE)
     start =
-      touch && event.touches.length === 1 && !element?.closest(IGNORE)
+      touch && event.touches.length === 1 && !fromEdge && !element?.closest(IGNORE)
         ? { x: touch.clientX, y: touch.clientY }
         : null
   }

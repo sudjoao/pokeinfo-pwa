@@ -27,6 +27,9 @@ function confirm(): void {
       <v-card-text>
         <p class="text-body-medium">{{ t('team.importHint') }}</p>
         <v-textarea
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
           v-model="text"
           :label="t('team.importLabel')"
           rows="8"

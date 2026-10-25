@@ -56,6 +56,8 @@ const { drawer } = useAppMenu()
 <style scoped>
 .app-header {
   padding-top: var(--safe-top);
+  /* Na horizontal, o notch fica do lado: menu/voltar e a busca não podem ir para baixo dele. */
+  padding-inline: var(--safe-left) var(--safe-right);
 }
 
 .app-header__title {

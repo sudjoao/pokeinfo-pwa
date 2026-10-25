@@ -200,7 +200,7 @@ const multiplierText = computed(() =>
 
 <style scoped>
 .capture-sheet__body {
-  max-height: 80vh;
+  max-height: 80dvh;
 }
 
 .capture-sheet__result {

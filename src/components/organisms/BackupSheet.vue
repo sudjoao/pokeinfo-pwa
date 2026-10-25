@@ -65,9 +65,10 @@ function onFile(event: Event): void {
 </script>
 
 <template>
-  <v-bottom-sheet v-model="open" inset :aria-label="t('backup.title')">
+  <v-bottom-sheet v-model="open" inset scrollable :aria-label="t('backup.title')">
     <v-card rounded="t-xl" :title="t('backup.title')">
-      <v-card-text class="d-flex flex-column ga-3">
+      <!-- Com o QR aberto (~300 px a mais), num iPhone SE o "Concluído" sairia da tela sem rolagem. -->
+      <v-card-text class="backup-sheet__body d-flex flex-column ga-3">
         <p class="text-body-medium mb-0">{{ t('backup.intro') }}</p>
         <p class="text-label-large mb-0">{{ t('backup.summary', { ...summary }) }}</p>
         <div class="d-flex flex-wrap ga-2">
@@ -130,6 +131,11 @@ function onFile(event: Event): void {
 </template>
 
 <style scoped>
+.backup-sheet__body {
+  max-height: 80dvh;
+  overflow-y: auto;
+}
+
 .backup-qr {
   display: flex;
   flex-direction: column;

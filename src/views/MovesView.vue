@@ -360,6 +360,9 @@ const dash = '—'
             @update:model-value="setLearnGame"
           />
           <v-autocomplete
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"
             v-model="learn"
             :items="learnOptions"
             :label="t('movesPage.learnMoves')"

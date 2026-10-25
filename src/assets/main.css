@@ -15,6 +15,54 @@ html {
 
 body {
   overscroll-behavior-y: none;
+  /* O flash cinza do toque do iOS some: os componentes já têm o próprio retorno (ripple). */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/*
+ * Busca no corpo da página (Golpes, Itens, Velocidade): o "solo-filled" sem sombra quase some sobre o
+ * fundo cinza do tema claro, e o campo não parecia um campo. No cabeçalho vermelho ele já se destaca.
+ */
+.v-main .v-field--variant-solo-filled {
+  background: rgb(var(--v-theme-surface));
+  box-shadow: 0 0 0 1px rgba(var(--v-border-color), var(--v-border-opacity));
+}
+
+/* Rodapé dos bottom sheets acima do indicador de home do iPhone (o Vuetify não soma a área segura). */
+.v-bottom-sheet__content > .v-card > .v-card-actions:last-child {
+  padding-bottom: calc(8px + var(--safe-bottom));
+}
+
+/*
+ * No toque não existe "passar o mouse": o iOS mantém o :hover no último elemento tocado, então o
+ * card aberto voltava do detalhe ainda elevado e escurecido. Sem hover, o estado de repouso vale.
+ */
+@media (hover: none) {
+  .v-card:hover > .v-card__overlay,
+  .v-btn:hover > .v-btn__overlay {
+    opacity: 0;
+  }
+
+  .v-card--hover:hover::after {
+    opacity: 0;
+  }
+
+  .v-card--hover:hover::before {
+    opacity: 1;
+  }
+
+  .v-card--hover.v-card--variant-elevated:hover {
+    box-shadow:
+      0px 1px 2px 0px rgba(var(--v-shadow-color), var(--v-shadow-key-opacity, 0.3)),
+      0px 1px 3px 1px rgba(var(--v-shadow-color), var(--v-shadow-ambient-opacity, 0.15));
+  }
+}
+
+/* No app instalado, segurar um card abriria a prévia do link e o "Abrir no Safari", fora do app. */
+@media (display-mode: standalone) {
+  .stretched-action {
+    -webkit-touch-callout: none;
+  }
 }
 
 /* Área segura do iPhone (notch e indicador de home). viewport-fit=cover está no index.html. */

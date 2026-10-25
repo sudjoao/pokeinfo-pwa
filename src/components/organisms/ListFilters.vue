@@ -80,6 +80,23 @@ const { t } = useI18n()
   overflow-x: auto;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
+  /*
+   * Folga para a área de toque dos chips (abaixo) não ser cortada pela rolagem; a margem negativa
+   * devolve o espaço, então o cabeçalho não muda (o topo soma os 8 px do mt-2 de quem usa).
+   */
+  padding-block: 6px;
+  margin-block: 2px -6px;
+}
+
+/* Chips de 32 px: a área de toque cresce para 44 px na vertical, sem mudar o visual. */
+.list-filters :deep(.v-chip) {
+  overflow: visible;
+}
+
+.list-filters :deep(.v-chip)::before {
+  content: '';
+  position: absolute;
+  inset: -6px 0;
 }
 
 .list-filters::-webkit-scrollbar {

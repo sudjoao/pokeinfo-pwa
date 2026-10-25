@@ -162,6 +162,9 @@ function setSort(key: SortKey): void {
         />
 
         <v-autocomplete
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
           :model-value="filters.ability"
           :items="abilityItems"
           :label="t('filters.ability')"
@@ -200,7 +203,7 @@ function setSort(key: SortKey): void {
 
 <style scoped>
 .advanced-sheet__body {
-  max-height: 75vh;
+  max-height: 75dvh;
   /* Espaço para o rótulo flutuante do primeiro campo, que o contêiner rolável cortaria. */
   padding-top: 12px !important;
 }

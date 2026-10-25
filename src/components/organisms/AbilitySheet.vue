@@ -68,6 +68,6 @@ function select(id: number): void {
 
 <style scoped>
 .ability-sheet__body {
-  max-height: 70vh;
+  max-height: 70dvh;
 }
 </style>

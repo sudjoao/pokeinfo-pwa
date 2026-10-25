@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { ref, watchEffect } from 'vue'
 import { vuetify } from '@/plugins/vuetify'
 import { readStorage, writeStorage } from '@/utils/storage'
 
@@ -29,4 +29,10 @@ export function useThemePreference() {
 /** Aplica o tema salvo; chamado uma vez no boot, antes de montar o app. */
 export function applyInitialTheme(): void {
   vuetify.theme.change(preference.value)
+  // A barra do navegador (Chrome no Android, aba do Safari) acompanha o cabeçalho, que no tema
+  // escuro é outro vermelho: com a cor fixa do index.html ficava uma emenda entre os dois.
+  const meta = document.querySelector('meta[name="theme-color"]')
+  watchEffect(() =>
+    meta?.setAttribute('content', String(vuetify.theme.current.value.colors.primary)),
+  )
 }

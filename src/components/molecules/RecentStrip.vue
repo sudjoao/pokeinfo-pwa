@@ -53,8 +53,15 @@ const { t } = useI18n()
   scroll-snap-align: start;
 }
 
-.recent-strip__item:hover,
+@media (hover: hover) {
+  .recent-strip__item:hover {
+    background: rgba(var(--v-theme-on-surface), 0.06);
+  }
+}
+
+/* Só o fundo a 6% não bastava como indicador de foco (WCAG 2.4.7). */
 .recent-strip__item:focus-visible {
-  background: rgba(var(--v-theme-on-surface), 0.06);
+  outline: 2px solid rgb(var(--v-theme-primary));
+  outline-offset: 1px;
 }
 </style>

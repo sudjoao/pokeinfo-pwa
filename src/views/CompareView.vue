@@ -137,6 +137,9 @@ function goBack(): void {
   <DetailLayout :title="t('compare.title')" @back="goBack">
     <div class="d-flex flex-column ga-4">
       <v-autocomplete
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
         v-if="ids.length < MAX_COMPARE"
         ref="autocomplete"
         v-model="search"

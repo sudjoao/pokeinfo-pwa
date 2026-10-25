@@ -60,6 +60,6 @@ function select(id: number): void {
 
 <style scoped>
 .egg-sheet__body {
-  max-height: 70vh;
+  max-height: 70dvh;
 }
 </style>

@@ -32,4 +32,10 @@ const { t } = useI18n()
   background: rgb(var(--v-theme-surface));
   color: rgb(var(--v-theme-primary));
 }
+
+/* No escuro o primário dá 4,43:1 sobre a superfície; o vermelho claro de .text-primary-safe passa. */
+.v-theme--dark .advanced-filter-chip--active,
+.v-theme--dark.advanced-filter-chip--active {
+  color: #fca5a5;
+}
 </style>

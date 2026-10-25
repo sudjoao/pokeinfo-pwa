@@ -56,8 +56,10 @@ const emit = defineEmits<{ select: [id: number] }>()
   cursor: pointer;
 }
 
-.pokemon-button-grid__item:hover {
-  background: color-mix(in srgb, rgb(var(--v-theme-on-surface)) 6%, transparent);
+@media (hover: hover) {
+  .pokemon-button-grid__item:hover {
+    background: color-mix(in srgb, rgb(var(--v-theme-on-surface)) 6%, transparent);
+  }
 }
 
 .pokemon-button-grid__item:focus-visible {
