@@ -5,7 +5,10 @@ Todas as mudanças relevantes deste projeto são registradas aqui.
 O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e o projeto adota
 [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
-## [Não lançado]
+## [1.7.0] - 2026-10-25
+
+Conta Google opcional para guardar a coleção na nuvem e sincronizar o Mac e o iPhone, sem deixar de
+funcionar no aparelho e offline.
 
 ### Adicionado
 
@@ -341,6 +344,7 @@ Primeira versão estável da Pokédex em formato de PWA, consumindo a [PokéAPI]
 - As marcações de captura ficam só no aparelho, sem sincronização entre dispositivos.
 - Os gritos vêm só em `.ogg`; em navegadores sem suporte o botão de som não aparece.
 
+[1.7.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.6.0...v1.7.0
 [1.6.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.3.0...v1.4.0
