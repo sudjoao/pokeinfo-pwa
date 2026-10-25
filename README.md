@@ -365,6 +365,21 @@ Para a conta Google, configure o Supabase e o Google Cloud e adicione `VITE_SUPA
 `VITE_SUPABASE_PUBLISHABLE_KEY` nas variáveis da Vercel: passo a passo em
 [`supabase/README.md`](supabase/README.md).
 
+## Versões
+
+As mudanças ficam em [`CHANGELOG.md`](CHANGELOG.md), na seção "Não lançado", até a próxima versão.
+Para lançar:
+
+1. Renomeie a seção para `## [X.Y.Z] - AAAA-MM-DD`, adicione o link de comparação no fim do arquivo
+   e rode `npm version X.Y.Z --no-git-tag-version`.
+2. Faça o commit `chore: release vX.Y.Z`, crie a tag anotada (`git tag -a vX.Y.Z -m vX.Y.Z`) e
+   envie as duas (`git push origin main vX.Y.Z`).
+
+O workflow `release.yml` cria a release do GitHub com a seção do CHANGELOG
+(`node scripts/release-notes.mjs X.Y.Z` mostra o texto). Ele também cria as releases que faltarem
+e atualiza as notas das existentes, então basta corrigir o CHANGELOG e rodá-lo de novo pela aba
+Actions.
+
 ## Créditos
 
 Feito por [sudjoao](https://github.com/sudjoao). Código-fonte em

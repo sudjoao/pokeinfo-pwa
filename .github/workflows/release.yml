@@ -1,0 +1,37 @@
+name: Release
+
+# Cada tag vX.Y.Z enviada vira uma release do GitHub com a seção dela no CHANGELOG.md. O job passa
+# por todas as tags: cria as releases que faltam e atualiza as notas das que já existem, então uma
+# tag que ficou sem release (ou uma correção no CHANGELOG) entra na próxima execução.
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Releases a partir do CHANGELOG
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          latest=$(git tag -l 'v*' --sort=-v:refname | head -n 1)
+          for tag in $(git tag -l 'v*' --sort=v:refname); do
+            node scripts/release-notes.mjs "$tag" > notes.md
+            if gh release view "$tag" > /dev/null 2>&1; then
+              gh release edit "$tag" --title "$tag" --notes-file notes.md
+            else
+              gh release create "$tag" --title "$tag" --notes-file notes.md --verify-tag --latest=false
+            fi
+          done
+          gh release edit "$latest" --latest
