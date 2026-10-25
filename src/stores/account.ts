@@ -19,7 +19,11 @@ import { safeNextPath } from '@/utils/authRedirect'
 import { parseBackupData, type BackupData } from '@/utils/backup'
 import { onLocalChange, withoutNotify } from '@/utils/localChanges'
 import { readStorage, removeStorage, writeStorage } from '@/utils/storage'
-import { canonicalData, isEmptyData, mergeData, sameData } from '@/utils/sync'
+import { canonicalData, EMPTY_DATA, isEmptyData, mergeData, sameData } from '@/utils/sync'
+import { CAUGHT_KEY } from './caught'
+import { DAILY_KEY } from './daily'
+import { FAVORITES_KEY } from './favorites'
+import { HUNTS_KEY, SHINY_KEY } from './shiny'
 
 /** Estado da última sincronização deste aparelho: a `base` da mescla de 3 vias. */
 interface SyncState {
@@ -42,6 +46,8 @@ export type SyncStatus = 'idle' | 'syncing' | 'synced' | 'offline' | 'error'
 export type FirstSyncChoice = 'merge' | 'cloud' | 'device'
 
 const SYNC_KEY = 'pokeinfo:sync:v1'
+/** Chaves da coleção no localStorage (para acompanhar o que outra aba grava). */
+const COLLECTION_KEYS = new Set([CAUGHT_KEY, SHINY_KEY, FAVORITES_KEY, HUNTS_KEY, DAILY_KEY])
 /** Tela para voltar depois do login (o Google só devolve para /auth/callback). */
 const NEXT_KEY = 'pokeinfo:auth-next:v1'
 
@@ -76,8 +82,6 @@ export const useAccountStore = defineStore('account', () => {
   // Com sessão salva, a conta aparece já na abertura (sem esperar o SDK, e também offline).
   const stored = cloudEnabled ? storedSessionUser() : null
   const user = shallowRef<AccountUser | null>(stored ? toAccountUser(stored) : null)
-  /** Há sessão salva e o SDK ainda está restaurando: o menu mostra "conectando" em vez de "entrar". */
-  const restoring = ref(cloudEnabled && hasStoredSession() && !stored)
   const status = ref<SyncStatus>('idle')
   const lastSyncedAt = ref<string | null>(null)
   /** Primeira sincronização com dados dos dois lados: espera a pessoa escolher como juntar. */
@@ -112,11 +116,47 @@ export const useAccountStore = defineStore('account', () => {
     return state
   }
 
-  function writeState(userId: string, version: number, base: BackupData): void {
-    const syncedAt = new Date().toISOString()
+  /**
+   * Grava a base. `synced` = os dois lados ficaram iguais agora (atualiza o "sincronizado às").
+   * `canonicalData` devolve uma cópia profunda: a base não muda junto com os stores.
+   */
+  function writeState(userId: string, version: number, base: BackupData, synced = true): void {
+    const syncedAt = synced ? new Date().toISOString() : (lastSyncedAt.value ?? '')
     state = { userId, version, base: canonicalData(base), syncedAt }
     writeStorage(SYNC_KEY, state)
-    lastSyncedAt.value = syncedAt
+    if (synced) lastSyncedAt.value = syncedAt
+  }
+
+  /** A coleção como está no disco (o que outra aba gravou). */
+  function readDiskData(): BackupData {
+    return parseBackupData({
+      caught: readStorage(CAUGHT_KEY),
+      shiny: readStorage(SHINY_KEY),
+      favorites: readStorage(FAVORITES_KEY),
+      hunts: readStorage(HUNTS_KEY),
+      daily: readStorage(DAILY_KEY),
+    })
+  }
+
+  let reloadTimer: ReturnType<typeof setTimeout> | undefined
+  /**
+   * Outra aba gravou a coleção ou sincronizou: esta aba recarrega do disco. Sem isso, a coleção
+   * desatualizada desta aba, gravada por cima, faria a próxima sincronização ler como apagado o
+   * que a outra aba marcou (e apagar em todos os aparelhos).
+   */
+  function onStorage(event: StorageEvent): void {
+    if (event.key === SYNC_KEY) {
+      state = null
+      const saved = readStorage<SyncState>(SYNC_KEY)
+      if (saved?.syncedAt && saved.userId === user.value?.id) lastSyncedAt.value = saved.syncedAt
+      return
+    }
+    if (!event.key || !COLLECTION_KEYS.has(event.key)) return
+    clearTimeout(reloadTimer)
+    reloadTimer = setTimeout(
+      () => withoutNotify(() => backup.restore(readDiskData(), 'replace')),
+      50,
+    )
   }
 
   /** Troca a coleção do aparelho pela mesclada, sem disparar um novo envio, e grava no disco já. */
@@ -128,7 +168,6 @@ export const useAccountStore = defineStore('account', () => {
   function onAuthChange(event: AuthChangeEvent, session: Session | null): void {
     const previous = user.value?.id
     user.value = session?.user ? toAccountUser(session.user) : null
-    restoring.value = false
     if (!user.value) {
       status.value = 'idle'
       firstSync.value = null
@@ -152,6 +191,7 @@ export const useAccountStore = defineStore('account', () => {
     if (!cloudEnabled || started) return
     started = true
     onLocalChange(schedulePush)
+    window.addEventListener('storage', onStorage)
     window.addEventListener('online', () => {
       if (pending) void sync()
     })
@@ -168,7 +208,6 @@ export const useAccountStore = defineStore('account', () => {
     if (hasStoredSession()) {
       listen().catch(() => {
         // SDK não carregou (offline e ainda fora do cache): a conta segue visível, sem sincronizar.
-        restoring.value = false
         status.value = 'offline'
       })
     }
@@ -216,8 +255,12 @@ export const useAccountStore = defineStore('account', () => {
     status.value = 'syncing'
     pending = false
     try {
+      // Idempotente; refaz a inscrição nos eventos de sessão se o SDK não carregou na abertura.
+      await listen()
       const client = await getClient()
       let base = readState(userId)?.base ?? null
+      // Sem base deste usuário, mas com a de outro: o aparelho tem a coleção de quem estava logado.
+      const foreign = !base && Boolean(readStorage<SyncState>(SYNC_KEY)?.userId)
       for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
         const remote = await fetchCollection(client, userId)
         if (user.value?.id !== userId) return
@@ -226,6 +269,20 @@ export const useAccountStore = defineStore('account', () => {
         backup.flush()
         const local = backup.data()
 
+        // Primeira vez deste usuário no aparelho, com dados que a conta não tem: pergunta como
+        // juntar em vez de misturar (ou copiar a coleção de outra pessoa) sem avisar.
+        const remoteData = remote?.data ?? EMPTY_DATA
+        if (
+          !base &&
+          !isEmptyData(local) &&
+          !sameData(local, remoteData) &&
+          (foreign || !isEmptyData(remoteData))
+        ) {
+          firstSync.value = { local, remote: remote ?? { data: EMPTY_DATA, version: 0 } }
+          status.value = 'idle'
+          return
+        }
+
         if (!remote) {
           const version = await createCollection(client, userId, local)
           if (version === null) continue
@@ -233,28 +290,17 @@ export const useAccountStore = defineStore('account', () => {
           return finish()
         }
 
-        if (
-          !base &&
-          !isEmptyData(local) &&
-          !isEmptyData(remote.data) &&
-          !sameData(local, remote.data)
-        ) {
-          firstSync.value = { local, remote }
-          status.value = 'idle'
-          return
-        }
-
         const merged = mergeData(base, local, remote.data)
         if (!sameData(merged, local)) applyLocal(merged)
         let version = remote.version
         if (!sameData(merged, remote.data)) {
+          // O aparelho já tem tudo o que a conta tem: a versão lida vira a base desde já. Se o
+          // envio falhar, a próxima sincronização não desfaz o que o outro aparelho mudar depois.
+          writeState(userId, remote.version, remote.data, false)
+          base = remote.data
           const saved = await updateCollection(client, userId, merged, remote.version)
-          if (saved === null) {
-            // Outro aparelho gravou entre a leitura e a escrita: a versão dele descende da que
-            // lemos, então ela vira a base da próxima tentativa.
-            base = remote.data
-            continue
-          }
+          // Outro aparelho gravou entre a leitura e a escrita: relê e mescla de novo.
+          if (saved === null) continue
           version = saved
         }
         writeState(userId, version, merged)
@@ -288,7 +334,7 @@ export const useAccountStore = defineStore('account', () => {
           : local
     if (!sameData(result, local)) applyLocal(result)
     // Base = o que está na conta: a sincronização a seguir envia só a diferença escolhida.
-    writeState(user.value.id, remote.version, remote.data)
+    writeState(user.value.id, remote.version, remote.data, false)
     void sync()
   }
 
@@ -323,7 +369,10 @@ export const useAccountStore = defineStore('account', () => {
   }
 
   async function signOut(): Promise<void> {
-    if (pending && navigator.onLine) await sync()
+    // Envia o que falta antes de sair, inclusive a rodada extra de quem marcou durante um envio.
+    for (let round = 0; round < MAX_ATTEMPTS && navigator.onLine && (running || pending); round++) {
+      await (running ?? sync())
+    }
     clearTimeout(pushTimer)
     clearTimeout(retryTimer)
     const client = await getClient()
@@ -349,7 +398,6 @@ export const useAccountStore = defineStore('account', () => {
     enabled: cloudEnabled,
     user,
     signedIn,
-    restoring,
     status,
     lastSyncedAt,
     firstSync,

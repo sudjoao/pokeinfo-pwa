@@ -181,6 +181,13 @@ export interface PersistedDaily {
   game: DailyGame | null
 }
 
+export function copyDaily(data: PersistedDaily): PersistedDaily {
+  return {
+    stats: { ...data.stats, distribution: [...data.stats.distribution] },
+    game: data.game ? { ...data.game, guesses: [...data.game.guesses] } : null,
+  }
+}
+
 function isStats(value: unknown): value is DailyStats {
   const stats = value as DailyStats
   return (
@@ -200,7 +207,11 @@ export function parseDaily(value: unknown): PersistedDaily | null {
   return {
     stats: { ...EMPTY_STATS, ...data.stats },
     game: validGame
-      ? { day: validGame.day, guesses: validGame.guesses, done: !!validGame.done }
+      ? {
+          day: validGame.day,
+          guesses: validGame.guesses.filter(Number.isInteger),
+          done: !!validGame.done,
+        }
       : null,
   }
 }

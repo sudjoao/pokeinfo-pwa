@@ -2,10 +2,12 @@ import { defineStore } from 'pinia'
 import { reactive } from 'vue'
 import { readStorage, writeStorage } from '@/utils/storage'
 import { notifyLocalChange } from '@/utils/localChanges'
+import { isHunt } from '@/utils/backup'
 import { defineGameSetStore } from './gameSet'
 
 /** Shinies capturados por jogo (separados dos capturados normais). */
-export const useShinyCaughtStore = defineGameSetStore('shinyCaught', 'pokeinfo:shiny:v1')
+export const SHINY_KEY = 'pokeinfo:shiny:v1'
+export const useShinyCaughtStore = defineGameSetStore('shinyCaught', SHINY_KEY)
 
 /** Uma caçada de shiny: encontros contados e os bônus que mudam a chance. */
 export interface ShinyHunt {
@@ -20,23 +22,11 @@ export interface ShinyHunt {
 
 export type PersistedHunts = Record<string, ShinyHunt>
 
-const HUNTS_KEY = 'pokeinfo:hunts:v1'
+export const HUNTS_KEY = 'pokeinfo:hunts:v1'
 
 /** Chave de uma caçada: jogo + espécie. */
 export function huntKey(game: string, speciesId: number): string {
   return `${game}:${speciesId}`
-}
-
-function isHunt(value: unknown): value is ShinyHunt {
-  const hunt = value as ShinyHunt
-  return (
-    typeof hunt === 'object' &&
-    hunt !== null &&
-    Number.isInteger(hunt.count) &&
-    hunt.count >= 0 &&
-    typeof hunt.charm === 'boolean' &&
-    typeof hunt.masuda === 'boolean'
-  )
 }
 
 /** Contadores de shiny hunt por jogo e espécie, salvos no aparelho. */

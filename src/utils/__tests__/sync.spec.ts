@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import type { BackupData } from '@/utils/backup'
+import { parseBackupData, type BackupData } from '@/utils/backup'
 import { decodeBitset, encodeBitset } from '@/utils/bitset'
 import { EMPTY_STATS } from '@/utils/daily'
 import { safeNextPath } from '@/utils/authRedirect'
 import {
+  canonicalData,
   EMPTY_DATA,
   isEmptyData,
   mergeData,
@@ -124,5 +125,60 @@ describe('safeNextPath', () => {
     for (const value of ['//evil.com', '/\\evil.com', 'https://evil.com', '/\tx', '/auth/callback'])
       expect(safeNextPath(value)).toBe('/')
     expect(safeNextPath(null)).toBe('/')
+  })
+})
+
+describe('correções da revisão', () => {
+  it('canonicalData é cópia profunda (a partida do dia muda no lugar)', () => {
+    const game = { day: '2026-10-25', guesses: [1], done: false }
+    const value = data({ daily: { stats: { ...EMPTY_STATS }, game } })
+    const copy = canonicalData(value)
+    game.guesses.push(2)
+    expect(copy.daily?.game?.guesses).toEqual([1])
+  })
+
+  it('abrir o dia num aparelho não apaga os palpites do outro', () => {
+    const base = data({ daily: { stats: { ...EMPTY_STATS }, game: null } })
+    const local = data({
+      daily: { stats: { ...EMPTY_STATS }, game: { day: 'D', guesses: [1, 2], done: false } },
+    })
+    const remote = data({
+      daily: { stats: { ...EMPTY_STATS }, game: { day: 'D', guesses: [], done: false } },
+    })
+    expect(mergeData(base, local, remote).daily?.game?.guesses).toEqual([1, 2])
+    expect(mergeData(base, remote, local).daily?.game?.guesses).toEqual([1, 2])
+  })
+
+  it('partidas de dias diferentes: fica a mais recente', () => {
+    const base = data({ daily: { stats: { ...EMPTY_STATS }, game: null } })
+    const old = data({
+      daily: { stats: { ...EMPTY_STATS }, game: { day: '2026-10-24', guesses: [1], done: true } },
+    })
+    const today = data({
+      daily: { stats: { ...EMPTY_STATS }, game: { day: '2026-10-25', guesses: [], done: false } },
+    })
+    expect(mergeData(base, old, today).daily?.game?.day).toBe('2026-10-25')
+  })
+
+  it('caçada: Shiny Charm ligado num lado e contagem no outro entram os dois', () => {
+    const base = data({ hunts: { 'sv:1': hunt(10) } })
+    const local = data({ hunts: { 'sv:1': { ...hunt(10), charm: true } } })
+    const remote = data({ hunts: { 'sv:1': hunt(15) } })
+    expect(mergeData(base, local, remote).hunts['sv:1']).toEqual({ ...hunt(15), charm: true })
+  })
+})
+
+describe('parseBackupData', () => {
+  it('descarta entradas inválidas sem perder as boas', () => {
+    const parsed = parseBackupData(
+      JSON.parse(
+        '{"caught":{"sv":"Ag==","__proto__":"x","Bad Key":"y","za":3},' +
+          '"hunts":{"sv:1":{"count":2,"charm":false,"masuda":true,"startedAt":"d"},' +
+          '"sv:2":null,"__proto__":{"count":1,"charm":false,"masuda":false},"sv:3":{"count":-1,"charm":false,"masuda":false}}}',
+      ),
+    )
+    expect(parsed.caught).toEqual({ sv: 'Ag==' })
+    expect(Object.keys(parsed.hunts)).toEqual(['sv:1'])
+    expect(Object.getPrototypeOf(parsed.hunts)).toBe(Object.prototype)
   })
 })

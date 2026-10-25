@@ -4,8 +4,8 @@ O login com o Google e a sincronização entre aparelhos usam o [Supabase](https
 (Auth + Postgres). Não há servidor próprio: o app fala direto com a API do Supabase, e quem
 garante que cada pessoa só acessa os próprios dados é a **Row Level Security** da tabela.
 
-Sem as variáveis `VITE_SUPABASE_*`, o app funciona como antes (tudo só no aparelho) e o item
-"Entrar com o Google" não aparece.
+Sem as variáveis `VITE_SUPABASE_*`, o app funciona como antes (tudo só no aparelho) e o botão de
+conta não aparece no cabeçalho.
 
 ## Como funciona
 
@@ -22,8 +22,9 @@ Sem as variáveis `VITE_SUPABASE_*`, o app funciona como antes (tudo só no apar
 - **Quando sincroniza**: ao abrir o app com sessão salva, 2 s depois de cada marcação, ao voltar
   para o app (se a última sincronização tiver mais de 30 s), ao sair dele com algo pendente e quando
   a internet volta. Falhas tentam de novo em 15 s, 1 min e 5 min.
-- **Primeiro login num aparelho** que já tem dados, com uma conta que também tem: o app pergunta se
-  soma os dois, usa só a conta ou usa só o aparelho.
+- **Primeiro login num aparelho** com dados que a conta não tem (ou com a coleção de outra pessoa
+  que usou o aparelho antes): o app pergunta se soma os dois, usa só a conta ou usa só o aparelho.
+- **Várias abas**: quando uma aba grava a coleção ou sincroniza, as outras recarregam do disco.
 - **SDK sob demanda**: o `@supabase/supabase-js` (~55 KB gz) só é baixado por quem tem sessão salva
   ou toca em "Entrar".
 

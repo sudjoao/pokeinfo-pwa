@@ -123,7 +123,7 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
   favoritos e caçadas, importa esse arquivo e gera um **link** (`/?backup=...`, ~200 caracteres por
   jogo marcado) que, aberto em outro aparelho, pergunta se deve somar ou substituir os dados. O
   link também aparece como **QR code**, para passar os dados apontando a câmera.
-- **Conta Google (opcional)**: "Entrar com o Google" no menu guarda capturados, shinies, favoritos,
+- **Conta Google (opcional)**: o botão de conta no cabeçalho da Pokédex ("Entrar com o Google") guarda capturados, shinies, favoritos,
   caçadas e o Pokémon do dia na conta (Supabase) e sincroniza o Mac e o iPhone. O app continua
   funcionando no aparelho e sem internet; a conta recebe uma cópia em segundo plano, com mescla de
   3 vias para não perder marcações feitas offline nos dois aparelhos. Sair mantém os dados no

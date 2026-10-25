@@ -1,5 +1,5 @@
 import type { PersistedGameSet } from '@/stores/gameSet'
-import type { PersistedHunts } from '@/stores/shiny'
+import type { PersistedHunts, ShinyHunt } from '@/stores/shiny'
 import { parseDaily, type PersistedDaily } from './daily'
 
 /**
@@ -25,13 +25,50 @@ export function createBackup(data: BackupData, now = new Date()): Backup {
   return { app: 'pokeinfo', version: 1, exportedAt: now.toISOString(), ...data }
 }
 
-function isStringRecord(value: unknown): value is Record<string, string> {
+/** Slug de jogo ("scarlet-violet") e chave de caçada ("scarlet-violet:906"). */
+const GAME_KEY = /^[a-z0-9-]+$/
+const HUNT_KEY = /^[a-z0-9-]+:\d+$/
+
+export function isHunt(value: unknown): value is ShinyHunt {
+  const hunt = value as ShinyHunt
   return (
-    typeof value === 'object' &&
-    value !== null &&
-    !Array.isArray(value) &&
-    Object.values(value).every((item) => typeof item === 'string')
+    typeof hunt === 'object' &&
+    hunt !== null &&
+    Number.isInteger(hunt.count) &&
+    hunt.count >= 0 &&
+    typeof hunt.charm === 'boolean' &&
+    typeof hunt.masuda === 'boolean'
   )
+}
+
+function entriesOf(value: unknown): [string, unknown][] {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+    ? Object.entries(value)
+    : []
+}
+
+/**
+ * Só as entradas válidas: chave no formato esperado (o que também barra "__proto__") e valor do
+ * tipo certo. Uma entrada ruim não derruba as outras.
+ */
+function parseGameSets(value: unknown): PersistedGameSet {
+  return Object.fromEntries(
+    entriesOf(value).filter(([game, bits]) => GAME_KEY.test(game) && typeof bits === 'string'),
+  ) as PersistedGameSet
+}
+
+function parseHunts(value: unknown): PersistedHunts {
+  const result: PersistedHunts = {}
+  for (const [key, hunt] of entriesOf(value)) {
+    if (!HUNT_KEY.test(key) || !isHunt(hunt)) continue
+    result[key] = {
+      count: hunt.count,
+      charm: hunt.charm,
+      masuda: hunt.masuda,
+      startedAt: typeof hunt.startedAt === 'string' ? hunt.startedAt : '',
+    }
+  }
+  return result
 }
 
 /**
@@ -42,13 +79,10 @@ export function parseBackupData(value: unknown): BackupData {
   const data = (typeof value === 'object' && value !== null ? value : {}) as Partial<BackupData>
   const daily = parseDaily(data.daily)
   return {
-    caught: isStringRecord(data.caught) ? data.caught : {},
-    shiny: isStringRecord(data.shiny) ? data.shiny : {},
+    caught: parseGameSets(data.caught),
+    shiny: parseGameSets(data.shiny),
     favorites: typeof data.favorites === 'string' ? data.favorites : '',
-    hunts:
-      typeof data.hunts === 'object' && data.hunts !== null && !Array.isArray(data.hunts)
-        ? data.hunts
-        : {},
+    hunts: parseHunts(data.hunts),
     ...(daily ? { daily } : {}),
   }
 }

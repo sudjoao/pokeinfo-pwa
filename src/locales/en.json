@@ -520,7 +520,7 @@
   },
   "backup": {
     "title": "Data backup",
-    "intro": "Caught, shinies, favorites and hunts are stored only on this device. Export them to keep a copy or move to another device.",
+    "intro": "Caught, shinies, favorites and hunts are stored on this device (and in your account, if you sign in with Google). Export them to keep a copy or move them to another device without an account.",
     "summary": "{caught} caught in {games} games · {shiny} shinies · {favorites} favorites · {hunts} hunts",
     "download": "Download file",
     "copyLink": "Copy link",
@@ -1045,8 +1045,6 @@
   "account": {
     "title": "Account",
     "menuSignIn": "Sign in with Google",
-    "menuSignInHint": "Sync across devices",
-    "restoring": "Connecting…",
     "intro": "Sign in with Google to keep your caught Pokémon, shinies, favorites, hunts and Pokémon of the day in your account and see the same thing on every device.",
     "privacy": "Only your Google email, name and photo and what you mark in the app are stored. Everything stays on this device and works offline; your account gets a copy whenever you are online.",
     "signIn": "Continue with Google",
@@ -1072,7 +1070,7 @@
     "deleteText": "Deletes your account and everything stored in it. What is on this device stays here. This cannot be undone.",
     "deleteConfirm": "Delete",
     "firstSyncTitle": "Combine with your account?",
-    "firstSyncText": "This device and your account both have data. How do you want to combine them?",
+    "firstSyncText": "This device has data that is not in your account. How do you want to combine them?",
     "firstSyncDevice": "On this device",
     "firstSyncCloud": "In your account",
     "firstSyncConfirm": "Continue",
@@ -1087,6 +1085,7 @@
     "callbackLoading": "Signing in…",
     "callbackError": "Could not sign in",
     "callbackErrorHint": "Sign-in was canceled or expired. On iPhone, sign in from the installed app and finish without switching windows.",
-    "backHome": "Back to start"
+    "backHome": "Back to start",
+    "headerLabel": "{name}'s account"
   }
 }

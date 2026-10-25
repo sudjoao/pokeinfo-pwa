@@ -58,22 +58,11 @@ const online = useOnline()
 const offlineOpen = ref(!online.value)
 watch(online, (value) => (offlineOpen.value = !value))
 
-// Conta Google e sincronização (some do menu quando o build não tem Supabase configurado).
+// Conta Google e sincronização (o botão do cabeçalho some quando o build não tem Supabase).
 const account = useAccountStore()
-const {
-  user: accountUser,
-  status: syncStatus,
-  lastSyncedAt,
-  restoring,
-  firstSync,
-} = storeToRefs(account)
+const { user: accountUser, status: syncStatus, lastSyncedAt, firstSync } = storeToRefs(account)
 account.start()
 const syncStatusText = useSyncStatusText(syncStatus, lastSyncedAt, online)
-const accountMenu = computed(() =>
-  account.enabled
-    ? { user: accountUser.value, restoring: restoring.value, statusText: syncStatusText.value }
-    : null,
-)
 const accountBusy = ref<'signIn' | 'signOut' | 'delete' | null>(null)
 
 function signIn(): void {
@@ -200,13 +189,11 @@ function skipToContent(): void {
     <AppMenu
       v-model="menu.drawer.value"
       :theme="theme"
-      :account="accountMenu"
       @set-theme="setTheme"
       @open-language="menu.languageOpen.value = true"
       @open-backup="menu.backupOpen.value = true"
       @open-offline="menu.offlineOpen.value = true"
       @open-about="menu.aboutOpen.value = true"
-      @open-account="menu.accountOpen.value = true"
       @random="openRandom"
     />
     <!-- A Home fica em KeepAlive para preservar o scroll infinito e a busca ao voltar do detalhe. -->

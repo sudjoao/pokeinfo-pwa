@@ -520,7 +520,7 @@
   },
   "backup": {
     "title": "Backup dos dados",
-    "intro": "Capturados, shinies, favoritos e caçadas ficam só neste aparelho. Exporte para guardar ou para passar a outro aparelho.",
+    "intro": "Capturados, shinies, favoritos e caçadas ficam neste aparelho (e na sua conta, se você entrar com o Google). Exporte para guardar uma cópia ou passar a outro aparelho sem conta.",
     "summary": "{caught} capturados em {games} jogos · {shiny} shinies · {favorites} favoritos · {hunts} caçadas",
     "download": "Baixar arquivo",
     "copyLink": "Copiar link",
@@ -1045,8 +1045,6 @@
   "account": {
     "title": "Conta",
     "menuSignIn": "Entrar com o Google",
-    "menuSignInHint": "Sincronize entre aparelhos",
-    "restoring": "Conectando…",
     "intro": "Entre com o Google para guardar capturados, shinies, favoritos, caçadas e o Pokémon do dia na sua conta e ver tudo igual no Mac e no iPhone.",
     "privacy": "Ficam salvos só o seu e-mail, nome e foto do Google e o que você marca no app. Tudo continua neste aparelho e funciona sem internet; a conta recebe uma cópia quando houver conexão.",
     "signIn": "Continuar com o Google",
@@ -1072,7 +1070,7 @@
     "deleteText": "Apaga a sua conta e tudo o que está salvo nela. O que está neste aparelho continua aqui. Não dá para desfazer.",
     "deleteConfirm": "Excluir",
     "firstSyncTitle": "Juntar com a sua conta?",
-    "firstSyncText": "Este aparelho e a sua conta já têm dados. Como você quer juntar?",
+    "firstSyncText": "Este aparelho já tem marcações que não estão na sua conta. Como você quer juntar?",
     "firstSyncDevice": "Neste aparelho",
     "firstSyncCloud": "Na conta",
     "firstSyncConfirm": "Continuar",
@@ -1087,6 +1085,7 @@
     "callbackLoading": "Entrando…",
     "callbackError": "Não foi possível entrar",
     "callbackErrorHint": "O login foi cancelado ou expirou. No iPhone, entre pelo app instalado e conclua o login sem trocar de janela.",
-    "backHome": "Voltar ao início"
+    "backHome": "Voltar ao início",
+    "headerLabel": "Conta de {name}"
   }
 }

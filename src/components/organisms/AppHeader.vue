@@ -2,6 +2,7 @@
 import { mdiArrowLeft, mdiMenu } from '@mdi/js'
 import { useAppMenu } from '@/composables/useAppMenu'
 import SoundToggle from '@/components/molecules/SoundToggle.vue'
+import AccountButton from '@/components/molecules/AccountButton.vue'
 import { useI18n } from 'vue-i18n'
 
 defineProps<{
@@ -41,6 +42,8 @@ const { drawer } = useAppMenu()
     <template #append>
       <slot name="actions" />
       <SoundToggle />
+      <!-- Só nas telas principais (com menu): nas de voltar, o título precisa do espaço. -->
+      <AccountButton v-if="!back" />
     </template>
     <template v-if="$slots.extension" #extension>
       <div class="app-header__extension w-100 px-4 pb-3">

@@ -10,9 +10,10 @@ import {
   type DailyGame,
   type DailyStats,
   type PersistedDaily,
+  copyDaily,
 } from '@/utils/daily'
 
-const DAILY_KEY = 'pokeinfo:daily:v1'
+export const DAILY_KEY = 'pokeinfo:daily:v1'
 
 /**
  * "Pokémon do dia": estatísticas e a partida do dia, salvas no aparelho (e no backup). O modo
@@ -50,15 +51,17 @@ export const useDailyStore = defineStore('daily', () => {
     persist()
   }
 
+  /** Cópias: o resultado vira base da sincronização e não pode mudar junto com a partida. */
   function exportData(): PersistedDaily {
-    return { stats: stats.value, game: game.value }
+    return copyDaily({ stats: stats.value, game: game.value })
   }
 
   /** Mesclar fica com as estatísticas de quem jogou mais vezes (não dá para somar sem duplicar dias). */
   function importData(data: PersistedDaily, mode: 'merge' | 'replace'): void {
     if (mode === 'replace' || data.stats.played > stats.value.played) {
-      stats.value = { ...data.stats }
-      game.value = data.game
+      const copy = copyDaily(data)
+      stats.value = copy.stats
+      game.value = copy.game
     }
     persist()
   }

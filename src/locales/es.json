@@ -520,7 +520,7 @@
   },
   "backup": {
     "title": "Copia de seguridad",
-    "intro": "Capturados, variocolor, favoritos y cacerías se guardan solo en este dispositivo. Expórtalos para guardarlos o pasarlos a otro dispositivo.",
+    "intro": "Capturados, variocolor, favoritos y cacerías se guardan en este dispositivo (y en tu cuenta, si inicias sesión con Google). Expórtalos para guardar una copia o pasarlos a otro dispositivo sin cuenta.",
     "summary": "{caught} capturados en {games} juegos · {shiny} variocolor · {favorites} favoritos · {hunts} cacerías",
     "download": "Descargar archivo",
     "copyLink": "Copiar enlace",
@@ -1045,8 +1045,6 @@
   "account": {
     "title": "Cuenta",
     "menuSignIn": "Iniciar sesión con Google",
-    "menuSignInHint": "Sincroniza entre dispositivos",
-    "restoring": "Conectando…",
     "intro": "Inicia sesión con Google para guardar capturados, shinies, favoritos, cacerías y el Pokémon del día en tu cuenta y ver lo mismo en todos tus dispositivos.",
     "privacy": "Solo se guardan tu correo, nombre y foto de Google y lo que marcas en la app. Todo sigue en este dispositivo y funciona sin conexión; la cuenta recibe una copia cuando hay internet.",
     "signIn": "Continuar con Google",
@@ -1072,7 +1070,7 @@
     "deleteText": "Elimina tu cuenta y todo lo guardado en ella. Lo que está en este dispositivo sigue aquí. No se puede deshacer.",
     "deleteConfirm": "Eliminar",
     "firstSyncTitle": "¿Combinar con tu cuenta?",
-    "firstSyncText": "Este dispositivo y tu cuenta ya tienen datos. ¿Cómo quieres combinarlos?",
+    "firstSyncText": "Este dispositivo tiene datos que no están en tu cuenta. ¿Cómo quieres combinarlos?",
     "firstSyncDevice": "En este dispositivo",
     "firstSyncCloud": "En la cuenta",
     "firstSyncConfirm": "Continuar",
@@ -1087,6 +1085,7 @@
     "callbackLoading": "Iniciando sesión…",
     "callbackError": "No se pudo iniciar sesión",
     "callbackErrorHint": "El inicio de sesión se canceló o caducó. En iPhone, inicia sesión desde la app instalada y termina sin cambiar de ventana.",
-    "backHome": "Volver al inicio"
+    "backHome": "Volver al inicio",
+    "headerLabel": "Cuenta de {name}"
   }
 }

@@ -2,7 +2,7 @@ import type { PersistedGameSet } from '@/stores/gameSet'
 import type { PersistedHunts, ShinyHunt } from '@/stores/shiny'
 import type { BackupData } from './backup'
 import { decodeBitset, encodeBitset } from './bitset'
-import type { PersistedDaily } from './daily'
+import { copyDaily, type DailyGame, type DailyStats, type PersistedDaily } from './daily'
 
 /**
  * Mescla da coleção entre o aparelho e a conta. É uma mescla de 3 vias: além das duas versões, usa
@@ -29,7 +29,11 @@ function same(a: unknown, b: unknown): boolean {
   return stableStringify(a) === stableStringify(b)
 }
 
-/** Forma canônica: bitsets reencodados, jogos vazios removidos (para comparar dois lados). */
+/**
+ * Forma canônica: bitsets reencodados, jogos vazios removidos (para comparar dois lados). É também
+ * uma cópia profunda: guardada como base, não muda junto com os stores (a partida do dia, por
+ * exemplo, é alterada no lugar a cada palpite).
+ */
 export function canonicalData(data: BackupData): BackupData {
   const sets = (sets: PersistedGameSet): PersistedGameSet => {
     const result: PersistedGameSet = {}
@@ -43,8 +47,8 @@ export function canonicalData(data: BackupData): BackupData {
     caught: sets(data.caught),
     shiny: sets(data.shiny),
     favorites: encodeBitset(decodeBitset(data.favorites)),
-    hunts: { ...data.hunts },
-    ...(data.daily ? { daily: data.daily } : {}),
+    hunts: Object.fromEntries(Object.entries(data.hunts).map(([key, hunt]) => [key, { ...hunt }])),
+    ...(data.daily ? { daily: copyDaily(data.daily) } : {}),
   }
 }
 
@@ -114,13 +118,25 @@ function pick<T>(
 function mergeHunts(base: PersistedHunts, local: PersistedHunts, remote: PersistedHunts) {
   const result: PersistedHunts = {}
   for (const key of new Set([...Object.keys(local), ...Object.keys(remote)])) {
-    // Os dois lados contaram encontros: fica o contador maior (a caçada não anda para trás).
-    const hunt = pick<ShinyHunt>(base[key], local[key], remote[key], (l, r) =>
-      r.count > l.count ? r : l,
-    )
+    const from = base[key]
+    // Os dois lados mexeram na caçada: campo a campo. O contador fica o maior (não anda para
+    // trás), e Shiny Charm/Masuda ficam com o lado que trocou o valor.
+    const hunt = pick<ShinyHunt>(from, local[key], remote[key], (l, r) => ({
+      count: Math.max(l.count, r.count),
+      charm: from && l.charm === from.charm ? r.charm : l.charm,
+      masuda: from && l.masuda === from.masuda ? r.masuda : l.masuda,
+      startedAt: [l.startedAt, r.startedAt].filter(Boolean).sort()[0] ?? '',
+    }))
     if (hunt) result[key] = hunt
   }
   return result
+}
+
+/** Mesma partida do dia: fica a mais adiantada. Dias diferentes: fica a do dia mais recente. */
+function laterGame(local: DailyGame, remote: DailyGame): DailyGame {
+  if (local.day !== remote.day) return remote.day > local.day ? remote : local
+  if (local.done !== remote.done) return local.done ? local : remote
+  return remote.guesses.length > local.guesses.length ? remote : local
 }
 
 function mergeDaily(
@@ -128,8 +144,18 @@ function mergeDaily(
   local: PersistedDaily | undefined,
   remote: PersistedDaily | undefined,
 ): PersistedDaily | undefined {
-  // Estatísticas não dá para somar sem duplicar dias: fica quem jogou mais vezes.
-  return pick(base, local, remote, (l, r) => (r.stats.played > l.stats.played ? r : l))
+  if (!local || !remote) return local ?? remote
+  // Estatísticas e partida separadas: só abrir a tela do dia num aparelho (partida nova, vazia)
+  // não pode apagar os palpites feitos no outro. Estatísticas não dá para somar sem duplicar
+  // dias: fica quem jogou mais vezes.
+  const stats = pick<DailyStats>(base?.stats, local.stats, remote.stats, (l, r) =>
+    r.played > l.played ? r : l,
+  )!
+  const game = pick<DailyGame | null>(base?.game, local.game, remote.game, (l, r) => {
+    if (!l || !r) return l ?? r
+    return laterGame(l, r)
+  })
+  return { stats, game: game ?? null }
 }
 
 /** Mescla de 3 vias de tudo o que é sincronizado. `base` null = primeira sincronização. */

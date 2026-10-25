@@ -9,12 +9,14 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 
 ### Adicionado
 
-- Entrar com o Google (opcional, menu > Conta): capturados, shinies, favoritos, caçadas e o Pokémon
+- Entrar com o Google (opcional, botão de conta no cabeçalho da Pokédex): capturados, shinies, favoritos, caçadas e o Pokémon
   do dia ficam na conta (Supabase) e sincronizam entre aparelhos. O app continua local-first e
   funciona offline; a conta recebe uma cópia em segundo plano, com mescla de 3 vias (marcações
   feitas sem internet em dois aparelhos entram todas) e trava otimista de versão.
 - Primeiro login num aparelho com dados: escolher entre somar, usar só a conta ou só o aparelho.
 - Sair (os dados ficam no aparelho) e excluir a conta pelo app.
+- Abas abertas ao mesmo tempo recarregam a coleção quando outra aba grava (antes, a aba
+  desatualizada sobrescrevia o que a outra tinha marcado).
 - Tabela `user_collections` com Row Level Security e função `delete_account` em
   `supabase/migrations/`, guia de configuração em `supabase/README.md`.
 - Cabeçalhos de segurança na Vercel (`X-Content-Type-Options`, `X-Frame-Options`,

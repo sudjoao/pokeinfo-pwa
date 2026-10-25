@@ -4,7 +4,7 @@ import { decodeBitset, encodeBitset } from '@/utils/bitset'
 import { readStorage, writeStorage } from '@/utils/storage'
 import { notifyLocalChange } from '@/utils/localChanges'
 
-const FAVORITES_KEY = 'pokeinfo:favorites:v1'
+export const FAVORITES_KEY = 'pokeinfo:favorites:v1'
 
 /**
  * Pokémon favoritos (id da forma: Raichu de Alola é diferente do Raichu), salvos no aparelho
