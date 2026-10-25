@@ -7,6 +7,13 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 
 ## [Não lançado]
 
+## [1.9.2] - 2026-10-25
+
+### Corrigido
+
+- No iPhone, o card do Pokémon aberto às vezes sumia da lista ao voltar do detalhe e só
+  reaparecia ao ser tocado. A volta também cai exatamente na posição em que a lista estava.
+
 ## [1.9.1] - 2026-10-25
 
 ### Corrigido
@@ -441,7 +448,8 @@ Primeira versão estável da Pokédex em formato de PWA, consumindo a [PokéAPI]
 - As marcações de captura ficam só no aparelho, sem sincronização entre dispositivos.
 - Os gritos vêm só em `.ogg`; em navegadores sem suporte o botão de som não aparece.
 
-[Não lançado]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.9.1...HEAD
+[Não lançado]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.9.2...HEAD
+[1.9.2]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.9.1...v1.9.2
 [1.9.1]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.9.0...v1.9.1
 [1.9.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.8.0...v1.9.0
 [1.8.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.7.1...v1.8.0
