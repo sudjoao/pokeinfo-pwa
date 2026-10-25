@@ -7,6 +7,39 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 
 ## [Não lançado]
 
+Revisão de UX ponta a ponta (usabilidade, acessibilidade, textos e animação), no PWA e na web.
+
+### Adicionado
+
+- O jogo e a Pokédex escolhidos continuam selecionados na próxima visita (no início do PWA, nos
+  itens do menu e nas ferramentas Golpes, Item e Velocidade). Links compartilhados com filtros são
+  respeitados, e "Todos os jogos" volta a abrir na Pokédex nacional.
+- Entre a lista e o detalhe, o artwork do card voa até o topo da ficha e volta ao card no "voltar"
+  (View Transitions, Safari 18+ e Chrome; fora disso, ou com movimento reduzido, a transição de
+  antes).
+- "Desfazer" depois de limpar o time, remover um membro, importar do Showdown por cima de um time
+  e zerar o contador de shiny.
+- Lista vazia por filtros com "Limpar filtros"; "Favoritos" vazio explica como favoritar; dica nas
+  caixas com jogo (o toque marca a captura).
+- Teclado: "/" foca a busca, ←/→ trocam de Pokémon no detalhe, 1–4 e Enter no quiz.
+- Microinterações leves (desligadas com movimento reduzido): coração ao favoritar, slot novo na
+  bandeja do time, contador de shiny, silhueta do quiz e marcação nas caixas.
+
+### Corrigido
+
+- Celular: nomes das naturezas quebrados no meio, seletor de jogo da Velocidade estourando a tela,
+  "3 d…" na bandeja do time, tema cortado no menu, "Pokédex" e "Favoritos" marcados juntos.
+- iPhone: botões dos sheets atrás do indicador de home, cabeçalho sob o notch na horizontal,
+  sheets atrás da barra do Safari, card que voltava do detalhe ainda "em hover", prévia de link ao
+  segurar um card no app instalado, deslizar do detalhe disputando com o voltar do iOS,
+  autocorreção em nomes de Pokémon, teclado que não fechava no "Buscar".
+- Acessibilidade: chips do cabeçalho com área de toque de 44 px, busca visível no tema claro,
+  contraste do chip "Filtros (n)" no escuro, foco visível nos recentes, download offline sem
+  anunciar cada arquivo, "Apagar dados offline" com confirmação.
+- Textos revisados nos três idiomas: plurais ("Restam 1 palpites"), erros que dizem o que fazer,
+  botões com verbo e objeto e termos iguais no app todo.
+- A cor da barra do navegador acompanha o tema.
+
 ## [1.7.1] - 2026-10-25
 
 Rodada de desempenho, medida num celular emulado (CPU 4× mais lenta, 4G lento): na primeira
