@@ -56,7 +56,7 @@ const caughtLabel = computed(() => {
 
 <template>
   <v-card class="pokemon-hero" :style="{ '--accent': accent }">
-    <div class="pokemon-hero__art pa-4">
+    <div class="pokemon-hero__art pa-4" data-hero-artwork>
       <PokemonArtwork
         :id="pokemon.id"
         :alt="name"

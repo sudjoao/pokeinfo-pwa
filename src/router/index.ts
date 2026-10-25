@@ -8,6 +8,7 @@ import { usePokemonDetailStore } from '@/stores/pokemonDetail'
 import { usePokedexStore } from '@/stores/pokedex'
 import { gameContextFromQuery } from '@/utils/games'
 import { queryWithSavedGame } from '@/utils/lastGame'
+import { installArtworkTransition } from './viewTransition'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -124,6 +125,7 @@ const router = createRouter({
 })
 
 trackInAppNavigation(router)
+installArtworkTransition(router)
 
 // Quem entra na Pokédex, no time ou numa ferramenta sem dizer o jogo (o início do PWA, um item do
 // menu) continua no último jogo escolhido. Só na entrada da tela: dentro dela, "Todos os jogos" é

@@ -16,6 +16,7 @@ import { useMountOnOpen } from '@/composables/useMountOnOpen'
 import { useSyncStatusText } from '@/composables/useSyncStatusText'
 import { useAccountStore, type FirstSyncChoice } from '@/stores/account'
 import { storeToRefs } from 'pinia'
+import { nativePageTransition } from '@/router/viewTransition'
 
 // Sheets do menu: raros, carregados só na primeira abertura (BackupImportDialog também pode abrir
 // por um link ?backup=, e aí carrega na hora).
@@ -209,7 +210,8 @@ function skipToContent(): void {
       do sprite em PokemonArtwork.
     -->
     <RouterView v-slot="{ Component }">
-      <Transition name="page">
+      <!-- Lista ↔ detalhe com View Transition: a troca é imediata e o navegador anima (viewTransition.ts). -->
+      <Transition name="page" :css="!nativePageTransition">
         <KeepAlive :include="['HomeView']">
           <component :is="Component" />
         </KeepAlive>

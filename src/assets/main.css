@@ -124,6 +124,31 @@ body {
   width: 100%;
 }
 
+/*
+ * Lista ↔ detalhe (router/viewTransition.ts): o artwork do card voa até o topo do detalhe enquanto
+ * o resto da tela troca num fade curto. Durante a troca o artwork do detalhe aparece já pronto
+ * (sem a entrada com escala de PokemonArtwork, que seria fotografada no meio).
+ */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.2s;
+}
+
+::view-transition-group(pokemon-artwork) {
+  animation-duration: 0.36s;
+  animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.list-restoring .pokemon-grid__cell {
+  content-visibility: visible !important;
+}
+
+.artwork-transition [data-hero-artwork] .pokemon-artwork__img {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .page-enter-active > *,
   .page-leave-active > *,
