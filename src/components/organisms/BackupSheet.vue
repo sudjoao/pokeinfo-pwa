@@ -27,8 +27,11 @@ const { t } = useI18n()
 
 const fileInput = useTemplateRef<HTMLInputElement>('file')
 
-/** QR do link de backup, para passar os dados apontando a câmera do outro aparelho. */
-const qr = ref<string | null>(null)
+/**
+ * QR do link de backup, para passar os dados apontando a câmera do outro aparelho. Desenhado pelo
+ * próprio template (um quadrado de 1 unidade por módulo), sem v-html.
+ */
+const qr = ref<{ size: number; path: string } | null>(null)
 const qrStatus = ref<'hidden' | 'loading' | 'ready' | 'too-big'>('hidden')
 
 async function toggleQr(): Promise<void> {
@@ -40,8 +43,15 @@ async function toggleQr(): Promise<void> {
   qrStatus.value = 'loading'
   try {
     // Biblioteca pequena (~10 KB), baixada só aqui.
-    const { renderSVG } = await import('uqr')
-    qr.value = renderSVG(props.link(), { ecc: 'L', border: 2, pixelSize: 4 })
+    const { encode } = await import('uqr')
+    const { size, data } = encode(props.link(), { ecc: 'L', border: 2 })
+    let path = ''
+    data.forEach((row, y) =>
+      row.forEach((dark, x) => {
+        if (dark) path += `M${x},${y}h1v1h-1z`
+      }),
+    )
+    qr.value = { size, path }
     qrStatus.value = 'ready'
   } catch {
     // Link maior que a capacidade do QR (muitos jogos marcados): o arquivo ou o link resolvem.
@@ -105,8 +115,12 @@ function onFile(event: Event): void {
           role="img"
           :aria-label="t('backup.qrLabel')"
         >
-          <!-- SVG gerado localmente pelo uqr a partir do próprio link: não há conteúdo de terceiros. -->
-          <div class="backup-qr__code" v-html="qr" />
+          <div class="backup-qr__code">
+            <svg :viewBox="`0 0 ${qr.size} ${qr.size}`" shape-rendering="crispEdges">
+              <rect fill="#fff" :width="qr.size" :height="qr.size" />
+              <path fill="#000" :d="qr.path" />
+            </svg>
+          </div>
           <p class="text-body-small mb-0">{{ t('backup.qrHint') }}</p>
         </div>
         <p v-else-if="qrStatus === 'too-big'" class="text-body-small mb-0">
@@ -151,7 +165,7 @@ function onFile(event: Event): void {
   background: #fff;
 }
 
-.backup-qr__code :deep(svg) {
+.backup-qr__code svg {
   display: block;
   width: 100%;
   height: auto;

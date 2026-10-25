@@ -67,4 +67,56 @@ describe('backup com o Pokémon do dia', () => {
     expect(withDaily!.daily).toEqual(daily)
     expect(parseBackup(JSON.stringify({ ...old, daily: { stats: 'x' } }))!.daily).toBeUndefined()
   })
+
+  it('descarta dados adulterados: bitset enorme, chaves longas, contadores absurdos', () => {
+    const backup = createBackup(data)
+    const tampered = {
+      ...backup,
+      caught: { ...backup.caught, ['x'.repeat(41)]: '', huge: 'A'.repeat(5000) },
+      favorites: 'A'.repeat(5000),
+      hunts: {
+        ...backup.hunts,
+        'scarlet-violet:1': { count: 1e12, charm: false, masuda: false, startedAt: '' },
+        'scarlet-violet:2': { count: 3, charm: false, masuda: false, startedAt: 'x'.repeat(41) },
+      },
+    }
+    const parsed = parseBackup(JSON.stringify(tampered))!
+    expect(parsed.caught).toEqual(backup.caught)
+    expect(parsed.favorites).toBe('')
+    expect(Object.keys(parsed.hunts)).toEqual(['scarlet-violet:906', 'scarlet-violet:2'])
+    expect(parsed.hunts['scarlet-violet:2']!.startedAt).toBe('')
+  })
+
+  it('não tenta ler texto grande demais para ser backup', () => {
+    expect(parseBackup(' '.repeat(1024 * 1024 + 1))).toBeNull()
+  })
+
+  it('estatísticas do dia só com os campos conhecidos e contadores válidos', () => {
+    const daily = {
+      stats: {
+        played: 5,
+        won: -1,
+        streak: 1.5,
+        best: 2,
+        lastWon: '<b>',
+        distribution: [1, 'x', 2, 0, 0, 0, 0, 0, 9, 9, 9],
+        extra: 'x'.repeat(100),
+      },
+      game: { day: '2026-10-25', guesses: Array.from({ length: 20 }, (_, i) => i + 1), done: 1 },
+    }
+    const parsed = parseBackup(JSON.stringify({ ...createBackup(data), daily }))!.daily!
+    expect(parsed.stats).toEqual({
+      played: 5,
+      won: 0,
+      streak: 0,
+      best: 2,
+      lastWon: null,
+      distribution: [1, 0, 2, 0, 0, 0, 0, 0],
+    })
+    expect(parsed.game).toEqual({
+      day: '2026-10-25',
+      guesses: [1, 2, 3, 4, 5, 6, 7, 8],
+      done: true,
+    })
+  })
 })

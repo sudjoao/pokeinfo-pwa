@@ -15,7 +15,17 @@ export class ApiError extends Error {
   }
 }
 
+/**
+ * Segmentos como os da PokéAPI ("pokemon/25", "move/thunderbolt", "pokemon?limit=100000&offset=0").
+ * Parte do caminho vem da URL do app (`/item/:slug`): sem esta checagem, um link com "..", "%2F" ou
+ * "?" levaria o app a pedir (e guardar no cache) outro recurso que não o da tela.
+ */
+const SAFE_PATH = /^(\/[a-z0-9-]+)+\/?(\?limit=\d+&offset=\d+)?$/i
+
 export async function fetchJson<T>(path: string, signal?: AbortSignal): Promise<T> {
+  // Mesmo tratamento de um recurso que não existe: a tela mostra "não encontrado".
+  if (!SAFE_PATH.test(path)) throw new ApiError('http', 404)
+
   let response: Response
   try {
     response = await fetch(`${POKEAPI_BASE_URL}${path}`, { signal })

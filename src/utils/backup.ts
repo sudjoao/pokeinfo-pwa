@@ -26,8 +26,23 @@ export function createBackup(data: BackupData, now = new Date()): Backup {
 }
 
 /** Slug de jogo ("scarlet-violet") e chave de caçada ("scarlet-violet:906"). */
-const GAME_KEY = /^[a-z0-9-]+$/
-const HUNT_KEY = /^[a-z0-9-]+:\d+$/
+const GAME_KEY = /^[a-z0-9-]{1,40}$/
+const HUNT_KEY = /^[a-z0-9-]{1,40}:\d{1,6}$/
+
+/**
+ * Maior bitset aceito de fora: 4096 caracteres em base64 cobrem ids até ~24 mil (as formas vão até
+ * ~10 300). Um backup adulterado com um bitset de megabytes travaria a tela ao virar um Set enorme.
+ */
+const MAX_BITSET_LENGTH = 4096
+/** Contador de caçada acima disso só pode ser dado adulterado. */
+const MAX_HUNT_COUNT = 10_000_000
+
+/** Arquivo de backup acima disso não é do PokeInfo (uma coleção completa tem ~30 KB). */
+export const MAX_BACKUP_BYTES = 1024 * 1024
+
+function isBitset(value: unknown): value is string {
+  return typeof value === 'string' && value.length <= MAX_BITSET_LENGTH
+}
 
 export function isHunt(value: unknown): value is ShinyHunt {
   const hunt = value as ShinyHunt
@@ -36,6 +51,7 @@ export function isHunt(value: unknown): value is ShinyHunt {
     hunt !== null &&
     Number.isInteger(hunt.count) &&
     hunt.count >= 0 &&
+    hunt.count <= MAX_HUNT_COUNT &&
     typeof hunt.charm === 'boolean' &&
     typeof hunt.masuda === 'boolean'
   )
@@ -53,7 +69,7 @@ function entriesOf(value: unknown): [string, unknown][] {
  */
 function parseGameSets(value: unknown): PersistedGameSet {
   return Object.fromEntries(
-    entriesOf(value).filter(([game, bits]) => GAME_KEY.test(game) && typeof bits === 'string'),
+    entriesOf(value).filter(([game, bits]) => GAME_KEY.test(game) && isBitset(bits)),
   ) as PersistedGameSet
 }
 
@@ -65,7 +81,8 @@ function parseHunts(value: unknown): PersistedHunts {
       count: hunt.count,
       charm: hunt.charm,
       masuda: hunt.masuda,
-      startedAt: typeof hunt.startedAt === 'string' ? hunt.startedAt : '',
+      startedAt:
+        typeof hunt.startedAt === 'string' && hunt.startedAt.length <= 40 ? hunt.startedAt : '',
     }
   }
   return result
@@ -81,7 +98,7 @@ export function parseBackupData(value: unknown): BackupData {
   return {
     caught: parseGameSets(data.caught),
     shiny: parseGameSets(data.shiny),
-    favorites: typeof data.favorites === 'string' ? data.favorites : '',
+    favorites: isBitset(data.favorites) ? data.favorites : '',
     hunts: parseHunts(data.hunts),
     ...(daily ? { daily } : {}),
   }
@@ -89,6 +106,7 @@ export function parseBackupData(value: unknown): BackupData {
 
 /** Valida um backup lido de arquivo ou link; null quando não é um backup do PokeInfo. */
 export function parseBackup(text: string): Backup | null {
+  if (text.length > MAX_BACKUP_BYTES) return null
   let value: unknown
   try {
     value = JSON.parse(text)

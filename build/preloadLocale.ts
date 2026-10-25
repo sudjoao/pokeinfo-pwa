@@ -54,7 +54,7 @@ export function preloadLocale(): Plugin {
   try {
     locale = JSON.parse(localStorage.getItem('pokeinfo:locale:v1'))
   } catch (e) {}
-  if (!files[locale]) {
+  if (!Object.prototype.hasOwnProperty.call(files, locale)) {
     var device = (navigator.language || '').toLowerCase()
     locale = device.indexOf('pt') === 0 ? 'pt-BR' : device.indexOf('es') === 0 ? 'es' : 'en'
   }

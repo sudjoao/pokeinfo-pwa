@@ -20,6 +20,18 @@ export default defineConfigWithVueTs(
   ...pluginVue.configs['flat/essential'],
   vueTsConfigs.recommended,
 
+  {
+    // Segurança: nada de HTML cru nem código montado a partir de texto (a CSP também barra eval).
+    name: 'app/security',
+    rules: {
+      'vue/no-v-html': 'error',
+      'no-eval': 'error',
+      'no-implied-eval': 'error',
+      'no-new-func': 'error',
+      'no-script-url': 'error',
+    },
+  },
+
   ...pluginOxlint.buildFromOxlintConfigFile('.oxlintrc.json'),
 
   skipFormatting,

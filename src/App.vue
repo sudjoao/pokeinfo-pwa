@@ -9,7 +9,7 @@ import { useOnline } from '@/composables/useOnline'
 import { summarize, useBackup, type BackupSummary } from '@/composables/useBackup'
 import { announcement } from '@/composables/useAnnouncer'
 import AppNotice from '@/components/molecules/AppNotice.vue'
-import { decodeBackupParam, parseBackup, type Backup } from '@/utils/backup'
+import { decodeBackupParam, MAX_BACKUP_BYTES, parseBackup, type Backup } from '@/utils/backup'
 import type { ImportMode } from '@/stores/gameSet'
 import AppMenu from '@/components/organisms/AppMenu.vue'
 import { useMountOnOpen } from '@/composables/useMountOnOpen'
@@ -144,6 +144,8 @@ function askImport(value: Backup | null): void {
 
 function importFile(file: File): void {
   menu.backupOpen.value = false
+  // Nem lê um arquivo grande demais para ser backup (evita travar a aba com um arquivo errado).
+  if (file.size > MAX_BACKUP_BYTES) return askImport(null)
   file.text().then(
     (text) => askImport(parseBackup(text)),
     () => askImport(null),

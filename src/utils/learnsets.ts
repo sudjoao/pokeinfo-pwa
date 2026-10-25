@@ -22,7 +22,9 @@ export function hasLearnset(versionGroup: string): boolean {
 const cache = new Map<string, Promise<Readonly<Record<string, string>>>>()
 
 /** Golpe -> aprendizes (texto compacto) de um jogo; null quando o jogo não tem learnset. */
-export function loadLearnset(versionGroup: string): Promise<Readonly<Record<string, string>>> | null {
+export function loadLearnset(
+  versionGroup: string,
+): Promise<Readonly<Record<string, string>>> | null {
   const load = loaderByGroup.get(versionGroup)
   if (!load) return null
   let promise = cache.get(versionGroup)

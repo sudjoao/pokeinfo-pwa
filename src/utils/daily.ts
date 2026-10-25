@@ -197,19 +197,37 @@ function isStats(value: unknown): value is DailyStats {
   )
 }
 
+/** Dia no formato de `dayKey` ("2026-10-24"). */
+const DAY_KEY = /^\d{4}-\d{2}-\d{2}$/
+
+function count(value: unknown): number {
+  return Number.isSafeInteger(value) && (value as number) >= 0 ? (value as number) : 0
+}
+
 /** Lê o que veio do aparelho ou de um backup, descartando o que não tem o formato esperado. */
 export function parseDaily(value: unknown): PersistedDaily | null {
   const data = value as Partial<PersistedDaily> | null
   if (!data || !isStats(data.stats)) return null
-  const game = data.game
+  const { stats, game } = data
   const validGame =
-    game && typeof game.day === 'string' && Array.isArray(game.guesses) ? game : null
+    game && typeof game.day === 'string' && DAY_KEY.test(game.day) && Array.isArray(game.guesses)
+      ? game
+      : null
+  // Campo a campo (nada além do formato conhecido entra), com contadores inteiros e não negativos.
   return {
-    stats: { ...EMPTY_STATS, ...data.stats },
+    stats: {
+      played: count(stats.played),
+      won: count(stats.won),
+      streak: count(stats.streak),
+      best: count(stats.best),
+      lastWon:
+        typeof stats.lastWon === 'string' && DAY_KEY.test(stats.lastWon) ? stats.lastWon : null,
+      distribution: EMPTY_STATS.distribution.map((_, index) => count(stats.distribution[index])),
+    },
     game: validGame
       ? {
           day: validGame.day,
-          guesses: validGame.guesses.filter(Number.isInteger),
+          guesses: validGame.guesses.filter(Number.isInteger).slice(0, DAILY_MAX_GUESSES),
           done: !!validGame.done,
         }
       : null,
