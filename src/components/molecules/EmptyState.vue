@@ -8,6 +8,8 @@ const props = defineProps<{
   title: string
   message?: string
   actionLabel?: string
+  /** Ícone do botão; padrão: "tentar de novo". */
+  actionIcon?: string
 }>()
 
 const emit = defineEmits<{ action: [] }>()
@@ -26,7 +28,12 @@ onMounted(() => {
     :color="variant === 'error' ? 'error' : 'primary'"
   >
     <template v-if="actionLabel" #actions>
-      <v-btn color="primary" variant="tonal" :prepend-icon="mdiRefresh" @click="emit('action')">
+      <v-btn
+        color="primary"
+        variant="tonal"
+        :prepend-icon="actionIcon ?? mdiRefresh"
+        @click="emit('action')"
+      >
         {{ actionLabel }}
       </v-btn>
     </template>

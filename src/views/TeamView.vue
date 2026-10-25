@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, shallowRef } from 'vue'
+import { mdiFilterRemoveOutline } from '@mdi/js'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useDisplay } from 'vuetify'
@@ -46,6 +47,8 @@ const {
   typeFilter,
   toggleType,
   clearTypes,
+  hasFilters,
+  clearFilters,
   versions,
   availability,
   toggleAvailability,
@@ -95,6 +98,28 @@ useOverlayFocusReturn(teamOpen)
 const fullNotice = ref(false)
 const notice = ref<string | null>(null)
 const importOpen = ref(false)
+
+/**
+ * O time só existe na URL (gravada com replace): limpar, remover pelo painel ou importar por cima não
+ * tinha volta, nem pelo "voltar" do navegador. O aviso oferece desfazer.
+ */
+const undo = shallowRef<{ text: string; ids: number[] } | null>(null)
+
+function changeTeam(text: string, change: () => void): void {
+  const before = [...team.ids.value]
+  change()
+  undo.value = before.length ? { text, ids: before } : null
+}
+
+function removeMember(member: { id: number; name: string }): void {
+  changeTeam(t('team.removed', { name: formatPokemonName(member.name) }), () =>
+    team.remove(member.id),
+  )
+}
+
+function clearTeam(): void {
+  changeTeam(t('team.cleared'), team.clear)
+}
 const pokedex = usePokedexStore()
 
 /** Quem da lista atual (jogo, dex e filtros) cobre as fraquezas do time. */
@@ -160,10 +185,14 @@ function copyShowdown(): void {
 
 function pasteShowdown(text: string): void {
   const result = importShowdown(text, pokedex.index)
-  if (result.ids.length) team.replace(result.ids)
-  const parts = [t('team.imported', { n: result.ids.length })]
+  const parts = [t('team.imported', result.ids.length)]
   if (result.unknown.length)
     parts.push(t('team.importUnknown', { names: result.unknown.join(', ') }))
+  if (result.ids.length && team.ids.value.length) {
+    changeTeam(parts.join(' '), () => team.replace(result.ids))
+    return
+  }
+  if (result.ids.length) team.replace(result.ids)
   notice.value = parts.join(' ')
 }
 
@@ -247,6 +276,9 @@ function goBack(): void {
           v-else-if="isEmpty"
           :title="t('home.emptyTitle')"
           :message="t('home.emptyFiltered')"
+          :action-label="hasFilters ? t('home.clearFilters') : undefined"
+          :action-icon="mdiFilterRemoveOutline"
+          @action="clearFilters"
         />
 
         <PokemonGrid
@@ -276,8 +308,8 @@ function goBack(): void {
             :gaps="team.gaps.value"
             :suggestions="suggestions"
             @select="openMember"
-            @remove="team.remove($event.id)"
-            @clear="team.clear"
+            @remove="removeMember"
+            @clear="clearTeam"
             @add-suggestion="addSuggestion"
             @export-showdown="copyShowdown"
             @import-showdown="importOpen = true"
@@ -302,9 +334,9 @@ function goBack(): void {
               :gaps="team.gaps.value"
               :suggestions="suggestions"
               @select="openMember"
-              @remove="team.remove($event.id)"
+              @remove="removeMember"
               @add="onAddSlot"
-              @clear="team.clear"
+              @clear="clearTeam"
               @add-suggestion="addSuggestion"
               @export-showdown="copyShowdown"
               @import-showdown="importOpen = true"
@@ -362,6 +394,13 @@ function goBack(): void {
       @close="fullNotice = false"
     />
     <AppNotice :text="notice" location="top" @close="notice = null" />
+    <AppNotice
+      :text="undo?.text ?? null"
+      location="top"
+      :action-label="t('common.undo')"
+      @action="undo && team.replace(undo.ids)"
+      @close="undo = null"
+    />
     <ShowdownImportDialog v-model="importOpen" @import="pasteShowdown" />
     <ShareImageDialog
       v-model="shareImage.open.value"

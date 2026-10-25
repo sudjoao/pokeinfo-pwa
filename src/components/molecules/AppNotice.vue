@@ -11,9 +11,11 @@ const props = defineProps<{
   color?: string
   /** Padrão: 4 s, ou até fechar quando o texto é longo (ver noticeTimeout). */
   timeout?: number
+  /** Rótulo de uma ação ao lado do "Fechar" (ex.: "Desfazer"); tocar nela emite `action` e fecha. */
+  actionLabel?: string
 }>()
 
-const emit = defineEmits<{ close: [] }>()
+const emit = defineEmits<{ close: []; action: [] }>()
 
 const { t } = useI18n()
 
@@ -29,13 +31,16 @@ watch(
 <template>
   <v-snackbar
     :model-value="text !== null"
-    :timeout="timeout ?? noticeTimeout(text)"
+    :timeout="timeout ?? (actionLabel ? 6000 : noticeTimeout(text))"
     :location="location"
     :color="color"
     @update:model-value="(open: boolean) => !open && emit('close')"
   >
     <span aria-hidden="true">{{ text }}</span>
     <template #actions>
+      <v-btn v-if="actionLabel" variant="text" @click="(emit('action'), emit('close'))">
+        {{ actionLabel }}
+      </v-btn>
       <v-btn variant="text" @click="emit('close')">{{ t('common.close') }}</v-btn>
     </template>
   </v-snackbar>

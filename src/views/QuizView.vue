@@ -229,6 +229,23 @@ function goBack(): void {
   filter: brightness(0);
 }
 
+/*
+ * A resposta "acende" a silhueta. A transição fica só no estado revelado: na volta para a silhueta
+ * (próxima pergunta) a troca é instantânea, senão o Pokémon novo apareceria colorido por um instante.
+ */
+.quiz__art:not(.quiz__art--hidden) :deep(img) {
+  transition:
+    filter 0.5s ease,
+    opacity 0.3s ease,
+    transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quiz__art:not(.quiz__art--hidden) :deep(img) {
+    transition: none;
+  }
+}
+
 :root .v-theme--dark .quiz__art--hidden :deep(img) {
   filter: brightness(0) invert(0.85);
 }

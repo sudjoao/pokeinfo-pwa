@@ -1,5 +1,13 @@
 <script setup lang="ts">
-import { computed, defineAsyncComponent, nextTick, ref, useTemplateRef, watch } from 'vue'
+import {
+  computed,
+  defineAsyncComponent,
+  nextTick,
+  ref,
+  shallowRef,
+  useTemplateRef,
+  watch,
+} from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import {
@@ -30,6 +38,7 @@ import { useShareImage } from '@/composables/useShareImage'
 import { useAbilityInfo } from '@/composables/useAbilityInfo'
 import { useEggCompatibility } from '@/composables/useEggCompatibility'
 import { useSwipe } from '@/composables/useSwipe'
+import { useShortcut } from '@/composables/useShortcut'
 import { shareLink } from '@/composables/useShare'
 import DetailLayout from '@/components/templates/DetailLayout.vue'
 import AppNotice from '@/components/molecules/AppNotice.vue'
@@ -224,6 +233,19 @@ function updateHunt(change: { count?: number; charm?: boolean; masuda?: boolean 
   const target = shinyContext.value
   if (target) hunts.update(target.game.slug, target.speciesId, change)
 }
+
+/** Desfaz o último "Zerar" (o contador pode estar em milhares e o toque é fácil de errar). */
+const undoHuntReset = shallowRef<(() => void) | null>(null)
+
+function resetHunt(): void {
+  const target = shinyContext.value
+  if (!target) return
+  const previous = hunts.huntOf(target.game.slug, target.speciesId)
+  hunts.reset(target.game.slug, target.speciesId)
+  undoHuntReset.value = previous?.count
+    ? () => hunts.update(target.game.slug, target.speciesId, previous)
+    : null
+}
 const favorite = computed(() => (detail.value ? favorites.isFavorite(detail.value.id) : false))
 
 const ability = useAbilityInfo()
@@ -233,6 +255,11 @@ const egg = useEggCompatibility()
 useSwipe(useTemplateRef<HTMLElement>('swipeArea'), {
   onNext: () => next.value && goTo(next.value.id),
   onPrevious: () => previous.value && goTo(previous.value.id),
+})
+// No teclado, as setas fazem o mesmo.
+useShortcut(['ArrowLeft', 'ArrowRight'], (event) => {
+  const target = event.key === 'ArrowRight' ? next.value : previous.value
+  if (target) goTo(target.id)
 })
 
 const notice = ref<string | null>(null)
@@ -475,7 +502,7 @@ async function sendShareImage(): Promise<void> {
               @count="updateHunt({ count: (hunt?.count ?? 0) + $event })"
               @set-charm="updateHunt({ charm: $event })"
               @set-masuda="updateHunt({ masuda: $event })"
-              @reset="hunts.reset(shinyContext.game.slug, shinyContext.speciesId)"
+              @reset="resetHunt"
             />
           </v-col>
 
@@ -541,5 +568,11 @@ async function sendShareImage(): Promise<void> {
       </template>
     </div>
     <AppNotice :text="notice" :timeout="2500" @close="notice = null" />
+    <AppNotice
+      :text="undoHuntReset ? t('shiny.resetDone') : null"
+      :action-label="t('common.undo')"
+      @action="undoHuntReset?.()"
+      @close="undoHuntReset = null"
+    />
   </DetailLayout>
 </template>

@@ -2,7 +2,12 @@
 import { computed, defineAsyncComponent, nextTick, onActivated, ref, watch } from 'vue'
 import { useRoute, useRouter, type RouteLocationRaw } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { mdiPackageVariantClosed, mdiSwordCross, mdiViewGridOutline } from '@mdi/js'
+import {
+  mdiFilterRemoveOutline,
+  mdiPackageVariantClosed,
+  mdiSwordCross,
+  mdiViewGridOutline,
+} from '@mdi/js'
 import { gameContextQuery } from '@/utils/games'
 import { ROUTE_GAMES } from '@/data/routeGames'
 import { usePokemonList } from '@/composables/usePokemonList'
@@ -46,6 +51,8 @@ const {
   typeFilter,
   toggleType,
   clearTypes,
+  hasFilters,
+  clearFilters,
   versions,
   availability,
   toggleAvailability,
@@ -129,7 +136,13 @@ function openAdvanced(): void {
 /** Altura do cabeçalho: busca (48) + linha de chips (32) + espaçamentos. */
 const HEADER_EXTENSION_HEIGHT = 108
 
+/** Só "Favoritos" ligado e nenhum favorito: explica onde se favorita, em vez de "tente outra busca". */
+const noFavorites = computed(
+  () => advanced.value.favorites && advancedCount.value === 1 && !query.value.trim(),
+)
+
 const emptyTitle = computed(() => {
+  if (noFavorites.value) return t('home.noFavoritesTitle')
   if (
     !game.value ||
     !caughtFilter.value ||
@@ -143,7 +156,9 @@ const emptyTitle = computed(() => {
 })
 
 const emptyMessage = computed(() => {
-  if (typeFilter.value.length || availability.value.length) return t('home.emptyFiltered')
+  if (noFavorites.value) return t('home.noFavoritesMessage')
+  if (typeFilter.value.length || availability.value.length || advancedCount.value)
+    return t('home.emptyFiltered')
   const params = { dex: dex.value ? dexLabel(dex.value) : '', game: game.value?.title }
   if (game.value && dex.value && caughtFilter.value && !query.value.trim()) {
     return caughtFilter.value === 'caught'
@@ -295,7 +310,14 @@ function openTeamBuilder(): void {
         @action="retry"
       />
 
-      <EmptyState v-else-if="isEmpty" :title="emptyTitle" :message="emptyMessage" />
+      <EmptyState
+        v-else-if="isEmpty"
+        :title="emptyTitle"
+        :message="emptyMessage"
+        :action-label="hasFilters ? t('home.clearFilters') : undefined"
+        :action-icon="mdiFilterRemoveOutline"
+        @action="clearFilters"
+      />
 
       <PokemonBoxes
         v-else-if="layout === 'boxes'"

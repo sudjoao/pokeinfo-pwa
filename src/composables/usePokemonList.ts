@@ -250,6 +250,25 @@ export function usePokemonList() {
     typeFilter.value = []
   }
 
+  /** Busca ou algum filtro restringe a lista (o jogo e a Pokédex não contam: são a fonte). */
+  const hasFilters = computed(
+    () =>
+      Boolean(query.value.trim()) ||
+      caughtFilter.value !== null ||
+      typeFilter.value.length > 0 ||
+      activeAvailability.value.length > 0 ||
+      advancedCount.value > 0,
+  )
+
+  /** Saída do estado vazio: tira busca e filtros, mantendo o jogo e a Pokédex. */
+  function clearFilters(): void {
+    query.value = ''
+    caughtFilter.value = null
+    typeFilter.value = []
+    availability.value = []
+    advanced.value = { ...EMPTY_ADVANCED }
+  }
+
   // Carregamento das entradas da Pokédex do jogo (uma requisição por dex, cacheada na store).
   const dexLoading = ref(false)
   const dexError = ref<unknown>(null)
@@ -485,6 +504,8 @@ export function usePokemonList() {
     typeFilter,
     toggleType,
     clearTypes,
+    hasFilters,
+    clearFilters,
     versions,
     availability: activeAvailability,
     toggleAvailability,

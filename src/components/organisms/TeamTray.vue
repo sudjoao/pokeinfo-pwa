@@ -32,7 +32,13 @@ const label = computed(() =>
   <!-- O nome acessível inclui o texto visível ("3 de 6"), como pede o critério 2.5.3. -->
   <button type="button" class="team-tray" aria-haspopup="dialog" @click="emit('open')">
     <div class="team-tray__inner d-flex align-center ga-3">
-      <div class="team-tray__slots d-flex" aria-hidden="true">
+      <!-- Slot preenchido entra com um "pop": o retorno de que o card tocado lá em cima foi para o time. -->
+      <TransitionGroup
+        tag="div"
+        name="tray-slot"
+        class="team-tray__slots d-flex"
+        aria-hidden="true"
+      >
         <span
           v-for="(member, i) in slots"
           :key="member?.id ?? `empty-${i}`"
@@ -42,7 +48,7 @@ const label = computed(() =>
         >
           <PokemonAvatar v-if="member" :id="member.id" :name="member.name" :size="32" />
         </span>
-      </div>
+      </TransitionGroup>
       <span class="team-tray__label text-label-large flex-grow-1">
         <span class="d-sr-only">{{ t('team.open') }}: </span>{{ label }}
       </span>
@@ -112,6 +118,25 @@ const label = computed(() =>
 @media (max-width: 380px) {
   .team-tray__label {
     display: none;
+  }
+}
+
+.tray-slot-enter-active {
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.tray-slot-enter-from:not(.team-tray__slot--empty) {
+  transform: scale(0.4);
+}
+
+/* O slot que sai é trocado na hora pelo vazio (com animação, os dois ocupariam espaço juntos). */
+.tray-slot-leave-active {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tray-slot-enter-active {
+    transition: none;
   }
 }
 </style>

@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed, nextTick, useTemplateRef, type ComponentPublicInstance } from 'vue'
+import { computed, nextTick, useTemplateRef, watch, type ComponentPublicInstance } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { mdiMinus, mdiPlus, mdiRestore, mdiShimmer } from '@mdi/js'
 import type { ShinyHunt } from '@/stores/shiny'
 import { formatPercent } from '@/utils/pokemon'
 import { chanceByNow, hasMasuda, hasShinyCharm, shinyOdds } from '@/utils/shiny'
+import { prefersReducedMotion } from '@/composables/usePrefersReducedMotion'
 
 const props = defineProps<{
   gameTitle: string
@@ -31,6 +32,16 @@ const plus = useTemplateRef<ComponentPublicInstance>('plus')
 function focusPlus(): void {
   nextTick(() => (plus.value?.$el as HTMLElement | undefined)?.focus())
 }
+
+// Cada encontro somado dá um "pulo" no número: o retorno de que o toque contou, sem olhar o dígito.
+const countEl = useTemplateRef<HTMLElement>('countEl')
+watch(count, (value, old) => {
+  if (value <= old || prefersReducedMotion()) return
+  countEl.value?.animate([{ transform: 'scale(1.25)' }, { transform: 'scale(1)' }], {
+    duration: 220,
+    easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+  })
+})
 
 function decrement(): void {
   emit('count', -1)
@@ -75,7 +86,7 @@ const byNow = computed(() =>
           @click="decrement"
         />
         <div class="text-center" aria-live="polite">
-          <div class="shiny-hunt__count text-headline-small">{{ n(count) }}</div>
+          <div ref="countEl" class="shiny-hunt__count text-headline-small">{{ n(count) }}</div>
           <div class="text-label-small opacity-70">{{ t('shiny.encounters') }}</div>
         </div>
         <v-btn

@@ -10,6 +10,7 @@ import DexNumber from '@/components/atoms/DexNumber.vue'
 import TypeChip from '@/components/atoms/TypeChip.vue'
 import CryButton from '@/components/atoms/CryButton.vue'
 import CatchToggle from '@/components/atoms/CatchToggle.vue'
+import { prefersReducedMotion } from '@/composables/usePrefersReducedMotion'
 
 /** Número do Pokémon na Pokédex de um jogo, mostrado no lugar do nacional quando há jogo selecionado. */
 export interface RegionalNumber {
@@ -46,6 +47,22 @@ const name = computed(() => speciesDisplayName(props.species, props.pokemon.name
 const genus = computed(() => speciesGenus(props.species, locale.value))
 const nationalLabel = computed(() => formatDexNumber(props.pokemon.speciesId))
 const accent = computed(() => TYPE_COLORS[props.pokemon.types[0] ?? 'unknown'])
+
+/** Favoritar "bate" o coração, como a Poké Bola ao marcar captura; desfavoritar fica só na troca do ícone. */
+function onFavorite(event: MouseEvent): void {
+  if (!props.favorite && !prefersReducedMotion()) {
+    ;(event.currentTarget as HTMLElement).animate(
+      [
+        { transform: 'scale(1)' },
+        { transform: 'scale(1.3)' },
+        { transform: 'scale(0.92)' },
+        { transform: 'scale(1)' },
+      ],
+      { duration: 420, easing: 'ease-out' },
+    )
+  }
+  emit('toggleFavorite')
+}
 
 const caughtLabel = computed(() => {
   const game = props.regional?.gameTitle
@@ -84,7 +101,7 @@ const caughtLabel = computed(() => {
         :aria-pressed="favorite ?? false"
         :aria-label="t('favorites.toggle', { name })"
         :title="t('favorites.title')"
-        @click="emit('toggleFavorite')"
+        @click="onFavorite"
       />
     </div>
     <v-card-item>
