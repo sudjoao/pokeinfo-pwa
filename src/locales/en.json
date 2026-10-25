@@ -556,7 +556,8 @@
     "boxes": "Boxes (living dex)",
     "box": "Box {n}",
     "caught": "{caught}/{total}",
-    "caughtLong": "{caught} of {total} caught"
+    "caughtLong": "{caught} of {total} caught",
+    "hint": "Tap a Pokémon to mark it as caught or not. To open its page, switch to the card list."
   },
   "filters": {
     "chip": "Filters",
@@ -1047,7 +1048,11 @@
     "failed": "Files that didn't download: {n}. Tap Download again to retry just those.",
     "usage": "Space used by PokeInfo on this device: {used} of {quota} available.",
     "hint": "What is already saved is skipped: you can cancel and continue later. Data does not update by itself; clear and download again to get PokéAPI updates.",
-    "clear": "Clear offline data"
+    "clear": "Clear offline data",
+    "done": "Download complete. The chosen data now works offline.",
+    "cleared": "Offline data deleted.",
+    "clearConfirm": "Tap again to delete",
+    "progressLabel": "Download progress"
   },
   "account": {
     "title": "Account",

@@ -556,7 +556,8 @@
     "boxes": "Caixas (living dex)",
     "box": "Caixa {n}",
     "caught": "{caught}/{total}",
-    "caughtLong": "{caught} de {total} capturados"
+    "caughtLong": "{caught} de {total} capturados",
+    "hint": "Toque num Pokémon para marcar ou desmarcar a captura. Para abrir a ficha, use a lista em cards."
   },
   "filters": {
     "chip": "Filtros",
@@ -1047,7 +1048,11 @@
     "failed": "Arquivos que não baixaram: {n}. Toque em Baixar de novo para tentar só esses.",
     "usage": "Espaço usado pelo PokeInfo neste aparelho: {used} de {quota} disponíveis.",
     "hint": "O que já está salvo é pulado: dá para cancelar e continuar depois. Os dados não se atualizam sozinhos; apague e baixe de novo para pegar novidades da PokéAPI.",
-    "clear": "Apagar dados offline"
+    "clear": "Apagar dados offline",
+    "done": "Download concluído. Os dados escolhidos já funcionam sem internet.",
+    "cleared": "Dados offline apagados.",
+    "clearConfirm": "Tocar de novo para apagar",
+    "progressLabel": "Progresso do download"
   },
   "account": {
     "title": "Conta",

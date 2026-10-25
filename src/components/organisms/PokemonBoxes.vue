@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import type { PokemonIndexEntry } from '@/types/pokemon'
 import { formatDexNumber, formatPokemonName } from '@/utils/pokemon'
 import PokemonAvatar from '@/components/atoms/PokemonAvatar.vue'
+import { prefersReducedMotion } from '@/composables/usePrefersReducedMotion'
 
 /** Uma entrada da Pokédex atual (já filtrada), com o número regional quando há jogo. */
 export interface BoxEntry extends PokemonIndexEntry {
@@ -50,13 +51,25 @@ function rangeOf(box: readonly BoxEntry[]): string {
   return `${numberOf(box[0]!)}–${numberOf(box[box.length - 1]!)}`
 }
 
-function onCell(entry: BoxEntry): void {
-  if (props.caughtIds) emit('toggleCaught', speciesOf(entry))
-  else emit('open', entry.id)
+function onCell(entry: BoxEntry, event: MouseEvent): void {
+  if (!props.caughtIds) {
+    emit('open', entry.id)
+    return
+  }
+  // Marcar dá um "pop" na célula, como a Poké Bola do card; desmarcar só troca o fundo.
+  if (!isCaught(entry) && !prefersReducedMotion()) {
+    ;(event.currentTarget as HTMLElement).animate(
+      [{ transform: 'scale(0.85)' }, { transform: 'scale(1.08)' }, { transform: 'scale(1)' }],
+      { duration: 280, easing: 'ease-out' },
+    )
+  }
+  emit('toggleCaught', speciesOf(entry))
 }
 </script>
 
 <template>
+  <!-- Com jogo, as caixas são a lista de marcação (como no Pokémon HOME): a dica diz o que o toque faz. -->
+  <p v-if="caughtIds" class="text-body-small mb-3">{{ t('boxes.hint') }}</p>
   <div class="pokemon-boxes">
     <section
       v-for="(box, index) in boxes"
@@ -85,7 +98,7 @@ function onCell(entry: BoxEntry): void {
             :aria-pressed="caughtIds ? isCaught(entry) : undefined"
             :aria-label="`${numberOf(entry)} ${formatPokemonName(entry.name)}`"
             :title="`${numberOf(entry)} ${formatPokemonName(entry.name)}`"
-            @click="onCell(entry)"
+            @click="onCell(entry, $event)"
           >
             <PokemonAvatar
               :id="entry.id"

@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { mdiCheck, mdiClose, mdiVolumeHigh } from '@mdi/js'
 import { usePokedexStore } from '@/stores/pokedex'
 import { useCry } from '@/composables/useCry'
+import { useShortcut } from '@/composables/useShortcut'
 import { usePokemonData } from '@/composables/usePokemonData'
 import { GENERATIONS } from '@/utils/advancedFilters'
 import { formatPokemonName } from '@/utils/pokemon'
@@ -87,6 +88,19 @@ function nextQuestion(): void {
   nextTick(() => choicesEl.value?.querySelector<HTMLElement>('button')?.focus())
 }
 
+// Teclado: 1–4 respondem e Enter vai para a próxima (fora de botões, onde o Enter já clica).
+useShortcut(['1', '2', '3', '4', 'Enter'], (event) => {
+  if (event.key === 'Enter') {
+    if (!revealed.value || (event.target as Element).closest('button, a')) return
+    // O foco vai para a 1ª alternativa nova: sem isso, o mesmo Enter já a escolheria (keypress).
+    event.preventDefault()
+    nextQuestion()
+    return
+  }
+  const choice = choices.value[Number(event.key) - 1]
+  if (choice && !revealed.value) choose(choice)
+})
+
 function hint(): void {
   if (answer.value) cry.listen(answer.value.id)
 }
@@ -145,7 +159,7 @@ function goBack(): void {
           </p>
           <div ref="choicesEl" class="quiz__choices">
             <v-btn
-              v-for="choice in choices"
+              v-for="(choice, index) in choices"
               :key="choice.id"
               size="large"
               class="text-none"
@@ -171,6 +185,7 @@ function goBack(): void {
               "
               @click="choose(choice)"
             >
+              <kbd class="quiz__key" aria-hidden="true">{{ index + 1 }}</kbd>
               {{ formatPokemonName(choice.name) }}
               <span v-if="revealed && choice.id === answer.id" class="d-sr-only">
                 ({{ t('quiz.rightAnswer') }})
@@ -248,6 +263,24 @@ function goBack(): void {
 
 :root .v-theme--dark .quiz__art--hidden :deep(img) {
   filter: brightness(0) invert(0.85);
+}
+
+/* Número do atalho, só onde há teclado (mouse/trackpad); no toque seria ruído. */
+.quiz__key {
+  display: none;
+  margin-inline-end: 8px;
+  padding: 0 6px;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  font: inherit;
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .quiz__key {
+    display: inline-block;
+  }
 }
 
 .quiz__choices {

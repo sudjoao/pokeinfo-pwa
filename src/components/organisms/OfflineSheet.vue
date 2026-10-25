@@ -6,6 +6,7 @@ import { useOfflinePacks } from '@/composables/useOfflinePacks'
 import { usePokemonData } from '@/composables/usePokemonData'
 import { estimatePackMb, OFFLINE_PACKS, packUrls, type OfflinePack } from '@/utils/offline'
 import { DAILY_SPECIES } from '@/utils/daily'
+import { announce } from '@/composables/useAnnouncer'
 
 const open = defineModel<boolean>({ required: true })
 useOverlayFocusReturn(open)
@@ -67,6 +68,31 @@ const usageText = computed(() => {
 function start(): void {
   offline.download(packs.value, ids.value)
 }
+
+// O contador de arquivos muda a cada download: anunciado ao vivo, o leitor de tela não parava de
+// falar. Só o fim é anunciado (a barra tem rótulo e valor para quem for conferir).
+watch(offline.running, (running, wasRunning) => {
+  if (running || !wasRunning) return
+  const { failed } = offline.progress.value
+  announce(failed ? t('offline.failed', { n: failed }) : t('offline.done'))
+})
+
+/**
+ * "Apagar" pede um segundo toque (pode ser centenas de MB baixados): o primeiro troca o rótulo por
+ * "Tocar de novo para apagar", que volta sozinho em 4 s.
+ */
+const confirmingClear = ref(false)
+let confirmTimer: ReturnType<typeof setTimeout> | undefined
+function onClear(): void {
+  clearTimeout(confirmTimer)
+  if (!confirmingClear.value) {
+    confirmingClear.value = true
+    confirmTimer = setTimeout(() => (confirmingClear.value = false), 4000)
+    return
+  }
+  confirmingClear.value = false
+  offline.clear().then(() => announce(t('offline.cleared')))
+}
 </script>
 
 <template>
@@ -127,8 +153,14 @@ function start(): void {
           </div>
 
           <template v-if="offline.running.value">
-            <v-progress-linear :model-value="percent" color="primary" height="8" rounded />
-            <p class="text-body-small mb-0" aria-live="polite">
+            <v-progress-linear
+              :model-value="percent"
+              color="primary"
+              height="8"
+              rounded
+              :aria-label="t('offline.progressLabel')"
+            />
+            <p class="text-body-small mb-0">
               {{
                 t('offline.progress', {
                   done: n(offline.progress.value.done),
@@ -150,13 +182,8 @@ function start(): void {
         </template>
       </v-card-text>
       <v-card-actions v-if="offline.supported" class="flex-wrap">
-        <v-btn
-          color="error"
-          variant="text"
-          :disabled="offline.running.value"
-          @click="offline.clear"
-        >
-          {{ t('offline.clear') }}
+        <v-btn color="error" variant="text" :disabled="offline.running.value" @click="onClear">
+          {{ confirmingClear ? t('offline.clearConfirm') : t('offline.clear') }}
         </v-btn>
         <v-spacer />
         <v-btn v-if="offline.running.value" @click="offline.cancel">{{ t('backup.cancel') }}</v-btn>
