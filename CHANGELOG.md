@@ -5,6 +5,34 @@ Todas as mudanças relevantes deste projeto são registradas aqui.
 O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e o projeto adota
 [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [Não lançado]
+
+Rodada de desempenho, medida num celular emulado (CPU 4× mais lenta, 4G lento): na primeira
+visita, a Pokédex aparece com o LCP em ~2,9 s (era ~4,2 s) e o detalhe em ~3,0 s (era ~4,3 s).
+
+### Alterado
+
+- Índice da Pokédex e tipos de cada Pokémon embutidos no build
+  (`scripts/gen-dex-index.mjs`, ~9 KB gz): a primeira visita não espera mais 19 requisições à
+  PokéAPI, e as seguintes não leem ~60 KB do `localStorage`. Pokémon lançados depois do build são
+  conferidos uma vez por semana, em segundo plano.
+- CSS inicial de 277 KB para 97 KB (40 para 14 KB gz): o build tira os utilitários do Vuetify que
+  o app não usa, e o compilador de mensagens do vue-i18n e os textos do Vuetify em pt/es saíram do
+  JS de abertura.
+- Abertura sem esperas em série: as mensagens do idioma baixam junto com o JS principal, o chunk
+  da tela em paralelo com elas, e o detalhe já começa a ficha e o artwork na navegação. Na Pokédex
+  sem filtro, as imagens dos primeiros cards começam na hora; o SDK do Supabase espera a primeira
+  pintura.
+- Cards da lista mais leves: com a Pokédex inteira rolada, o heap JS cai de 208 MB para 85 MB e
+  a rolagem tem menos travadas.
+- Assets com hash saem com cache imutável de um ano na Vercel (antes cada visita sem o service
+  worker revalidava dezenas de arquivos); chunk de deploy antigo dá 404 em vez do `index.html`.
+
+### Removido
+
+- Chaves `pokeinfo:index:v1` e `pokeinfo:types:v1` do `localStorage` e o cache `pokeapi-types` do
+  service worker (apagados na abertura).
+
 ## [1.7.0] - 2026-10-25
 
 Conta Google opcional para guardar a coleção na nuvem e sincronizar o Mac e o iPhone, sem deixar de
