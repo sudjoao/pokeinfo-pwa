@@ -9,6 +9,7 @@ import { vuetify } from './plugins/vuetify'
 import { i18n } from './plugins/i18n'
 import { applyInitialLocale, loadLocale } from './composables/useLocale'
 import { applyInitialTheme } from './composables/useThemePreference'
+import { appleWebKit } from './utils/platform'
 
 const app = createApp(App)
 
@@ -19,6 +20,7 @@ app.use(router)
 app.use(vuetify)
 app.use(i18n)
 applyInitialTheme()
+if (appleWebKit) document.documentElement.classList.add('apple-webkit')
 
 // Monta só com as mensagens do idioma: nenhum texto aparece com a chave no lugar da tradução.
 loadLocale(i18n.global.locale.value).then(() => {

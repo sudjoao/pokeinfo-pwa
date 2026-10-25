@@ -1,5 +1,6 @@
 import { nextTick, ref } from 'vue'
 import { START_LOCATION, type RouteLocationNormalized, type Router } from 'vue-router'
+import { appleWebKit } from '@/utils/platform'
 
 /**
  * Transição "compartilhada" entre a lista e o detalhe: o artwork do card voa até o topo do
@@ -34,17 +35,6 @@ if (typeof window !== 'undefined') {
     )
   })
 }
-
-/**
- * WebKit da Apple (Safari e todo navegador do iOS): quando a troca muda a rolagem da janela (a lista
- * rolada vai para o detalhe no topo, ou volta restaurando a posição), o compositor só aplica a
- * rolagem nova alguns quadros depois de começar a desenhar a View Transition, e nesse intervalo a
- * camada dela fica fora da tela: a tela some inteira (ou metade). O crossfade do App.vue também não
- * serve: a página que sai aparece já rolada para o topo, com o cabeçalho cortado. Medido no Safari
- * do simulador do iPhone gravando a tela; sem mudar a rolagem não acontece, mas lista↔detalhe quase
- * sempre muda.
- */
-const appleWebKit = typeof navigator !== 'undefined' && navigator.vendor.startsWith('Apple')
 
 const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms))
 
@@ -114,15 +104,18 @@ export function installArtworkTransition(router: Router): void {
 
   router.beforeResolve((to, from) => {
     if (appleWebKit && from !== START_LOCATION && isListDetail(to, from)) {
+      // WebKit da Apple (ver utils/platform.ts): quando a troca muda a rolagem da janela (a lista
+      // rolada vai para o detalhe no topo, ou volta restaurando a posição), o compositor só aplica a
+      // rolagem nova alguns quadros depois de começar a desenhar a View Transition, e nesse
+      // intervalo a camada dela fica fora da tela: a tela some inteira (ou metade). O crossfade do
+      // App.vue também não serve: a página que sai aparece já rolada para o topo, com o cabeçalho
+      // cortado. Medido no Safari do simulador do iPhone gravando a tela; sem mudar a rolagem não
+      // acontece, mas lista↔detalhe quase sempre muda.
       nativePageTransition.value = true
-      if (to.name === 'home') document.documentElement.classList.add(RESTORING_CLASS)
       void navigationEnd(router)
         .then(() => nextTick())
-        .then(() => sleep(0))
         .then(() => {
-          // O router já restaurou a posição da lista (logo depois do nextTick).
           nativePageTransition.value = false
-          document.documentElement.classList.remove(RESTORING_CLASS)
         })
       return
     }

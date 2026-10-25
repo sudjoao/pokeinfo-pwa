@@ -191,6 +191,16 @@ body {
   content-visibility: visible !important;
 }
 
+/*
+ * No iPhone, o card aberto às vezes sumia por inteiro ~1 s depois de voltar à lista e só voltava
+ * ao ser tocado: o WebKit marcava a célula (`content-visibility: auto`) como fora da tela e pulava o
+ * desenho dela. No WebKit da Apple (main.ts) as células são sempre desenhadas.
+ */
+.apple-webkit .pokemon-grid__cell,
+.apple-webkit .pokemon-boxes__box {
+  content-visibility: visible !important;
+}
+
 .artwork-transition [data-hero-artwork] .pokemon-artwork__img {
   opacity: 1;
   transform: none;
