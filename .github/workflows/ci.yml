@@ -5,16 +5,28 @@ on:
     branches: [main]
   pull_request:
 
+# Só leitura: o job não publica nada. Ações fixadas por SHA (o Dependabot atualiza os SHAs).
+permissions:
+  contents: read
+
 jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 24
           cache: npm
       - run: npm ci
+      # Assinaturas do registro npm de todos os pacotes instalados (pacote adulterado no caminho).
+      - run: npm audit signatures
+      # Vulnerabilidade alta ou crítica no que vai para o bundle derruba o CI; as das ferramentas
+      # de build aparecem no log e chegam como PR do Dependabot.
+      - run: npm audit --omit=dev --audit-level=high
+      - run: npm audit --audit-level=high || true
       # Sem --fix (os scripts de lint corrigem localmente; aqui só acusam).
       - run: npx oxlint .
       - run: npx eslint .
