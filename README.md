@@ -351,6 +351,11 @@ O projeto está configurado para a Vercel (`vercel.json`): rewrites para SPA, `s
 o content-type correto para o `manifest.webmanifest` e cabeçalhos de segurança (`nosniff`, sem
 iframe, `Referrer-Policy` e `Permissions-Policy`). Basta conectar o repositório.
 
+Os arquivos de `/assets` têm hash no nome e saem com `immutable` (um ano): quem abre pelo navegador,
+sem o service worker, não revalida dezenas de chunks a cada visita. Eles ficam fora do rewrite da
+SPA, então um chunk de um deploy antigo dá 404 em vez de receber o `index.html` como JavaScript.
+Ícones e capturas de tela ficam em cache por uma semana.
+
 Para a conta Google, configure o Supabase e o Google Cloud e adicione `VITE_SUPABASE_URL` e
 `VITE_SUPABASE_PUBLISHABLE_KEY` nas variáveis da Vercel: passo a passo em
 [`supabase/README.md`](supabase/README.md).
