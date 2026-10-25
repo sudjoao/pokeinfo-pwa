@@ -6,14 +6,14 @@ import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
 import { vuetify } from './plugins/vuetify'
-import { i18n, loadLocaleMessages } from './plugins/i18n'
-import { applyInitialLocale } from './composables/useLocale'
+import { i18n } from './plugins/i18n'
+import { applyInitialLocale, loadLocale } from './composables/useLocale'
 import { applyInitialTheme } from './composables/useThemePreference'
 
 const app = createApp(App)
 
 // As mensagens do idioma chegam antes do router: a primeira navegação já define o título da aba.
-loadLocaleMessages(i18n.global.locale.value).then(() => {
+loadLocale(i18n.global.locale.value).then(() => {
   app.use(createPinia())
   app.use(router)
   app.use(vuetify)

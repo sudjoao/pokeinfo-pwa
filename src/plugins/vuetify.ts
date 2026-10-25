@@ -1,7 +1,6 @@
 import 'vuetify/styles'
 import { createVuetify, type ThemeDefinition } from 'vuetify'
 import { aliases, mdi } from 'vuetify/iconsets/mdi-svg'
-import { en, es, pt } from 'vuetify/locale'
 
 const light: ThemeDefinition = {
   dark: false,
@@ -31,11 +30,11 @@ const dark: ThemeDefinition = {
 }
 
 export const vuetify = createVuetify({
-  // Textos internos dos componentes; o idioma atual é trocado por `useLocale`.
+  // Textos internos dos componentes; o idioma atual é trocado por `useLocale`. O inglês já vem
+  // embutido no Vuetify; pt e es chegam por `loadVuetifyMessages`, junto com as mensagens do app.
   locale: {
-    locale: 'pt',
+    locale: 'en',
     fallback: 'en',
-    messages: { pt, en, es },
   },
   theme: {
     defaultTheme: 'system',
@@ -52,3 +51,17 @@ export const vuetify = createVuetify({
     VTextField: { variant: 'solo-filled', flat: true, rounded: 'pill', density: 'comfortable' },
   },
 })
+
+/** Mensagens do Vuetify que não vêm embutidas, um chunk por idioma (~4 KB cada). */
+const messageLoaders: Record<string, () => Promise<typeof import('vuetify/lib/locale/pt.js')>> = {
+  pt: () => import('vuetify/lib/locale/pt.js'),
+  es: () => import('vuetify/lib/locale/es.js'),
+}
+
+/** Baixa as mensagens do Vuetify no idioma (uma vez só). Precisa terminar antes de trocar `current`. */
+export async function loadVuetifyMessages(code: string): Promise<void> {
+  const messages = vuetify.locale.messages.value
+  const loader = messageLoaders[code]
+  if (!loader || messages[code]) return
+  messages[code] = (await loader()).default
+}

@@ -46,8 +46,12 @@ export default defineConfig({
     vue(),
     vueDevTools(),
     vuetify({ autoImport: true }),
-    // Pré-compila os JSON de src/locales e usa o build runtime-only do vue-i18n (sem compilador).
-    VueI18nPlugin({ include: [fileURLToPath(new URL('./src/locales/**', import.meta.url))] }),
+    // Pré-compila os JSON de src/locales e usa o build runtime-only do vue-i18n. Sem mensagem
+    // nenhuma para compilar em runtime, o compilador (~17 KB) também sai do bundle.
+    VueI18nPlugin({
+      include: [fileURLToPath(new URL('./src/locales/**', import.meta.url))],
+      dropMessageCompiler: true,
+    }),
     VitePWA({
       registerType: 'autoUpdate',
       // Com 'auto' o registerSW.js entra no <head> sem defer e segura a primeira pintura.
