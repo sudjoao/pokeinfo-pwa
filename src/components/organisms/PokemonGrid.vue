@@ -74,6 +74,9 @@ function onIntersect(isIntersecting: boolean) {
   sentinelVisible.value = isIntersecting
 }
 
+/** Cards da primeira dobra no celular (duas linhas de dois): imagens sem lazy e com prioridade. */
+const PRIORITY_CARDS = 4
+
 // Começa a carregar o próximo lote ~1,5 telas antes do fim da lista.
 const intersectOptions = { rootMargin: '0px 0px 1200px 0px' }
 </script>
@@ -87,9 +90,9 @@ const intersectOptions = { rootMargin: '0px 0px 1200px 0px' }
         mudou é refeita. `linkTo` é estável; o card calcula o destino (e reage ao jogo) sozinho.
       -->
       <v-col
-        v-for="pokemon in items"
+        v-for="(pokemon, index) in items"
         :key="pokemon.id"
-        v-memo="[pokemon, caughtOf(pokemon), selectedIds?.has(pokemon.id), wide, linkTo]"
+        v-memo="[pokemon, caughtOf(pokemon), selectedIds?.has(pokemon.id), wide, linkTo, index]"
         class="pokemon-grid__cell"
         cols="6"
         sm="4"
@@ -101,6 +104,7 @@ const intersectOptions = { rootMargin: '0px 0px 1200px 0px' }
           :caught="caughtOf(pokemon)"
           :selected="selectedIds?.has(pokemon.id)"
           :link-to="linkTo"
+          :priority="index < PRIORITY_CARDS"
           @select="emit('select', $event)"
           @toggle-caught="emit('toggleCaught', $event)"
         />

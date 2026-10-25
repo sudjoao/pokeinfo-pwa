@@ -4,7 +4,7 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 
 import App from './App.vue'
-import router from './router'
+import router, { applyRouteTitle } from './router'
 import { vuetify } from './plugins/vuetify'
 import { i18n } from './plugins/i18n'
 import { applyInitialLocale, loadLocale } from './composables/useLocale'
@@ -12,15 +12,18 @@ import { applyInitialTheme } from './composables/useThemePreference'
 
 const app = createApp(App)
 
-// As mensagens do idioma chegam antes do router: a primeira navegação já define o título da aba.
-loadLocale(i18n.global.locale.value).then(() => {
-  app.use(createPinia())
-  app.use(router)
-  app.use(vuetify)
-  app.use(i18n)
-  applyInitialLocale()
-  applyInitialTheme()
+app.use(createPinia())
+// A primeira navegação começa aqui: o chunk da tela (e, no detalhe, a ficha e o artwork) baixa em
+// paralelo com as mensagens do idioma, em vez de esperar por elas.
+app.use(router)
+app.use(vuetify)
+app.use(i18n)
+applyInitialTheme()
 
+// Monta só com as mensagens do idioma: nenhum texto aparece com a chave no lugar da tradução.
+loadLocale(i18n.global.locale.value).then(() => {
+  applyInitialLocale()
+  applyRouteTitle()
   app.mount('#app')
 })
 

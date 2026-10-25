@@ -17,6 +17,9 @@ const ARTWORK_WIDTHS = [96, 240, 480] as const
 /** Lado do artwork no topo do detalhe; o detalhe pré-carrega essa mesma URL (ver usePokemonDetail). */
 export const HERO_ARTWORK_SIZE = 240
 
+/** Lado do artwork nos cards da lista; o router pré-carrega os primeiros (ver router/index.ts). */
+export const CARD_ARTWORK_SIZE = 120
+
 /**
  * Artwork redimensionado e convertido para WebP pelo wsrv.nl (proxy de imagens na Cloudflare).
  * O PNG original tem 475 px e ~120 KB; na largura de um card (240 px, 2× da tela) fica com ~13 KB.
@@ -28,6 +31,18 @@ export function artworkSrc(id: number, size: number, shiny = false): string {
     ARTWORK_WIDTHS.find((w) => w >= size * 2) ?? ARTWORK_WIDTHS[ARTWORK_WIDTHS.length - 1]
   const source = artworkUrl(id, shiny).replace(/^https:\/\//, '')
   return `https://wsrv.nl/?url=${source}&w=${width}&we&output=webp`
+}
+
+/**
+ * Começa a baixar um artwork que vai ser o LCP (o topo do detalhe, os primeiros cards) antes de a
+ * tela renderizar. Mesma requisição do `<img>` (tamanho e crossorigin iguais), para cair no cache
+ * dele.
+ */
+export function preloadArtwork(id: number, size = HERO_ARTWORK_SIZE): void {
+  const image = new Image()
+  image.crossOrigin = 'anonymous'
+  image.fetchPriority = 'high'
+  image.src = artworkSrc(id, size)
 }
 
 /** Sprite de item (PNG pequeno do repositório de sprites da PokéAPI): "oran-berry" -> URL. */

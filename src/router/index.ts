@@ -1,8 +1,10 @@
 import { watch } from 'vue'
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, START_LOCATION } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
 import { i18n } from '@/plugins/i18n'
 import { trackInAppNavigation } from '@/composables/usePageFocus'
+import { CARD_ARTWORK_SIZE, preloadArtwork } from '@/utils/pokemon'
+import { usePokemonDetailStore } from '@/stores/pokemonDetail'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -11,12 +13,30 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView,
+      // Abrindo o app na Pokédex sem filtro (o início do PWA instalado), os primeiros cards são
+      // sempre os #1 a #4: as imagens (o LCP) começam a baixar já, e não depois da montagem.
+      beforeEnter: (to, from) => {
+        if (from !== START_LOCATION || Object.keys(to.query).length) return
+        for (let id = 1; id <= 4; id++) preloadArtwork(id, CARD_ARTWORK_SIZE)
+      },
     },
     {
       path: '/pokemon/:id',
       name: 'pokemon',
       // Carregado sob demanda: a Home continua leve.
       component: () => import('@/views/PokemonDetailView.vue'),
+      // O artwork do topo e a ficha começam a baixar junto com o chunk da tela, e não depois de ela
+      // montar (num link direto, isso era depois do idioma e de ~20 chunks). O composable
+      // reaproveita a mesma requisição.
+      beforeEnter: (to) => {
+        const key = String(to.params.id).trim().toLowerCase()
+        if (!key) return
+        const id = /^\d+$/.test(key) ? Number(key) : key
+        if (typeof id === 'number') preloadArtwork(id)
+        usePokemonDetailStore()
+          .ensureDetail(id)
+          .catch(() => {})
+      },
     },
     {
       path: '/team',
@@ -108,9 +128,10 @@ const ROUTE_TITLES: Partial<Record<string, string>> = {
   'auth-callback': 'app.signInTitle',
 }
 
-function applyRouteTitle(): void {
+/** Exportada para o boot: a primeira navegação acontece antes de as mensagens chegarem. */
+export function applyRouteTitle(): void {
   const key = ROUTE_TITLES[String(router.currentRoute.value.name)]
-  if (key) document.title = i18n.global.t(key)
+  if (key && i18n.global.te(key)) document.title = i18n.global.t(key)
 }
 
 router.afterEach(applyRouteTitle)

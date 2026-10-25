@@ -16,6 +16,7 @@ import {
   type RemoteCollection,
 } from '@/services/cloud/collection.service'
 import { safeNextPath } from '@/utils/authRedirect'
+import { whenIdle } from '@/utils/idle'
 import { parseBackupData, type BackupData } from '@/utils/backup'
 import { onLocalChange, withoutNotify } from '@/utils/localChanges'
 import { readStorage, removeStorage, writeStorage } from '@/utils/storage'
@@ -186,7 +187,11 @@ export const useAccountStore = defineStore('account', () => {
     client.auth.onAuthStateChange(onAuthChange)
   }
 
-  /** Chamado uma vez no App.vue. Só baixa o SDK se este aparelho já tem sessão. */
+  /**
+   * Chamado uma vez no App.vue. Só baixa o SDK se este aparelho já tem sessão, e só depois da
+   * primeira pintura: são ~55 KB gz que disputariam a rede e a CPU com a abertura. A conta já
+   * aparece antes disso (lida do localStorage), e quem precisar do SDK antes o carrega na hora.
+   */
   function start(): void {
     if (!cloudEnabled || started) return
     started = true
@@ -206,10 +211,12 @@ export const useAccountStore = defineStore('account', () => {
       if (Date.now() - last > PULL_AFTER) void sync()
     })
     if (hasStoredSession()) {
-      listen().catch(() => {
-        // SDK não carregou (offline e ainda fora do cache): a conta segue visível, sem sincronizar.
-        status.value = 'offline'
-      })
+      whenIdle(() =>
+        listen().catch(() => {
+          // SDK não carregou (offline e ainda fora do cache): a conta segue visível, sem sincronizar.
+          status.value = 'offline'
+        }),
+      )
     }
   }
 

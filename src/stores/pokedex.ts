@@ -19,6 +19,7 @@ import {
 } from '@/data/generated/dexIndex'
 import { decodeDexIndex, type TypeMap } from '@/utils/dexIndex'
 import { buildRegionalFormIndex } from '@/utils/games'
+import { whenIdle } from '@/utils/idle'
 import { readStorage, removeStorage, writeStorage } from '@/utils/storage'
 
 /** O que a PokéAPI tem e o build não: Pokémon/formas lançados depois do índice gerado. */
@@ -36,12 +37,6 @@ interface PersistedExtra {
   checkedAt: number
   entries: PokemonIndexEntry[]
   types: Record<number, number[]>
-}
-
-/** Roda quando o navegador estiver ocioso (o Safari não tem requestIdleCallback). */
-function whenIdle(run: () => void): void {
-  if (typeof requestIdleCallback === 'function') requestIdleCallback(run, { timeout: 10_000 })
-  else setTimeout(run, 3000)
 }
 
 /**

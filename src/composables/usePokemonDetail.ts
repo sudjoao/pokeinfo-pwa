@@ -6,7 +6,7 @@ import { usePokedexStore } from '@/stores/pokedex'
 import { usePokemonDetailStore } from '@/stores/pokemonDetail'
 import { buildDexList, type GameContext } from '@/utils/games'
 import { describeError } from '@/utils/errors'
-import { artworkSrc, HERO_ARTWORK_SIZE } from '@/utils/pokemon'
+import { preloadArtwork } from '@/utils/pokemon'
 import type {
   EvolutionChain,
   PokemonDetail,
@@ -29,14 +29,6 @@ export interface NeighborEntry extends PokemonIndexEntry {
  * tela), depois espécie + cadeia de evolução e os locais de encontro em paralelo. Reage à troca do id na rota.
  * Com um jogo selecionado (`context`), a navegação anterior/próximo segue a Pokédex dele.
  */
-/** Mesma requisição do `<img>` do hero (tamanho e crossorigin iguais), para cair no cache dele. */
-function preloadArtwork(id: number): void {
-  const image = new Image()
-  image.crossOrigin = 'anonymous'
-  image.fetchPriority = 'high'
-  image.src = artworkSrc(id, HERO_ARTWORK_SIZE)
-}
-
 export function usePokemonDetail(idOrName: Ref<string>, context: Ref<GameContext | null>) {
   const store = usePokemonDetailStore()
   const pokedex = usePokedexStore()

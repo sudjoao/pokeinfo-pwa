@@ -4,7 +4,7 @@ import { mdiCheckCircle, mdiStarFourPoints } from '@mdi/js'
 import { useI18n } from 'vue-i18n'
 import type { RouteLocationRaw } from 'vue-router'
 import type { PokemonListItem } from '@/types/pokemon'
-import { formatDexNumber, formatPokemonName, TYPE_COLORS } from '@/utils/pokemon'
+import { CARD_ARTWORK_SIZE, formatDexNumber, formatPokemonName, TYPE_COLORS } from '@/utils/pokemon'
 import PokemonArtwork from '@/components/atoms/PokemonArtwork.vue'
 import DexNumber from '@/components/atoms/DexNumber.vue'
 import TypeChip from '@/components/atoms/TypeChip.vue'
@@ -22,6 +22,8 @@ const props = defineProps<{
    * e não o objeto da rota: um objeto novo a cada render da grade fazia todos os cards renderizarem.
    */
   linkTo?: (pokemon: PokemonListItem) => RouteLocationRaw
+  /** Card da primeira dobra: a imagem é o LCP da lista e baixa já, com prioridade alta. */
+  priority?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -61,7 +63,7 @@ function onLinkClick(event: MouseEvent): void {
     link
   >
     <div class="pokemon-card__art pa-2">
-      <PokemonArtwork :id="pokemon.id" alt="" :size="120" />
+      <PokemonArtwork :id="pokemon.id" alt="" :size="CARD_ARTWORK_SIZE" :priority="priority" />
       <v-icon v-if="selected" :icon="mdiCheckCircle" color="primary" class="pokemon-card__check" />
       <CatchToggle
         v-if="caught !== undefined"
