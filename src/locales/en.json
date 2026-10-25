@@ -19,7 +19,7 @@
     "retry": "Try again",
     "back": "Back",
     "national": "Nat.",
-    "less": "Less",
+    "less": "Show less",
     "clear": "Clear",
     "done": "Done",
     "skipToContent": "Skip to content",
@@ -27,7 +27,8 @@
     "share": "Share",
     "linkCopied": "Link copied.",
     "close": "Close",
-    "shareFailed": "Couldn't share the link"
+    "shareFailed": "Couldn't share. Please try again.",
+    "undo": "Undo"
   },
   "language": {
     "title": "Language",
@@ -41,7 +42,7 @@
   "home": {
     "searchPlaceholder": "Search by name or number",
     "searchLabel": "Search Pokémon",
-    "gameFilterLabel": "Game filter",
+    "gameFilterLabel": "List filters",
     "allGames": "All games",
     "nationalDex": "National Pokédex",
     "pickGame": "Filter by game",
@@ -57,7 +58,7 @@
     "completeTitle": "Pokédex complete!",
     "completeMessage": "You have caught every Pokémon in the {dex} Pokédex in {game}.",
     "loadErrorTitle": "Could not load the Pokédex",
-    "loadMoreError": "Error loading Pokémon",
+    "loadMoreError": "Couldn't load more Pokémon.",
     "endOfList": "You have reached the end of the list.",
     "teamBuilder": "Team builder",
     "emptyFiltered": "No Pokémon matches these filters. Try another type or search.",
@@ -65,7 +66,10 @@
     "exclusivesOf": "{version} exclusives",
     "pokemonTab": "Pokémon",
     "routesTab": "Routes",
-    "resultsCount": "No Pokémon found | 1 Pokémon found | {n} Pokémon found"
+    "resultsCount": "No Pokémon found | 1 Pokémon found | {n} Pokémon found",
+    "clearFilters": "Clear filters",
+    "noFavoritesTitle": "No favorites yet",
+    "noFavoritesMessage": "Tap the heart at the top of a Pokémon's page to keep it here."
   },
   "dex": {
     "crown-tundra": "Crown Tundra",
@@ -95,12 +99,12 @@
     "dismiss": "Not now"
   },
   "detail": {
-    "neighborsLabel": "Neighboring Pokémon",
+    "neighborsLabel": "Previous and next Pokémon",
     "notFoundTitle": "Pokémon not found",
     "notFoundMessage": "Check the number or name and try again.",
     "backToDex": "Back to the Pokédex",
     "errorTitle": "Could not load the Pokémon",
-    "loadError": "Error loading the Pokémon",
+    "loadError": "Couldn't load the Pokémon.",
     "pokedex": "Pokédex",
     "dexOf": "{dex} Pokédex · {game}",
     "about": "About",
@@ -285,15 +289,15 @@
     }
   },
   "error": {
-    "network": "Could not reach the PokéAPI",
-    "http": "PokéAPI responded with status {status}",
-    "loadDex": "Error loading the Pokédex"
+    "network": "Couldn't reach the PokéAPI. Check your connection and try again.",
+    "http": "The PokéAPI is having trouble (error {status}). Try again in a moment.",
+    "loadDex": "Couldn't load the Pokédex."
   },
   "typeFilter": {
     "chip": "Type",
     "label": "Type filter",
     "title": "Filter by type",
-    "hint": "Up to 2 types: the Pokémon must have both."
+    "hint": "Pick up to 2 types. With 2, only Pokémon that have both are shown."
   },
   "team": {
     "title": "Team builder",
@@ -311,7 +315,7 @@
     "defense": "Defense",
     "defenseHint": "Damage each attacking type deals to each member: red is a weakness, green a resistance.",
     "threats": "Team weaknesses",
-    "noThreats": "No attacking type hits two or more members super effectively without the team resisting it just as much.",
+    "noThreats": "No attacking type is super effective against 2 or more members without being offset by the team's resistances.",
     "weakMembers": "{n} weak | {n} weak",
     "attack": "Attack",
     "weak": "Weak",
@@ -329,12 +333,14 @@
     "importTitle": "Import team",
     "importHint": "Paste a team exported from Pokémon Showdown (or just names separated by blank lines). Items, moves and EVs are ignored.",
     "importLabel": "Showdown team",
-    "imported": "{n} Pokémon imported.",
+    "imported": "No Pokémon imported. | 1 Pokémon imported. | {n} Pokémon imported.",
     "importUnknown": "Not recognized: {names}.",
     "suggestions": "Suggestions for the weaknesses",
     "suggestionsHint": "From the current list, Pokémon that resist the team's weaknesses without being weak to them. Tap to add.",
-    "suggestionsFull": "Team is full: remove someone to swap in a suggestion.",
-    "share": "Share team"
+    "suggestionsFull": "Team is full: remove a Pokémon to add a suggestion.",
+    "share": "Share team",
+    "cleared": "Team cleared.",
+    "removed": "{name} removed from the team."
   },
   "versionFilter": {
     "chip": "Version",
@@ -431,7 +437,7 @@
     "loadError": "Could not load this route's Pokémon.",
     "pokemonCount": "{n} Pokémon | {n} Pokémon",
     "chance": "{pct}%",
-    "onlyMissing": "Show only Pokémon not caught yet",
+    "onlyMissing": "Only not caught",
     "caughtCount": "{caught}/{total} caught",
     "allCaught": "You have caught everything on this route.",
     "section": {
@@ -521,14 +527,14 @@
   "backup": {
     "title": "Data backup",
     "intro": "Caught, shinies, favorites and hunts are stored on this device (and in your account, if you sign in with Google). Export them to keep a copy or move them to another device without an account.",
-    "summary": "{caught} caught in {games} games · {shiny} shinies · {favorites} favorites · {hunts} hunts",
+    "summary": "Caught: {caught} · Games: {games} · Shinies: {shiny} · Favorites: {favorites} · Hunts: {hunts}",
     "download": "Download file",
     "copyLink": "Copy link",
     "share": "Share link",
     "import": "Import file",
     "linkCopied": "Link copied. Open it on the other device to import.",
     "linkHint": "The link carries the data: whoever opens it can import it.",
-    "invalid": "Invalid backup file or link.",
+    "invalid": "Invalid backup file or link. Create a new one on the other device and try again.",
     "importTitle": "Import backup",
     "importFrom": "Backup from {date}",
     "merge": "Merge with current data",
@@ -605,8 +611,8 @@
     "chartScroll": "Type chart (scroll sideways)",
     "attacker": "Attack",
     "defender": "Defense",
-    "summaryDefense": "Weak to {weak} types, resists {resist}, immune to {immune}.",
-    "summaryAttack": "Super effective against {weak} types, not very effective against {resist}, no effect on {immune}."
+    "summaryDefense": "Weaknesses: {weak}. Resistances: {resist}. Immunities: {immune}.",
+    "summaryAttack": "Super effective: {weak}. Not very effective: {resist}. No effect: {immune}."
   },
   "compare": {
     "title": "Compare",
@@ -637,12 +643,13 @@
     "encounters": "encounters",
     "increment": "Add one encounter",
     "decrement": "Remove one encounter",
-    "reset": "Reset",
+    "reset": "Reset counter",
     "charm": "Shiny Charm",
     "masuda": "Masuda method",
     "odds": "Odds per encounter: 1 in {n}",
     "byNow": "{pct} chance of having found one",
-    "hint": "Base game odds, without outbreaks, sandwiches or events. The counter is saved on this device and included in backups."
+    "hint": "Base game odds, without outbreaks, sandwiches or events. The counter is saved on this device and included in backups.",
+    "resetDone": "Counter reset."
   },
   "encounterCondition": {
     "always": "normally",
@@ -696,7 +703,7 @@
   "heldItems": {
     "title": "Held items",
     "noneInGame": "PokéAPI lists no held items in {game}.",
-    "more": "+{n} games",
+    "more": "+{n} game | +{n} games",
     "hint": "Chance that the wild Pokémon is holding the item."
   },
   "changes": {
@@ -723,9 +730,9 @@
     },
     "category": "Category",
     "loadError": "Could not load this game's moves.",
-    "empty": "No move matches these filters.",
+    "empty": "No move matches these filters. Try another type or category.",
     "results": "{n} move | {n} moves",
-    "showMore": "Show more ({n} left)",
+    "showMore": "Show more ({n})",
     "learnIntro": "Pick up to {n} moves and a game to see which Pokémon learn all of them.",
     "learnMoves": "Moves",
     "learnEmpty": "Pick at least one move.",
@@ -750,7 +757,7 @@
     "learners": "Learned by",
     "noLearnset": "PokéAPI has no move data for {game} yet.",
     "noneInGame": "No Pokémon learns this move in {game}.",
-    "allGamesHint": "In any game. Pick a game to see level-up, TM, egg and tutor.",
+    "allGamesHint": "Learned in at least one game. Pick a game to split by level-up, TM, egg and tutor.",
     "method": {
       "L": "Level-up",
       "M": "TM/HM",
@@ -805,7 +812,7 @@
       "key": "Key items"
     },
     "results": "{n} item | {n} items",
-    "empty": "No item matches these filters.",
+    "empty": "No item matches these filters. Try another category or search.",
     "category": {
       "standard-balls": "Standard balls",
       "special-balls": "Special balls",
@@ -822,7 +829,7 @@
       "z-crystals": "Z-Crystals",
       "all-machines": "TMs, HMs and TRs",
       "medicine": "Healing berries",
-      "picky-healing": "Picky healing",
+      "picky-healing": "Healing (may confuse)",
       "in-a-pinch": "In a pinch",
       "type-protection": "Type protection",
       "baking-only": "Baking only",
@@ -835,7 +842,7 @@
     "allGames": "All games",
     "price": "Price",
     "priceValue": "₽{n}",
-    "notSold": "Not sold",
+    "notSold": "Not sold in shops",
     "fling": "Fling power",
     "loadError": "Could not load the item's description.",
     "berry": "Berry",
@@ -856,7 +863,7 @@
     "naturalGiftPower": "power {n}",
     "flavors": "Flavors",
     "heldBy": "Held by wild Pokémon",
-    "heldByNone": "PokéAPI lists no wild Pokémon holding this item in that game."
+    "heldByNone": "PokéAPI lists no wild Pokémon holding this item in this game."
   },
   "flavor": {
     "spicy": "spicy",
@@ -912,9 +919,9 @@
     "title": "Catching {name}",
     "perThrow": "chance per throw",
     "within": "{pct} within {n} throws",
-    "throwsFor": "~{n} throws for 90%",
+    "throwsFor": "~{n} throws for a 90% chance",
     "ball": "Ball",
-    "level": "Wild level",
+    "level": "Wild Pokémon level",
     "turns": "Turn {n}",
     "dark": "At night or in a cave",
     "water": "In water (surfing, fishing or diving)",
@@ -958,7 +965,7 @@
       "maxPlus": "Max+"
     },
     "inTeam": "(in your team)",
-    "fromTeam": "Speed tiers",
+    "fromTeam": "Team speed tiers",
     "legend": "Min: 0 IV, 0 EV, hindering nature. Neutral: 31 IV, 0 EV. Max: 31 IV, 252 EV. Max+: with a boosting nature (Jolly, Timid). The grey number next to the name is the base stat."
   },
   "daily": {
@@ -971,7 +978,7 @@
     "cryHint": "Hint: hear its cry",
     "silhouetteHint": "Hint: the Pokémon's silhouette.",
     "correct": "Correct: {name}!",
-    "wrong": "Not {name}. {left} guesses left.",
+    "wrong": "Not {name}. 1 guess left. | Not {name}. {left} guesses left.",
     "lost": "Out of guesses. It was {name}.",
     "wonTitle": "Got it in {n} guess! | Got it in {n} guesses!",
     "lostTitle": "Not this time. It was:",
@@ -1004,7 +1011,7 @@
     "streak": "Streak",
     "best": "Best",
     "distribution": "Guesses to win",
-    "distributionRow": "{count} wins in {n} guesses"
+    "distributionRow": "Guess {n}: no wins | Guess {n}: 1 win | Guess {n}: {count} wins"
   },
   "recent": {
     "title": "Recently viewed",
@@ -1023,7 +1030,7 @@
   },
   "offline": {
     "title": "Use offline",
-    "unsupported": "This browser can't store data for offline use.",
+    "unsupported": "This browser can't store data for offline use. Open PokeInfo in an up-to-date Safari or Chrome.",
     "intro": "Download entries, images and cries to open Pokémon without internet. Otherwise only what you already opened is kept (and only the latest ones).",
     "generations": "Generations",
     "generation": "Gen {n}",
@@ -1037,7 +1044,7 @@
     "mb": "{n} MB",
     "download": "Download (≈ {size})",
     "progress": "{done} of {total} files",
-    "failed": "{n} files didn't download. Tap Download again to retry just those.",
+    "failed": "Files that didn't download: {n}. Tap Download again to retry just those.",
     "usage": "Space used by PokeInfo on this device: {used} of {quota} available.",
     "hint": "What is already saved is skipped: you can cancel and continue later. Data does not update by itself; clear and download again to get PokéAPI updates.",
     "clear": "Clear offline data"
@@ -1068,7 +1075,7 @@
     "delete": "Delete account",
     "deleteTitle": "Delete account?",
     "deleteText": "Deletes your account and everything stored in it. What is on this device stays here. This cannot be undone.",
-    "deleteConfirm": "Delete",
+    "deleteConfirm": "Delete account",
     "firstSyncTitle": "Combine with your account?",
     "firstSyncText": "This device has data that is not in your account. How do you want to combine them?",
     "firstSyncDevice": "On this device",

@@ -142,7 +142,10 @@ function submit(id: number | null): void {
   if (id === answer.value) announce(t('daily.correct', { name }))
   else if (guesses.value.length >= DAILY_MAX_GUESSES)
     announce(t('daily.lost', { name: answerName.value }))
-  else announce(t('daily.wrong', { name, left: DAILY_MAX_GUESSES - guesses.value.length }))
+  else {
+    const left = DAILY_MAX_GUESSES - guesses.value.length
+    announce(t('daily.wrong', { name, left }, left))
+  }
 }
 
 function newPractice(): void {
@@ -262,6 +265,9 @@ function goBack(): void {
 
         <div v-if="!done" class="d-flex flex-column ga-2">
           <v-autocomplete
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"
             v-model="selection"
             v-model:search="searchText"
             :items="options"
@@ -402,7 +408,7 @@ function goBack(): void {
                   {{ count }}
                 </span>
                 <span class="d-sr-only">{{
-                  t('daily.distributionRow', { n: index + 1, count })
+                  t('daily.distributionRow', { n: index + 1, count }, count)
                 }}</span>
               </li>
             </ol>

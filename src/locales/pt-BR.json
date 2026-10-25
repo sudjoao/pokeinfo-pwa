@@ -19,7 +19,7 @@
     "retry": "Tentar novamente",
     "back": "Voltar",
     "national": "Nac.",
-    "less": "Menos",
+    "less": "Mostrar menos",
     "clear": "Limpar",
     "done": "Pronto",
     "skipToContent": "Pular para o conteúdo",
@@ -27,7 +27,8 @@
     "share": "Compartilhar",
     "linkCopied": "Link copiado.",
     "close": "Fechar",
-    "shareFailed": "Não foi possível compartilhar o link"
+    "shareFailed": "Não foi possível compartilhar. Tente de novo.",
+    "undo": "Desfazer"
   },
   "language": {
     "title": "Idioma",
@@ -41,7 +42,7 @@
   "home": {
     "searchPlaceholder": "Buscar por nome ou número",
     "searchLabel": "Buscar Pokémon",
-    "gameFilterLabel": "Filtro por jogo",
+    "gameFilterLabel": "Filtros da lista",
     "allGames": "Todos os jogos",
     "nationalDex": "Pokédex Nacional",
     "pickGame": "Filtrar por jogo",
@@ -57,7 +58,7 @@
     "completeTitle": "Pokédex completa!",
     "completeMessage": "Você já capturou todos os Pokémon da Pokédex de {dex} em {game}.",
     "loadErrorTitle": "Não foi possível carregar a Pokédex",
-    "loadMoreError": "Erro ao carregar Pokémon",
+    "loadMoreError": "Não foi possível carregar mais Pokémon.",
     "endOfList": "Você chegou ao fim da lista.",
     "teamBuilder": "Montar time",
     "emptyFiltered": "Nenhum Pokémon combina com os filtros. Tente outro tipo ou outra busca.",
@@ -65,7 +66,10 @@
     "exclusivesOf": "Exclusivos de {version}",
     "pokemonTab": "Pokémon",
     "routesTab": "Rotas",
-    "resultsCount": "Nenhum Pokémon encontrado | 1 Pokémon encontrado | {n} Pokémon encontrados"
+    "resultsCount": "Nenhum Pokémon encontrado | 1 Pokémon encontrado | {n} Pokémon encontrados",
+    "clearFilters": "Limpar filtros",
+    "noFavoritesTitle": "Nenhum favorito ainda",
+    "noFavoritesMessage": "Toque no coração no topo da página de um Pokémon para guardá-lo aqui."
   },
   "dex": {
     "crown-tundra": "Tundra da Coroa",
@@ -95,12 +99,12 @@
     "dismiss": "Agora não"
   },
   "detail": {
-    "neighborsLabel": "Pokémon vizinhos",
+    "neighborsLabel": "Pokémon anterior e próximo",
     "notFoundTitle": "Pokémon não encontrado",
     "notFoundMessage": "Confira o número ou o nome e tente de novo.",
     "backToDex": "Voltar à Pokédex",
     "errorTitle": "Não foi possível carregar o Pokémon",
-    "loadError": "Erro ao carregar o Pokémon",
+    "loadError": "Não foi possível carregar o Pokémon.",
     "pokedex": "Pokédex",
     "dexOf": "Pokédex de {dex} · {game}",
     "about": "Sobre",
@@ -117,7 +121,7 @@
     "categoryBaby": "Bebê",
     "categoryCommon": "Comum",
     "captureRate": "Taxa de captura",
-    "baseHappiness": "Felicidade base",
+    "baseHappiness": "Amizade base",
     "abilities": "Habilidades",
     "hiddenAbility": "(oculta)",
     "noAbilities": "Nenhuma habilidade.",
@@ -143,7 +147,7 @@
     "locationsShowGame": "Só {game}",
     "locationsCount": "{n} local | {n} locais",
     "locationsNone": "A PokéAPI não tem locais de encontro para este Pokémon.",
-    "locationsNoneInGame": "Não aparece na natureza em {game}: evolua, choque um ovo ou troque.",
+    "locationsNoneInGame": "Não aparece na natureza em {game}: consiga por evolução, ovo ou troca.",
     "locationsNoData": "A PokéAPI ainda não tem locais de {game}.",
     "locationsMissingGames": "Sem dados da PokéAPI para {games}.",
     "locationsHint": "Só encontros selvagens, presentes e trocas; evoluções e ovos não entram.",
@@ -167,7 +171,7 @@
     "eggCompatibleOpen": "Ver Pokémon compatíveis",
     "eggCompatibleTitle": "Pode cruzar com",
     "eggCompatibleCount": "{n} espécie | {n} espécies",
-    "eggNoEggs": "Não gera ovos (grupo \"Indefinido\").",
+    "eggNoEggs": "Não gera ovos (grupo \"Sem ovos\").",
     "eggDitto": "Também cruza com Ditto.",
     "eggCompatibleError": "Não foi possível carregar os Pokémon compatíveis.",
     "pokedexIn": "Pokédex · {version}",
@@ -285,15 +289,15 @@
     }
   },
   "error": {
-    "network": "Não foi possível conectar à PokéAPI",
-    "http": "PokéAPI respondeu com status {status}",
-    "loadDex": "Erro ao carregar a Pokédex"
+    "network": "Sem conexão com a PokéAPI. Confira a internet e tente de novo.",
+    "http": "A PokéAPI está com problemas (erro {status}). Tente de novo em instantes.",
+    "loadDex": "Não foi possível carregar a Pokédex."
   },
   "typeFilter": {
     "chip": "Tipo",
     "label": "Filtro por tipo",
     "title": "Filtrar por tipo",
-    "hint": "Até 2 tipos: o Pokémon precisa ter os dois."
+    "hint": "Escolha até 2 tipos. Com 2, só aparecem Pokémon que têm os dois."
   },
   "team": {
     "title": "Montar time",
@@ -311,7 +315,7 @@
     "defense": "Defesa",
     "defenseHint": "Dano que cada tipo de ataque causa em cada membro: vermelho é fraqueza, verde é resistência.",
     "threats": "Fraquezas do time",
-    "noThreats": "Nenhum tipo de ataque acerta dois ou mais membros de forma super efetiva sem que o time o resista na mesma medida.",
+    "noThreats": "Nenhum tipo de ataque é super efetivo contra 2 ou mais membros sem ser compensado por resistências do time.",
     "weakMembers": "{n} fraco | {n} fracos",
     "attack": "Ataque",
     "weak": "Fracos",
@@ -320,21 +324,23 @@
     "coverageHint": "Tipos que o time acerta de forma super efetiva com golpes do próprio tipo (STAB).",
     "gaps": "Sem cobertura",
     "noGaps": "O time acerta todos os tipos de forma super efetiva.",
-    "chartNote": "Com um jogo selecionado, usa a tabela de tipos e os tipos dos Pokémon daquela geração (ex.: sem Fada antes da 6ª, Clefairy Normal). Sem jogo, usa a tabela atual.",
+    "chartNote": "Com um jogo selecionado, usa a tabela de tipos e os tipos dos Pokémon daquela geração (ex.: sem Fairy antes da 6ª geração; Clefairy era Normal). Sem jogo, usa a tabela atual.",
     "close": "Fechar",
     "trayEmpty": "Monte seu time",
     "export": "Copiar para o Showdown",
     "import": "Importar do Showdown",
     "exported": "Time copiado no formato do Pokémon Showdown.",
     "importTitle": "Importar time",
-    "importHint": "Cole um time exportado do Pokémon Showdown (ou só os nomes, um por linha em branco). Itens, golpes e EVs são ignorados.",
+    "importHint": "Cole um time exportado do Pokémon Showdown (ou só os nomes, separados por uma linha em branco). Itens, golpes e EVs são ignorados.",
     "importLabel": "Time do Showdown",
-    "imported": "{n} Pokémon importado(s).",
+    "imported": "Nenhum Pokémon importado. | 1 Pokémon importado. | {n} Pokémon importados.",
     "importUnknown": "Não reconhecidos: {names}.",
     "suggestions": "Sugestões para as fraquezas",
     "suggestionsHint": "Da lista atual, quem resiste às fraquezas do time sem ser fraco a elas. Toque para adicionar.",
-    "suggestionsFull": "Time cheio: tire alguém para trocar por uma sugestão.",
-    "share": "Compartilhar time"
+    "suggestionsFull": "Time completo: remova um Pokémon para adicionar uma sugestão.",
+    "share": "Compartilhar time",
+    "cleared": "Time limpo.",
+    "removed": "{name} saiu do time."
   },
   "versionFilter": {
     "chip": "Versão",
@@ -350,11 +356,11 @@
   "about": {
     "open": "Sobre o app",
     "title": "Sobre o PokeInfo",
-    "description": "Pokédex em formato de app para consultar tipos, stats, evoluções e montar times, feita para funcionar offline e instalada na tela inicial.",
+    "description": "Pokédex em formato de app para consultar tipos, stats, evoluções e montar times, feita para funcionar offline e ser instalada na tela inicial.",
     "madeBy": "Feito por {author}",
     "repo": "Código-fonte no GitHub",
     "data": "Dados e imagens da PokéAPI",
-    "exclusives": "Exclusivos de versão a partir da Bulbapedia",
+    "exclusives": "Exclusivos de versão com base na Bulbapedia",
     "disclaimer": "Pokémon e os nomes dos personagens são marcas registradas da Nintendo, Creatures Inc. e GAME FREAK inc. Projeto de estudo, sem fins comerciais e sem vínculo com essas empresas.",
     "close": "Fechar"
   },
@@ -393,7 +399,7 @@
     "island-scan": "Island Scan",
     "sos": "Chamado SOS",
     "bubbling-spots": "Bolhas na água",
-    "berry-trees": "Árvore de frutas",
+    "berry-trees": "Árvore de berries",
     "npc-trade": "Troca com NPC",
     "sos-from-bubbling-spot": "Chamado SOS (bolhas)",
     "overworld": "Visível no mapa",
@@ -427,11 +433,11 @@
   },
   "routes": {
     "empty": "Sem dados de rota para {game}.",
-    "emptyRoute": "Nenhum pokémon catalogado aqui para {game}.",
-    "loadError": "Não foi possível carregar os pokémon desta rota.",
-    "pokemonCount": "{n} pokémon | {n} pokémon",
+    "emptyRoute": "Nenhum Pokémon catalogado aqui para {game}.",
+    "loadError": "Não foi possível carregar os Pokémon desta rota.",
+    "pokemonCount": "{n} Pokémon | {n} Pokémon",
     "chance": "{pct}%",
-    "onlyMissing": "Mostrar só os que faltam capturar",
+    "onlyMissing": "Só os não capturados",
     "caughtCount": "{caught}/{total} capturados",
     "allCaught": "Você já capturou todos desta rota.",
     "section": {
@@ -444,8 +450,8 @@
       "kalos": "Kalos",
       "alola": "Alola",
       "galar": "Galar",
-      "isleOfArmor": "Isle of Armor",
-      "crownTundra": "Crown Tundra",
+      "isleOfArmor": "Ilha da Armadura",
+      "crownTundra": "Tundra da Coroa",
       "other": "Outros encontros"
     },
     "searchPlaceholder": "Buscar local",
@@ -521,17 +527,17 @@
   "backup": {
     "title": "Backup dos dados",
     "intro": "Capturados, shinies, favoritos e caçadas ficam neste aparelho (e na sua conta, se você entrar com o Google). Exporte para guardar uma cópia ou passar a outro aparelho sem conta.",
-    "summary": "{caught} capturados em {games} jogos · {shiny} shinies · {favorites} favoritos · {hunts} caçadas",
+    "summary": "Capturados: {caught} · Jogos: {games} · Shinies: {shiny} · Favoritos: {favorites} · Caçadas: {hunts}",
     "download": "Baixar arquivo",
     "copyLink": "Copiar link",
     "share": "Compartilhar link",
     "import": "Importar arquivo",
     "linkCopied": "Link copiado. Abra no outro aparelho para importar.",
     "linkHint": "O link leva os dados junto: quem abrir pode importá-los.",
-    "invalid": "Arquivo ou link de backup inválido.",
+    "invalid": "Arquivo ou link de backup inválido. Gere um novo no outro aparelho e tente de novo.",
     "importTitle": "Importar backup",
     "importFrom": "Backup de {date}",
-    "merge": "Somar ao que já existe",
+    "merge": "Juntar com o que já existe",
     "mergeHint": "Mantém o que está neste aparelho e acrescenta o do backup.",
     "replace": "Substituir tudo",
     "replaceHint": "Apaga o que está neste aparelho e fica só com o backup.",
@@ -605,15 +611,15 @@
     "chartScroll": "Tabela de tipos (role para os lados)",
     "attacker": "Ataque",
     "defender": "Defesa",
-    "summaryDefense": "Fraco a {weak} tipos, resiste a {resist}, imune a {immune}.",
-    "summaryAttack": "Super efetivo contra {weak} tipos, pouco efetivo contra {resist}, sem efeito em {immune}."
+    "summaryDefense": "Fraquezas: {weak}. Resistências: {resist}. Imunidades: {immune}.",
+    "summaryAttack": "Super efetivo: {weak}. Pouco efetivo: {resist}. Sem efeito: {immune}."
   },
   "compare": {
     "title": "Comparar",
     "add": "Adicionar Pokémon",
     "hint": "Até {n} Pokémon; busque por nome ou número.",
     "empty": "Escolha Pokémon acima para comparar stats, tipos, habilidades e fraquezas.",
-    "remove": "Tirar {name} da comparação",
+    "remove": "Remover {name} da comparação",
     "withThis": "Comparar com outro Pokémon",
     "bestHint": "Em destaque: o maior valor de cada linha.",
     "best": "maior"
@@ -637,12 +643,13 @@
     "encounters": "encontros",
     "increment": "Somar um encontro",
     "decrement": "Tirar um encontro",
-    "reset": "Zerar",
+    "reset": "Zerar contador",
     "charm": "Shiny Charm",
     "masuda": "Método Masuda",
     "odds": "Chance por encontro: 1 em {n}",
-    "byNow": "{pct} de já ter achado",
-    "hint": "Chance base do jogo, sem surtos, sanduíches ou eventos. O contador fica salvo no aparelho e entra no backup."
+    "byNow": "{pct} de chance de já ter achado",
+    "hint": "Chance base do jogo, sem surtos, sanduíches ou eventos. O contador fica salvo no aparelho e entra no backup.",
+    "resetDone": "Contador zerado."
   },
   "encounterCondition": {
     "always": "normal",
@@ -666,7 +673,7 @@
     "weekday-thursday": "quinta",
     "weekday-friday": "sexta",
     "weekday-saturday": "sábado",
-    "swarm-yes": "surto (swarm)",
+    "swarm-yes": "aparição em massa",
     "radar-on": "Poké Radar",
     "radio-hoenn": "rádio: Som de Hoenn",
     "radio-sinnoh": "rádio: Som de Sinnoh",
@@ -696,7 +703,7 @@
   "heldItems": {
     "title": "Itens segurados",
     "noneInGame": "A PokéAPI não lista itens segurados em {game}.",
-    "more": "+{n} jogos",
+    "more": "+{n} jogo | +{n} jogos",
     "hint": "Chance de o Pokémon selvagem estar segurando o item."
   },
   "changes": {
@@ -723,9 +730,9 @@
     },
     "category": "Categoria",
     "loadError": "Não foi possível carregar os golpes deste jogo.",
-    "empty": "Nenhum golpe com esses filtros.",
+    "empty": "Nenhum golpe com esses filtros. Tente outro tipo ou categoria.",
     "results": "{n} golpe | {n} golpes",
-    "showMore": "Mostrar mais ({n} restantes)",
+    "showMore": "Mostrar mais ({n})",
     "learnIntro": "Escolha até {n} golpes e um jogo para ver quais Pokémon aprendem todos eles.",
     "learnMoves": "Golpes",
     "learnEmpty": "Escolha pelo menos um golpe.",
@@ -750,7 +757,7 @@
     "learners": "Quem aprende",
     "noLearnset": "A PokéAPI ainda não tem os golpes de {game}.",
     "noneInGame": "Nenhum Pokémon aprende este golpe em {game}.",
-    "allGamesHint": "Em algum jogo. Escolha um jogo para ver por nível, TM, ovo e tutor.",
+    "allGamesHint": "Aprendem em pelo menos um jogo. Escolha um jogo para separar por nível, TM, ovo e tutor.",
     "method": {
       "L": "Por nível",
       "M": "TM/HM",
@@ -783,10 +790,10 @@
       "burn": "queimar",
       "poison": "envenenar",
       "confusion": "confundir",
-      "infatuation": "atrair",
+      "infatuation": "deixar apaixonado",
       "trap": "prender",
       "leech-seed": "drenar a cada turno",
-      "yawn": "dar sono"
+      "yawn": "deixar sonolento"
     }
   },
   "itemsPage": {
@@ -805,7 +812,7 @@
       "key": "Itens-chave"
     },
     "results": "{n} item | {n} itens",
-    "empty": "Nenhum item com esses filtros.",
+    "empty": "Nenhum item com esses filtros. Tente outra categoria ou outra busca.",
     "category": {
       "standard-balls": "Poké Balls comuns",
       "special-balls": "Poké Balls especiais",
@@ -822,7 +829,7 @@
       "z-crystals": "Z-Crystals",
       "all-machines": "TMs, HMs e TRs",
       "medicine": "Berries de cura",
-      "picky-healing": "Cura (sabor exigente)",
+      "picky-healing": "Cura (pode confundir)",
       "in-a-pinch": "Em apuros",
       "type-protection": "Proteção de tipo",
       "baking-only": "Só para culinária",
@@ -835,7 +842,7 @@
     "allGames": "Todos os jogos",
     "price": "Preço",
     "priceValue": "₽ {n}",
-    "notSold": "Não se compra",
+    "notSold": "Não vendido em lojas",
     "fling": "Poder com Fling",
     "loadError": "Não foi possível carregar a descrição do item.",
     "berry": "Berry",
@@ -856,7 +863,7 @@
     "naturalGiftPower": "poder {n}",
     "flavors": "Sabores",
     "heldBy": "Quem segura na natureza",
-    "heldByNone": "A PokéAPI não lista Pokémon selvagens com este item nesse jogo."
+    "heldByNone": "A PokéAPI não lista Pokémon selvagens com este item neste jogo."
   },
   "flavor": {
     "spicy": "picante",
@@ -884,7 +891,7 @@
     "hates": "odeia {flavor}",
     "neutral": "neutra",
     "neutralLong": "neutra, não altera stats nem tem sabor preferido.",
-    "formulaHint": "Fórmula da 3ª geração em diante. Gen 1–2 (DVs) e Let's Go (AVs) usam outra conta.",
+    "formulaHint": "Fórmula da 3ª geração em diante. Na 1ª e na 2ª geração (DVs) e em Let's Go (AVs) a conta é outra.",
     "pokemon": "Pokémon",
     "level": "Nível",
     "nature": "Natureza",
@@ -912,16 +919,16 @@
     "title": "Captura de {name}",
     "perThrow": "de chance por arremesso",
     "within": "{pct} em até {n} arremessos",
-    "throwsFor": "~{n} arremessos para 90%",
+    "throwsFor": "~{n} arremessos para 90% de chance",
     "ball": "Bola",
-    "level": "Nível do selvagem",
+    "level": "Nível do Pokémon selvagem",
     "turns": "Turno {n}",
     "dark": "À noite ou numa caverna",
     "water": "Na água (surfando, pescando ou mergulhando)",
     "repeatCaught": "Você já marcou este Pokémon como capturado neste jogo: a Repeat Ball vale mais.",
     "repeatNotCaught": "Só vale mais se você já tiver capturado esta espécie (marque a Poké Bola com um jogo selecionado).",
-    "netYes": "Pokémon Água ou Inseto: a Net Ball vale mais.",
-    "netNo": "A Net Ball só vale mais em Pokémon Água ou Inseto.",
+    "netYes": "Pokémon Water ou Bug: a Net Ball vale mais.",
+    "netNo": "A Net Ball só vale mais em Pokémon Water ou Bug.",
     "hp": "HP restante: {n}%",
     "statusLabel": "Status",
     "status": {
@@ -958,7 +965,7 @@
       "maxPlus": "Máx+"
     },
     "inTeam": "(no seu time)",
-    "fromTeam": "Ver velocidade",
+    "fromTeam": "Velocidade do time",
     "legend": "Mín: 0 IV, 0 EV, natureza que reduz. Neutro: 31 IV, 0 EV. Máx: 31 IV, 252 EV. Máx+: com natureza que aumenta (Jolly, Timid). O número cinza ao lado do nome é a base."
   },
   "daily": {
@@ -971,7 +978,7 @@
     "cryHint": "Dica: ouvir o grito",
     "silhouetteHint": "Dica: a silhueta do Pokémon.",
     "correct": "Acertou: {name}!",
-    "wrong": "{name} não é. Restam {left} palpites.",
+    "wrong": "{name} não é. Resta 1 palpite. | {name} não é. Restam {left} palpites.",
     "lost": "Acabaram os palpites. Era {name}.",
     "wonTitle": "Acertou em {n} palpite! | Acertou em {n} palpites!",
     "lostTitle": "Não foi desta vez. Era:",
@@ -998,13 +1005,13 @@
       "swapped": "(certo, mas no outro slot)",
       "wrong": "(errado)"
     },
-    "stats": "Suas estatísticas",
-    "played": "Jogos",
+    "stats": "Seu desempenho",
+    "played": "Partidas",
     "winRate": "Vitórias",
     "streak": "Sequência",
     "best": "Recorde",
     "distribution": "Palpites até acertar",
-    "distributionRow": "{count} vitórias com {n} palpites"
+    "distributionRow": "No {n}º palpite: nenhuma vitória | No {n}º palpite: 1 vitória | No {n}º palpite: {count} vitórias"
   },
   "recent": {
     "title": "Vistos recentemente",
@@ -1023,7 +1030,7 @@
   },
   "offline": {
     "title": "Usar offline",
-    "unsupported": "Este navegador não permite guardar dados para usar sem internet.",
+    "unsupported": "Este navegador não permite guardar dados para usar sem internet. Abra o PokeInfo no Safari ou no Chrome atualizados.",
     "intro": "Baixe as fichas, as imagens e os gritos para abrir os Pokémon sem internet. Sem isso, só fica salvo o que você já abriu (e só os mais recentes).",
     "generations": "Gerações",
     "generation": "Gen {n}",
@@ -1037,7 +1044,7 @@
     "mb": "{n} MB",
     "download": "Baixar (≈ {size})",
     "progress": "{done} de {total} arquivos",
-    "failed": "{n} arquivos não baixaram. Toque em Baixar de novo para tentar só esses.",
+    "failed": "Arquivos que não baixaram: {n}. Toque em Baixar de novo para tentar só esses.",
     "usage": "Espaço usado pelo PokeInfo neste aparelho: {used} de {quota} disponíveis.",
     "hint": "O que já está salvo é pulado: dá para cancelar e continuar depois. Os dados não se atualizam sozinhos; apague e baixe de novo para pegar novidades da PokéAPI.",
     "clear": "Apagar dados offline"
@@ -1045,7 +1052,7 @@
   "account": {
     "title": "Conta",
     "menuSignIn": "Entrar com o Google",
-    "intro": "Entre com o Google para guardar capturados, shinies, favoritos, caçadas e o Pokémon do dia na sua conta e ver tudo igual no Mac e no iPhone.",
+    "intro": "Entre com o Google para guardar capturados, shinies, favoritos, caçadas e o Pokémon do dia na sua conta e ver tudo igual em todos os seus aparelhos.",
     "privacy": "Ficam salvos só o seu e-mail, nome e foto do Google e o que você marca no app. Tudo continua neste aparelho e funciona sem internet; a conta recebe uma cópia quando houver conexão.",
     "signIn": "Continuar com o Google",
     "signInOffline": "Conecte-se à internet para entrar.",
@@ -1063,19 +1070,19 @@
     },
     "syncHint": "Cada marcação vai para a conta em segundos; ao abrir o app, ele busca o que mudou no outro aparelho.",
     "syncNow": "Sincronizar agora",
-    "signOut": "Sair",
+    "signOut": "Sair da conta",
     "signOutHint": "Ao sair, os dados continuam neste aparelho.",
     "delete": "Excluir conta",
     "deleteTitle": "Excluir conta?",
     "deleteText": "Apaga a sua conta e tudo o que está salvo nela. O que está neste aparelho continua aqui. Não dá para desfazer.",
-    "deleteConfirm": "Excluir",
+    "deleteConfirm": "Excluir conta",
     "firstSyncTitle": "Juntar com a sua conta?",
     "firstSyncText": "Este aparelho já tem marcações que não estão na sua conta. Como você quer juntar?",
     "firstSyncDevice": "Neste aparelho",
     "firstSyncCloud": "Na conta",
     "firstSyncConfirm": "Continuar",
     "choice": {
-      "merge": "Somar os dois",
+      "merge": "Juntar os dois",
       "mergeHint": "Junta o que está neste aparelho com o que está na conta.",
       "cloud": "Usar só o da conta",
       "cloudHint": "Descarta o que está neste aparelho.",

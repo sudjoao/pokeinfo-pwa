@@ -54,7 +54,7 @@ function rarityText(rarity: HeldRarity): string {
             </RouterLink>
             <div class="text-label-small opacity-70">
               {{ row.rarities.map(rarityText).join(' · ') }}
-              <template v-if="row.more">· {{ t('heldItems.more', { n: row.more }) }}</template>
+              <template v-if="row.more">· {{ t('heldItems.more', row.more) }}</template>
             </div>
           </div>
         </li>
