@@ -24,7 +24,10 @@ export function isLocale(value: unknown): value is Locale {
   return (LOCALES as readonly unknown[]).includes(value)
 }
 
-/** Idioma salvo pelo usuário ou, na primeira abertura, o do aparelho (`pt-*` -> pt-BR, `es-*` -> es, senão en). */
+/**
+ * Idioma salvo pelo usuário ou, na primeira abertura, o do aparelho (`pt-*` -> pt-BR, `es-*` -> es,
+ * senão en). O index.html repete esta regra para pré-carregar as mensagens (build/preloadLocale.ts).
+ */
 export function initialLocale(): Locale {
   const saved = readStorage<string>(LOCALE_KEY)
   if (isLocale(saved)) return saved
