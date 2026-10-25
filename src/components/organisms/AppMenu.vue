@@ -18,7 +18,7 @@ import {
   mdiCalendarStar,
   mdiCloudDownloadOutline,
 } from '@mdi/js'
-import type { RouteLocationRaw } from 'vue-router'
+import { useRoute, type RouteLocationNormalizedLoaded, type RouteLocationRaw } from 'vue-router'
 import type { ThemePreference } from '@/composables/useThemePreference'
 
 defineProps<{ theme: ThemePreference }>()
@@ -35,25 +35,39 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+const route = useRoute()
 
 interface NavItem {
   icon: string
   /** Chave i18n do título. */
   title: string
   to: RouteLocationRaw
-  exact?: boolean
+  /**
+   * Quando o item fica marcado como atual. Sem isso vale o padrão do link, que não olha a query:
+   * "Pokédex" (`/`) e "Favoritos" (`/?fav=1`) ficariam marcados juntos.
+   */
+  isActive?: (route: RouteLocationNormalizedLoaded) => boolean
 }
+
+const isFavorites = (route: RouteLocationNormalizedLoaded) =>
+  route.name === 'home' && route.query.fav === '1'
 
 /** Navegação em três grupos: coleção, ferramentas de consulta e jogos. */
 const NAV_GROUPS: readonly { title: string; items: readonly NavItem[] }[] = [
   {
     title: 'menu.groupMain',
     items: [
-      { icon: mdiBookOpenVariant, title: 'menu.pokedex', to: { name: 'home' }, exact: true },
+      {
+        icon: mdiBookOpenVariant,
+        title: 'menu.pokedex',
+        to: { name: 'home' },
+        isActive: (route) => route.name === 'home' && !isFavorites(route),
+      },
       {
         icon: mdiHeartOutline,
         title: 'favorites.title',
         to: { name: 'home', query: { fav: '1' } },
+        isActive: isFavorites,
       },
       { icon: mdiSwordCross, title: 'menu.team', to: { name: 'team' } },
     ],
@@ -98,7 +112,8 @@ function then(action: () => void): void {
           :prepend-icon="item.icon"
           :title="t(item.title)"
           :to="item.to"
-          :exact="item.exact"
+          :active="item.isActive?.(route)"
+          :aria-current="item.isActive ? (item.isActive(route) ? 'page' : 'false') : undefined"
           rounded="lg"
           @click="open = false"
         />
@@ -115,6 +130,7 @@ function then(action: () => void): void {
         divided
         density="compact"
         variant="outlined"
+        class="theme-toggle"
         aria-labelledby="menu-theme-label"
         @update:model-value="emit('setTheme', $event)"
       >
@@ -173,3 +189,16 @@ function then(action: () => void): void {
     </v-list>
   </v-navigation-drawer>
 </template>
+
+<style scoped>
+/* Os três botões dividem a largura do menu (com o padding padrão, "Escuro" saía da gaveta). */
+.theme-toggle {
+  display: flex;
+  width: 100%;
+}
+.theme-toggle :deep(.v-btn) {
+  flex: 1 1 0;
+  min-width: 0;
+  padding-inline: 4px;
+}
+</style>

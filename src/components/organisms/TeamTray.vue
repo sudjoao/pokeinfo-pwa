@@ -32,7 +32,7 @@ const label = computed(() =>
   <!-- O nome acessível inclui o texto visível ("3 de 6"), como pede o critério 2.5.3. -->
   <button type="button" class="team-tray" aria-haspopup="dialog" @click="emit('open')">
     <div class="team-tray__inner d-flex align-center ga-3">
-      <div class="d-flex ga-2" aria-hidden="true">
+      <div class="team-tray__slots d-flex" aria-hidden="true">
         <span
           v-for="(member, i) in slots"
           :key="member?.id ?? `empty-${i}`"
@@ -40,10 +40,10 @@ const label = computed(() =>
           :class="{ 'team-tray__slot--empty': !member }"
           :style="member ? { '--accent': TYPE_COLORS[member.types[0] ?? 'unknown'] } : undefined"
         >
-          <PokemonAvatar v-if="member" :id="member.id" :name="member.name" :size="34" />
+          <PokemonAvatar v-if="member" :id="member.id" :name="member.name" :size="32" />
         </span>
       </div>
-      <span class="team-tray__label text-label-large flex-grow-1 text-truncate">
+      <span class="team-tray__label text-label-large flex-grow-1">
         <span class="d-sr-only">{{ t('team.open') }}: </span>{{ label }}
       </span>
       <v-icon :icon="mdiChevronUp" />
@@ -74,12 +74,16 @@ const label = computed(() =>
   margin: 0 auto;
 }
 
+.team-tray__slots {
+  gap: 6px;
+}
+
 .team-tray__slot {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: color-mix(in srgb, var(--accent, transparent) 30%, rgb(var(--v-theme-surface)));
   box-shadow: 0 0 0 2px var(--accent, transparent);
@@ -96,6 +100,12 @@ const label = computed(() =>
 
 .team-tray__label {
   min-width: 0;
+  /* Até duas linhas ("Monte seu / time"): truncado virava "3 d…". */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  line-height: 1.2;
 }
 
 /* Em telas muito estreitas o rótulo cede espaço para os 6 slots. */

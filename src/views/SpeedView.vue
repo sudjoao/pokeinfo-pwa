@@ -315,11 +315,16 @@ function goBack(): void {
 </template>
 
 <style scoped>
+/* No celular o jogo desce para a linha de baixo, em vez de espremer o "Nível 100". */
 .speed-controls {
-  display: grid;
-  grid-template-columns: auto minmax(180px, 1fr);
+  display: flex;
+  flex-wrap: wrap;
   gap: 12px;
   align-items: center;
+}
+
+.speed-controls > .v-input {
+  flex: 1 1 220px;
 }
 
 .speed-stage {

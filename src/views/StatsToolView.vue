@@ -409,12 +409,12 @@ function goBack(): void {
   width: 100%;
   table-layout: fixed;
   border-collapse: separate;
-  border-spacing: 3px;
+  border-spacing: 2px;
 }
 
 .natures-table thead td,
 .natures-table tbody th {
-  width: 44px;
+  width: 40px;
 }
 
 .natures-table th {
@@ -425,10 +425,12 @@ function goBack(): void {
 
 .natures-table__cell {
   width: 100%;
-  min-height: 40px;
-  padding: 2px;
-  overflow-wrap: anywhere;
-  font-size: 0.75rem;
+  min-height: 44px;
+  padding: 2px 1px;
+  /* Nome inteiro numa linha: "Adamant" quebrado em "Adama/nt" não se lê. Cabe a 320 px. */
+  overflow-wrap: normal;
+  font-size: 0.6875rem;
+  letter-spacing: 0;
   border-radius: 8px;
   background: rgba(var(--v-theme-on-surface), 0.05);
 }
