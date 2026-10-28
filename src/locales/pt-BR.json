@@ -456,7 +456,43 @@
     },
     "searchPlaceholder": "Buscar local",
     "searchLabel": "Buscar local pelo nome",
-    "noMatch": "Nenhum local encontrado para “{query}”."
+    "noMatch": "Nenhum local encontrado para “{query}”.",
+    "view": {
+      "label": "Visualização das rotas",
+      "list": "Lista",
+      "map": "Mapa"
+    },
+    "map": {
+      "label": "Mapa de {region}",
+      "zoomIn": "Aproximar o mapa",
+      "zoomOut": "Afastar o mapa",
+      "fit": "Ver o mapa inteiro",
+      "sections": "Parte do mapa",
+      "loadError": "Não foi possível carregar o mapa.",
+      "hint": "Toque numa cidade, rota ou caverna para ver os Pokémon. Arraste para mover o mapa; para o zoom, use os botões ou dois dedos.",
+      "offMap": "Fora do mapa",
+      "empty": "Escolha um local no mapa para ver os Pokémon que aparecem nele.",
+      "start": "Começar por {name}",
+      "previous": "Anterior na história: {name}",
+      "previousNone": "Primeiro local da história",
+      "next": "Próximo na história: {name}",
+      "nextNone": "Último local da história",
+      "step": "Parada {n} de {total}",
+      "legend": {
+        "title": "Legenda",
+        "city": "Cidade",
+        "town": "Vila",
+        "route": "Rota (número)",
+        "sea": "Rota pelo mar",
+        "tunnel": "Túnel ou passagem",
+        "cave": "Caverna",
+        "forest": "Floresta",
+        "tower": "Torre ou prédio",
+        "water": "Lago ou mar",
+        "noData": "Sem Pokémon neste jogo",
+        "done": "Todos capturados"
+      }
+    }
   },
   "ability": {
     "pokemonWith": "Pokémon com esta habilidade ({n})",

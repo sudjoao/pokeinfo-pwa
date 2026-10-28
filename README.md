@@ -112,6 +112,16 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
   hora do dia, estação, swarm, rádio, Poké Radar, slot 2 e tipo de árvore no Headbutt
   ("Grama · noite 15% · manhã/dia 5%"). A ordem é escrita à mão em `src/data/routeOrder.ts`,
   porque a PokéAPI não tem esse dado.
+- **Mapa das rotas**: a aba Rotas alterna entre lista e **mapa** (a escolha fica salva). Cada região
+  tem um mapa próprio, esquemático (cidades como estações, rotas como linhas com a placa do número,
+  rotas por mar tracejadas, cavernas/florestas/torres com ícone), em `src/data/maps/` (um arquivo
+  por região, baixado só ao abrir o mapa dela; formato em `src/data/maps/types.ts`). Jogos com mais
+  de uma parte (Johto/Kanto, Ilhas Sevii, DLCs de Galar) trocam de mapa por botões. Tocar num local
+  abre os Pokémon dele, com anterior/próximo na ordem da história; locais sem Pokémon no jogo
+  ficam apagados, os completos ganham um selo verde e a busca destaca os resultados. Zoom por
+  botões, pinça e Ctrl + roda; arrastar com o mouse. Um teste
+  (`utils/__tests__/routeMap.spec.ts`) garante que todo local com dado está no mapa (ou na lista
+  "Fora do mapa", para navio, céu e eventos).
 - **Shiny**: com um jogo selecionado (2ª geração em diante), o detalhe tem um card para marcar o shiny
   como capturado (separado da captura normal) e um contador de encontros com Shiny Charm e método
   Masuda, mostrando a chance por encontro do jogo (1/8192 até a 5ª geração, 1/4096 depois) e a

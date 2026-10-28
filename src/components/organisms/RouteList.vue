@@ -1,23 +1,23 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, defineAsyncComponent, ref, toRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { mdiFormatListBulleted, mdiMapOutline } from '@mdi/js'
 import type { Game } from '@/data/games'
 import type { RoutePokemon } from '@/types/pokemon'
-import { usePokedexStore } from '@/stores/pokedex'
-import {
-  isStaticRoute,
-  routeSectionsForGame,
-  toRoutePokemon,
-  type AnyGameRoute,
-} from '@/utils/routes'
-import { mapLimit } from '@/utils/async'
-
-/** Áreas de um local baixadas ao mesmo tempo. */
-const AREA_CONCURRENCY = 4
+import { routeSectionsForGame } from '@/utils/routes'
 import { formatAreaName } from '@/utils/encounters'
 import { speciesIdOf } from '@/utils/forms'
-import RoutePokemonRow from '@/components/molecules/RoutePokemonRow.vue'
+import { readStorage, writeStorage } from '@/utils/storage'
+import { hasRegionMap } from '@/data/maps'
+import { useRouteEncounters } from '@/composables/useRouteEncounters'
+import RouteEncounterList from '@/components/molecules/RouteEncounterList.vue'
 import SearchField from '@/components/molecules/SearchField.vue'
+
+/** O desenho e os dados do mapa só baixam quando alguém abre o mapa. */
+const RouteMap = defineAsyncComponent(() => import('@/components/organisms/RouteMap.vue'))
+
+/** Última visão escolhida (lista ou mapa), lembrada entre jogos e visitas. */
+const VIEW_KEY = 'pokeinfo:routes-view:v1'
 
 const props = defineProps<{
   game: Game
@@ -33,10 +33,6 @@ function isCaught(pokemon: RoutePokemon): boolean {
   return props.caughtIds?.has(speciesIdOf(pokemon.id)) ?? false
 }
 
-function visible(list: readonly RoutePokemon[]): RoutePokemon[] {
-  return onlyMissing.value ? list.filter((pokemon) => !isCaught(pokemon)) : [...list]
-}
-
 function caughtCount(list: readonly RoutePokemon[]): number {
   return new Set(list.filter(isCaught).map((pokemon) => speciesIdOf(pokemon.id))).size
 }
@@ -46,86 +42,71 @@ function speciesCount(list: readonly RoutePokemon[]): number {
 }
 
 const { t } = useI18n()
-const pokedexStore = usePokedexStore()
 
 /** Na ordem da história, por região/DLC; o título só aparece quando há mais de uma seção. */
 const sections = computed(() => routeSectionsForGame(props.game))
 const routes = computed(() => sections.value.flatMap((section) => section.routes))
 
+/** O mapa existe quando alguma seção do jogo tem desenho (os "Outros encontros" não têm). */
+const canShowMap = computed(() => sections.value.some((section) => hasRegionMap(section.key)))
+const storedView = ref<'list' | 'map'>(readStorage<string>(VIEW_KEY) === 'map' ? 'map' : 'list')
+const view = computed(() => (canShowMap.value ? storedView.value : 'list'))
+
+function setView(value: 'list' | 'map'): void {
+  storedView.value = value
+  writeStorage(VIEW_KEY, value)
+}
+
 /** Sem diferenciar maiúsculas nem acentos ("cave" acha "Cave of Origin"). */
 function normalize(text: string): string {
-  return text
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
+  return text.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
 }
 
 const search = ref('')
+const searchTerm = computed(() => normalize(search.value?.trim() ?? ''))
+
+/** Locais que batem com a busca (null sem busca), para o mapa destacar. */
+const matches = computed<ReadonlySet<string> | null>(() => {
+  const term = searchTerm.value
+  if (!term) return null
+  return new Set(
+    routes.value
+      .map((route) => route.location)
+      .filter((location) => normalize(formatAreaName(location)).includes(term)),
+  )
+})
+
 /** Seções com os locais que batem com a busca; as que ficam vazias somem. */
 const visibleSections = computed(() => {
-  const term = normalize(search.value?.trim() ?? '')
-  if (!term) return sections.value
+  const found = matches.value
+  if (!found) return sections.value
   return sections.value
     .map((section) => ({
       ...section,
-      routes: section.routes.filter((route) =>
-        normalize(formatAreaName(route.location)).includes(term),
-      ),
+      routes: section.routes.filter((route) => found.has(route.location)),
     }))
     .filter((section) => section.routes.length)
 })
 
 const openPanel = ref<string | undefined>(undefined)
-const results = ref<Record<string, RoutePokemon[]>>({})
-const loading = ref<Record<string, boolean>>({})
-const failed = ref<Record<string, boolean>>({})
+const encounters = useRouteEncounters(toRef(props, 'game'))
+const { results, loading, failed } = encounters
 
-/** Troca de jogo: os resultados são específicos do jogo, então não podem sobreviver à troca. */
+/** Troca de jogo: painel aberto e busca são do jogo anterior. */
 watch(
   () => props.game.slug,
   () => {
     openPanel.value = undefined
     search.value = ''
-    results.value = {}
-    loading.value = {}
-    failed.value = {}
   },
 )
 
-async function loadRoute(route: AnyGameRoute): Promise<void> {
-  if (results.value[route.location] || loading.value[route.location]) return
-
-  if (isStaticRoute(route)) {
-    // Já vem pronto (ex.: BDSP via Bulbapedia): só falta o nome, resolvido pelo índice em memória.
-    results.value = {
-      ...results.value,
-      [route.location]: route.pokemon.map((pokemon) => ({
-        ...pokemon,
-        name: pokedexStore.entryOf(pokemon.id)?.name ?? String(pokemon.id),
-      })),
-    }
-    return
-  }
-
-  loading.value = { ...loading.value, [route.location]: true }
-  failed.value = { ...failed.value, [route.location]: false }
-  try {
-    // Covis de Dynamax chegam a 22 áreas: em lotes, para não abrir dezenas de requisições juntas.
-    const dtos = await mapLimit(route.areas, AREA_CONCURRENCY, (area) =>
-      pokedexStore.ensureAreaEncounters(area),
-    )
-    results.value = { ...results.value, [route.location]: toRoutePokemon(dtos, props.game) }
-  } catch {
-    failed.value = { ...failed.value, [route.location]: true }
-  } finally {
-    loading.value = { ...loading.value, [route.location]: false }
-  }
+function loadLocation(location: string | undefined): void {
+  const route = routes.value.find((r) => r.location === location)
+  if (route) encounters.load(route)
 }
 
-watch(openPanel, (location) => {
-  const route = routes.value.find((r) => r.location === location)
-  if (route) loadRoute(route)
-})
+watch(openPanel, loadLocation)
 </script>
 
 <template>
@@ -135,13 +116,32 @@ watch(openPanel, (location) => {
     </p>
 
     <template v-else>
-      <SearchField
-        v-model="search"
-        :placeholder="t('routes.searchPlaceholder')"
-        :label="t('routes.searchLabel')"
-        density="compact"
-        class="mb-2"
-      />
+      <div class="route-list__toolbar d-flex flex-wrap align-center gc-3 gr-2 mb-2">
+        <SearchField
+          v-model="search"
+          :placeholder="t('routes.searchPlaceholder')"
+          :label="t('routes.searchLabel')"
+          density="compact"
+          class="route-list__search"
+        />
+        <v-btn-toggle
+          v-if="canShowMap"
+          :model-value="view"
+          mandatory
+          density="compact"
+          variant="outlined"
+          divided
+          :aria-label="t('routes.view.label')"
+          @update:model-value="setView"
+        >
+          <v-btn value="list" :prepend-icon="mdiFormatListBulleted" :aria-pressed="view === 'list'">
+            {{ t('routes.view.list') }}
+          </v-btn>
+          <v-btn value="map" :prepend-icon="mdiMapOutline" :aria-pressed="view === 'map'">
+            {{ t('routes.view.map') }}
+          </v-btn>
+        </v-btn-toggle>
+      </div>
       <v-switch
         v-if="caughtIds"
         v-model="onlyMissing"
@@ -151,81 +151,71 @@ watch(openPanel, (location) => {
         hide-details
         class="mb-2"
       />
-      <p v-if="!visibleSections.length" class="text-body-medium opacity-70 mb-0">
+
+      <p v-if="view === 'map' && matches && !matches.size" class="text-body-medium opacity-70 mb-2">
         {{ t('routes.noMatch', { query: search.trim() }) }}
       </p>
-      <section v-for="section in visibleSections" :key="section.key" class="route-section">
-        <h2 v-if="sections.length > 1" class="text-title-small mb-2">
-          {{ t(`routes.section.${section.key}`) }}
-        </h2>
-        <!-- Um grupo por seção, todos no mesmo openPanel: abrir um painel fecha o dos outros. -->
-        <v-expansion-panels v-model="openPanel" variant="accordion">
-          <v-expansion-panel
-            v-for="route in section.routes"
-            :key="route.location"
-            :value="route.location"
-          >
-            <v-expansion-panel-title>
-              <span class="text-body-medium font-weight-medium">{{
-                formatAreaName(route.location)
-              }}</span>
-              <span v-if="results[route.location]" class="text-label-small opacity-70 ms-2">
-                {{ t('routes.pokemonCount', results[route.location]!.length) }}
-                <template v-if="caughtIds">
-                  ·
-                  {{
-                    t('routes.caughtCount', {
-                      caught: caughtCount(results[route.location]!),
-                      total: speciesCount(results[route.location]!),
-                    })
-                  }}
-                </template>
-              </span>
-            </v-expansion-panel-title>
-            <v-expansion-panel-text>
-              <v-skeleton-loader
-                aria-hidden="true"
-                v-if="loading[route.location]"
-                type="list-item-two-line@3"
-              />
+      <RouteMap
+        v-if="view === 'map'"
+        :game="game"
+        :sections="sections"
+        :encounters="encounters"
+        :matches="matches"
+        :caught-ids="caughtIds"
+        :only-missing="onlyMissing"
+        @select="emit('select', $event)"
+        @toggle-caught="emit('toggleCaught', $event)"
+      />
 
-              <div v-else-if="failed[route.location]" class="d-flex flex-column align-start ga-2">
-                <span>{{ t('routes.loadError') }}</span>
-                <v-btn color="primary" variant="tonal" size="small" @click="loadRoute(route)">
-                  {{ t('common.retry') }}
-                </v-btn>
-              </div>
-
-              <p
-                v-else-if="results[route.location] && !results[route.location]!.length"
-                class="text-body-medium opacity-70 mb-0"
-              >
-                {{ t('routes.emptyRoute', { game: game.title }) }}
-              </p>
-
-              <template v-else-if="results[route.location]">
-                <p
-                  v-if="!visible(results[route.location]!).length"
-                  class="text-body-medium opacity-70 mb-0"
-                >
-                  {{ t('routes.allCaught') }}
-                </p>
-                <ul v-else class="route-pokemon-list">
-                  <RoutePokemonRow
-                    v-for="pokemon in visible(results[route.location]!)"
-                    :key="pokemon.id"
-                    :pokemon="pokemon"
-                    :game="game"
-                    :caught="caughtIds ? isCaught(pokemon) : undefined"
-                    @select="emit('select', $event)"
-                    @toggle-caught="emit('toggleCaught', speciesIdOf(pokemon.id))"
-                  />
-                </ul>
-              </template>
-            </v-expansion-panel-text>
-          </v-expansion-panel>
-        </v-expansion-panels>
-      </section>
+      <template v-else>
+        <p v-if="!visibleSections.length" class="text-body-medium opacity-70 mb-0">
+          {{ t('routes.noMatch', { query: search.trim() }) }}
+        </p>
+        <section v-for="section in visibleSections" :key="section.key" class="route-section">
+          <h2 v-if="sections.length > 1" class="text-title-small mb-2">
+            {{ t(`routes.section.${section.key}`) }}
+          </h2>
+          <!-- Um grupo por seção, todos no mesmo openPanel: abrir um painel fecha o dos outros. -->
+          <v-expansion-panels v-model="openPanel" variant="accordion">
+            <v-expansion-panel
+              v-for="route in section.routes"
+              :key="route.location"
+              :value="route.location"
+            >
+              <v-expansion-panel-title>
+                <span class="text-body-medium font-weight-medium">{{
+                  formatAreaName(route.location)
+                }}</span>
+                <span v-if="results[route.location]" class="text-label-small opacity-70 ms-2">
+                  {{ t('routes.pokemonCount', results[route.location]!.length) }}
+                  <template v-if="caughtIds">
+                    ·
+                    {{
+                      t('routes.caughtCount', {
+                        caught: caughtCount(results[route.location]!),
+                        total: speciesCount(results[route.location]!),
+                      })
+                    }}
+                  </template>
+                </span>
+              </v-expansion-panel-title>
+              <v-expansion-panel-text>
+                <RouteEncounterList
+                  :game="game"
+                  :pokemon="results[route.location]"
+                  :loading="!!loading[route.location]"
+                  :failed="!!failed[route.location]"
+                  :caught-ids="caughtIds"
+                  :only-missing="onlyMissing"
+                  @retry="encounters.load(route)"
+                  @select="emit('select', $event)"
+                  @toggle-caught="emit('toggleCaught', $event)"
+                />
+              </v-expansion-panel-text>
+            </v-expansion-panel>
+          </v-expansion-panels>
+        </section>
+      </template>
     </template>
   </div>
 </template>
@@ -235,8 +225,7 @@ watch(openPanel, (location) => {
   margin-top: 16px;
 }
 
-.route-pokemon-list {
-  padding: 0;
-  margin: 0;
+.route-list__search {
+  flex: 1 1 240px;
 }
 </style>

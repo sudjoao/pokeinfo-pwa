@@ -7,6 +7,17 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 
 ## [Não lançado]
 
+### Adicionado
+
+- **Mapa das rotas**: a aba Rotas ganhou a visão "Mapa", com um mapa desenhado para cada região
+  (Kanto, Ilhas Sevii, Johto, Hoenn, Sinnoh, Unova, Kalos, Alola, Galar, Ilha da Armadura e Tundra
+  da Coroa). Cidades, rotas numeradas, cavernas, florestas e torres ficam na posição do jogo;
+  tocar num local mostra os Pokémon dele (ao lado do mapa na tela grande, num cartão no rodapé no
+  celular), com "anterior" e "próximo" seguindo a ordem da história. Locais sem Pokémon no jogo
+  escolhido ficam apagados, os já completos ganham um selo verde e a busca destaca os locais que
+  batem. Zoom pelos botões, pela pinça (dois dedos ou trackpad) e com Ctrl + roda; dá para
+  arrastar o mapa com o mouse. A escolha entre lista e mapa fica salva no aparelho.
+
 ## [1.9.2] - 2026-10-25
 
 ### Corrigido

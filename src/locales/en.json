@@ -456,7 +456,43 @@
     },
     "searchPlaceholder": "Search location",
     "searchLabel": "Search location by name",
-    "noMatch": "No location matches “{query}”."
+    "noMatch": "No location matches “{query}”.",
+    "view": {
+      "label": "Routes view",
+      "list": "List",
+      "map": "Map"
+    },
+    "map": {
+      "label": "Map of {region}",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "fit": "Show the whole map",
+      "sections": "Map area",
+      "loadError": "Couldn't load the map.",
+      "hint": "Tap a city, route or cave to see its Pokémon. Drag to move the map; zoom with the buttons or two fingers.",
+      "offMap": "Off the map",
+      "empty": "Pick a place on the map to see the Pokémon found there.",
+      "start": "Start at {name}",
+      "previous": "Previous in the story: {name}",
+      "previousNone": "First place in the story",
+      "next": "Next in the story: {name}",
+      "nextNone": "Last place in the story",
+      "step": "Stop {n} of {total}",
+      "legend": {
+        "title": "Legend",
+        "city": "City",
+        "town": "Town",
+        "route": "Route (number)",
+        "sea": "Sea route",
+        "tunnel": "Tunnel or passage",
+        "cave": "Cave",
+        "forest": "Forest",
+        "tower": "Tower or building",
+        "water": "Lake or sea",
+        "noData": "No Pokémon in this game",
+        "done": "All caught"
+      }
+    }
   },
   "ability": {
     "pokemonWith": "Pokémon with this ability ({n})",
