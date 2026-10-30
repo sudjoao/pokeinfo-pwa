@@ -1,8 +1,19 @@
 <script setup lang="ts">
-import { computed, defineAsyncComponent, nextTick, onActivated, ref, shallowRef, watch } from 'vue'
+import {
+  computed,
+  defineAsyncComponent,
+  nextTick,
+  onActivated,
+  reactive,
+  ref,
+  shallowRef,
+  useTemplateRef,
+  watch,
+} from 'vue'
 import { useRoute, useRouter, type RouteLocationRaw } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import {
+  mdiCheckboxMultipleMarkedOutline,
   mdiClipboardListOutline,
   mdiFilterRemoveOutline,
   mdiPackageVariantClosed,
@@ -14,6 +25,10 @@ import { hasLeague } from '@/utils/league'
 import { usePokemonList } from '@/composables/usePokemonList'
 import { useCry } from '@/composables/useCry'
 import { useDexLabel } from '@/composables/useDexLabel'
+import { useShortcut } from '@/composables/useShortcut'
+import { announce } from '@/composables/useAnnouncer'
+import { useCaughtStore } from '@/stores/caught'
+import SelectionBar from '@/components/organisms/SelectionBar.vue'
 import type { PokemonSummary } from '@/types/pokemon'
 import DefaultLayout from '@/components/templates/DefaultLayout.vue'
 import SearchField from '@/components/molecules/SearchField.vue'
@@ -74,6 +89,7 @@ const {
   setAdvanced,
   clearAdvanced,
   items,
+  source,
   filtered,
   exportSource,
   listKey,
@@ -183,12 +199,124 @@ const exportEntries = shallowRef<readonly BoxEntry[]>([])
  * (o uso principal: levar a lista para pesquisar onde capturar).
  */
 const exportScope = computed(() => caughtFilter.value ?? 'missing')
+/** O sheet está exportando a seleção (abre em "todos", sem o aviso de filtros). */
+const exportSelection = ref(false)
 const notice = ref<string | null>(null)
 
 function openExport(): void {
   exportEntries.value = exportSource()
+  exportSelection.value = false
   exportOpen.value = true
 }
+
+/*
+ * Seleção múltipla: "Selecionar" troca o toque no card (abrir a ficha) por escolher, e a barra do
+ * rodapé marca a captura de todos de uma vez ou copia a lista deles. A chave é o id da forma
+ * (o card); a captura vai para a espécie, como no toque na Poké Bola.
+ */
+const caughtStore = useCaughtStore()
+const selecting = ref(false)
+const selectedIds = reactive(new Set<number>())
+const selectionBarHeight = ref(0)
+const selectButton = useTemplateRef<{ $el: HTMLElement }>('selectButton')
+
+function startSelection(): void {
+  selecting.value = true
+  announce(t('select.started'))
+}
+
+/** Sai do modo; o foco volta ao "Selecionar" (a barra, onde ele estava, some). */
+function exitSelection(options: { focus?: boolean; silent?: boolean } = {}): void {
+  if (!selecting.value) return
+  selecting.value = false
+  selectedIds.clear()
+  if (!options.silent) announce(t('select.ended'))
+  if (options.focus) nextTick(() => selectButton.value?.$el.focus())
+}
+
+function toggleSelecting(): void {
+  if (selecting.value) exitSelection()
+  else startSelection()
+}
+
+function toggleSelected(id: number): void {
+  if (selectedIds.has(id)) selectedIds.delete(id)
+  else selectedIds.add(id)
+}
+
+function setSelected(ids: readonly number[], selected: boolean): void {
+  for (const id of ids) {
+    if (selected) selectedIds.add(id)
+    else selectedIds.delete(id)
+  }
+}
+
+/** "Selecionar todos" vale para a lista inteira com os filtros, não só os cards já carregados. */
+const allSelected = computed(
+  () => filtered.value.length > 0 && filtered.value.every((entry) => selectedIds.has(entry.id)),
+)
+
+function toggleAll(): void {
+  const select = !allSelected.value
+  setSelected(
+    filtered.value.map((entry) => entry.id),
+    select,
+  )
+  announce(t('select.count', selectedIds.size))
+}
+
+/** Na grade, o card vira botão de seleção; fora do modo, abre a ficha (com o grito). */
+function onGridSelect(pokemon: PokemonSummary): void {
+  if (selecting.value) toggleSelected(pokemon.id)
+  else onCardOpen(pokemon)
+}
+
+/** Selecionados na ordem da Pokédex (a fonte), não na ordem dos toques. */
+function selectedEntries(): BoxEntry[] {
+  return source.value.filter((entry) => selectedIds.has(entry.id))
+}
+
+/** Marcação em lote: só as espécies que mudam entram no desfazer (e na contagem do aviso). */
+const markUndo = shallowRef<{ text: string; game: string; ids: number[]; caught: boolean } | null>(
+  null,
+)
+
+function markSelected(caught: boolean): void {
+  const current = game.value
+  if (!current) return
+  const marked = caughtStore.caughtIn(current.slug)
+  const species = new Set(selectedEntries().map((entry) => entry.speciesId ?? entry.id))
+  const changed = [...species].filter((id) => marked.has(id) !== caught)
+  exitSelection({ focus: true, silent: true })
+  if (!changed.length) {
+    notice.value = t(caught ? 'select.alreadyCaught' : 'select.alreadyMissing')
+    return
+  }
+  caughtStore.setMany(current.slug, changed, caught)
+  markUndo.value = {
+    text: t(caught ? 'select.markedCaught' : 'select.markedMissing', changed.length),
+    game: current.slug,
+    ids: changed,
+    caught,
+  }
+}
+
+function undoMark(): void {
+  const last = markUndo.value
+  if (last) caughtStore.setMany(last.game, last.ids, !last.caught)
+}
+
+function copySelection(): void {
+  exportEntries.value = selectedEntries()
+  exportSelection.value = true
+  exportOpen.value = true
+}
+
+useShortcut(['Escape'], () => exitSelection({ focus: true }))
+
+// Outro jogo ou Pokédex é outra lista (e outra captura); a seleção também não vale nas outras abas.
+watch([() => game.value?.slug, () => dex.value?.slug], () => exitSelection({ silent: true }))
+watch(view, (value) => value !== 'pokemon' && exitSelection({ silent: true }))
 
 function onExportCopied(count: number): void {
   notice.value = t('export.copied', count)
@@ -331,7 +459,7 @@ onActivated(() => {
 
     <template v-else>
       <RecentStrip
-        v-if="recentItems.length && layout === 'cards'"
+        v-if="recentItems.length && layout === 'cards' && !selecting"
         :items="recentItems"
         class="mb-3"
         @select="openPokemonId"
@@ -348,6 +476,17 @@ onActivated(() => {
           @click="openExport"
         >
           {{ t('export.action') }}
+        </v-btn>
+        <v-btn
+          ref="selectButton"
+          :variant="selecting ? 'flat' : 'tonal'"
+          :color="selecting ? 'primary' : undefined"
+          :prepend-icon="mdiCheckboxMultipleMarkedOutline"
+          :disabled="!selecting && (sourceLoading || !!sourceError || isEmpty)"
+          :aria-pressed="selecting"
+          @click="toggleSelecting"
+        >
+          {{ t('select.action') }}
         </v-btn>
         <v-spacer />
         <v-btn-toggle
@@ -373,6 +512,19 @@ onActivated(() => {
           />
         </v-btn-toggle>
       </div>
+
+      <SelectionBar
+        v-if="selecting"
+        :count="selectedIds.size"
+        :total="filtered.length"
+        :all-selected="allSelected"
+        :can-mark="!!game"
+        @close="exitSelection({ focus: true })"
+        @toggle-all="toggleAll"
+        @mark="markSelected"
+        @copy="copySelection"
+        @resize="selectionBarHeight = $event"
+      />
 
       <v-row v-if="sourceLoading" density="compact">
         <v-col v-for="n in 12" :key="n" cols="6" sm="4" md="3" lg="2">
@@ -402,8 +554,12 @@ onActivated(() => {
         v-else-if="layout === 'boxes'"
         :items="filtered"
         :caught-ids="game ? caughtIds : undefined"
+        :selecting="selecting"
+        :selected-ids="selectedIds"
         @toggle-caught="toggleCaught"
         @open="openPokemonId"
+        @select="toggleSelected"
+        @select-many="setSelected"
       />
 
       <PokemonGrid
@@ -413,12 +569,17 @@ onActivated(() => {
         :status="status"
         :error-message="errorMessage"
         :caught-ids="game ? caughtIds : undefined"
-        :link-to="pokemonRoute"
+        :selected-ids="selecting ? selectedIds : undefined"
+        :selectable="selecting"
+        :link-to="selecting ? undefined : pokemonRoute"
         @load="loadMore"
         @retry="retry"
-        @select="onCardOpen"
+        @select="onGridSelect"
         @toggle-caught="toggleCaught"
       />
+
+      <!-- A barra de seleção cobre o fim da lista: o espaço dela entra embaixo. -->
+      <div v-if="selecting" :style="{ height: `${selectionBarHeight}px` }" aria-hidden="true" />
     </template>
 
     <GamePickerSheet
@@ -446,7 +607,7 @@ onActivated(() => {
       @clear="clearAvailability"
     />
 
-    <BackToTop />
+    <BackToTop :offset="selecting ? selectionBarHeight : 0" />
 
     <ExportListSheet
       v-if="exportMounted"
@@ -455,13 +616,21 @@ onActivated(() => {
       :caught-ids="game ? caughtIds : undefined"
       :game="game"
       :dex="dex"
-      :initial-scope="exportScope"
-      :filtered="narrowed"
+      :initial-scope="exportSelection ? 'all' : exportScope"
+      :filtered="!exportSelection && narrowed"
+      :selection="exportSelection"
       :link-for="pokemonLink"
       @copied="onExportCopied"
     />
 
     <AppNotice :text="notice" location="top" @close="notice = null" />
+    <AppNotice
+      :text="markUndo?.text ?? null"
+      location="top"
+      :action-label="t('common.undo')"
+      @action="undoMark"
+      @close="markUndo = null"
+    />
 
     <AdvancedFilterSheet
       v-if="advancedMounted"

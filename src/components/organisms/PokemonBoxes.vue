@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { mdiCheckCircle } from '@mdi/js'
 import type { PokemonIndexEntry } from '@/types/pokemon'
 import { formatDexNumber, formatPokemonName } from '@/utils/pokemon'
 import PokemonAvatar from '@/components/atoms/PokemonAvatar.vue'
@@ -16,9 +17,18 @@ const props = defineProps<{
   items: readonly BoxEntry[]
   /** Espécies capturadas no jogo; undefined = sem jogo (tocar abre o detalhe). */
   caughtIds?: ReadonlySet<number>
+  /** Modo de seleção múltipla: tocar seleciona (ids da forma), em vez de marcar a captura. */
+  selecting?: boolean
+  selectedIds?: ReadonlySet<number>
 }>()
 
-const emit = defineEmits<{ toggleCaught: [speciesId: number]; open: [id: number] }>()
+const emit = defineEmits<{
+  toggleCaught: [speciesId: number]
+  open: [id: number]
+  select: [id: number]
+  /** "Selecionar caixa": todos os da caixa entram (ou saem, se já estavam todos). */
+  selectMany: [ids: number[], selected: boolean]
+}>()
 
 const { t } = useI18n()
 
@@ -51,7 +61,39 @@ function rangeOf(box: readonly BoxEntry[]): string {
   return `${numberOf(box[0]!)}–${numberOf(box[box.length - 1]!)}`
 }
 
+function isSelected(entry: BoxEntry): boolean {
+  return props.selectedIds?.has(entry.id) ?? false
+}
+
+function boxSelected(box: readonly BoxEntry[]): boolean {
+  return box.every(isSelected)
+}
+
+function toggleBox(box: readonly BoxEntry[]): void {
+  emit(
+    'selectMany',
+    box.map((entry) => entry.id),
+    !boxSelected(box),
+  )
+}
+
+/** Estado anunciado pelo botão da célula: seleção no modo de seleção, captura fora dele. */
+function pressedOf(entry: BoxEntry): boolean | undefined {
+  if (props.selecting) return isSelected(entry)
+  return props.caughtIds ? isCaught(entry) : undefined
+}
+
+function labelOf(entry: BoxEntry): string {
+  const label = `${numberOf(entry)} ${formatPokemonName(entry.name)}`
+  // Selecionando, o aria-pressed fala da seleção: a captura vai no nome.
+  return props.selecting && isCaught(entry) ? `${label} (${t('catch.caught')})` : label
+}
+
 function onCell(entry: BoxEntry, event: MouseEvent): void {
+  if (props.selecting) {
+    emit('select', entry.id)
+    return
+  }
   if (!props.caughtIds) {
     emit('open', entry.id)
     return
@@ -69,7 +111,8 @@ function onCell(entry: BoxEntry, event: MouseEvent): void {
 
 <template>
   <!-- Com jogo, as caixas são a lista de marcação (como no Pokémon HOME): a dica diz o que o toque faz. -->
-  <p v-if="caughtIds" class="text-body-small mb-3">{{ t('boxes.hint') }}</p>
+  <p v-if="selecting" class="text-body-small mb-3">{{ t('select.boxesHint') }}</p>
+  <p v-else-if="caughtIds" class="text-body-small mb-3">{{ t('boxes.hint') }}</p>
   <div class="pokemon-boxes">
     <section
       v-for="(box, index) in boxes"
@@ -89,17 +132,42 @@ function onCell(entry: BoxEntry, event: MouseEvent): void {
           }}</span>
         </span>
       </h2>
+      <v-btn
+        v-if="selecting"
+        size="small"
+        variant="text"
+        class="pokemon-boxes__select"
+        :aria-pressed="boxSelected(box)"
+        :aria-label="
+          boxSelected(box)
+            ? t('select.deselectBoxLong', { n: index + 1 })
+            : t('select.selectBoxLong', { n: index + 1 })
+        "
+        @click="toggleBox(box)"
+      >
+        {{ boxSelected(box) ? t('select.deselectBox') : t('select.selectBox') }}
+      </v-btn>
       <ul class="pokemon-boxes__grid">
         <li v-for="entry in box" :key="entry.id">
           <button
             type="button"
             class="pokemon-boxes__cell"
-            :class="{ 'pokemon-boxes__cell--missing': caughtIds && !isCaught(entry) }"
-            :aria-pressed="caughtIds ? isCaught(entry) : undefined"
-            :aria-label="`${numberOf(entry)} ${formatPokemonName(entry.name)}`"
-            :title="`${numberOf(entry)} ${formatPokemonName(entry.name)}`"
+            :class="{
+              'pokemon-boxes__cell--missing': caughtIds && !isCaught(entry),
+              'pokemon-boxes__cell--selected': selecting && isSelected(entry),
+            }"
+            :aria-pressed="pressedOf(entry)"
+            :aria-label="labelOf(entry)"
+            :title="labelOf(entry)"
             @click="onCell(entry, $event)"
           >
+            <v-icon
+              v-if="selecting && isSelected(entry)"
+              :icon="mdiCheckCircle"
+              size="16"
+              color="primary"
+              class="pokemon-boxes__check"
+            />
             <PokemonAvatar
               :id="entry.id"
               :name="entry.name"
@@ -151,6 +219,7 @@ function onCell(entry: BoxEntry, event: MouseEvent): void {
 }
 
 .pokemon-boxes__cell {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -181,6 +250,25 @@ function onCell(entry: BoxEntry, event: MouseEvent): void {
 .pokemon-boxes__cell--missing .pokemon-boxes__avatar {
   filter: grayscale(1);
   opacity: 0.55;
+}
+
+/* Selecionada: contorno grosso + ✓ (a cor sozinha não basta para indicar o estado). */
+.pokemon-boxes__cell--selected {
+  outline: 3px solid rgb(var(--v-theme-primary));
+  outline-offset: -3px;
+}
+
+.pokemon-boxes__check {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  z-index: 1;
+  border-radius: 50%;
+  background: rgb(var(--v-theme-surface));
+}
+
+.pokemon-boxes__select {
+  margin: -4px 0 4px -8px;
 }
 
 .pokemon-boxes__avatar {

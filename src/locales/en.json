@@ -1224,5 +1224,30 @@
     "onlyIn": "{version} only",
     "linksHint": "Opens the Pokémon's page on PokeInfo.",
     "linksHintGame": "Opens PokeInfo with the selected game, where \"Where to find\" is."
+  },
+  "select": {
+    "action": "Select",
+    "started": "Selection mode. Tap Pokémon to pick them; the actions are in the bar at the bottom of the screen.",
+    "ended": "Selection ended.",
+    "exit": "Exit selection (Esc)",
+    "region": "Selection actions",
+    "count": "None selected | 1 selected | {n} selected",
+    "selectAll": "Select all ({n})",
+    "clearAll": "Deselect all",
+    "markCaught": "Caught",
+    "markMissing": "Not caught",
+    "markCaughtLong": "Mark the selected as caught",
+    "markMissingLong": "Mark the selected as not caught",
+    "copy": "Copy",
+    "copyLong": "Copy or share the list of selected Pokémon",
+    "markedCaught": "1 marked as caught | {n} marked as caught",
+    "markedMissing": "1 unmarked | {n} unmarked",
+    "alreadyCaught": "The selected Pokémon were already marked as caught.",
+    "alreadyMissing": "None of the selected Pokémon were marked as caught.",
+    "boxesHint": "Tap Pokémon to select them, or select a whole box.",
+    "selectBox": "Select box",
+    "deselectBox": "Deselect box",
+    "selectBoxLong": "Select box {n}",
+    "deselectBoxLong": "Deselect box {n}"
   }
 }

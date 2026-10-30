@@ -87,6 +87,21 @@ export function defineGameSetStore(id: string, storageKey: string) {
       schedulePersist()
     }
 
+    /** Marca ou desmarca várias espécies de uma vez (seleção múltipla), com uma gravação só. */
+    function setMany(game: string, speciesIds: Iterable<number>, caught: boolean): void {
+      let ids = byGame.get(game)
+      if (!ids) {
+        if (!caught) return
+        byGame.set(game, new Set<number>())
+        ids = byGame.get(game)!
+      }
+      for (const speciesId of speciesIds) {
+        if (caught) ids.add(speciesId)
+        else ids.delete(speciesId)
+      }
+      schedulePersist()
+    }
+
     function toggle(game: string, speciesId: number): void {
       setCaught(game, speciesId, !isCaught(game, speciesId))
     }
@@ -117,6 +132,7 @@ export function defineGameSetStore(id: string, storageKey: string) {
       caughtInRaw,
       isCaught,
       setCaught,
+      setMany,
       toggle,
       exportData,
       importData,

@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { mdiCheckCircle, mdiStarFourPoints } from '@mdi/js'
+import {
+  mdiCheckboxBlankCircleOutline,
+  mdiCheckCircle,
+  mdiPokeball,
+  mdiStarFourPoints,
+} from '@mdi/js'
 import { useI18n } from 'vue-i18n'
 import type { RouteLocationRaw } from 'vue-router'
 import type { PokemonListItem } from '@/types/pokemon'
@@ -24,6 +29,12 @@ const props = defineProps<{
   linkTo?: (pokemon: PokemonListItem) => RouteLocationRaw
   /** Card da primeira dobra: a imagem é o LCP da lista e baixa já, com prioridade alta. */
   priority?: boolean
+  /**
+   * Modo de seleção múltipla: o card inteiro alterna a seleção (sem `linkTo`), com um círculo
+   * vazio de "dá para marcar". A Poké Bola vira só indicação: um segundo alvo de toque dentro do
+   * card selecionável é armadilha (marcaria a captura em vez de selecionar).
+   */
+  selectable?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -72,8 +83,19 @@ function onLinkClick(event: MouseEvent): void {
     <div class="pokemon-card__art pa-2">
       <PokemonArtwork :id="pokemon.id" alt="" :size="CARD_ARTWORK_SIZE" :priority="priority" />
       <v-icon v-if="selected" :icon="mdiCheckCircle" color="primary" class="pokemon-card__check" />
+      <v-icon
+        v-else-if="selectable"
+        :icon="mdiCheckboxBlankCircleOutline"
+        class="pokemon-card__check pokemon-card__check--empty"
+      />
+      <v-icon
+        v-if="selectable && caught"
+        :icon="mdiPokeball"
+        size="small"
+        class="pokemon-card__caught-badge"
+      />
       <CatchToggle
-        v-if="caught !== undefined"
+        v-else-if="caught !== undefined && !selectable"
         :caught="caught"
         :name="name"
         class="pokemon-card__catch"
@@ -104,6 +126,7 @@ function onLinkClick(event: MouseEvent): void {
             @click="emit('select', pokemon)"
           >
             {{ name }}
+            <span v-if="selectable && caught" class="d-sr-only">({{ t('catch.caught') }})</span>
           </button>
         </div>
         <span
@@ -153,6 +176,22 @@ function onLinkClick(event: MouseEvent): void {
   left: 8px;
   background: rgb(var(--v-theme-surface));
   border-radius: 50%;
+}
+
+.pokemon-card__check--empty {
+  opacity: 0.7;
+}
+
+/* Mesmo lugar da Poké Bola do card, mas sem ser botão (no modo de seleção o card é o alvo). */
+.pokemon-card__caught-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgb(var(--v-theme-primary));
+  color: rgb(var(--v-theme-on-primary));
 }
 
 .pokemon-card__sort {

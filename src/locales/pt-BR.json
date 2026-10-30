@@ -1224,5 +1224,30 @@
     "onlyIn": "só {version}",
     "linksHint": "Abre a ficha no PokeInfo.",
     "linksHintGame": "Abre no PokeInfo com o jogo escolhido, onde fica \"Onde encontrar\"."
+  },
+  "select": {
+    "action": "Selecionar",
+    "started": "Modo de seleção. Toque nos Pokémon para escolher; as ações ficam na barra no fim da tela.",
+    "ended": "Seleção encerrada.",
+    "exit": "Sair da seleção (Esc)",
+    "region": "Ações da seleção",
+    "count": "Nenhum selecionado | 1 selecionado | {n} selecionados",
+    "selectAll": "Selecionar todos ({n})",
+    "clearAll": "Desmarcar todos",
+    "markCaught": "Capturado",
+    "markMissing": "Não capturado",
+    "markCaughtLong": "Marcar os selecionados como capturados",
+    "markMissingLong": "Marcar os selecionados como não capturados",
+    "copy": "Copiar",
+    "copyLong": "Copiar ou compartilhar a lista dos selecionados",
+    "markedCaught": "1 marcado como capturado | {n} marcados como capturados",
+    "markedMissing": "1 desmarcado | {n} desmarcados",
+    "alreadyCaught": "Os selecionados já estavam marcados como capturados.",
+    "alreadyMissing": "Nenhum dos selecionados estava marcado como capturado.",
+    "boxesHint": "Toque nos Pokémon para selecionar, ou selecione a caixa inteira.",
+    "selectBox": "Selecionar caixa",
+    "deselectBox": "Desmarcar caixa",
+    "selectBoxLong": "Selecionar a caixa {n}",
+    "deselectBoxLong": "Desmarcar a caixa {n}"
   }
 }

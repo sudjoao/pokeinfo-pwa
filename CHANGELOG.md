@@ -13,6 +13,10 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
   filtros da tela) para colar em notas, conversas ou planilhas. Em texto (uma linha por Pokémon)
   ou em colunas para Google Planilhas/Excel, com tipos, exclusivos de versão e, se quiser, o link
   da ficha de cada um (onde fica "Onde encontrar"). No celular também dá para compartilhar direto.
+- **Seleção múltipla**: "Selecionar" na aba Pokémon troca o toque no card por escolher vários (ou
+  a caixa inteira, na exibição em caixas). A barra no rodapé marca todos como capturados ou não
+  capturados de uma vez, com desfazer, ou copia a lista deles. "Selecionar todos" vale para a lista
+  inteira com a busca e os filtros; Esc sai da seleção.
 
 ## [1.12.0] - 2026-10-30
 

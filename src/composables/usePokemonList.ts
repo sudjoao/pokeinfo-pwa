@@ -529,6 +529,7 @@ export function usePokemonList() {
     advancedCount,
     setAdvanced,
     clearAdvanced,
+    source,
     filtered,
     exportSource,
     items,
