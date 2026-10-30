@@ -7,6 +7,16 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 
 ## [Não lançado]
 
+## [1.11.2] - 2026-10-30
+
+### Alterado
+
+- Ferramentas de desenvolvimento atualizadas: Vitest 5, vite-plugin-pwa 2 (o service worker, o
+  manifest e o registro gerados ficaram idênticos aos da versão anterior), ESLint, oxlint,
+  Prettier, vue-tsc e o plugin Vue do Vite. Nada muda no app publicado.
+- O Dependabot não propõe mais o TypeScript 7: a versão reescrita em Go não tem a API JavaScript
+  que o vue-tsc usa para checar os componentes `.vue`.
+
 ## [1.11.1] - 2026-10-30
 
 ### Segurança
@@ -492,7 +502,8 @@ Primeira versão estável da Pokédex em formato de PWA, consumindo a [PokéAPI]
 - As marcações de captura ficam só no aparelho, sem sincronização entre dispositivos.
 - Os gritos vêm só em `.ogg`; em navegadores sem suporte o botão de som não aparece.
 
-[Não lançado]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.11.1...HEAD
+[Não lançado]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.11.2...HEAD
+[1.11.2]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.11.1...v1.11.2
 [1.11.1]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.11.0...v1.11.1
 [1.11.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.10.0...v1.11.0
 [1.10.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.9.2...v1.10.0
