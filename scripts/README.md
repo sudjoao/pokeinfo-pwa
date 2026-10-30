@@ -9,6 +9,7 @@ script tem dependências (Node 22.18+ ou 24, que já remove os tipos ao importar
 | `gen-reference-data.mjs` | `src/data/generated/learnsets/*.ts` (quem aprende cada golpe, por jogo), `items.ts`, `natures.ts`, `characteristics.ts` | PokéAPI GraphQL beta (learnsets, ~15 s) + REST para itens que faltarem | Jogo, geração ou DLC nova; tem `--check` |
 | `gen-dex-index.mjs` | `src/data/generated/dexIndex.ts` (índice id + nome e tipos de cada Pokémon/forma, ~9 KB gz) | PokéAPI REST (`/pokemon` e os 18 `/type`) | Pokémon ou formas novas; tem `--check` |
 | `gen-routes.mjs` | `src/data/routes.ts` (locais com encontro por jogo) | PokéAPI REST (~1700 requisições, alguns minutos) | Jogo novo com `hasEncounterData`, ou dado novo na PokéAPI |
+| `gen-trainers.mjs` | `src/data/generated/trainers/*.ts` (líderes, Elite 4 e campeão de cada jogo, com times e revanches) | Bulbapedia, API MediaWiki (~120 páginas, uma por vez, ~2 min) | Jogo novo ou correção na Bulbapedia; tem `--check` |
 
 ```sh
 node scripts/gen-pokemon-data.mjs
@@ -19,14 +20,25 @@ node scripts/gen-reference-data.mjs           # reescreve learnsets, itens, natu
 node scripts/gen-routes.mjs --check   # só compara com o arquivo atual
 node scripts/gen-routes.mjs           # reescreve src/data/routes.ts
 npx prettier --write src/data/routes.ts
+node scripts/gen-trainers.mjs --check --cache /tmp/bulbapedia   # só compara (guarda as páginas)
+node scripts/gen-trainers.mjs --cache /tmp/bulbapedia           # reescreve os times
 ```
 
 `gen-routes.mjs` tem uma lista `IGNORED` com erros conhecidos da PokéAPI (locais marcados num jogo
 em que não existem). Ao rodar de novo, confira com `--check` o que mudou antes de aceitar.
 
+`gen-trainers.mjs` lê os templates `{{Party}}` e `{{Pokémon}}` das páginas de cada treinador. Quem
+entra em cada jogo, a ordem e o tipo de especialidade ficam escritos à mão em `GAMES`, no topo do
+script; o filtro `where` (local da luta) separa a luta da liga das outras do mesmo treinador
+(Giovanni no esconderijo, Larry no ginásio e na Elite 4). Ficam de fora torres de batalha, torneios
+de exibição, Multi Battles e o modo Challenge de Black 2/White 2 (vale o Normal). Golpes, habilidades
+e itens são conferidos com os arquivos gerados da PokéAPI; o script avisa o que não reconhecer.
+Em 2026-10-30 a API da Bulbapedia voltou a responder a scripts; se voltar o 403 do Cloudflare,
+rode com `--cache` apontando para uma pasta com o wikitext salvo à mão (`{página}.txt`).
+
 ## Dados da Bulbapedia (sem script)
 
-Dois arquivos vêm da Bulbapedia, porque a PokéAPI não tem o dado. Os scripts originais se perderam e,
+Além dos times (`gen-trainers.mjs`, acima), dois arquivos vêm da Bulbapedia, porque a PokéAPI não tem o dado. Os scripts originais se perderam e,
 em 2026-10-23, a Bulbapedia passou a responder requisições automáticas com o desafio do Cloudflare
 (HTTP 403). Por isso não há script versionado: abaixo está o procedimento exato para refazer à mão
 ou com um script, quando o acesso permitir. Use um `User-Agent` que identifique o projeto.

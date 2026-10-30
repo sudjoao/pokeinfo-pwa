@@ -66,6 +66,7 @@
     "exclusivesOf": "Exclusivos de {version}",
     "pokemonTab": "Pokémon",
     "routesTab": "Rotas",
+    "leadersTab": "Líderes",
     "resultsCount": "Nenhum Pokémon encontrado | 1 Pokémon encontrado | {n} Pokémon encontrados",
     "clearFilters": "Limpar filtros",
     "noFavoritesTitle": "Nenhum favorito ainda",
@@ -360,7 +361,7 @@
     "madeBy": "Feito por {author}",
     "repo": "Código-fonte no GitHub",
     "data": "Dados e imagens da PokéAPI",
-    "exclusives": "Exclusivos de versão com base na Bulbapedia",
+    "exclusives": "Exclusivos de versão e times dos líderes com base na Bulbapedia",
     "disclaimer": "Pokémon e os nomes dos personagens são marcas registradas da Nintendo, Creatures Inc. e GAME FREAK inc. Projeto de estudo, sem fins comerciais e sem vínculo com essas empresas.",
     "close": "Fechar"
   },
@@ -1135,5 +1136,48 @@
     "callbackErrorHint": "O login foi cancelado ou expirou. No iPhone, entre pelo app instalado e conclua o login sem trocar de janela.",
     "backHome": "Voltar ao início",
     "headerLabel": "Conta de {name}"
+  },
+  "league": {
+    "section": {
+      "gyms": "Ginásios",
+      "kahunas": "Grandes provações",
+      "elite4": "Elite 4",
+      "champion": "Campeão",
+      "kanto": "Ginásios de Kanto",
+      "postgame": "Pós-jogo"
+    },
+    "first": "Primeira luta",
+    "rematch": "Revanche",
+    "rematchN": "Revanche {n}",
+    "battles": "Lutas",
+    "variants": "Variações do time",
+    "yourStarter": "Seu inicial:",
+    "rivalEeveeShort": "Eevee do rival:",
+    "version": "Versão:",
+    "starter": "Se você escolheu {name}",
+    "rivalEevee": "Eevee do rival virou {name}",
+    "maxLevel": "Até Nv. {n}",
+    "weakTo": "Ataques eficazes",
+    "attacksWith": "Cuidado com",
+    "hits": "acerta {count} de {total} Pokémon com vantagem",
+    "usedBy": "{count} de {total} Pokémon têm golpes desse tipo",
+    "tera": "Tera {type}",
+    "special": {
+      "mega": "Mega",
+      "z": "Golpe Z",
+      "dmax": "Dynamax",
+      "gmax": "Gigantamax"
+    },
+    "gender": {
+      "m": "macho",
+      "f": "fêmea"
+    },
+    "ability": "Habilidade: {name}",
+    "item": "Item: {name}",
+    "moves": "Golpes",
+    "bulbapedia": "Ver na Bulbapedia",
+    "loadError": "Não foi possível carregar os líderes.",
+    "empty": "Ainda não há líderes de {game}.",
+    "source": "Times e observações (em inglês) da Bulbapedia."
   }
 }

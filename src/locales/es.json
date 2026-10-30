@@ -66,6 +66,7 @@
     "exclusivesOf": "Exclusivos de {version}",
     "pokemonTab": "Pokémon",
     "routesTab": "Rutas",
+    "leadersTab": "Líderes",
     "resultsCount": "Ningún Pokémon encontrado | 1 Pokémon encontrado | {n} Pokémon encontrados",
     "clearFilters": "Quitar filtros",
     "noFavoritesTitle": "Aún no hay favoritos",
@@ -360,7 +361,7 @@
     "madeBy": "Hecho por {author}",
     "repo": "Código fuente en GitHub",
     "data": "Datos e imágenes de la PokéAPI",
-    "exclusives": "Exclusivos de versión según Bulbapedia",
+    "exclusives": "Exclusivos de versión y equipos de los líderes según Bulbapedia",
     "disclaimer": "Pokémon y los nombres de los personajes son marcas registradas de Nintendo, Creatures Inc. y GAME FREAK inc. Proyecto de estudio, sin fines comerciales y sin vínculo con esas empresas.",
     "close": "Cerrar"
   },
@@ -1135,5 +1136,48 @@
     "callbackErrorHint": "El inicio de sesión se canceló o caducó. En iPhone, inicia sesión desde la app instalada y termina sin cambiar de ventana.",
     "backHome": "Volver al inicio",
     "headerLabel": "Cuenta de {name}"
+  },
+  "league": {
+    "section": {
+      "gyms": "Gimnasios",
+      "kahunas": "Grandes pruebas",
+      "elite4": "Alto Mando",
+      "champion": "Campeón",
+      "kanto": "Gimnasios de Kanto",
+      "postgame": "Posjuego"
+    },
+    "first": "Primer combate",
+    "rematch": "Revancha",
+    "rematchN": "Revancha {n}",
+    "battles": "Combates",
+    "variants": "Variantes del equipo",
+    "yourStarter": "Tu inicial:",
+    "rivalEeveeShort": "Eevee del rival:",
+    "version": "Versión:",
+    "starter": "Si elegiste a {name}",
+    "rivalEevee": "El Eevee del rival evolucionó a {name}",
+    "maxLevel": "Hasta Nv. {n}",
+    "weakTo": "Ataques eficaces",
+    "attacksWith": "Cuidado con",
+    "hits": "supereficaz contra {count} de {total} Pokémon",
+    "usedBy": "{count} de {total} Pokémon tienen movimientos de este tipo",
+    "tera": "Tera {type}",
+    "special": {
+      "mega": "Mega",
+      "z": "Movimiento Z",
+      "dmax": "Dinamax",
+      "gmax": "Gigamax"
+    },
+    "gender": {
+      "m": "macho",
+      "f": "hembra"
+    },
+    "ability": "Habilidad: {name}",
+    "item": "Objeto: {name}",
+    "moves": "Movimientos",
+    "bulbapedia": "Ver en Bulbapedia",
+    "loadError": "No se pudieron cargar los líderes.",
+    "empty": "Todavía no hay líderes de {game}.",
+    "source": "Equipos y notas (en inglés) de Bulbapedia."
   }
 }

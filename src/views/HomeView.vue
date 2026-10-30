@@ -10,6 +10,7 @@ import {
 } from '@mdi/js'
 import { gameContextQuery } from '@/utils/games'
 import { ROUTE_GAMES } from '@/data/routeGames'
+import { hasLeague } from '@/utils/league'
 import { usePokemonList } from '@/composables/usePokemonList'
 import { useCry } from '@/composables/useCry'
 import { useDexLabel } from '@/composables/useDexLabel'
@@ -35,6 +36,7 @@ import { usePokemonData } from '@/composables/usePokemonData'
 // Só usados ao abrir a aba "Rotas" (com ~170 KB de dados) e o sheet de filtros (VSelect, VSlider…):
 // ficam fora do carregamento inicial.
 const RouteList = defineAsyncComponent(() => import('@/components/organisms/RouteList.vue'))
+const LeagueList = defineAsyncComponent(() => import('@/components/organisms/LeagueList.vue'))
 const AdvancedFilterSheet = defineAsyncComponent(
   () => import('@/components/organisms/AdvancedFilterSheet.vue'),
 )
@@ -113,8 +115,13 @@ const cry = useCry()
 const { t } = useI18n()
 const { dexLabel } = useDexLabel()
 
-/** Aba ativa na Home; "routes" só existe com um jogo com dados de encontro selecionado. */
-const view = ref<'pokemon' | 'routes'>('pokemon')
+/**
+ * Aba ativa na Home; "routes" só existe com um jogo com dados de encontro selecionado e
+ * "leaders" com um jogo que tem ginásios/Elite 4 (Legends: Arceus e Z-A não têm).
+ */
+const view = ref<'pokemon' | 'routes' | 'leaders'>('pokemon')
+const hasRoutesTab = computed(() => !!game.value && ROUTE_GAMES.has(game.value.slug))
+const hasLeadersTab = computed(() => !!game.value && hasLeague(game.value.slug))
 watch(
   () => game.value?.slug,
   () => (view.value = 'pokemon'),
@@ -236,7 +243,7 @@ function openTeamBuilder(): void {
         :missing-count="missingCount"
         :versions="versions"
         :availability="availability"
-        :simplified="view === 'routes'"
+        :simplified="view !== 'pokemon'"
         @open-game="pickerOpen = true"
         @open-types="typesOpen = true"
         :advanced-count="advancedCount"
@@ -247,9 +254,10 @@ function openTeamBuilder(): void {
       />
     </template>
 
-    <v-tabs v-if="game && ROUTE_GAMES.has(game.slug)" v-model="view" class="mb-3" density="compact">
+    <v-tabs v-if="hasRoutesTab || hasLeadersTab" v-model="view" class="mb-3" density="compact">
       <v-tab value="pokemon">{{ t('home.pokemonTab') }}</v-tab>
-      <v-tab value="routes">{{ t('home.routesTab') }}</v-tab>
+      <v-tab v-if="hasRoutesTab" value="routes">{{ t('home.routesTab') }}</v-tab>
+      <v-tab v-if="hasLeadersTab" value="leaders">{{ t('home.leadersTab') }}</v-tab>
     </v-tabs>
 
     <RouteList
@@ -259,6 +267,8 @@ function openTeamBuilder(): void {
       @select="openPokemonId"
       @toggle-caught="toggleCaught"
     />
+
+    <LeagueList v-else-if="view === 'leaders' && game" :game="game" @select="openPokemonId" />
 
     <template v-else>
       <RecentStrip

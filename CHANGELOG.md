@@ -7,6 +7,19 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 
 ## [Não lançado]
 
+### Adicionado
+
+- **Líderes**: nova aba ao lado de Pokémon e Rotas, para os jogos com ginásios (todos menos os
+  Legends). Mostra os líderes de ginásio, a Elite 4 e o campeão do jogo na ordem da história (os
+  ginásios de Kanto e o Red nos jogos de Johto; as grandes provações dos kahunas em Sun/Moon e Ultra
+  Sun/Ultra Moon). Cada treinador traz o time de cada luta (primeira luta e revanches), com nível,
+  habilidade, item, golpes coloridos por tipo e com poder, Tera, Mega, Golpe Z e Dynamax. Times que
+  mudam conforme o inicial escolhido, a versão ou o Eevee do rival têm um seletor próprio. Para
+  montar a estratégia, cada time mostra os tipos de ataque que acertam a maior parte dele com
+  vantagem e os tipos de golpe que ele mais usa, pela tabela de tipos da geração do jogo, além das
+  observações da Bulbapedia (itens de cura que o líder usa, quando ele terastaliza ou dinamaxiza).
+  Os dados vêm da Bulbapedia e cada jogo só é baixado ao abrir a aba.
+
 ## [1.10.0] - 2026-10-28
 
 ### Adicionado

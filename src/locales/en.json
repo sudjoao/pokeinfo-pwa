@@ -66,6 +66,7 @@
     "exclusivesOf": "{version} exclusives",
     "pokemonTab": "Pokémon",
     "routesTab": "Routes",
+    "leadersTab": "Leaders",
     "resultsCount": "No Pokémon found | 1 Pokémon found | {n} Pokémon found",
     "clearFilters": "Clear filters",
     "noFavoritesTitle": "No favorites yet",
@@ -360,7 +361,7 @@
     "madeBy": "Made by {author}",
     "repo": "Source code on GitHub",
     "data": "Data and images from PokéAPI",
-    "exclusives": "Version exclusives from Bulbapedia",
+    "exclusives": "Version exclusives and leader teams from Bulbapedia",
     "disclaimer": "Pokémon and character names are trademarks of Nintendo, Creatures Inc. and GAME FREAK inc. This is a study project, non-commercial and not affiliated with those companies.",
     "close": "Close"
   },
@@ -1135,5 +1136,48 @@
     "callbackErrorHint": "Sign-in was canceled or expired. On iPhone, sign in from the installed app and finish without switching windows.",
     "backHome": "Back to start",
     "headerLabel": "{name}'s account"
+  },
+  "league": {
+    "section": {
+      "gyms": "Gyms",
+      "kahunas": "Grand trials",
+      "elite4": "Elite Four",
+      "champion": "Champion",
+      "kanto": "Kanto Gyms",
+      "postgame": "Post-game"
+    },
+    "first": "First battle",
+    "rematch": "Rematch",
+    "rematchN": "Rematch {n}",
+    "battles": "Battles",
+    "variants": "Team variations",
+    "yourStarter": "Your starter:",
+    "rivalEeveeShort": "Rival's Eevee:",
+    "version": "Version:",
+    "starter": "If you picked {name}",
+    "rivalEevee": "Rival's Eevee became {name}",
+    "maxLevel": "Up to Lv. {n}",
+    "weakTo": "Effective attacks",
+    "attacksWith": "Watch out for",
+    "hits": "super effective on {count} of {total} Pokémon",
+    "usedBy": "{count} of {total} Pokémon have moves of this type",
+    "tera": "Tera {type}",
+    "special": {
+      "mega": "Mega",
+      "z": "Z-Move",
+      "dmax": "Dynamax",
+      "gmax": "Gigantamax"
+    },
+    "gender": {
+      "m": "male",
+      "f": "female"
+    },
+    "ability": "Ability: {name}",
+    "item": "Item: {name}",
+    "moves": "Moves",
+    "bulbapedia": "View on Bulbapedia",
+    "loadError": "Couldn't load the leaders.",
+    "empty": "No leaders for {game} yet.",
+    "source": "Teams and notes from Bulbapedia."
   }
 }
