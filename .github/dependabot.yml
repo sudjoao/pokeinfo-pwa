@@ -8,6 +8,12 @@ updates:
       interval: weekly
       day: monday
     open-pull-requests-limit: 5
+    ignore:
+      # O TypeScript 7 (reescrito em Go) não tem a API JavaScript que o vue-tsc usa
+      # (`typescript/lib/tsc`); testado em 2026-10-30 com vue-tsc 3.3.14. Tirar quando o vue-tsc
+      # suportar.
+      - dependency-name: typescript
+        versions: ['>=7']
     groups:
       dev:
         dependency-type: development
