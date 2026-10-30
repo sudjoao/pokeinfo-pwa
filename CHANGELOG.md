@@ -7,6 +7,8 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 
 ## [Não lançado]
 
+## [1.12.0] - 2026-10-30
+
 ### Adicionado
 
 - Aba **Time** na Home: o time do jogo selecionado com fraquezas, cobertura e sugestões, sem sair
@@ -19,7 +21,6 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 - As abas da Home (Pokémon, Time, Rotas, Líderes) ficam grudadas no topo ao rolar, e cada aba
   guarda a própria posição da rolagem.
 - O botão do team builder saiu do cabeçalho da Home (a aba Time e o menu levam a ele).
-
 - `@types/node` 24.19 (ferramenta de desenvolvimento; nada muda no app).
 
 ## [1.11.3] - 2026-10-30
@@ -527,7 +528,8 @@ Primeira versão estável da Pokédex em formato de PWA, consumindo a [PokéAPI]
 - As marcações de captura ficam só no aparelho, sem sincronização entre dispositivos.
 - Os gritos vêm só em `.ogg`; em navegadores sem suporte o botão de som não aparece.
 
-[Não lançado]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.11.3...HEAD
+[Não lançado]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.12.0...HEAD
+[1.12.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.11.3...v1.12.0
 [1.11.3]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.11.2...v1.11.3
 [1.11.2]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.11.1...v1.11.2
 [1.11.1]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.11.0...v1.11.1
