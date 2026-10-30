@@ -14,6 +14,10 @@ updates:
       # suportar.
       - dependency-name: typescript
         versions: ['>=7']
+      # Os tipos do Node acompanham o Node do projeto (24, ver `engines` e o CI); um major novo
+      # aceitaria APIs que não existem no runtime. Subir junto com o Node, à mão.
+      - dependency-name: '@types/node'
+        update-types: ['version-update:semver-major']
     groups:
       dev:
         dependency-type: development
