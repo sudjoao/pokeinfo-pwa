@@ -7,6 +7,13 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 
 ## [Não lançado]
 
+### Adicionado
+
+- **Exportar lista** na aba Pokémon: copia os que faltam, os capturados ou todos (com a busca e os
+  filtros da tela) para colar em notas, conversas ou planilhas. Em texto (uma linha por Pokémon)
+  ou em colunas para Google Planilhas/Excel, com tipos, exclusivos de versão e, se quiser, o link
+  da ficha de cada um (onde fica "Onde encontrar"). No celular também dá para compartilhar direto.
+
 ## [1.12.0] - 2026-10-30
 
 ### Adicionado

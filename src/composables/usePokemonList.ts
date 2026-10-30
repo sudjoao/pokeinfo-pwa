@@ -303,9 +303,11 @@ export function usePokemonList() {
    * O de tipo exige que o Pokémon tenha todos os tipos escolhidos (lê o mapa de tipos, que já
    * está pronto antes de a lista aparecer). A lista só reaplica os filtros quando eles mudam.
    */
-  const filtered = computed(() => {
+  const filtered = computed(() => filterSource(game.value ? caughtFilter.value : null))
+
+  /** A fonte com a busca e os filtros, e o de captura só quando `status` não é null. */
+  function filterSource(status: CaughtFilter): ListSource[] {
     const matches = matcherFor(normalizedQuery.value)
-    const status = game.value ? caughtFilter.value : null
     const caught = caughtStore.caughtInRaw(game.value?.slug)
     const types = typeFilter.value
     const gameKey = game.value?.slug
@@ -327,7 +329,15 @@ export function usePokemonList() {
       favorites: toRaw(favoritesStore.ids),
       generation: game.value?.generation,
     })
-  })
+  }
+
+  /**
+   * Lista da exportação: busca e filtros da tela, sem o de captura (a exportação escolhe entre
+   * faltantes, capturados e todos). Lida na hora de abrir, com o estado de captura em dia.
+   */
+  function exportSource(): ListSource[] {
+    return filterSource(null)
+  }
 
   /** Quantos Pokémon da Pokédex atual há em cada grupo ("both" e cada versão). */
   const availabilityCounts = computed<Record<string, number>>(() => {
@@ -520,6 +530,7 @@ export function usePokemonList() {
     setAdvanced,
     clearAdvanced,
     filtered,
+    exportSource,
     items,
     status,
     errorMessage,

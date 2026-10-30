@@ -1,8 +1,13 @@
 <script setup lang="ts">
-import { computed, defineAsyncComponent, nextTick, onActivated, ref, watch } from 'vue'
+import { computed, defineAsyncComponent, nextTick, onActivated, ref, shallowRef, watch } from 'vue'
 import { useRoute, useRouter, type RouteLocationRaw } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { mdiFilterRemoveOutline, mdiPackageVariantClosed, mdiViewGridOutline } from '@mdi/js'
+import {
+  mdiClipboardListOutline,
+  mdiFilterRemoveOutline,
+  mdiPackageVariantClosed,
+  mdiViewGridOutline,
+} from '@mdi/js'
 import { gameContextQuery } from '@/utils/games'
 import { ROUTE_GAMES } from '@/data/routeGames'
 import { hasLeague } from '@/utils/league'
@@ -20,7 +25,8 @@ import ResultsAnnouncer from '@/components/atoms/ResultsAnnouncer.vue'
 import PokemonCardSkeleton from '@/components/molecules/PokemonCardSkeleton.vue'
 import ListFilters from '@/components/organisms/ListFilters.vue'
 import PokemonGrid from '@/components/organisms/PokemonGrid.vue'
-import PokemonBoxes from '@/components/organisms/PokemonBoxes.vue'
+import PokemonBoxes, { type BoxEntry } from '@/components/organisms/PokemonBoxes.vue'
+import AppNotice from '@/components/molecules/AppNotice.vue'
 import BackToTop from '@/components/atoms/BackToTop.vue'
 import GamePickerSheet from '@/components/organisms/GamePickerSheet.vue'
 import TypePickerSheet from '@/components/organisms/TypePickerSheet.vue'
@@ -35,6 +41,9 @@ const LeagueList = defineAsyncComponent(() => import('@/components/organisms/Lea
 const TeamTab = defineAsyncComponent(() => import('@/components/organisms/TeamTab.vue'))
 const AdvancedFilterSheet = defineAsyncComponent(
   () => import('@/components/organisms/AdvancedFilterSheet.vue'),
+)
+const ExportListSheet = defineAsyncComponent(
+  () => import('@/components/organisms/ExportListSheet.vue'),
 )
 
 const {
@@ -66,6 +75,7 @@ const {
   clearAdvanced,
   items,
   filtered,
+  exportSource,
   listKey,
   status,
   errorMessage,
@@ -153,6 +163,41 @@ const pokemonData = usePokemonData()
 function openAdvanced(): void {
   advancedOpen.value = true
   pokemonData.load().catch(() => {})
+}
+
+/** Busca ou filtros além do jogo e do filtro de captura (a exportação escolhe o recorte de captura). */
+const narrowed = computed(
+  () =>
+    Boolean(query.value.trim()) ||
+    typeFilter.value.length > 0 ||
+    availability.value.length > 0 ||
+    advancedCount.value > 0,
+)
+
+const exportOpen = ref(false)
+const exportMounted = useMountOnOpen(exportOpen)
+/** Lista lida ao abrir: o estado de captura e os filtros daquele momento. */
+const exportEntries = shallowRef<readonly BoxEntry[]>([])
+/**
+ * "Exportar" já abre no que a tela mostra quando há filtro de captura; sem ele, nos que faltam
+ * (o uso principal: levar a lista para pesquisar onde capturar).
+ */
+const exportScope = computed(() => caughtFilter.value ?? 'missing')
+const notice = ref<string | null>(null)
+
+function openExport(): void {
+  exportEntries.value = exportSource()
+  exportOpen.value = true
+}
+
+function onExportCopied(count: number): void {
+  notice.value = t('export.copied', count)
+}
+
+/** Link absoluto da ficha, com o jogo (é lá que fica "Onde encontrar"). */
+function pokemonLink(id: number): string {
+  const href = router.resolve({ name: 'pokemon', params: { id }, query: contextQuery.value }).href
+  return new URL(href, window.location.origin).href
 }
 
 /** Altura do cabeçalho: busca (48) + linha de chips (32) + espaçamentos. */
@@ -294,7 +339,17 @@ onActivated(() => {
       />
       <ResultsAnnouncer :count="filtered.length" :ready="!sourceLoading && !sourceError" />
 
-      <div class="d-flex justify-end mb-2">
+      <div class="d-flex align-center ga-2 mb-2">
+        <v-btn
+          variant="tonal"
+          :prepend-icon="mdiClipboardListOutline"
+          :disabled="sourceLoading || !!sourceError"
+          aria-haspopup="dialog"
+          @click="openExport"
+        >
+          {{ t('export.action') }}
+        </v-btn>
+        <v-spacer />
         <v-btn-toggle
           :model-value="layout"
           mandatory
@@ -392,6 +447,21 @@ onActivated(() => {
     />
 
     <BackToTop />
+
+    <ExportListSheet
+      v-if="exportMounted"
+      v-model="exportOpen"
+      :entries="exportEntries"
+      :caught-ids="game ? caughtIds : undefined"
+      :game="game"
+      :dex="dex"
+      :initial-scope="exportScope"
+      :filtered="narrowed"
+      :link-for="pokemonLink"
+      @copied="onExportCopied"
+    />
+
+    <AppNotice :text="notice" location="top" @close="notice = null" />
 
     <AdvancedFilterSheet
       v-if="advancedMounted"
