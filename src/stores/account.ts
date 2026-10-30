@@ -25,6 +25,7 @@ import { CAUGHT_KEY } from './caught'
 import { DAILY_KEY } from './daily'
 import { FAVORITES_KEY } from './favorites'
 import { HUNTS_KEY, SHINY_KEY } from './shiny'
+import { TEAMS_KEY } from './teams'
 
 /** Estado da última sincronização deste aparelho: a `base` da mescla de 3 vias. */
 interface SyncState {
@@ -48,7 +49,14 @@ export type FirstSyncChoice = 'merge' | 'cloud' | 'device'
 
 const SYNC_KEY = 'pokeinfo:sync:v1'
 /** Chaves da coleção no localStorage (para acompanhar o que outra aba grava). */
-const COLLECTION_KEYS = new Set([CAUGHT_KEY, SHINY_KEY, FAVORITES_KEY, HUNTS_KEY, DAILY_KEY])
+const COLLECTION_KEYS = new Set([
+  CAUGHT_KEY,
+  SHINY_KEY,
+  FAVORITES_KEY,
+  HUNTS_KEY,
+  DAILY_KEY,
+  TEAMS_KEY,
+])
 /** Tela para voltar depois do login (o Google só devolve para /auth/callback). */
 const NEXT_KEY = 'pokeinfo:auth-next:v1'
 
@@ -136,6 +144,7 @@ export const useAccountStore = defineStore('account', () => {
       favorites: readStorage(FAVORITES_KEY),
       hunts: readStorage(HUNTS_KEY),
       daily: readStorage(DAILY_KEY),
+      teams: readStorage(TEAMS_KEY),
     })
   }
 

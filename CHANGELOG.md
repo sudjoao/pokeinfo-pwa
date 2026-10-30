@@ -7,7 +7,18 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 
 ## [Não lançado]
 
+### Adicionado
+
+- Aba **Time** na Home: o time do jogo selecionado com fraquezas, cobertura e sugestões, sem sair
+  da Pokédex. "Escolher Pokémon" abre o team builder no mesmo time.
+- O time agora fica **salvo no aparelho, um por jogo**, e entra no backup e na sincronização com a
+  conta. Um link compartilhado carrega o time no jogo dele, com desfazer.
+
 ### Alterado
+
+- As abas da Home (Pokémon, Time, Rotas, Líderes) ficam grudadas no topo ao rolar, e cada aba
+  guarda a própria posição da rolagem.
+- O botão do team builder saiu do cabeçalho da Home (a aba Time e o menu levam a ele).
 
 - `@types/node` 24.19 (ferramenta de desenvolvimento; nada muda no app).
 

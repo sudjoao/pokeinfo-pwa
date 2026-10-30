@@ -2,12 +2,7 @@
 import { computed, defineAsyncComponent, nextTick, onActivated, ref, watch } from 'vue'
 import { useRoute, useRouter, type RouteLocationRaw } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import {
-  mdiFilterRemoveOutline,
-  mdiPackageVariantClosed,
-  mdiSwordCross,
-  mdiViewGridOutline,
-} from '@mdi/js'
+import { mdiFilterRemoveOutline, mdiPackageVariantClosed, mdiViewGridOutline } from '@mdi/js'
 import { gameContextQuery } from '@/utils/games'
 import { ROUTE_GAMES } from '@/data/routeGames'
 import { hasLeague } from '@/utils/league'
@@ -33,10 +28,11 @@ import VersionPickerSheet from '@/components/organisms/VersionPickerSheet.vue'
 import { useMountOnOpen } from '@/composables/useMountOnOpen'
 import { usePokemonData } from '@/composables/usePokemonData'
 
-// Só usados ao abrir a aba "Rotas" (com ~170 KB de dados) e o sheet de filtros (VSelect, VSlider…):
-// ficam fora do carregamento inicial.
+// Só usados ao abrir as abas "Rotas" (com ~170 KB de dados), "Líderes" e "Time" e o sheet de filtros
+// (VSelect, VSlider…): ficam fora do carregamento inicial.
 const RouteList = defineAsyncComponent(() => import('@/components/organisms/RouteList.vue'))
 const LeagueList = defineAsyncComponent(() => import('@/components/organisms/LeagueList.vue'))
+const TeamTab = defineAsyncComponent(() => import('@/components/organisms/TeamTab.vue'))
 const AdvancedFilterSheet = defineAsyncComponent(
   () => import('@/components/organisms/AdvancedFilterSheet.vue'),
 )
@@ -115,16 +111,35 @@ const cry = useCry()
 const { t } = useI18n()
 const { dexLabel } = useDexLabel()
 
+type HomeTab = 'pokemon' | 'team' | 'routes' | 'leaders'
+
 /**
- * Aba ativa na Home; "routes" só existe com um jogo com dados de encontro selecionado e
- * "leaders" com um jogo que tem ginásios/Elite 4 (Legends: Arceus e Z-A não têm).
+ * Aba ativa na Home. "team" (o time salvo do jogo) existe sempre; "routes" só com um jogo com dados
+ * de encontro selecionado e "leaders" com um jogo que tem ginásios/Elite 4 (Legends: Arceus e Z-A
+ * não têm).
  */
-const view = ref<'pokemon' | 'routes' | 'leaders'>('pokemon')
+const view = ref<HomeTab>('pokemon')
 const hasRoutesTab = computed(() => !!game.value && ROUTE_GAMES.has(game.value.slug))
 const hasLeadersTab = computed(() => !!game.value && hasLeague(game.value.slug))
+// Trocar de jogo mantém a aba (o Time mostra o do jogo novo); só volta para Pokémon se ela sumiu.
+watch([hasRoutesTab, hasLeadersTab], ([routes, leaders]) => {
+  if ((view.value === 'routes' && !routes) || (view.value === 'leaders' && !leaders))
+    view.value = 'pokemon'
+})
+
+/**
+ * As abas ficam grudadas no topo: trocar de aba lá embaixo da lista mostraria o meio (ou o fim) da
+ * outra. Cada aba guarda a própria rolagem (até trocar de jogo); a primeira visita começa do topo.
+ */
+const tabScroll = new Map<HomeTab, number>()
+watch(view, (next, previous) => {
+  tabScroll.set(previous, window.scrollY)
+  const top = tabScroll.get(next) ?? 0
+  nextTick(() => window.scrollTo({ top }))
+})
 watch(
   () => game.value?.slug,
-  () => (view.value = 'pokemon'),
+  () => tabScroll.clear(),
 )
 
 const pickerOpen = ref(false)
@@ -217,20 +232,10 @@ onActivated(() => {
       ?.focus({ preventScroll: true })
   })
 })
-
-/** Abre o team builder já com o jogo e o filtro de tipo atuais. */
-function openTeamBuilder(): void {
-  const query: Record<string, string> = { ...contextQuery.value }
-  if (typeFilter.value.length) query.type = typeFilter.value.join(',')
-  router.push({ name: 'team', query })
-}
 </script>
 
 <template>
   <DefaultLayout :extension-height="HEADER_EXTENSION_HEIGHT">
-    <template #actions>
-      <v-btn :icon="mdiSwordCross" :aria-label="t('home.teamBuilder')" @click="openTeamBuilder" />
-    </template>
     <template #header>
       <SearchField v-model="query" :recent="recent.searches" @clear-recent="recent.clearSearches" />
       <ListFilters
@@ -243,7 +248,7 @@ function openTeamBuilder(): void {
         :missing-count="missingCount"
         :versions="versions"
         :availability="availability"
-        :simplified="view !== 'pokemon'"
+        :simplified="view === 'routes' || view === 'leaders'"
         @open-game="pickerOpen = true"
         @open-types="typesOpen = true"
         :advanced-count="advancedCount"
@@ -254,8 +259,9 @@ function openTeamBuilder(): void {
       />
     </template>
 
-    <v-tabs v-if="hasRoutesTab || hasLeadersTab" v-model="view" class="mb-3" density="compact">
+    <v-tabs v-model="view" class="home-tabs mb-3" density="compact">
       <v-tab value="pokemon">{{ t('home.pokemonTab') }}</v-tab>
+      <v-tab value="team">{{ t('home.teamTab') }}</v-tab>
       <v-tab v-if="hasRoutesTab" value="routes">{{ t('home.routesTab') }}</v-tab>
       <v-tab v-if="hasLeadersTab" value="leaders">{{ t('home.leadersTab') }}</v-tab>
     </v-tabs>
@@ -269,6 +275,14 @@ function openTeamBuilder(): void {
     />
 
     <LeagueList v-else-if="view === 'leaders' && game" :game="game" @select="openPokemonId" />
+
+    <TeamTab
+      v-else-if="view === 'team'"
+      :game="game"
+      :dex="dex"
+      :candidates="filtered"
+      :types="typeFilter"
+    />
 
     <template v-else>
       <RecentStrip
@@ -389,3 +403,13 @@ function openTeamBuilder(): void {
     />
   </DefaultLayout>
 </template>
+
+<style scoped>
+/* Abas grudadas logo abaixo do cabeçalho (busca e filtros), por cima da lista que rola. */
+.home-tabs {
+  position: sticky;
+  top: calc(var(--v-layout-top, 0px) + var(--safe-top));
+  z-index: 2;
+  background: rgb(var(--v-theme-background));
+}
+</style>

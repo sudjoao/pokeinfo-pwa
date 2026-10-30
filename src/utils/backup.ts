@@ -17,7 +17,12 @@ export interface Backup {
   hunts: PersistedHunts
   /** Estatísticas do "Pokémon do dia"; ausente nos backups anteriores à 1.6 (o formato não mudou). */
   daily?: PersistedDaily
+  /** Time salvo de cada jogo; ausente nos backups anteriores à 1.12. */
+  teams?: PersistedTeams
 }
+
+/** Ids das formas no time de cada jogo (slug do version-group ou "national"), na ordem escolhida. */
+export type PersistedTeams = Record<string, number[]>
 
 export type BackupData = Omit<Backup, 'app' | 'version' | 'exportedAt'>
 
@@ -36,6 +41,9 @@ const HUNT_KEY = /^[a-z0-9-]{1,40}:\d{1,6}$/
 const MAX_BITSET_LENGTH = 4096
 /** Contador de caçada acima disso só pode ser dado adulterado. */
 const MAX_HUNT_COUNT = 10_000_000
+/** Tamanho de um time e maior id de forma aceito (as formas vão até ~10 300). */
+const TEAM_SIZE = 6
+const MAX_FORM_ID = 100_000
 
 /** Arquivo de backup acima disso não é do PokeInfo (uma coleção completa tem ~30 KB). */
 export const MAX_BACKUP_BYTES = 1024 * 1024
@@ -88,6 +96,20 @@ function parseHunts(value: unknown): PersistedHunts {
   return result
 }
 
+/** Times válidos: até 6 ids inteiros positivos sem repetição; um jogo sem nenhum id válido some. */
+export function parseTeams(value: unknown): PersistedTeams {
+  const result: PersistedTeams = {}
+  for (const [game, ids] of entriesOf(value)) {
+    if (!GAME_KEY.test(game) || !Array.isArray(ids)) continue
+    const valid = ids.filter(
+      (id): id is number => Number.isInteger(id) && id > 0 && id <= MAX_FORM_ID,
+    )
+    const team = [...new Set(valid)].slice(0, TEAM_SIZE)
+    if (team.length) result[game] = team
+  }
+  return result
+}
+
 /**
  * Valida os dados de um backup (ou da coleção salva na conta): campos ausentes ou inválidos viram
  * vazios. Nunca confia no que veio de fora do aparelho.
@@ -95,12 +117,14 @@ function parseHunts(value: unknown): PersistedHunts {
 export function parseBackupData(value: unknown): BackupData {
   const data = (typeof value === 'object' && value !== null ? value : {}) as Partial<BackupData>
   const daily = parseDaily(data.daily)
+  const teams = parseTeams(data.teams)
   return {
     caught: parseGameSets(data.caught),
     shiny: parseGameSets(data.shiny),
     favorites: isBitset(data.favorites) ? data.favorites : '',
     hunts: parseHunts(data.hunts),
     ...(daily ? { daily } : {}),
+    ...(Object.keys(teams).length ? { teams } : {}),
   }
 }
 

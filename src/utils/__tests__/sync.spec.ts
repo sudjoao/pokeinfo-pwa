@@ -182,3 +182,44 @@ describe('parseBackupData', () => {
     expect(Object.getPrototypeOf(parsed.hunts)).toBe(Object.prototype)
   })
 })
+
+describe('times por jogo', () => {
+  it('fica o lado que mexeu no time de cada jogo', () => {
+    const base = data({ teams: { 'lets-go-pikachu-lets-go-eevee': [25, 6], 'x-y': [658] } })
+    const local = data({ teams: { 'lets-go-pikachu-lets-go-eevee': [25, 6, 131], 'x-y': [658] } })
+    const remote = data({ teams: { 'lets-go-pikachu-lets-go-eevee': [25, 6], national: [1] } })
+    expect(mergeData(base, local, remote).teams).toEqual({
+      'lets-go-pikachu-lets-go-eevee': [25, 6, 131],
+      national: [1],
+    })
+  })
+
+  it('os dois mexeram no mesmo jogo: fica o deste aparelho', () => {
+    const base = data({ teams: { sv: [1] } })
+    const local = data({ teams: { sv: [1, 4] } })
+    const remote = data({ teams: { sv: [7] } })
+    expect(mergeData(base, local, remote).teams).toEqual({ sv: [1, 4] })
+  })
+
+  it('sem times dos dois lados, o campo não aparece', () => {
+    expect(mergeData(null, EMPTY_DATA, EMPTY_DATA)).not.toHaveProperty('teams')
+    expect(isEmptyData(data({ teams: {} }))).toBe(true)
+    expect(isEmptyData(data({ teams: { sv: [1] } }))).toBe(false)
+    expect(sameData(data({ teams: {} }), EMPTY_DATA)).toBe(true)
+  })
+
+  it('a base é uma cópia: mexer no time depois não muda a base', () => {
+    const teams = { sv: [1, 4] }
+    const canonical = canonicalData(data({ teams }))
+    teams.sv.push(7)
+    expect(canonical.teams).toEqual({ sv: [1, 4] })
+  })
+
+  it('valida os times vindos de fora', () => {
+    const parsed = parseBackupData({
+      teams: { sv: [1, 1, 4, -2, 'x', 7, 8, 9, 10, 11], 'Bad Key': [1], xy: 'nada', za: [] },
+    })
+    expect(parsed.teams).toEqual({ sv: [1, 4, 7, 8, 9, 10] })
+    expect(parseBackupData({})).not.toHaveProperty('teams')
+  })
+})

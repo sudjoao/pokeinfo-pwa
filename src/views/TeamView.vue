@@ -1,22 +1,14 @@
 <script setup lang="ts">
-import { computed, ref, shallowRef } from 'vue'
+import { computed, ref } from 'vue'
 import { mdiFilterRemoveOutline } from '@mdi/js'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useDisplay } from 'vuetify'
 import { gameContextQuery } from '@/utils/games'
 import { usePokemonList } from '@/composables/usePokemonList'
-import { useTeam, type TeamMember } from '@/composables/useTeam'
-import { useCry } from '@/composables/useCry'
-import { usePokedexStore } from '@/stores/pokedex'
-import { exportShowdown, importShowdown } from '@/utils/showdown'
-import { suggestCounters } from '@/utils/typeChart'
-import ShowdownImportDialog from '@/components/organisms/ShowdownImportDialog.vue'
+import { useTeam } from '@/composables/useTeam'
+import { useTeamActions } from '@/composables/useTeamActions'
 import BackToTop from '@/components/atoms/BackToTop.vue'
-import { shareLink } from '@/composables/useShare'
-import { useShareImage } from '@/composables/useShareImage'
-import ShareImageDialog from '@/components/organisms/ShareImageDialog.vue'
-import { formatPokemonName } from '@/utils/pokemon'
 import type { PokemonSummary } from '@/types/pokemon'
 import DetailLayout from '@/components/templates/DetailLayout.vue'
 import SearchField from '@/components/molecules/SearchField.vue'
@@ -31,9 +23,9 @@ import VersionPickerSheet from '@/components/organisms/VersionPickerSheet.vue'
 import AdvancedFilterSheet from '@/components/organisms/AdvancedFilterSheet.vue'
 import { usePokemonData } from '@/composables/usePokemonData'
 import { useOverlayFocusReturn } from '@/composables/useOverlayFocusReturn'
-import AppNotice from '@/components/molecules/AppNotice.vue'
 import TeamPanel from '@/components/organisms/TeamPanel.vue'
 import TeamTray from '@/components/organisms/TeamTray.vue'
+import TeamOverlays from '@/components/organisms/TeamOverlays.vue'
 
 const {
   query,
@@ -74,10 +66,9 @@ const {
   retry,
 } = usePokemonList()
 
-const team = useTeam(() => game.value?.generation)
+const team = useTeam(() => game.value)
 
 const router = useRouter()
-const cry = useCry()
 const { t } = useI18n()
 /** Desktop (≥ 960 px): painel lateral fixo. Abaixo disso: bandeja no rodapé + sheet. */
 const { mdAndUp } = useDisplay()
@@ -95,126 +86,27 @@ function openAdvanced(): void {
 }
 const teamOpen = ref(false)
 useOverlayFocusReturn(teamOpen)
-const fullNotice = ref(false)
-const notice = ref<string | null>(null)
-const importOpen = ref(false)
-
-/**
- * O time só existe na URL (gravada com replace): limpar, remover pelo painel ou importar por cima não
- * tinha volta, nem pelo "voltar" do navegador. O aviso oferece desfazer.
- */
-const undo = shallowRef<{ text: string; ids: number[] } | null>(null)
-
-function changeTeam(text: string, change: () => void): void {
-  const before = [...team.ids.value]
-  change()
-  undo.value = before.length ? { text, ids: before } : null
-}
-
-function removeMember(member: { id: number; name: string }): void {
-  changeTeam(t('team.removed', { name: formatPokemonName(member.name) }), () =>
-    team.remove(member.id),
-  )
-}
-
-function clearTeam(): void {
-  changeTeam(t('team.cleared'), team.clear)
-}
-const pokedex = usePokedexStore()
-
-/** Quem da lista atual (jogo, dex e filtros) cobre as fraquezas do time. */
-const suggestions = computed(() =>
-  suggestCounters(
-    filtered.value,
-    team.threats.value.map((row) => row.type),
-    (id) => pokedex.typesOf(id),
-    teamIds.value,
-    game.value?.generation,
-  ),
-)
-
-function addSuggestion(id: number): void {
-  if (team.toggle(id) === 'full') fullNotice.value = true
-}
-
-function shareTeam(): void {
-  shareLink(t('team.share'), window.location.href).then((result) => {
-    if (result === 'copied') notice.value = t('common.linkCopied')
-    else if (result === 'failed') notice.value = t('common.shareFailed')
-  })
-}
-
-const shareImage = useShareImage()
-const shareImageAlt = computed(() =>
-  t('shareImage.teamAlt', {
-    names: team.members.value.map((member) => formatPokemonName(member.name)).join(', '),
-  }),
-)
-
-function openShareImage(): void {
-  const members = team.members.value
-  shareImage.generate(
-    async () => {
-      const { teamImage } = await import('@/utils/shareImage')
-      return teamImage(members, {
-        title: t('shareImage.teamTitle'),
-        subtitle: game.value?.title,
-        type: (type) => t(`type.${type}`),
-        footer: `PokeInfo · ${window.location.host}`,
-      })
-    },
-    'pokeinfo-time.png',
-    t('team.share'),
-  )
-}
-
-async function sendShareImage(): Promise<void> {
-  const result = await shareImage.share()
-  if (result === 'downloaded') notice.value = t('shareImage.downloaded')
-  else if (result === 'failed') notice.value = t('common.shareFailed')
-  else if (result === 'shared') shareImage.open.value = false
-}
-
-function copyShowdown(): void {
-  const text = exportShowdown(team.members.value)
-  navigator.clipboard
-    .writeText(text)
-    .then(() => (notice.value = t('team.exported')))
-    .catch(() => (notice.value = text))
-}
-
-function pasteShowdown(text: string): void {
-  const result = importShowdown(text, pokedex.index)
-  const parts = [t('team.imported', result.ids.length)]
-  if (result.unknown.length)
-    parts.push(t('team.importUnknown', { names: result.unknown.join(', ') }))
-  if (result.ids.length && team.ids.value.length) {
-    changeTeam(parts.join(' '), () => team.replace(result.ids))
-    return
-  }
-  if (result.ids.length) team.replace(result.ids)
-  notice.value = parts.join(' ')
-}
-
-/** Altura do cabeçalho: busca (48) + linha de chips (32) + espaçamentos (igual à Home). */
-const HEADER_EXTENSION_HEIGHT = 108
-
-/** Ids do time em Set: o grid marca os cards já escolhidos. */
-const teamIds = computed(() => new Set(team.ids.value))
 
 const contextQuery = computed(() =>
   gameContextQuery(game.value && dex.value ? { game: game.value, dex: dex.value } : null),
 )
 
-/** Tocar em um card entra/sai do time; com 6 já escolhidos, avisa em vez de trocar. */
-function onCardSelect(pokemon: PokemonSummary): void {
-  if (team.toggle(pokemon.id) === 'full') fullNotice.value = true
-}
+const actions = useTeamActions(team, {
+  game: () => game.value,
+  context: () => contextQuery.value,
+  candidates: () => filtered.value,
+})
 
-/** Tocar em um membro abre o detalhe (com o grito no gesto, como na Home). */
-function openMember(member: TeamMember): void {
-  cry.play(member.id)
-  router.push({ name: 'pokemon', params: { id: member.id }, query: contextQuery.value })
+// Link compartilhado: o time dele vira o salvo do jogo, com desfazer se havia outro.
+const previous = team.takeFromLink()
+if (previous) actions.offerUndo(t('team.fromLink'), previous)
+
+/** Altura do cabeçalho: busca (48) + linha de chips (32) + espaçamentos (igual à Home). */
+const HEADER_EXTENSION_HEIGHT = 108
+
+/** Tocar em um card entra/sai do time. */
+function onCardSelect(pokemon: PokemonSummary): void {
+  actions.toggle(pokemon.id)
 }
 
 /** Vaga vazia tocada no sheet: fecha para a pessoa escolher na lista. */
@@ -288,7 +180,7 @@ function goBack(): void {
           :status="status"
           :error-message="errorMessage"
           :caught-ids="game ? caughtIds : undefined"
-          :selected-ids="teamIds"
+          :selected-ids="actions.teamIds.value"
           wide
           @load="loadMore"
           @retry="retry"
@@ -306,15 +198,15 @@ function goBack(): void {
             :threats="team.threats.value"
             :coverage="team.coverage.value"
             :gaps="team.gaps.value"
-            :suggestions="suggestions"
-            @select="openMember"
-            @remove="removeMember"
-            @clear="clearTeam"
-            @add-suggestion="addSuggestion"
-            @export-showdown="copyShowdown"
-            @import-showdown="importOpen = true"
-            @share="shareTeam"
-            @share-image="openShareImage"
+            :suggestions="actions.suggestions.value"
+            @select="actions.openMember"
+            @remove="actions.removeMember"
+            @clear="actions.clearTeam"
+            @add-suggestion="actions.toggle"
+            @export-showdown="actions.copyShowdown"
+            @import-showdown="actions.importOpen.value = true"
+            @share="actions.shareTeam"
+            @share-image="actions.openShareImage"
           />
         </div>
       </v-col>
@@ -332,16 +224,16 @@ function goBack(): void {
               :threats="team.threats.value"
               :coverage="team.coverage.value"
               :gaps="team.gaps.value"
-              :suggestions="suggestions"
-              @select="openMember"
-              @remove="removeMember"
+              :suggestions="actions.suggestions.value"
+              @select="actions.openMember"
+              @remove="actions.removeMember"
               @add="onAddSlot"
-              @clear="clearTeam"
-              @add-suggestion="addSuggestion"
-              @export-showdown="copyShowdown"
-              @import-showdown="importOpen = true"
-              @share="shareTeam"
-              @share-image="openShareImage"
+              @clear="actions.clearTeam"
+              @add-suggestion="actions.toggle"
+              @export-showdown="actions.copyShowdown"
+              @import-showdown="actions.importOpen.value = true"
+              @share="actions.shareTeam"
+              @share-image="actions.openShareImage"
             />
           </v-card-text>
           <v-card-actions class="team-view__sheet-actions">
@@ -387,28 +279,7 @@ function goBack(): void {
       @clear="clearAdvanced"
     />
 
-    <AppNotice
-      :text="fullNotice ? t('team.full') : null"
-      :timeout="2500"
-      location="top"
-      @close="fullNotice = false"
-    />
-    <AppNotice :text="notice" location="top" @close="notice = null" />
-    <AppNotice
-      :text="undo?.text ?? null"
-      location="top"
-      :action-label="t('common.undo')"
-      @action="undo && team.replace(undo.ids)"
-      @close="undo = null"
-    />
-    <ShowdownImportDialog v-model="importOpen" @import="pasteShowdown" />
-    <ShareImageDialog
-      v-model="shareImage.open.value"
-      :status="shareImage.status.value"
-      :url="shareImage.url.value"
-      :alt="shareImageAlt"
-      @share="sendShareImage"
-    />
+    <TeamOverlays :actions="actions" />
     <BackToTop :offset="mdAndUp ? 0 : 72" />
   </DetailLayout>
 </template>

@@ -39,7 +39,8 @@ export function saveGame(game: Game | null, dex: GameDex | null): void {
  */
 const NEUTRAL_KEYS: Partial<Record<string, readonly string[]>> = {
   home: ['fav', 'layout'],
-  team: ['team'],
+  // Um link de time sem jogo é um time da Pokédex nacional: não pode cair no time do jogo salvo.
+  team: [],
   moves: ['mode'],
   move: [],
   item: [],

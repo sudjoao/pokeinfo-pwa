@@ -34,12 +34,14 @@ describe('último jogo escolhido', () => {
     const saved = { game: 'scarlet-violet', dex: 'kitakami' }
     expect(queryWithSavedGame('home', {}, saved)).toEqual(saved)
     expect(queryWithSavedGame('home', { fav: '1' }, saved)).toEqual({ fav: '1', ...saved })
-    expect(queryWithSavedGame('team', { team: '1,4' }, saved)).toEqual({ team: '1,4', ...saved })
+    expect(queryWithSavedGame('team', {}, saved)).toEqual(saved)
     // As ferramentas recebem só o jogo.
     expect(queryWithSavedGame('moves', {}, saved)).toEqual({ game: 'scarlet-violet' })
     // Link com filtro, jogo já na URL, tela sem jogo ou nada salvo: a URL fica como veio.
     expect(queryWithSavedGame('home', { type: 'fire' }, saved)).toBeNull()
     expect(queryWithSavedGame('home', { game: 'x-y' }, saved)).toBeNull()
+    // Link de time sem jogo: é da Pokédex nacional, não do jogo salvo.
+    expect(queryWithSavedGame('team', { team: '1,4' }, saved)).toBeNull()
     expect(queryWithSavedGame('pokemon', {}, saved)).toBeNull()
     expect(queryWithSavedGame('home', {}, null)).toBeNull()
   })

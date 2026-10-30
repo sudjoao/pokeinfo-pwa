@@ -1,6 +1,8 @@
-import { computed, ref, watch } from 'vue'
+import { computed, watch } from 'vue'
 import { useRoute, useRouter, type LocationQueryRaw } from 'vue-router'
 import { usePokedexStore } from '@/stores/pokedex'
+import { useTeamsStore } from '@/stores/teams'
+import type { Game } from '@/data/games'
 import {
   analyzeCoverage,
   analyzeDefense,
@@ -32,16 +34,22 @@ function teamParam(value: unknown): number[] {
 }
 
 /**
- * Time de até 6 Pokémon montado na hora, sem persistência: os ids ficam só na URL (`?team=`),
- * o que sobrevive a recarregar a página e permite compartilhar o link. Nomes e tipos vêm do
- * índice e do mapa de tipos já em memória, então montar o time não faz requisição nenhuma.
+ * Time de até 6 Pokémon do jogo selecionado, salvo no aparelho (um por jogo, ver `useTeamsStore`):
+ * a aba "Time" da Home e o team builder mostram o mesmo. Nomes e tipos vêm do índice e do mapa de
+ * tipos já em memória, então montar o time não faz requisição nenhuma. A URL só leva o time num
+ * link compartilhado (`?team=`), que `takeFromLink` traz para o jogo.
  */
-export function useTeam(generation: () => number | undefined = () => undefined) {
+export function useTeam(game: () => Game | null | undefined = () => null) {
   const store = usePokedexStore()
+  const teams = useTeamsStore()
   const route = useRoute()
   const router = useRouter()
+  const generation = () => game()?.generation
 
-  const ids = ref<number[]>(teamParam(route.query.team))
+  const ids = computed<number[]>({
+    get: () => [...teams.teamOf(game()?.slug)],
+    set: (next) => teams.setTeam(game()?.slug, next),
+  })
 
   const members = computed<TeamMember[]>(() =>
     ids.value.map((id) => ({
@@ -99,12 +107,29 @@ export function useTeam(generation: () => number | undefined = () => undefined) 
     { immediate: true },
   )
 
-  watch(ids, (list) => {
+  /**
+   * Link compartilhado (`?team=`): o time dele passa a ser o salvo do jogo, e o parâmetro sai da URL
+   * (senão recarregar a página desfaria as mudanças feitas depois). Devolve o time que estava salvo,
+   * para a tela oferecer desfazer; null quando a URL não trouxe time ou trouxe o mesmo.
+   */
+  function takeFromLink(): number[] | null {
+    if (!('team' in route.query)) return null
+    const incoming = teamParam(route.query.team)
     const query: LocationQueryRaw = { ...route.query }
-    if (list.length) query.team = list.join(',')
-    else delete query.team
+    delete query.team
     router.replace({ query })
-  })
+    const before = ids.value
+    if (!incoming.length || incoming.join() === before.join()) return null
+    replace(incoming)
+    return before
+  }
+
+  /** Link para compartilhar: o team builder no jogo atual com os ids na URL. */
+  function shareUrl(context: LocationQueryRaw): string {
+    const query: LocationQueryRaw = { ...context }
+    if (ids.value.length) query.team = ids.value.join(',')
+    return new URL(router.resolve({ name: 'team', query }).href, window.location.origin).toString()
+  }
 
   // Com um jogo selecionado, a análise usa a tabela de tipos e os tipos dos Pokémon da geração dele.
   const defense = computed(() => analyzeDefense(members.value, generation()))
@@ -123,6 +148,8 @@ export function useTeam(generation: () => number | undefined = () => undefined) 
     toggle,
     clear,
     replace,
+    takeFromLink,
+    shareUrl,
     defense,
     threats,
     coverage,

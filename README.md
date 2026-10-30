@@ -85,9 +85,11 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
   mostra os 6 slots enquanto a lista rola e abre um sheet com o time completo; no desktop, o time
   fica num painel lateral que acompanha a rolagem. Nos dois casos aparecem as fraquezas do time,
   a tabela defensiva (quanto cada tipo de ataque causa em cada membro) e a cobertura ofensiva por
-  STAB (tipos que o time acerta de forma super efetiva e os que ficam sem cobertura). O time não é
-  salvo: fica só na URL (`/team?game=scarlet-violet&team=906,909,912`), o que sobrevive a recarregar
-  e permite compartilhar o link. A análise usa a tabela de tipos da geração do jogo selecionado.
+  STAB (tipos que o time acerta de forma super efetiva e os que ficam sem cobertura). O time fica
+  **salvo no aparelho, um por jogo** (e entra no backup e na sincronização com a conta), e aparece
+  na **aba "Time" da Home** com a análise completa, para voltar a ele durante o jogo. O link
+  compartilhado (`/team?game=scarlet-violet&team=906,909,912`) carrega o time no jogo dele, com
+  desfazer se já havia outro. A análise usa a tabela de tipos da geração do jogo selecionado.
   O time pode ser **copiado e importado no formato do Pokémon Showdown** (só as espécies; itens,
   golpes e EVs são ignorados na importação), e o painel sugere Pokémon da lista atual que
   **resistem às fraquezas do time** sem serem fracos a elas (tocar adiciona).
@@ -130,7 +132,7 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
   HOME), na ordem da Pokédex atual e com os filtros aplicados (`?layout=boxes`). Cada caixa mostra o
   intervalo de números e quantos foram capturados; com um jogo selecionado, tocar marca/desmarca.
 - **Backup**: no menu (☰), "Backup dos dados" baixa um JSON com capturados, shinies capturados,
-  favoritos e caçadas, importa esse arquivo e gera um **link** (`/?backup=...`, ~200 caracteres por
+  favoritos, caçadas e times, importa esse arquivo e gera um **link** (`/?backup=...`, ~200 caracteres por
   jogo marcado) que, aberto em outro aparelho, pergunta se deve somar ou substituir os dados. O
   link também aparece como **QR code**, para passar os dados apontando a câmera.
 - **Conta Google (opcional)**: o botão de conta no cabeçalho da Pokédex ("Entrar com o Google") guarda capturados, shinies, favoritos,

@@ -1,6 +1,6 @@
 import type { PersistedGameSet } from '@/stores/gameSet'
 import type { PersistedHunts, ShinyHunt } from '@/stores/shiny'
-import type { BackupData } from './backup'
+import type { BackupData, PersistedTeams } from './backup'
 import { decodeBitset, encodeBitset } from './bitset'
 import { copyDaily, type DailyGame, type DailyStats, type PersistedDaily } from './daily'
 
@@ -49,7 +49,21 @@ export function canonicalData(data: BackupData): BackupData {
     favorites: encodeBitset(decodeBitset(data.favorites)),
     hunts: Object.fromEntries(Object.entries(data.hunts).map(([key, hunt]) => [key, { ...hunt }])),
     ...(data.daily ? { daily: copyDaily(data.daily) } : {}),
+    ...(hasTeams(data.teams) ? { teams: copyTeams(data.teams!) } : {}),
   }
+}
+
+/** Há algum time salvo (um objeto vazio conta como sem times). */
+function hasTeams(value: PersistedTeams | undefined): boolean {
+  return !!value && Object.values(value).some((ids) => ids.length)
+}
+
+function copyTeams(value: PersistedTeams): PersistedTeams {
+  return Object.fromEntries(
+    Object.entries(value)
+      .filter(([, ids]) => ids.length)
+      .map(([game, ids]) => [game, [...ids]]),
+  )
 }
 
 export function sameData(a: BackupData, b: BackupData): boolean {
@@ -63,7 +77,8 @@ export function isEmptyData(data: BackupData): boolean {
     !Object.keys(canonical.shiny).length &&
     !canonical.favorites &&
     !Object.keys(canonical.hunts).length &&
-    !canonical.daily?.stats.played
+    !canonical.daily?.stats.played &&
+    !canonical.teams
   )
 }
 
@@ -132,6 +147,26 @@ function mergeHunts(base: PersistedHunts, local: PersistedHunts, remote: Persist
   return result
 }
 
+/**
+ * Time de cada jogo: fica o lado que mexeu nele desde a base. Os dois mexeram no mesmo jogo: fica o
+ * deste aparelho (um time não dá para somar sem passar de 6 nem para saber a ordem).
+ */
+function mergeTeams(
+  base: PersistedTeams | undefined,
+  local: PersistedTeams | undefined,
+  remote: PersistedTeams | undefined,
+): PersistedTeams | undefined {
+  const from = base ?? {}
+  const mine = local ?? {}
+  const theirs = remote ?? {}
+  const result: PersistedTeams = {}
+  for (const game of new Set([...Object.keys(mine), ...Object.keys(theirs)])) {
+    const team = pick<number[]>(from[game], mine[game], theirs[game], (l) => l)
+    if (team?.length) result[game] = [...team]
+  }
+  return Object.keys(result).length ? result : undefined
+}
+
 /** Mesma partida do dia: fica a mais adiantada. Dias diferentes: fica a do dia mais recente. */
 function laterGame(local: DailyGame, remote: DailyGame): DailyGame {
   if (local.day !== remote.day) return remote.day > local.day ? remote : local
@@ -171,11 +206,13 @@ export function mergeData(
     decodeBitset(remote.favorites),
   )
   const daily = mergeDaily(from.daily, local.daily, remote.daily)
+  const teams = mergeTeams(from.teams, local.teams, remote.teams)
   return {
     caught: mergeGameSets(from.caught, local.caught, remote.caught),
     shiny: mergeGameSets(from.shiny, local.shiny, remote.shiny),
     favorites: encodeBitset(favorites),
     hunts: mergeHunts(from.hunts, local.hunts, remote.hunts),
     ...(daily ? { daily } : {}),
+    ...(teams ? { teams } : {}),
   }
 }

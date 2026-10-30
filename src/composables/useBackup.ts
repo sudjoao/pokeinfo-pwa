@@ -3,6 +3,7 @@ import { useCaughtStore } from '@/stores/caught'
 import { useFavoritesStore } from '@/stores/favorites'
 import { useHuntsStore, useShinyCaughtStore } from '@/stores/shiny'
 import { useDailyStore } from '@/stores/daily'
+import { useTeamsStore } from '@/stores/teams'
 import type { ImportMode } from '@/stores/gameSet'
 import {
   backupFileName,
@@ -20,6 +21,7 @@ export interface BackupSummary {
   shiny: number
   favorites: number
   hunts: number
+  teams: number
 }
 
 function countSets(sets: Record<string, string>): number {
@@ -33,16 +35,18 @@ export function summarize(backup: BackupData): BackupSummary {
     shiny: countSets(backup.shiny),
     favorites: decodeBitset(backup.favorites).size,
     hunts: Object.keys(backup.hunts).length,
+    teams: Object.keys(backup.teams ?? {}).length,
   }
 }
 
-/** Exporta e importa capturados, shinies, favoritos e caçadas (arquivo JSON ou link). */
+/** Exporta e importa capturados, shinies, favoritos, caçadas e times (arquivo JSON ou link). */
 export function useBackup() {
   const caught = useCaughtStore()
   const shiny = useShinyCaughtStore()
   const favorites = useFavoritesStore()
   const hunts = useHuntsStore()
   const daily = useDailyStore()
+  const teams = useTeamsStore()
 
   /** Tudo o que é salvo no backup e sincronizado com a conta. */
   function data(): BackupData {
@@ -52,6 +56,7 @@ export function useBackup() {
       favorites: favorites.exportData(),
       hunts: hunts.exportData(),
       daily: daily.exportData(),
+      teams: teams.exportData(),
     }
   }
 
@@ -65,6 +70,7 @@ export function useBackup() {
     shiny.flush()
     favorites.flush()
     hunts.flush()
+    teams.flush()
   }
 
   const summary = computed(() => summarize(current()))
@@ -91,6 +97,7 @@ export function useBackup() {
     favorites.importData(backup.favorites, mode)
     hunts.importData(backup.hunts, mode)
     if (backup.daily) daily.importData(backup.daily, mode)
+    teams.importData(backup.teams ?? {}, mode)
   }
 
   return { summary, data, flush, downloadFile, link, restore }
