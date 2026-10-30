@@ -7,6 +7,10 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 
 ## [Não lançado]
 
+### Alterado
+
+- `@types/node` 24.19 (ferramenta de desenvolvimento; nada muda no app).
+
 ## [1.11.3] - 2026-10-30
 
 ### Alterado
