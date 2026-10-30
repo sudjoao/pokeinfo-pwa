@@ -7,6 +7,16 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 
 ## [Não lançado]
 
+## [1.11.3] - 2026-10-30
+
+### Alterado
+
+- Vuetify 4.3.1 (correções da 4.3).
+- Ferramentas de desenvolvimento atualizadas: oxlint e eslint-plugin-oxlint 1.90,
+  eslint-plugin-vue 10.12 e PostCSS 8.5.32.
+- O Dependabot só propõe `@types/node` dentro do major do Node usado no projeto (24), para os tipos
+  não aceitarem APIs que o runtime não tem.
+
 ## [1.11.2] - 2026-10-30
 
 ### Alterado
@@ -502,7 +512,8 @@ Primeira versão estável da Pokédex em formato de PWA, consumindo a [PokéAPI]
 - As marcações de captura ficam só no aparelho, sem sincronização entre dispositivos.
 - Os gritos vêm só em `.ogg`; em navegadores sem suporte o botão de som não aparece.
 
-[Não lançado]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.11.2...HEAD
+[Não lançado]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.11.3...HEAD
+[1.11.3]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.11.2...v1.11.3
 [1.11.2]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.11.1...v1.11.2
 [1.11.1]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.11.0...v1.11.1
 [1.11.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.10.0...v1.11.0
