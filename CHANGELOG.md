@@ -7,6 +7,22 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 
 ## [Não lançado]
 
+## [1.11.1] - 2026-10-30
+
+### Segurança
+
+- Atualizado o `vue-i18n` para a 11.4.16, que corrige duas falhas de XSS ligadas ao
+  `escapeParameter` ([GHSA-8rc2-428q-7ww3](https://github.com/advisories/GHSA-8rc2-428q-7ww3) e
+  [GHSA-83rm-6c8r-g728](https://github.com/advisories/GHSA-83rm-6c8r-g728)). O app não usa
+  traduções com HTML, mas a versão vulnerável ia junto no bundle. A cópia antiga que o plugin de
+  build ainda puxava também saiu.
+
+### Alterado
+
+- Dependências do app atualizadas: Vue 3.5.44, Vuetify 4.3.0, Pinia 4.1.0 e Vue Router 5.4.0. O
+  JavaScript baixado ao abrir a Home ficou praticamente igual, em menos arquivos (21 em vez de 30).
+- Ações do GitHub usadas no CI e nas releases atualizadas (checkout 7.0.1, setup-node 7.1.0).
+
 ## [1.11.0] - 2026-10-30
 
 ### Adicionado
@@ -476,7 +492,8 @@ Primeira versão estável da Pokédex em formato de PWA, consumindo a [PokéAPI]
 - As marcações de captura ficam só no aparelho, sem sincronização entre dispositivos.
 - Os gritos vêm só em `.ogg`; em navegadores sem suporte o botão de som não aparece.
 
-[Não lançado]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.11.0...HEAD
+[Não lançado]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.11.1...HEAD
+[1.11.1]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.11.0...v1.11.1
 [1.11.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.10.0...v1.11.0
 [1.10.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.9.2...v1.10.0
 [1.9.2]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.9.1...v1.9.2
