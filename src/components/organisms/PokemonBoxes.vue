@@ -111,8 +111,7 @@ function onCell(entry: BoxEntry, event: MouseEvent): void {
 
 <template>
   <!-- Com jogo, as caixas são a lista de marcação (como no Pokémon HOME): a dica diz o que o toque faz. -->
-  <p v-if="selecting" class="text-body-small mb-3">{{ t('select.boxesHint') }}</p>
-  <p v-else-if="caughtIds" class="text-body-small mb-3">{{ t('boxes.hint') }}</p>
+  <p v-if="!selecting && caughtIds" class="text-body-small mb-3">{{ t('boxes.hint') }}</p>
   <div class="pokemon-boxes">
     <section
       v-for="(box, index) in boxes"
@@ -152,6 +151,7 @@ function onCell(entry: BoxEntry, event: MouseEvent): void {
           <button
             type="button"
             class="pokemon-boxes__cell"
+            :data-pokemon-id="entry.id"
             :class="{
               'pokemon-boxes__cell--missing': caughtIds && !isCaught(entry),
               'pokemon-boxes__cell--selected': selecting && isSelected(entry),

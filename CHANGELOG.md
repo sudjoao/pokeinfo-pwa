@@ -17,6 +17,9 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
   a caixa inteira, na exibição em caixas). A barra no rodapé marca todos como capturados ou não
   capturados de uma vez, com desfazer, ou copia a lista deles. "Selecionar todos" vale para a lista
   inteira com a busca e os filtros; Esc sai da seleção.
+- **Selecionar arrastando**: no modo de seleção, segure um instante e arraste o dedo (no computador,
+  clique e arraste) para pegar vários seguidos; começar num já selecionado desmarca. A lista rola
+  sozinha perto das bordas. Shift+clique seleciona um intervalo.
 
 ## [1.12.0] - 2026-10-30
 

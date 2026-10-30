@@ -1244,10 +1244,10 @@
     "markedMissing": "1 unmarked | {n} unmarked",
     "alreadyCaught": "The selected Pokémon were already marked as caught.",
     "alreadyMissing": "None of the selected Pokémon were marked as caught.",
-    "boxesHint": "Tap Pokémon to select them, or select a whole box.",
     "selectBox": "Select box",
     "deselectBox": "Deselect box",
     "selectBoxLong": "Select box {n}",
-    "deselectBoxLong": "Deselect box {n}"
+    "deselectBoxLong": "Deselect box {n}",
+    "hint": "Tap to select. For several in a row, press and hold, then drag (on a computer, click and drag or Shift+click)."
   }
 }

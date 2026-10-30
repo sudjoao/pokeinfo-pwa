@@ -26,6 +26,7 @@ import { usePokemonList } from '@/composables/usePokemonList'
 import { useCry } from '@/composables/useCry'
 import { useDexLabel } from '@/composables/useDexLabel'
 import { useShortcut } from '@/composables/useShortcut'
+import { useDragSelect } from '@/composables/useDragSelect'
 import { announce } from '@/composables/useAnnouncer'
 import { useCaughtStore } from '@/stores/caught'
 import SelectionBar from '@/components/organisms/SelectionBar.vue'
@@ -314,6 +315,18 @@ function copySelection(): void {
 
 useShortcut(['Escape'], () => exitSelection({ focus: true }))
 
+const listArea = useTemplateRef<HTMLElement>('listArea')
+useDragSelect({
+  container: listArea,
+  active: selecting,
+  order: () => filtered.value.map((entry) => entry.id),
+  isSelected: (id) => selectedIds.has(id),
+  apply: (id, selected) => setSelected([id], selected),
+  // A lista some embaixo do cabeçalho e das abas grudadas, e da barra da seleção.
+  topInset: () => document.querySelector('.home-tabs')?.getBoundingClientRect().bottom ?? 0,
+  bottomInset: () => selectionBarHeight.value,
+})
+
 // Outro jogo ou Pokédex é outra lista (e outra captura); a seleção também não vale nas outras abas.
 watch([() => game.value?.slug, () => dex.value?.slug], () => exitSelection({ silent: true }))
 watch(view, (value) => value !== 'pokemon' && exitSelection({ silent: true }))
@@ -550,33 +563,36 @@ onActivated(() => {
         @action="clearFilters"
       />
 
-      <PokemonBoxes
-        v-else-if="layout === 'boxes'"
-        :items="filtered"
-        :caught-ids="game ? caughtIds : undefined"
-        :selecting="selecting"
-        :selected-ids="selectedIds"
-        @toggle-caught="toggleCaught"
-        @open="openPokemonId"
-        @select="toggleSelected"
-        @select-many="setSelected"
-      />
+      <div v-else ref="listArea" class="list-area" :class="{ 'list-area--selecting': selecting }">
+        <p v-if="selecting" class="text-body-small mb-3">{{ t('select.hint') }}</p>
+        <PokemonBoxes
+          v-if="layout === 'boxes'"
+          :items="filtered"
+          :caught-ids="game ? caughtIds : undefined"
+          :selecting="selecting"
+          :selected-ids="selectedIds"
+          @toggle-caught="toggleCaught"
+          @open="openPokemonId"
+          @select="toggleSelected"
+          @select-many="setSelected"
+        />
 
-      <PokemonGrid
-        v-else
-        :key="listKey"
-        :items="items"
-        :status="status"
-        :error-message="errorMessage"
-        :caught-ids="game ? caughtIds : undefined"
-        :selected-ids="selecting ? selectedIds : undefined"
-        :selectable="selecting"
-        :link-to="selecting ? undefined : pokemonRoute"
-        @load="loadMore"
-        @retry="retry"
-        @select="onGridSelect"
-        @toggle-caught="toggleCaught"
-      />
+        <PokemonGrid
+          v-else
+          :key="listKey"
+          :items="items"
+          :status="status"
+          :error-message="errorMessage"
+          :caught-ids="game ? caughtIds : undefined"
+          :selected-ids="selecting ? selectedIds : undefined"
+          :selectable="selecting"
+          :link-to="selecting ? undefined : pokemonRoute"
+          @load="loadMore"
+          @retry="retry"
+          @select="onGridSelect"
+          @toggle-caught="toggleCaught"
+        />
+      </div>
 
       <!-- A barra de seleção cobre o fim da lista: o espaço dela entra embaixo. -->
       <div v-if="selecting" :style="{ height: `${selectionBarHeight}px` }" aria-hidden="true" />
@@ -644,6 +660,21 @@ onActivated(() => {
 </template>
 
 <style scoped>
+/*
+ * Selecionando, segurar e arrastar escolhe vários: sem seleção de texto, sem o menu de "salvar
+ * imagem" do iOS e sem arrastar a imagem do card como arquivo.
+ */
+.list-area--selecting {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.list-area--selecting :deep(img) {
+  -webkit-user-drag: none;
+  pointer-events: none;
+}
+
 /* Abas grudadas logo abaixo do cabeçalho (busca e filtros), por cima da lista que rola. */
 .home-tabs {
   position: sticky;

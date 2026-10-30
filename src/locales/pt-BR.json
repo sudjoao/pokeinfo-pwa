@@ -1244,10 +1244,10 @@
     "markedMissing": "1 desmarcado | {n} desmarcados",
     "alreadyCaught": "Os selecionados já estavam marcados como capturados.",
     "alreadyMissing": "Nenhum dos selecionados estava marcado como capturado.",
-    "boxesHint": "Toque nos Pokémon para selecionar, ou selecione a caixa inteira.",
     "selectBox": "Selecionar caixa",
     "deselectBox": "Desmarcar caixa",
     "selectBoxLong": "Selecionar a caixa {n}",
-    "deselectBoxLong": "Desmarcar a caixa {n}"
+    "deselectBoxLong": "Desmarcar a caixa {n}",
+    "hint": "Toque para selecionar. Para vários seguidos, segure um instante e arraste (no computador, clique e arraste ou use Shift+clique)."
   }
 }
