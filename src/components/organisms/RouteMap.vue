@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, ref, shallowRef, watch } from 'vue'
+import { computed, defineAsyncComponent, nextTick, ref, shallowRef, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useDisplay } from 'vuetify'
 import type { Game } from '@/data/games'
@@ -11,6 +11,7 @@ import { mapLocations } from '@/utils/routeMap'
 import { formatAreaName } from '@/utils/encounters'
 import { speciesIdOf } from '@/utils/forms'
 import { announce } from '@/composables/useAnnouncer'
+import { MAP_STYLES, useMapStyle } from '@/composables/useMapStyle'
 import RegionMapCanvas from '@/components/molecules/RegionMapCanvas.vue'
 import RouteLocationCard from '@/components/molecules/RouteLocationCard.vue'
 import RouteMapLegend from '@/components/molecules/RouteMapLegend.vue'
@@ -29,7 +30,20 @@ const emit = defineEmits<{ select: [id: number]; toggleCaught: [speciesId: numbe
 
 const { t } = useI18n()
 const { mdAndUp } = useDisplay()
+const { style: mapStyle, setStyle: setMapStyle } = useMapStyle()
+
+/**
+ * Só no `npm run dev`: imagem do mapa oficial por baixo do nosso, para comparar (src/dev/). No
+ * build, `import.meta.env.DEV` vira `false` e os imports somem junto com os chunks.
+ */
+const OfficialMapPanel = import.meta.env.DEV
+  ? defineAsyncComponent(() => import('@/dev/OfficialMapPanel.vue'))
+  : null
+const OfficialMapUnderlay = import.meta.env.DEV
+  ? defineAsyncComponent(() => import('@/dev/OfficialMapUnderlay.vue'))
+  : null
 const { results, loading, failed } = props.encounters
+const styleLabelId = useId()
 
 /** Seções com desenho (região, ilhas, DLC); as outras viram botões abaixo do mapa. */
 const mapped = computed(() => props.sections.filter((section) => hasRegionMap(section.key)))
@@ -223,11 +237,46 @@ function sectionTitle(key: string): string {
         :matches="matches"
         :completed="completed"
         :order="activeOrder"
+        :variant="mapStyle"
         @select="select"
+      >
+        <template v-if="OfficialMapUnderlay" #underlay>
+          <component :is="OfficialMapUnderlay" :section-key="active.key" />
+        </template>
+      </RegionMapCanvas>
+
+      <component
+        :is="OfficialMapPanel"
+        v-if="OfficialMapPanel && regionMap && active"
+        :section-key="active.key"
+        :game-slug="game.slug"
+        :map="regionMap"
       />
 
       <p class="text-label-medium opacity-70 mt-2 mb-0">{{ t('routes.map.hint') }}</p>
-      <RouteMapLegend class="mt-2" />
+      <div class="d-flex align-center flex-wrap ga-2 mt-2">
+        <span :id="styleLabelId" class="text-label-medium">{{ t('routes.map.style.label') }}</span>
+        <v-btn-toggle
+          :model-value="mapStyle"
+          mandatory
+          density="compact"
+          variant="outlined"
+          divided
+          :aria-labelledby="styleLabelId"
+          @update:model-value="setMapStyle"
+        >
+          <v-btn
+            v-for="option in MAP_STYLES"
+            :key="option"
+            :value="option"
+            size="small"
+            :aria-pressed="option === mapStyle"
+          >
+            {{ t(`routes.map.style.${option}`) }}
+          </v-btn>
+        </v-btn-toggle>
+      </div>
+      <RouteMapLegend class="mt-2" :variant="mapStyle" />
 
       <div v-if="offMap.length" class="mt-3">
         <h3 class="text-title-small mb-1">{{ t('routes.map.offMap') }}</h3>

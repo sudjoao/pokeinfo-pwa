@@ -483,6 +483,11 @@
       "next": "Next in the story: {name}",
       "nextNone": "Last place in the story",
       "step": "Stop {n} of {total}",
+      "style": {
+        "label": "Map style",
+        "classic": "Classic",
+        "schematic": "Schematic"
+      },
       "legend": {
         "title": "Legend",
         "city": "City",

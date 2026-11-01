@@ -483,6 +483,11 @@
       "next": "Siguiente en la historia: {name}",
       "nextNone": "Último lugar de la historia",
       "step": "Parada {n} de {total}",
+      "style": {
+        "label": "Estilo del mapa",
+        "classic": "Clásico",
+        "schematic": "Esquemático"
+      },
       "legend": {
         "title": "Leyenda",
         "city": "Ciudad",

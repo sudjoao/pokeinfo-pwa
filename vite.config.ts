@@ -8,6 +8,7 @@ import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite'
 import { purgeVuetifyUtilities } from './build/purgeVuetifyUtilities.ts'
 import { preloadLocale } from './build/preloadLocale.ts'
 import { contentSecurityPolicy } from './build/contentSecurityPolicy.ts'
+import { devMaps } from './build/devMaps.ts'
 
 const DAY = 60 * 60 * 24
 
@@ -51,6 +52,7 @@ export default defineConfig({
     vuetify({ autoImport: true }),
     purgeVuetifyUtilities(),
     preloadLocale(),
+    devMaps(),
     // Pré-compila os JSON de src/locales e usa o build runtime-only do vue-i18n. Sem mensagem
     // nenhuma para compilar em runtime, o compilador (~17 KB) também sai do bundle.
     VueI18nPlugin({

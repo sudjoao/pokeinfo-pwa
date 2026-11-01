@@ -11,6 +11,7 @@ import {
   linePath,
   mapLabel,
   pathMidpoint,
+  pixelTerrain,
   routeBadgeText,
   splitLabel,
 } from '@/utils/routeMap'
@@ -81,6 +82,58 @@ describe('geometria', () => {
     expect(smooth.endsWith('Z')).toBe(true)
   })
 
+  it('pixelTerrain: blocos pelo centro, linhas emendadas e água rasa em volta', () => {
+    // Quadrado de terra de 20 a 40 numa grade de 10: os blocos 2 e 3 de cada eixo.
+    const square: MapPoint[] = [
+      [20, 20],
+      [40, 20],
+      [40, 40],
+      [20, 40],
+    ]
+    const terrain = pixelTerrain(
+      { width: 60, height: 60, areas: [{ kind: 'land', points: square, smooth: false }] },
+      'red-blue',
+      10,
+    )
+    expect(terrain.land).toBe('M20 20h20v10h-20zM20 30h20v10h-20z')
+    // Anel de um bloco em volta (oito vizinhos), sem cobrir a terra.
+    expect(terrain.shallows).toBe(
+      'M10 10h40v10h-40zM10 20h10v10h-10zM40 20h10v10h-10zM10 30h10v10h-10zM40 30h10v10h-10zM10 40h40v10h-40z',
+    )
+  })
+
+  it('pixelTerrain: a última mancha ganha, lago vira mar e `only` filtra', () => {
+    const all: MapPoint[] = [
+      [0, 0],
+      [30, 0],
+      [30, 10],
+      [0, 10],
+    ]
+    const middle: MapPoint[] = [
+      [10, 0],
+      [20, 0],
+      [20, 10],
+      [10, 10],
+    ]
+    const map = {
+      width: 30,
+      height: 10,
+      areas: [
+        { kind: 'land' as const, points: all, smooth: false },
+        { kind: 'water' as const, points: middle, smooth: false },
+        { kind: 'forest' as const, points: middle, smooth: false, only: ['yellow'] },
+      ],
+    }
+    expect(pixelTerrain(map, 'red-blue', 10)).toEqual({
+      land: 'M0 0h10v10h-10zM20 0h10v10h-10z',
+      shallows: 'M10 0h10v10h-10z',
+    })
+    expect(pixelTerrain(map, 'yellow', 10)).toEqual({
+      land: 'M0 0h10v10h-10zM20 0h10v10h-10z',
+      forest: 'M10 0h10v10h-10z',
+    })
+  })
+
   it('existsInGame: sem `only`, vale para todos', () => {
     expect(existsInGame({}, 'red-blue')).toBe(true)
     expect(existsInGame({ only: ['yellow'] }, 'red-blue')).toBe(false)
@@ -90,6 +143,10 @@ describe('geometria', () => {
 describe.each(MAP_SECTIONS)('mapa %s', (key) => {
   const map = maps.get(key)!
   const games = gamesWithSection(key)
+
+  it('o estilo clássico tem terra em todos os jogos do mapa', () => {
+    for (const slug of games) expect(pixelTerrain(map, slug, 8).land).toBeTruthy()
+  })
 
   it('a seção existe em algum jogo', () => {
     expect(games.length).toBeGreaterThan(0)

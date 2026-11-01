@@ -124,6 +124,13 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
   botões, pinça e Ctrl + roda; arrastar com o mouse. Um teste
   (`utils/__tests__/routeMap.spec.ts`) garante que todo local com dado está no mapa (ou na lista
   "Fora do mapa", para navio, céu e eventos).
+  Dois estilos, escolhidos abaixo do mapa e salvos no aparelho: **Clássico** (padrão), com a cara
+  do mapa de bolso dos jogos (as manchas de terreno viram blocos de pixel em `pixelTerrain`,
+  `utils/routeMap.ts`, com água rasa na costa, cidades quadradas e estradas largas), e
+  **Esquemático**, o desenho liso. Os dois são desenho próprio: o app não usa a arte oficial dos
+  mapas. No `npm run dev`, um painel **DEV** abaixo do mapa põe por baixo dos marcadores uma
+  imagem da pasta `dev-maps/` (fora do git e do build), para comparar com o mapa oficial; ver
+  `dev-maps/README.md`.
 - **Shiny**: com um jogo selecionado (2ª geração em diante), o detalhe tem um card para marcar o shiny
   como capturado (separado da captura normal) e um contador de encontros com Shiny Charm e método
   Masuda, mostrando a chance por encontro do jogo (1/8192 até a 5ª geração, 1/4096 depois) e a

@@ -18,6 +18,7 @@ import {
   mdiWaves,
 } from '@mdi/js'
 import type { MapLabelSide, MapPlaceKind, MapPoint, RegionMap } from '@/data/maps/types'
+import type { MapStyle } from '@/composables/useMapStyle'
 import { formatAreaName } from '@/utils/encounters'
 import {
   areaPath,
@@ -25,25 +26,32 @@ import {
   linePath,
   mapLabel,
   pathMidpoint,
+  pixelTerrain,
   routeBadgeText,
   splitLabel,
+  type PixelTileKind,
 } from '@/utils/routeMap'
 
-const props = defineProps<{
-  map: RegionMap
-  /** Nome da região, para o leitor de tela ("Mapa de Kanto"). */
-  title: string
-  gameSlug: string
-  /** Locais com Pokémon no jogo: só eles respondem ao toque. */
-  available: ReadonlySet<string>
-  selected: string | null
-  /** Locais que batem com a busca; null sem busca (nada fica apagado). */
-  matches: ReadonlySet<string> | null
-  /** Locais em que todas as espécies já foram capturadas (selo verde). */
-  completed: ReadonlySet<string>
-  /** Ordem da história: define a ordem do Tab entre os locais. */
-  order: readonly string[]
-}>()
+const props = withDefaults(
+  defineProps<{
+    map: RegionMap
+    /** `classic`: terreno em blocos e marcadores quadrados; `schematic`: desenho liso. */
+    variant?: MapStyle
+    /** Nome da região, para o leitor de tela ("Mapa de Kanto"). */
+    title: string
+    gameSlug: string
+    /** Locais com Pokémon no jogo: só eles respondem ao toque. */
+    available: ReadonlySet<string>
+    selected: string | null
+    /** Locais que batem com a busca; null sem busca (nada fica apagado). */
+    matches: ReadonlySet<string> | null
+    /** Locais em que todas as espécies já foram capturadas (selo verde). */
+    completed: ReadonlySet<string>
+    /** Ordem da história: define a ordem do Tab entre os locais. */
+    order: readonly string[]
+  }>(),
+  { variant: 'schematic' },
+)
 
 const emit = defineEmits<{ select: [location: string] }>()
 
@@ -110,10 +118,39 @@ function labelLayout(name: string, side: MapLabelSide, radius: number): LabelLay
   }
 }
 
+/** Lado do bloco do estilo clássico (8 unidades ≈ 6 px no zoom de leitura do celular). */
+const CELL = 8
+
+/** Ordem de pintura dos blocos; os com textura ganham um segundo caminho por cima. */
+const TILE_KINDS: readonly PixelTileKind[] = [
+  'shallows',
+  'land',
+  'sand',
+  'snow',
+  'forest',
+  'mountain',
+  'lava',
+]
+const TEXTURED: ReadonlySet<PixelTileKind> = new Set(['forest', 'mountain', 'snow'])
+
+const classic = computed(() => props.variant === 'classic')
+
+const tiles = computed(() => {
+  if (!classic.value) return []
+  const terrain = pixelTerrain(props.map, props.gameSlug, CELL)
+  return TILE_KINDS.filter((kind) => terrain[kind]).map((kind) => ({
+    kind,
+    d: terrain[kind]!,
+    textured: TEXTURED.has(kind),
+  }))
+})
+
 const areas = computed(() =>
-  props.map.areas
-    .filter((area) => existsInGame(area, props.gameSlug))
-    .map((area) => ({ kind: area.kind, d: areaPath(area.points, area.smooth) })),
+  classic.value
+    ? []
+    : props.map.areas
+        .filter((area) => existsInGame(area, props.gameSlug))
+        .map((area) => ({ kind: area.kind, d: areaPath(area.points, area.smooth) })),
 )
 const captions = computed(() =>
   (props.map.captions ?? []).filter((caption) => existsInGame(caption, props.gameSlug)),
@@ -390,7 +427,7 @@ watch(
 </script>
 
 <template>
-  <div class="region-map">
+  <div class="region-map" :class="{ 'region-map--classic': classic }">
     <div
       ref="scroller"
       class="region-map__viewport"
@@ -409,17 +446,52 @@ watch(
           <pattern :id="`${uid}-waves`" width="28" height="14" patternUnits="userSpaceOnUse">
             <path d="M0 10 q7 -6 14 0 t14 0" class="region-map__wave" />
           </pattern>
+          <template v-if="classic">
+            <!-- Texturas em múltiplos do bloco, alinhadas com a grade do terreno. -->
+            <pattern :id="`${uid}-px-sea`" width="32" height="16" patternUnits="userSpaceOnUse">
+              <path d="M4 4h6v2h-6zM20 12h6v2h-6z" class="region-map__px-wave" />
+            </pattern>
+            <pattern :id="`${uid}-px-forest`" width="8" height="8" patternUnits="userSpaceOnUse">
+              <path d="M3 1h2v2h1v2h-1v2h-2v-2h-1v-2h1z" class="region-map__px-texture--forest" />
+            </pattern>
+            <pattern
+              :id="`${uid}-px-mountain`"
+              width="16"
+              height="16"
+              patternUnits="userSpaceOnUse"
+            >
+              <path d="M7 3h2v2h2v2h2v2h-10v-2h2v-2h2z" class="region-map__px-texture--mountain" />
+            </pattern>
+            <pattern :id="`${uid}-px-snow`" width="16" height="16" patternUnits="userSpaceOnUse">
+              <path d="M3 3h2v2h-2zM11 11h2v2h-2z" class="region-map__px-texture--snow" />
+            </pattern>
+          </template>
         </defs>
 
         <g aria-hidden="true">
           <rect class="region-map__sea" :width="map.width" :height="map.height" />
-          <rect :width="map.width" :height="map.height" :fill="`url(#${uid}-waves)`" />
-          <path
-            v-for="(area, index) in areas"
-            :key="index"
-            :d="area.d"
-            :class="`region-map__area region-map__area--${area.kind}`"
-          />
+          <g v-if="classic" shape-rendering="crispEdges">
+            <rect :width="map.width" :height="map.height" :fill="`url(#${uid}-px-sea)`" />
+            <template v-for="tile in tiles" :key="tile.kind">
+              <path :d="tile.d" :class="`region-map__tile region-map__tile--${tile.kind}`" />
+              <path v-if="tile.textured" :d="tile.d" :fill="`url(#${uid}-px-${tile.kind})`" />
+            </template>
+          </g>
+          <template v-else>
+            <rect :width="map.width" :height="map.height" :fill="`url(#${uid}-waves)`" />
+            <path
+              v-for="(area, index) in areas"
+              :key="index"
+              :d="area.d"
+              :class="`region-map__area region-map__area--${area.kind}`"
+            />
+          </template>
+        </g>
+
+        <!-- Por baixo das rotas e dos marcadores (a imagem de referência do modo dev). -->
+        <slot name="underlay" />
+
+        <g aria-hidden="true">
           <text
             v-for="caption in captions"
             :key="caption.text"
@@ -484,7 +556,7 @@ watch(
               y="-14"
               :width="node.width + 10"
               height="28"
-              rx="14"
+              :rx="classic ? 4 : 14"
             />
             <rect
               class="region-map__badge"
@@ -492,7 +564,7 @@ watch(
               y="-9"
               :width="node.width"
               height="18"
-              rx="9"
+              :rx="classic ? 2 : 9"
             />
             <text v-if="node.text" class="region-map__badge-text" y="4" text-anchor="middle">
               {{ node.text }}
@@ -506,8 +578,38 @@ watch(
           </template>
 
           <template v-else>
-            <circle class="region-map__ring" :r="markerRadius(node.kind as MapPlaceKind) + 6" />
-            <template v-if="node.kind === 'city' || node.kind === 'town'">
+            <rect
+              v-if="classic"
+              class="region-map__ring"
+              :x="-markerRadius(node.kind as MapPlaceKind) - 6"
+              :y="-markerRadius(node.kind as MapPlaceKind) - 6"
+              :width="(markerRadius(node.kind as MapPlaceKind) + 6) * 2"
+              :height="(markerRadius(node.kind as MapPlaceKind) + 6) * 2"
+              rx="3"
+            />
+            <circle
+              v-else
+              class="region-map__ring"
+              :r="markerRadius(node.kind as MapPlaceKind) + 6"
+            />
+            <template v-if="classic && (node.kind === 'city' || node.kind === 'town')">
+              <rect
+                :class="`region-map__town region-map__town--${node.kind}`"
+                :x="-markerRadius(node.kind)"
+                :y="-markerRadius(node.kind)"
+                :width="markerRadius(node.kind) * 2"
+                :height="markerRadius(node.kind) * 2"
+              />
+              <rect
+                v-if="node.kind === 'city'"
+                class="region-map__town-dot"
+                x="-3.5"
+                y="-3.5"
+                width="7"
+                height="7"
+              />
+            </template>
+            <template v-else-if="node.kind === 'city' || node.kind === 'town'">
               <circle
                 :class="`region-map__town region-map__town--${node.kind}`"
                 :r="markerRadius(node.kind)"
@@ -521,7 +623,7 @@ watch(
                 y="-9"
                 width="18"
                 height="18"
-                rx="5"
+                :rx="classic ? 1 : 5"
               />
               <path
                 class="region-map__marker-icon"
@@ -613,6 +715,7 @@ watch(
   --map-town-fill: #ffffff;
   --map-badge-fill: #ffffff;
   --map-done: #2e7d32;
+  --map-label-halo: var(--map-land);
 
   position: relative;
   border-radius: 16px;
@@ -640,6 +743,158 @@ watch(
   --map-town-fill: #1e1e1e;
   --map-badge-fill: #2a2a2a;
   --map-done: #66bb6a;
+}
+
+/*
+ * Estilo clássico: paleta de mapa de bolso (mar azul, terra verde, estrada de terra batida,
+ * cidades em vermelho). Os nomes ficam escuros com contorno branco, que lê bem sobre qualquer
+ * bloco; no tema escuro, o contrário.
+ */
+.region-map--classic {
+  --map-sea: #4c8fd6;
+  --map-px-wave: #74aceb;
+  --map-shallows: #86c0ee;
+  --map-land: #82c55c;
+  --map-mountain: #c9a062;
+  --map-px-mountain: #8f6a35;
+  --map-forest: #4aa244;
+  --map-px-forest: #2b7a2e;
+  --map-snow: #f3f7fb;
+  --map-px-snow: #bccbdd;
+  --map-sand: #eed98f;
+  --map-lava: #dc6b3e;
+  --map-road: #f5e19a;
+  --map-road-casing: #6e5427;
+  --map-sea-route: #f4fbff;
+  --map-cave-route: #4a3720;
+  --map-ink: #1b1914;
+  --map-ink-soft: #4d463a;
+  --map-city: #d83a2a;
+  --map-town: #ef7d2c;
+  --map-town-fill: #fffdf4;
+  --map-badge-fill: #fffbe6;
+  --map-label-halo: #ffffff;
+}
+
+:global(.v-theme--dark .region-map--classic) {
+  --map-sea: #1c4775;
+  --map-px-wave: #275a8f;
+  --map-shallows: #2a6398;
+  --map-land: #3c6f33;
+  --map-mountain: #75592f;
+  --map-px-mountain: #4f3b1d;
+  --map-forest: #2b5a2a;
+  --map-px-forest: #1b3e1b;
+  --map-snow: #8d9aab;
+  --map-px-snow: #6f7c8e;
+  --map-sand: #7f7140;
+  --map-lava: #86391f;
+  --map-road: #cdb468;
+  --map-road-casing: #231a0b;
+  --map-sea-route: #cfe6ff;
+  --map-cave-route: #d8c39b;
+  --map-ink: #f4f0e6;
+  --map-ink-soft: #c9c0ae;
+  --map-city: #e2513f;
+  --map-town: #e48a3c;
+  --map-town-fill: #1e1e1e;
+  --map-badge-fill: #2a2418;
+  --map-label-halo: #14120d;
+}
+
+.region-map__px-wave {
+  fill: var(--map-px-wave);
+}
+
+.region-map__tile--shallows {
+  fill: var(--map-shallows);
+}
+.region-map__tile--land {
+  fill: var(--map-land);
+}
+.region-map__tile--sand {
+  fill: var(--map-sand);
+}
+.region-map__tile--snow {
+  fill: var(--map-snow);
+}
+.region-map__tile--forest {
+  fill: var(--map-forest);
+}
+.region-map__tile--mountain {
+  fill: var(--map-mountain);
+}
+.region-map__tile--lava {
+  fill: var(--map-lava);
+}
+
+.region-map__px-texture--forest {
+  fill: var(--map-px-forest);
+}
+.region-map__px-texture--mountain {
+  fill: var(--map-px-mountain);
+}
+.region-map__px-texture--snow {
+  fill: var(--map-px-snow);
+}
+
+/* Estradas largas de quina reta, com borda escura, como as trilhas do mapa de bolso. */
+.region-map--classic .region-map__casing,
+.region-map--classic .region-map__line {
+  stroke-linecap: square;
+  stroke-linejoin: miter;
+}
+
+.region-map--classic .region-map__casing--land {
+  stroke-width: 10;
+}
+
+.region-map--classic .region-map__line--land {
+  stroke-width: 6;
+}
+
+/* A ponta quadrada cresce meia largura de cada lado do traço: o espaço do tracejado desconta. */
+.region-map--classic .region-map__line--water {
+  stroke-width: 3;
+  stroke-dasharray: 4 8;
+}
+
+.region-map--classic .region-map__line--cave {
+  stroke-width: 4;
+  stroke-dasharray: 3 9;
+}
+
+.region-map--classic .region-map__town {
+  stroke-width: 2.5;
+}
+
+.region-map--classic .region-map__town--city {
+  fill: var(--map-city);
+}
+
+.region-map--classic .region-map__town--town {
+  fill: var(--map-town);
+}
+
+.region-map--classic .region-map__town-dot {
+  fill: var(--map-town-fill);
+}
+
+.region-map--classic .region-map__node:not(.is-active) .region-map__town {
+  opacity: 0.5;
+}
+
+.region-map--classic .region-map__badge {
+  stroke: var(--map-road-casing);
+}
+
+.region-map--classic .region-map__caption {
+  fill: var(--map-ink);
+  paint-order: stroke;
+  stroke: var(--map-label-halo);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+  opacity: 0.8;
 }
 
 .region-map__viewport {
@@ -892,7 +1147,7 @@ watch(
   font-size: 12.5px;
   font-weight: 600;
   paint-order: stroke;
-  stroke: var(--map-land);
+  stroke: var(--map-label-halo);
   stroke-width: 3.5px;
   stroke-linejoin: round;
   pointer-events: none;

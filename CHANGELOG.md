@@ -7,6 +7,17 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 
 ## [Não lançado]
 
+### Adicionado
+
+- **Mapa no estilo clássico**: o mapa da aba Rotas ganhou a cara do mapa de bolso dos jogos, com
+  terreno em blocos de pixel (mar com ondinhas, água rasa na costa, montanhas e florestas com
+  textura), cidades quadradas em vermelho e estradas largas. É o novo padrão; o desenho anterior
+  continua em "Estilo do mapa → Esquemático", e a escolha fica salva no aparelho. A legenda
+  acompanha o estilo escolhido.
+- Só no modo de desenvolvimento: painel para pôr a imagem do mapa oficial por baixo do nosso, com
+  opacidade, escala e posição, para comparar o desenho. As imagens ficam fora do repositório, e o
+  build falha se algo do painel chegar ao pacote publicado.
+
 ## [1.13.0] - 2026-10-30
 
 ### Adicionado

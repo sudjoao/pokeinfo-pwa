@@ -37,3 +37,7 @@ __screenshots__/
 
 # Vite
 *.timestamp-*-*.mjs
+
+# Mapas oficiais para comparar no modo dev (arte da Nintendo/TPC: nunca versionar)
+dev-maps/*
+!dev-maps/README.md

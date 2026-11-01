@@ -1,4 +1,4 @@
-import type { MapPoint, RegionMap } from '@/data/maps/types'
+import type { MapArea, MapAreaKind, MapPoint, RegionMap } from '@/data/maps/types'
 import { formatAreaName } from './encounters'
 
 /** Número da placa de uma rota ("kanto-sea-route-19" → "19"); null quando o slug não tem número. */
@@ -44,21 +44,130 @@ export function linePath(points: readonly MapPoint[]): string {
  */
 export function areaPath(points: readonly MapPoint[], smooth = true): string {
   if (points.length < 3 || !smooth) return `${linePath(points)} Z`
+  let d = `M${round(points[0]![0])} ${round(points[0]![1])}`
+  for (const [, [c1x, c1y], [c2x, c2y], [x, y]] of curveSegments(points)) {
+    d += ` C${round(c1x)} ${round(c1y)} ${round(c2x)} ${round(c2y)} ${round(x)} ${round(y)}`
+  }
+  return `${d} Z`
+}
+
+/** Trechos de Bézier cúbica (início, controle 1, controle 2, fim) da Catmull-Rom fechada. */
+function curveSegments(points: readonly MapPoint[]): [MapPoint, MapPoint, MapPoint, MapPoint][] {
   const n = points.length
   const at = (index: number) => points[(index + n) % n]!
-  let d = `M${round(at(0)[0])} ${round(at(0)[1])}`
-  for (let i = 0; i < n; i++) {
+  return points.map((_, i) => {
     const [x0, y0] = at(i - 1)
     const [x1, y1] = at(i)
     const [x2, y2] = at(i + 1)
     const [x3, y3] = at(i + 2)
-    const c1x = x1 + (x2 - x0) / 6
-    const c1y = y1 + (y2 - y0) / 6
-    const c2x = x2 - (x3 - x1) / 6
-    const c2y = y2 - (y3 - y1) / 6
-    d += ` C${round(c1x)} ${round(c1y)} ${round(c2x)} ${round(c2y)} ${round(x2)} ${round(y2)}`
+    return [
+      [x1, y1],
+      [x1 + (x2 - x0) / 6, y1 + (y2 - y0) / 6],
+      [x2 - (x3 - x1) / 6, y2 - (y3 - y1) / 6],
+      [x2, y2],
+    ]
+  })
+}
+
+/** Pontos por trecho de curva ao transformar o contorno suave num polígono. */
+const CURVE_SAMPLES = 8
+
+/**
+ * O mesmo contorno de `areaPath`, como polígono: as curvas viram `CURVE_SAMPLES` pontos cada.
+ * Serve para saber o que fica dentro da mancha sem depender do canvas do navegador.
+ */
+export function areaPolygon(points: readonly MapPoint[], smooth = true): MapPoint[] {
+  if (points.length < 3 || !smooth) return [...points]
+  const polygon: MapPoint[] = []
+  for (const [[x1, y1], [c1x, c1y], [c2x, c2y], [x2, y2]] of curveSegments(points)) {
+    for (let s = 0; s < CURVE_SAMPLES; s++) {
+      const t = s / CURVE_SAMPLES
+      const u = 1 - t
+      polygon.push([
+        u * u * u * x1 + 3 * u * u * t * c1x + 3 * u * t * t * c2x + t * t * t * x2,
+        u * u * u * y1 + 3 * u * u * t * c1y + 3 * u * t * t * c2y + t * t * t * y2,
+      ])
+    }
   }
-  return `${d} Z`
+  return polygon
+}
+
+/** Tipos de bloco do estilo clássico: as manchas do mapa, mais a água rasa em volta da terra. */
+export type PixelTileKind = Exclude<MapAreaKind, 'water'> | 'shallows'
+
+/**
+ * Terreno do estilo clássico: as manchas viram blocos de `cell` unidades, como no mapa de bolso
+ * dos jogos. Cada bloco fica com a última mancha que cobre o centro dele (a mesma ordem de
+ * pintura do estilo esquemático); `water` (lagos) volta a ser mar, e o mar que encosta na terra
+ * vira água rasa. Devolve um caminho SVG por tipo, com os blocos de cada linha emendados.
+ */
+export function pixelTerrain(
+  map: Pick<RegionMap, 'width' | 'height' | 'areas'>,
+  gameSlug: string,
+  cell: number,
+): Partial<Record<PixelTileKind, string>> {
+  const cols = Math.ceil(map.width / cell)
+  const rows = Math.ceil(map.height / cell)
+  const areas = map.areas.filter((area) => existsInGame(area, gameSlug))
+  const kinds: (MapAreaKind | null)[] = [null, ...new Set(areas.map((area) => area.kind))]
+  const grid = new Uint8Array(cols * rows)
+  for (const area of areas) fillArea(grid, cols, rows, cell, area, kinds.indexOf(area.kind))
+
+  const isLand = (col: number, row: number) => {
+    if (col < 0 || row < 0 || col >= cols || row >= rows) return false
+    const kind = kinds[grid[row * cols + col]!]
+    return !!kind && kind !== 'water'
+  }
+  const tileAt = (col: number, row: number): PixelTileKind | null => {
+    if (isLand(col, row)) return kinds[grid[row * cols + col]!] as PixelTileKind
+    for (let dy = -1; dy <= 1; dy++)
+      for (let dx = -1; dx <= 1; dx++) if (isLand(col + dx, row + dy)) return 'shallows'
+    return null
+  }
+
+  const paths: Partial<Record<PixelTileKind, string>> = {}
+  for (let row = 0; row < rows; row++) {
+    let start = 0
+    let current = tileAt(0, row)
+    for (let col = 1; col <= cols; col++) {
+      const kind = col < cols ? tileAt(col, row) : null
+      if (kind === current) continue
+      if (current) {
+        const run = `M${start * cell} ${row * cell}h${(col - start) * cell}v${cell}h${(start - col) * cell}z`
+        paths[current] = (paths[current] ?? '') + run
+      }
+      start = col
+      current = kind
+    }
+  }
+  return paths
+}
+
+/** Marca na grade os blocos cujo centro cai dentro da mancha (varredura por linha, par-ímpar). */
+function fillArea(
+  grid: Uint8Array,
+  cols: number,
+  rows: number,
+  cell: number,
+  area: MapArea,
+  value: number,
+): void {
+  const polygon = areaPolygon(area.points, area.smooth)
+  for (let row = 0; row < rows; row++) {
+    const y = (row + 0.5) * cell
+    const crossings: number[] = []
+    for (let i = 0; i < polygon.length; i++) {
+      const [x0, y0] = polygon[i]!
+      const [x1, y1] = polygon[(i + 1) % polygon.length]!
+      if (y0 <= y !== y1 <= y) crossings.push(x0 + ((y - y0) / (y1 - y0)) * (x1 - x0))
+    }
+    crossings.sort((a, b) => a - b)
+    for (let i = 0; i + 1 < crossings.length; i += 2) {
+      const first = Math.max(0, Math.ceil(crossings[i]! / cell - 0.5))
+      const last = Math.min(cols - 1, Math.floor(crossings[i + 1]! / cell - 0.5))
+      for (let col = first; col <= last; col++) grid[row * cols + col] = value
+    }
+  }
 }
 
 /** Ponto na metade do comprimento do caminho (lugar padrão da placa da rota). */
