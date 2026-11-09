@@ -27,7 +27,10 @@ const props = defineProps<{
    * e não o objeto da rota: um objeto novo a cada render da grade fazia todos os cards renderizarem.
    */
   linkTo?: (pokemon: PokemonListItem) => RouteLocationRaw
-  /** Card da primeira dobra: a imagem é o LCP da lista e baixa já, com prioridade alta. */
+  /**
+   * Card da primeira dobra: a imagem é o LCP da lista, baixa já, com prioridade alta, e aparece sem
+   * a animação de entrada.
+   */
   priority?: boolean
   /**
    * Modo de seleção múltipla: o card inteiro alterna a seleção (sem `linkTo`), com um círculo
@@ -81,7 +84,13 @@ function onLinkClick(event: MouseEvent): void {
   >
     <template #loader />
     <div class="pokemon-card__art pa-2">
-      <PokemonArtwork :id="pokemon.id" alt="" :size="CARD_ARTWORK_SIZE" :priority="priority" />
+      <PokemonArtwork
+        :id="pokemon.id"
+        alt=""
+        :size="CARD_ARTWORK_SIZE"
+        :priority="priority"
+        :instant="priority"
+      />
       <v-icon v-if="selected" :icon="mdiCheckCircle" color="primary" class="pokemon-card__check" />
       <v-icon
         v-else-if="selectable"

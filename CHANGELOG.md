@@ -13,6 +13,12 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
   empurrado pelos cards: a área da lista reserva uma tela de altura até o primeiro lote chegar
   (layout shift da primeira visita de 0,04 para 0, sem mudar o tempo da primeira pintura).
 
+### Alterado
+
+- Os artworks dos 4 primeiros cards da lista aparecem assim que chegam, sem a animação de entrada
+  (o resto da lista continua animado). Na primeira visita num celular lento, a primeira dobra fica
+  completa ~0,4 s mais cedo, e o LCP passa a medir as imagens em vez do rodapé.
+
 ## [1.14.0] - 2026-11-01
 
 ### Adicionado

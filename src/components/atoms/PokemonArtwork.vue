@@ -13,6 +13,11 @@ const props = defineProps<{
   shiny?: boolean
   /** Imagem principal da tela (LCP): baixa já, com prioridade alta, em vez de esperar o scroll. */
   priority?: boolean
+  /**
+   * Sem a animação de entrada: a imagem aparece assim que chega. Nos primeiros cards da lista a
+   * animação somava ~0,5 s à espera e, começando em `opacity: 0`, tirava as imagens do LCP.
+   */
+  instant?: boolean
 }>()
 
 const side = computed(() => props.size ?? 120)
@@ -72,7 +77,7 @@ function onError(): void {
       crossorigin="anonymous"
       draggable="false"
       class="pokemon-artwork__img"
-      :class="{ 'pokemon-artwork__img--loaded': loaded }"
+      :class="{ 'pokemon-artwork__img--loaded': loaded, 'pokemon-artwork__img--instant': instant }"
       @load="loaded = true"
       @error="onError"
     />
@@ -110,8 +115,13 @@ function onError(): void {
     transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.pokemon-artwork__img--loaded {
+.pokemon-artwork__img--loaded,
+.pokemon-artwork__img--instant {
   opacity: 1;
   transform: scale(1) rotate(0deg);
+}
+
+.pokemon-artwork__img--instant {
+  transition: none;
 }
 </style>
