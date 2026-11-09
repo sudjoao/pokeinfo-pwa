@@ -9,6 +9,7 @@ import { purgeVuetifyUtilities } from './build/purgeVuetifyUtilities.ts'
 import { preloadLocale } from './build/preloadLocale.ts'
 import { contentSecurityPolicy } from './build/contentSecurityPolicy.ts'
 import { devMaps } from './build/devMaps.ts'
+import { splitMdiIcons } from './build/splitMdiIcons.ts'
 
 const DAY = 60 * 60 * 24
 
@@ -51,6 +52,7 @@ export default defineConfig({
     vueDevTools(),
     vuetify({ autoImport: true }),
     purgeVuetifyUtilities(),
+    splitMdiIcons(),
     preloadLocale(),
     devMaps(),
     // Pré-compila os JSON de src/locales e usa o build runtime-only do vue-i18n. Sem mensagem

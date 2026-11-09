@@ -18,6 +18,9 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 - Os artworks dos 4 primeiros cards da lista aparecem assim que chegam, sem a animação de entrada
   (o resto da lista continua animado). Na primeira visita num celular lento, a primeira dobra fica
   completa ~0,4 s mais cedo, e o LCP passa a medir as imagens em vez do rodapé.
+- A tela inicial baixa ~14 KB a menos de JavaScript (comprimido) na primeira visita: o menu lateral
+  é carregado só quando o navegador fica ocioso (ou no primeiro toque), e cada tela baixa só os
+  ícones que usa, em vez dos ~100 ícones do app de uma vez.
 
 ## [1.14.0] - 2026-11-01
 

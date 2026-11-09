@@ -53,7 +53,8 @@ src/
   plugins/        # vuetify.ts, i18n.ts
   router/         # rotas (views carregadas sob demanda, exceto a Home)
   dev/            # ferramentas só do modo dev
-build/            # plugins de build: CSP, purge de utilitários do Vuetify, pré-carga do idioma
+build/            # plugins de build: CSP, purge de utilitários do Vuetify, pré-carga do idioma,
+                  # um módulo por ícone do @mdi/js (splitMdiIcons)
 scripts/          # geradores de dados (ver scripts/README.md) e notas de release
 supabase/         # config e migrations (ver supabase/README.md)
 ```

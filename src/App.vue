@@ -11,12 +11,21 @@ import { announcement } from '@/composables/useAnnouncer'
 import AppNotice from '@/components/molecules/AppNotice.vue'
 import { decodeBackupParam, MAX_BACKUP_BYTES, parseBackup, type Backup } from '@/utils/backup'
 import type { ImportMode } from '@/stores/gameSet'
-import AppMenu from '@/components/organisms/AppMenu.vue'
 import { useMountOnOpen } from '@/composables/useMountOnOpen'
+import { whenIdle } from '@/utils/idle'
 import { useSyncStatusText } from '@/composables/useSyncStatusText'
 import { useAccountStore, type FirstSyncChoice } from '@/stores/account'
 import { storeToRefs } from 'pinia'
 import { nativePageTransition } from '@/router/viewTransition'
+
+// O menu lateral (ícones, VList e VNavigationDrawer) não aparece na abertura: sai do JS inicial e é
+// montado no primeiro toque. O chunk é pedido quando o navegador fica ocioso, para esse primeiro
+// toque não esperar a rede.
+const loadAppMenu = () => import('@/components/organisms/AppMenu.vue')
+const AppMenu = defineAsyncComponent(loadAppMenu)
+whenIdle(() => {
+  loadAppMenu().catch(() => {})
+})
 
 // Sheets do menu: raros, carregados só na primeira abertura (BackupImportDialog também pode abrir
 // por um link ?backup=, e aí carrega na hora).
@@ -37,6 +46,7 @@ const route = useRoute()
 const router = useRouter()
 
 const menu = useAppMenu()
+const menuMounted = useMountOnOpen(menu.drawer)
 const languageMounted = useMountOnOpen(menu.languageOpen)
 const aboutMounted = useMountOnOpen(menu.aboutOpen)
 const backupMounted = useMountOnOpen(menu.backupOpen)
@@ -190,6 +200,7 @@ function skipToContent(): void {
       {{ t('common.skipToContent') }}
     </button>
     <AppMenu
+      v-if="menuMounted"
       v-model="menu.drawer.value"
       :theme="theme"
       @set-theme="setTheme"
