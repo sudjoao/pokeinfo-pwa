@@ -7,6 +7,8 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 
 ## [Não lançado]
 
+## [1.14.1] - 2026-11-09
+
 ### Corrigido
 
 - Ao abrir a tela inicial, o rodapé não aparece mais logo abaixo dos botões para depois ser
@@ -572,7 +574,8 @@ Primeira versão estável da Pokédex em formato de PWA, consumindo a [PokéAPI]
 - As marcações de captura ficam só no aparelho, sem sincronização entre dispositivos.
 - Os gritos vêm só em `.ogg`; em navegadores sem suporte o botão de som não aparece.
 
-[Não lançado]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.14.0...HEAD
+[Não lançado]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.14.1...HEAD
+[1.14.1]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.14.0...v1.14.1
 [1.14.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.13.0...v1.14.0
 [1.13.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.12.0...v1.13.0
 [1.12.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.11.3...v1.12.0
