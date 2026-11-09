@@ -128,6 +128,15 @@ const layout = computed<'cards' | 'boxes'>(() =>
   route.query.layout === 'boxes' ? 'boxes' : 'cards',
 )
 
+/**
+ * A grade monta vazia e só pede o primeiro lote depois do layout (pôr os cards na mesma pintura
+ * piorou o FCP). Nesse intervalo a área reserva uma tela de altura, senão o rodapé aparece logo
+ * abaixo dos botões e é empurrado quando os cards chegam (layout shift).
+ */
+const awaitingFirstBatch = computed(
+  () => layout.value === 'cards' && items.value.length === 0 && status.value !== 'error',
+)
+
 function setLayout(value: 'cards' | 'boxes'): void {
   const query = { ...route.query }
   if (value === 'boxes') query.layout = 'boxes'
@@ -563,7 +572,12 @@ onActivated(() => {
         @action="clearFilters"
       />
 
-      <div v-else ref="listArea" class="list-area" :class="{ 'list-area--selecting': selecting }">
+      <div
+        v-else
+        ref="listArea"
+        class="list-area"
+        :class="{ 'list-area--selecting': selecting, 'list-area--pending': awaitingFirstBatch }"
+      >
         <p v-if="selecting" class="text-body-small mb-3">{{ t('select.hint') }}</p>
         <PokemonBoxes
           v-if="layout === 'boxes'"
@@ -673,6 +687,10 @@ onActivated(() => {
 .list-area--selecting :deep(img) {
   -webkit-user-drag: none;
   pointer-events: none;
+}
+
+.list-area--pending {
+  min-height: 100vh;
 }
 
 /* Abas grudadas logo abaixo do cabeçalho (busca e filtros), por cima da lista que rola. */

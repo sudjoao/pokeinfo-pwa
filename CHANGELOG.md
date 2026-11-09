@@ -7,6 +7,12 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 
 ## [Não lançado]
 
+### Corrigido
+
+- Ao abrir a tela inicial, o rodapé não aparece mais logo abaixo dos botões para depois ser
+  empurrado pelos cards: a área da lista reserva uma tela de altura até o primeiro lote chegar
+  (layout shift da primeira visita de 0,04 para 0, sem mudar o tempo da primeira pintura).
+
 ## [1.14.0] - 2026-11-01
 
 ### Adicionado
