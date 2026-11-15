@@ -7,6 +7,8 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 
 ## [Não lançado]
 
+## [1.15.0] - 2026-11-15
+
 ### Adicionado
 
 - Tela de detalhe: seção **Megaevolução**, logo abaixo da cadeia de evolução, com a forma de origem
@@ -587,7 +589,8 @@ Primeira versão estável da Pokédex em formato de PWA, consumindo a [PokéAPI]
 - As marcações de captura ficam só no aparelho, sem sincronização entre dispositivos.
 - Os gritos vêm só em `.ogg`; em navegadores sem suporte o botão de som não aparece.
 
-[Não lançado]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.14.1...HEAD
+[Não lançado]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.15.0...HEAD
+[1.15.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.14.1...v1.15.0
 [1.14.1]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.14.0...v1.14.1
 [1.14.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.13.0...v1.14.0
 [1.13.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.12.0...v1.13.0
