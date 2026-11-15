@@ -7,6 +7,19 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 
 ## [Não lançado]
 
+### Adicionado
+
+- Tela de detalhe: seção **Megaevolução**, logo abaixo da cadeia de evolução, com a forma de origem
+  e as megas do Pokémon (artwork, tipos e toque para abrir os detalhes de cada uma), incluindo as
+  de Legends: Z-A e da DLC Mega Dimension. Aparece na Pokédex Nacional e nos jogos em que a mega
+  existe: X/Y, Omega Ruby/Alpha Sapphire, Sun/Moon, Ultra Sun/Ultra Moon, Let's Go (só Kanto) e
+  Legends: Z-A.
+
+### Alterado
+
+- As megas saíram dos chips de **Formas** no fim da tela de detalhe (ficavam misturadas às outras
+  formas e apareciam até em jogos sem Mega Evolução).
+
 ## [1.14.1] - 2026-11-09
 
 ### Corrigido

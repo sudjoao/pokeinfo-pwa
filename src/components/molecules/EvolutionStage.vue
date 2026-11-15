@@ -8,8 +8,13 @@ import DexNumber from '@/components/atoms/DexNumber.vue'
 import TypeChip from '@/components/atoms/TypeChip.vue'
 
 const props = defineProps<{
+  /** Id usado no artwork e emitido no toque: a espécie na cadeia de evolução, a forma nas megas. */
   speciesId: number
   name: string
+  /** Nome já pronto, quando o slug formatado não serve (ex.: "Mega Charizard X"). */
+  label?: string
+  /** Número mostrado quando o id é de uma forma (o da espécie); o padrão é o próprio id. */
+  dexNumber?: number
   summary?: PokemonSummary | null
   current?: boolean
   isBaby?: boolean
@@ -21,7 +26,7 @@ const emit = defineEmits<{ select: [id: number] }>()
 
 const { t } = useI18n()
 
-const label = computed(() => formatPokemonName(props.name))
+const label = computed(() => props.label ?? formatPokemonName(props.name))
 const enterDelay = computed(() => `${(props.depth ?? 0) * 90}ms`)
 </script>
 
@@ -38,7 +43,7 @@ const enterDelay = computed(() => `${(props.depth ?? 0) * 90}ms`)
   >
     <span v-if="current" class="evolution-stage__ring" aria-hidden="true" />
     <PokemonArtwork :id="speciesId" alt="" :size="96" />
-    <DexNumber :id="speciesId" />
+    <DexNumber :id="dexNumber ?? speciesId" />
     <div class="text-title-small">
       <span v-if="current">{{ label }}</span>
       <button v-else type="button" class="stretched-action" @click="emit('select', speciesId)">

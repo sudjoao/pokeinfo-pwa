@@ -30,6 +30,7 @@ import ShinyHuntCard from '@/components/organisms/ShinyHuntCard.vue'
 import { useDexLabel } from '@/composables/useDexLabel'
 import { gameContextFromQuery, gameContextQuery } from '@/utils/games'
 import { exclusiveVersionOf } from '@/utils/exclusives'
+import { withoutMegas } from '@/utils/megas'
 import { formatDexNumber, formatPokemonName } from '@/utils/pokemon'
 import { LATEST_GENERATION } from '@/utils/typeChart'
 import { useMountOnOpen } from '@/composables/useMountOnOpen'
@@ -55,6 +56,7 @@ import TypeDefenses from '@/components/organisms/TypeDefenses.vue'
 import AbilitySheet from '@/components/organisms/AbilitySheet.vue'
 import EggCompatSheet from '@/components/organisms/EggCompatSheet.vue'
 import EvolutionChain from '@/components/organisms/EvolutionChain.vue'
+import MegaEvolutionCard from '@/components/organisms/MegaEvolutionCard.vue'
 import LocationList from '@/components/organisms/LocationList.vue'
 import PokemonDetailSkeleton from '@/components/organisms/PokemonDetailSkeleton.vue'
 
@@ -84,6 +86,8 @@ const {
   species,
   chain,
   chainSummaries,
+  megaLine,
+  megaSummaries,
   encounters,
   status,
   speciesStatus,
@@ -208,7 +212,9 @@ function goBack(): void {
   else router.push({ name: 'home', query: gameContextQuery(context.value) })
 }
 
-const showVarieties = computed(() => (species.value?.varieties.length ?? 0) > 1)
+/** As megas ficam na seção própria (e só nos jogos em que existem), fora dos chips de formas. */
+const formVarieties = computed(() => withoutMegas(species.value?.varieties ?? []))
+const showVarieties = computed(() => formVarieties.value.length > 1)
 
 /** Artwork shiny no hero; continua ligado ao navegar entre Pokémon (para comparar shinies). */
 const shiny = ref(false)
@@ -483,6 +489,16 @@ async function sendShareImage(): Promise<void> {
             />
           </v-col>
 
+          <v-col v-if="megaLine" cols="12">
+            <MegaEvolutionCard
+              :line="megaLine"
+              :summaries="megaSummaries"
+              :current-id="detail.id"
+              :species-id="detail.speciesId"
+              @select="goTo"
+            />
+          </v-col>
+
           <v-col v-if="detail.sprites.length" cols="12">
             <SpritesCard
               :key="detail.id"
@@ -522,7 +538,7 @@ async function sendShareImage(): Promise<void> {
 
           <v-col v-if="showVarieties && species" cols="12">
             <VarietyChips
-              :varieties="species.varieties"
+              :varieties="formVarieties"
               :species-name="species.name"
               :current-id="detail.id"
               @select="goTo"

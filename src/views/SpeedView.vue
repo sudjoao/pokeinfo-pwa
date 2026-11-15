@@ -8,6 +8,7 @@ import { usePokemonData } from '@/composables/usePokemonData'
 import { useDebouncedRef } from '@/composables/useDebouncedRef'
 import { findGame } from '@/utils/games'
 import { speciesIdOf } from '@/utils/forms'
+import { hasMegaEvolution } from '@/utils/megas'
 import { formatPokemonName } from '@/utils/pokemon'
 import { speedValues, type SpeedModifiers, type SpeedValues } from '@/utils/speed'
 import DetailLayout from '@/components/templates/DetailLayout.vue'
@@ -29,15 +30,7 @@ const PAGE = 100
 const COLUMNS = ['min', 'neutral', 'max', 'maxPlus'] as const
 /** No celular ficam só Máx e Máx+ (as que importam para quem age primeiro). */
 const WIDE_ONLY = new Set(['min', 'neutral'])
-/** Jogos com Mega Evolução (e as formas Primal de ORAS): fora deles essas formas não existem. */
-const MEGA_GAMES = new Set([
-  'x-y',
-  'omega-ruby-alpha-sapphire',
-  'sun-moon',
-  'ultra-sun-ultra-moon',
-  'lets-go-pikachu-lets-go-eevee',
-  'legends-za',
-])
+/** Megas e formas Primal: só existem nos jogos com Mega Evolução. */
 const MEGA_FORM = /-(mega|primal)(-|$)/
 
 const level = ref<50 | 100>(route.query.level === '100' ? 100 : 50)
@@ -108,7 +101,7 @@ const rows = computed<SpeedRow[]>(() => {
     if (!row) continue
     const species = speciesIdOf(entry.id)
     if (dexSpecies.value && !dexSpecies.value.has(species)) continue
-    if (game.value && !MEGA_GAMES.has(game.value) && MEGA_FORM.test(entry.name)) continue
+    if (game.value && !hasMegaEvolution(game.value) && MEGA_FORM.test(entry.name)) continue
     const base = row[5] as number
     if (species !== entry.id && table.rows[species]?.[5] === base && !team.value.includes(entry.id))
       continue

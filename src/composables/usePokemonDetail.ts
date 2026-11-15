@@ -6,6 +6,7 @@ import { usePokedexStore } from '@/stores/pokedex'
 import { usePokemonDetailStore } from '@/stores/pokemonDetail'
 import { buildDexList, type GameContext } from '@/utils/games'
 import { describeError } from '@/utils/errors'
+import { megaLineOf } from '@/utils/megas'
 import { preloadArtwork } from '@/utils/pokemon'
 import type {
   EvolutionChain,
@@ -223,6 +224,28 @@ export function usePokemonDetail(idOrName: Ref<string>, context: Ref<GameContext
     return position >= 0 ? (list[position + 1] ?? null) : null
   })
 
+  /**
+   * Megas da forma aberta que existem no jogo selecionado (todas, sem jogo), com a forma de onde
+   * partem; null quando não há nenhuma.
+   */
+  const megaLine = computed(() =>
+    detail.value && species.value
+      ? megaLineOf(species.value.varieties, detail.value.id, context.value?.game.slug ?? null)
+      : null,
+  )
+
+  /** Resumos (tipos) dos estágios da linha de megas, do mapa embutido no build: sem requisição. */
+  const megaSummaries = computed<Record<number, PokemonSummary>>(() => {
+    const line = megaLine.value
+    if (!line) return {}
+    return Object.fromEntries(
+      [line.base, ...line.megas].map(({ pokemonId, name }) => [
+        pokemonId,
+        { id: pokemonId, name, types: pokedex.typesOf(pokemonId) ?? [] },
+      ]),
+    )
+  })
+
   watch(idOrName, load, { immediate: true })
 
   return {
@@ -230,6 +253,8 @@ export function usePokemonDetail(idOrName: Ref<string>, context: Ref<GameContext
     species,
     chain,
     chainSummaries,
+    megaLine,
+    megaSummaries,
     encounters,
     status,
     speciesStatus,

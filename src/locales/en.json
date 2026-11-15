@@ -134,6 +134,8 @@
     "noEvolution": "This Pokémon does not evolve.",
     "evolutionError": "Could not load the evolution chain.",
     "tapStage": "Tap a stage to see its details.",
+    "megaEvolution": "Mega Evolution",
+    "megaTap": "Tap a form to see its details.",
     "baby": "baby",
     "babyHatch": "The baby form hatches from an egg when a parent holds {item}.",
     "hatch": "Hatches from an egg when a parent holds {item}.",

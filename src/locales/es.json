@@ -134,6 +134,8 @@
     "noEvolution": "Este Pokémon no evoluciona.",
     "evolutionError": "No se pudo cargar la cadena de evolución.",
     "tapStage": "Toca una etapa para ver sus detalles.",
+    "megaEvolution": "Megaevolución",
+    "megaTap": "Toca una forma para ver sus detalles.",
     "baby": "bebé",
     "babyHatch": "La forma bebé nace de un huevo cuando uno de los padres lleva {item}.",
     "hatch": "Nace de un huevo cuando uno de los padres lleva {item}.",
