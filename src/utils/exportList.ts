@@ -1,4 +1,5 @@
-import { formatDexNumber, formatPokemonName } from '@/utils/pokemon'
+import { formatDexNumber } from '@/utils/pokemon'
+import { pokemonLabel } from '@/utils/megas'
 
 /**
  * Exportação da lista para a área de transferência: texto para colar em notas e conversas, ou
@@ -73,7 +74,7 @@ function speciesOf(entry: ExportEntry): number {
 function numberOf(entry: ExportEntry): string {
   return entry.dexNumber !== undefined
     ? formatDexNumber(entry.dexNumber, 3)
-    : formatDexNumber(entry.id)
+    : formatDexNumber(speciesOf(entry))
 }
 
 /** Uma célula não pode ter tab nem quebra de linha (viraria outra coluna ou outra linha). */
@@ -82,7 +83,7 @@ function cell(value: string): string {
 }
 
 function textLine(entry: ExportEntry, options: ExportOptions, labels: ExportLabels): string {
-  let line = `${numberOf(entry)} ${formatPokemonName(entry.name)}`
+  let line = `${numberOf(entry)} ${pokemonLabel(entry.id, entry.name)}`
   if (entry.dexNumber !== undefined)
     line += ` (${labels.national} ${formatDexNumber(speciesOf(entry))})`
   const extras: string[] = []
@@ -117,7 +118,7 @@ function tableRows(
   const rows = entries.map((entry) => {
     const row = [numberOf(entry)]
     if (regional) row.push(formatDexNumber(speciesOf(entry)))
-    row.push(formatPokemonName(entry.name))
+    row.push(pokemonLabel(entry.id, entry.name))
     if (options.types) row.push(entry.types?.join('/') ?? '')
     if (withStatus) row.push(entry.caught ? labels.yes : labels.no)
     if (withExclusive) row.push(entry.exclusiveTo ?? '')

@@ -9,7 +9,8 @@ import {
 import { useI18n } from 'vue-i18n'
 import type { RouteLocationRaw } from 'vue-router'
 import type { PokemonListItem } from '@/types/pokemon'
-import { CARD_ARTWORK_SIZE, formatDexNumber, formatPokemonName, TYPE_COLORS } from '@/utils/pokemon'
+import { CARD_ARTWORK_SIZE, formatDexNumber, TYPE_COLORS } from '@/utils/pokemon'
+import { pokemonLabel } from '@/utils/megas'
 import PokemonArtwork from '@/components/atoms/PokemonArtwork.vue'
 import DexNumber from '@/components/atoms/DexNumber.vue'
 import TypeChip from '@/components/atoms/TypeChip.vue'
@@ -38,6 +39,8 @@ const props = defineProps<{
    * card selecionável é armadilha (marcaria a captura em vez de selecionar).
    */
   selectable?: boolean
+  /** Mostra o artwork shiny. */
+  shiny?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -48,7 +51,7 @@ const emit = defineEmits<{
 const { t } = useI18n()
 
 const to = computed(() => props.linkTo?.(props.pokemon))
-const name = computed(() => formatPokemonName(props.pokemon.name))
+const name = computed(() => pokemonLabel(props.pokemon.id, props.pokemon.name))
 const accent = computed(() => TYPE_COLORS[props.pokemon.types[0] ?? 'unknown'])
 
 /** Com um jogo selecionado, o número regional vai em destaque e o nacional fica pequeno. */
@@ -88,6 +91,7 @@ function onLinkClick(event: MouseEvent): void {
         :id="pokemon.id"
         alt=""
         :size="CARD_ARTWORK_SIZE"
+        :shiny="shiny"
         :priority="priority"
         :instant="priority"
       />
@@ -115,7 +119,7 @@ function onLinkClick(event: MouseEvent): void {
       <div class="v-card-item__content">
         <div class="d-flex align-baseline flex-wrap ga-1">
           <DexNumber v-if="regional" :id="pokemon.dexNumber!" :digits="3" />
-          <DexNumber v-else :id="pokemon.id" />
+          <DexNumber v-else :id="speciesId" />
           <span v-if="regional" class="pokemon-card__national text-label-small">
             {{ t('common.national') }} {{ nationalLabel }}
           </span>

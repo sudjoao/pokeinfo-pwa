@@ -24,6 +24,7 @@ import { saveGame } from '@/utils/lastGame'
 import { describeError } from '@/utils/errors'
 import { formatHeight, formatWeight, isPokemonType } from '@/utils/pokemon'
 import { exclusiveVersionOf, exclusiveVersions } from '@/utils/exclusives'
+import { hasMegaEvolution, megaEntriesOf } from '@/utils/megas'
 import type { ExclusiveVersion } from '@/data/exclusives'
 import type { PokemonIndexEntry, PokemonListItem, PokemonType } from '@/types/pokemon'
 
@@ -67,7 +68,9 @@ function matcherFor(query: string): (entry: ListSource) => boolean {
   if (/^\d+$/.test(query)) {
     const number = Number(query)
     return (entry) =>
-      entry.dexNumber === undefined ? entry.id === number : entry.dexNumber === number
+      entry.dexNumber === undefined
+        ? (entry.speciesId ?? entry.id) === number
+        : entry.dexNumber === number
   }
   return (entry) => entry.name.includes(query)
 }
@@ -91,7 +94,16 @@ function availabilityOf(gameSlug: string | undefined, speciesId: number): string
 }
 
 /** Parâmetros da URL que esta lista controla; os demais (ex.: `team`) são preservados. */
-const OWN_QUERY_KEYS = ['q', 'game', 'dex', 'caught', 'type', 'versions', ...ADVANCED_QUERY_KEYS]
+const OWN_QUERY_KEYS = [
+  'q',
+  'game',
+  'dex',
+  'caught',
+  'type',
+  'versions',
+  'mega',
+  ...ADVANCED_QUERY_KEYS,
+]
 
 function foreignQuery(query: LocationQuery): LocationQueryRaw {
   const result: LocationQueryRaw = {}
@@ -161,6 +173,44 @@ export function usePokemonList() {
   /** Ordenação e filtros do botão "Filtros" (geração, categoria, fraqueza, habilidade…). */
   const advanced = ref<AdvancedFilters>(parseAdvanced(route.query))
   const advancedCount = computed(() => activeCount(advanced.value))
+
+  /** Pedido de ver só as megas (`?mega=1`); vale onde a Pokédex atual tem alguma. */
+  const megaOnly = ref(route.query.mega === '1')
+
+  /** Índice nacional ou Pokédex do jogo, antes de trocar pelas megas. */
+  const baseSource = computed<ListSource[]>(() => {
+    if (!dex.value) return store.index
+    const entries = store.dexEntries[dex.value.slug]
+    return entries ? buildDexList(entries, dex.value, store.regionalForms) : []
+  })
+
+  /** Megas das espécies da Pokédex atual que existem no jogo (todas, na Nacional). */
+  const megaEntries = computed<ListSource[]>(() => {
+    const slug = game.value?.slug ?? null
+    if (slug && !hasMegaEvolution(slug)) return []
+    return megaEntriesOf(baseSource.value, slug, (id) => store.entryOf(id)?.name)
+  })
+  const megaCount = computed(() => megaEntries.value.length)
+
+  /**
+   * Filtro de megas em vigor. Com a Pokédex ainda baixando não dá para contar: mantém o pedido,
+   * senão abrir um link com `?mega=1` perderia o parâmetro antes de a lista chegar.
+   */
+  const megaFilter = computed(() => {
+    if (!megaOnly.value) return false
+    const slug = game.value?.slug
+    if (slug && !hasMegaEvolution(slug)) return false
+    const pending = Boolean(dex.value) && !store.dexEntries[dex.value!.slug]
+    return pending || megaCount.value > 0
+  })
+
+  function toggleMegaFilter(): void {
+    megaOnly.value = !megaFilter.value
+  }
+
+  const source = computed<ListSource[]>(() =>
+    megaFilter.value ? megaEntries.value : baseSource.value,
+  )
 
   function setAdvanced(value: AdvancedFilters): void {
     advanced.value = value
@@ -257,6 +307,7 @@ export function usePokemonList() {
       caughtFilter.value !== null ||
       typeFilter.value.length > 0 ||
       activeAvailability.value.length > 0 ||
+      megaFilter.value ||
       advancedCount.value > 0,
   )
 
@@ -266,6 +317,7 @@ export function usePokemonList() {
     caughtFilter.value = null
     typeFilter.value = []
     availability.value = []
+    megaOnly.value = false
     advanced.value = { ...EMPTY_ADVANCED }
   }
 
@@ -290,12 +342,6 @@ export function usePokemonList() {
       if (dex.value?.slug === current.slug) dexLoading.value = false
     }
   }
-
-  const source = computed<ListSource[]>(() => {
-    if (!dex.value) return store.index
-    const entries = store.dexEntries[dex.value.slug]
-    return entries ? buildDexList(entries, dex.value, store.regionalForms) : []
-  })
 
   /**
    * Filtros aplicados à fonte. O de captura lê o conjunto sem rastreamento reativo: marcar um
@@ -460,6 +506,7 @@ export function usePokemonList() {
       if (activeAvailability.value.length) result.versions = activeAvailability.value.join(',')
     }
     if (typeFilter.value.length) result.type = typeFilter.value.join(',')
+    if (megaFilter.value) result.mega = '1'
     return { ...result, ...advancedToQuery(advanced.value) }
   }
 
@@ -471,6 +518,7 @@ export function usePokemonList() {
       caughtFilter,
       typeFilter,
       activeAvailability,
+      megaFilter,
       advanced,
     ],
     () => {
@@ -521,6 +569,9 @@ export function usePokemonList() {
     toggleAvailability,
     clearAvailability,
     availabilityCounts,
+    megaFilter,
+    megaCount,
+    toggleMegaFilter,
     caughtIds,
     caughtCount,
     missingCount,

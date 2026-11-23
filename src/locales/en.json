@@ -69,6 +69,8 @@
     "leadersTab": "Leaders",
     "resultsCount": "No Pokémon found | 1 Pokémon found | {n} Pokémon found",
     "clearFilters": "Clear filters",
+    "megaFilter": "Megas",
+    "shinyToggle": "Shiny",
     "noFavoritesTitle": "No favorites yet",
     "noFavoritesMessage": "Tap the heart at the top of a Pokémon's page to keep it here."
   },

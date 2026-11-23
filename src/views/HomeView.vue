@@ -39,6 +39,7 @@ import { usePokedexStore } from '@/stores/pokedex'
 import EmptyState from '@/components/molecules/EmptyState.vue'
 import ResultsAnnouncer from '@/components/atoms/ResultsAnnouncer.vue'
 import PokemonCardSkeleton from '@/components/molecules/PokemonCardSkeleton.vue'
+import { useListShiny } from '@/composables/useListShiny'
 import ListFilters from '@/components/organisms/ListFilters.vue'
 import PokemonGrid from '@/components/organisms/PokemonGrid.vue'
 import PokemonBoxes, { type BoxEntry } from '@/components/organisms/PokemonBoxes.vue'
@@ -81,6 +82,9 @@ const {
   toggleAvailability,
   clearAvailability,
   availabilityCounts,
+  megaFilter,
+  megaCount,
+  toggleMegaFilter,
   caughtIds,
   caughtCount,
   missingCount,
@@ -102,6 +106,8 @@ const {
   loadMore,
   retry,
 } = usePokemonList()
+
+const { shiny, toggleShiny } = useListShiny()
 
 const router = useRouter()
 const route = useRoute()
@@ -197,6 +203,7 @@ const narrowed = computed(
     Boolean(query.value.trim()) ||
     typeFilter.value.length > 0 ||
     availability.value.length > 0 ||
+    megaFilter.value ||
     advancedCount.value > 0,
 )
 
@@ -337,7 +344,9 @@ useDragSelect({
 })
 
 // Outro jogo ou Pokédex é outra lista (e outra captura); a seleção também não vale nas outras abas.
-watch([() => game.value?.slug, () => dex.value?.slug], () => exitSelection({ silent: true }))
+watch([() => game.value?.slug, () => dex.value?.slug, megaFilter], () =>
+  exitSelection({ silent: true }),
+)
 watch(view, (value) => value !== 'pokemon' && exitSelection({ silent: true }))
 
 function onExportCopied(count: number): void {
@@ -365,7 +374,8 @@ const emptyTitle = computed(() => {
     !caughtFilter.value ||
     query.value.trim() ||
     typeFilter.value.length ||
-    availability.value.length
+    availability.value.length ||
+    megaFilter.value
   ) {
     return t('home.emptyTitle')
   }
@@ -374,7 +384,12 @@ const emptyTitle = computed(() => {
 
 const emptyMessage = computed(() => {
   if (noFavorites.value) return t('home.noFavoritesMessage')
-  if (typeFilter.value.length || availability.value.length || advancedCount.value)
+  if (
+    typeFilter.value.length ||
+    availability.value.length ||
+    megaFilter.value ||
+    advancedCount.value
+  )
     return t('home.emptyFiltered')
   const params = { dex: dex.value ? dexLabel(dex.value) : '', game: game.value?.title }
   if (game.value && dex.value && caughtFilter.value && !query.value.trim()) {
@@ -447,6 +462,11 @@ onActivated(() => {
         @open-game="pickerOpen = true"
         @open-types="typesOpen = true"
         :advanced-count="advancedCount"
+        :mega-filter="megaFilter"
+        :mega-count="megaCount"
+        :shiny="shiny"
+        @toggle-mega="toggleMegaFilter"
+        @toggle-shiny="toggleShiny"
         @open-versions="versionsOpen = true"
         @open-advanced="openAdvanced"
         @select-dex="setDex"
@@ -585,6 +605,7 @@ onActivated(() => {
           :caught-ids="game ? caughtIds : undefined"
           :selecting="selecting"
           :selected-ids="selectedIds"
+          :shiny="shiny"
           @toggle-caught="toggleCaught"
           @open="openPokemonId"
           @select="toggleSelected"
@@ -601,6 +622,7 @@ onActivated(() => {
           :selected-ids="selecting ? selectedIds : undefined"
           :selectable="selecting"
           :link-to="selecting ? undefined : pokemonRoute"
+          :shiny="shiny"
           @load="loadMore"
           @retry="retry"
           @select="onGridSelect"

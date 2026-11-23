@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
+import { mdiDna, mdiShimmer } from '@mdi/js'
 import type { Game, GameDex } from '@/data/games'
 import type { CaughtFilter } from '@/composables/usePokemonList'
 import type { ExclusiveVersion } from '@/data/exclusives'
@@ -10,6 +11,7 @@ import DexChips from '@/components/molecules/DexChips.vue'
 import CaughtFilterChips from '@/components/molecules/CaughtFilterChips.vue'
 import VersionFilterChip from '@/components/molecules/VersionFilterChip.vue'
 import AdvancedFilterChip from '@/components/molecules/AdvancedFilterChip.vue'
+import ListToggleChip from '@/components/molecules/ListToggleChip.vue'
 
 /** Linha de chips de filtro da listagem (jogo, tipo, Pokédex do jogo, captura e exclusivos de versão). */
 defineProps<{
@@ -27,6 +29,12 @@ defineProps<{
   simplified?: boolean
   /** Quantos filtros avançados estão ativos (chip "Filtros"). */
   advancedCount: number
+  /** Só as megas na lista. */
+  megaFilter: boolean
+  /** Megas da Pokédex atual; zero esconde a chip (região sem megas). */
+  megaCount: number
+  /** Listas com os artworks shiny. */
+  shiny: boolean
 }>()
 
 const emit = defineEmits<{
@@ -36,6 +44,8 @@ const emit = defineEmits<{
   selectCaught: [filter: CaughtFilter]
   openVersions: []
   openAdvanced: []
+  toggleMega: []
+  toggleShiny: []
 }>()
 
 const { t } = useI18n()
@@ -57,6 +67,20 @@ const { t } = useI18n()
       />
       <TypeFilterChip :types="types" @click="emit('openTypes')" />
       <AdvancedFilterChip :count="advancedCount" @click="emit('openAdvanced')" />
+      <ListToggleChip
+        v-if="megaFilter || megaCount > 0"
+        :label="t('home.megaFilter')"
+        :icon="mdiDna"
+        :active="megaFilter"
+        :count="megaCount || undefined"
+        @click="emit('toggleMega')"
+      />
+      <ListToggleChip
+        :label="t('home.shinyToggle')"
+        :icon="mdiShimmer"
+        :active="shiny"
+        @click="emit('toggleShiny')"
+      />
     </template>
     <template v-if="game && dex && game.dexes.length > 1">
       <v-divider vertical class="list-filters__divider" />

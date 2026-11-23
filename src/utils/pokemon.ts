@@ -38,11 +38,11 @@ export function artworkSrc(id: number, size: number, shiny = false): string {
  * tela renderizar. Mesma requisição do `<img>` (tamanho e crossorigin iguais), para cair no cache
  * dele.
  */
-export function preloadArtwork(id: number, size = HERO_ARTWORK_SIZE): void {
+export function preloadArtwork(id: number, size = HERO_ARTWORK_SIZE, shiny = false): void {
   const image = new Image()
   image.crossOrigin = 'anonymous'
   image.fetchPriority = 'high'
-  image.src = artworkSrc(id, size)
+  image.src = artworkSrc(id, size, shiny)
 }
 
 /** Sprite de item (PNG pequeno do repositório de sprites da PokéAPI): "oran-berry" -> URL. */

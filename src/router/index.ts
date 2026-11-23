@@ -4,6 +4,7 @@ import HomeView from '@/views/HomeView.vue'
 import { i18n } from '@/plugins/i18n'
 import { trackInAppNavigation } from '@/composables/usePageFocus'
 import { CARD_ARTWORK_SIZE, preloadArtwork } from '@/utils/pokemon'
+import { useListShiny } from '@/composables/useListShiny'
 import { usePokemonDetailStore } from '@/stores/pokemonDetail'
 import { usePokedexStore } from '@/stores/pokedex'
 import { gameContextFromQuery } from '@/utils/games'
@@ -30,7 +31,8 @@ const router = createRouter({
           return
         }
         if (Object.keys(to.query).length) return
-        for (let id = 1; id <= 4; id++) preloadArtwork(id, CARD_ARTWORK_SIZE)
+        const { shiny } = useListShiny()
+        for (let id = 1; id <= 4; id++) preloadArtwork(id, CARD_ARTWORK_SIZE, shiny.value)
       },
     },
     {

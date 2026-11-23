@@ -6,7 +6,9 @@ import {
   isMega,
   megaExistsIn,
   megaLabel,
+  megaEntriesOf,
   megaLineOf,
+  pokemonLabel,
   withoutMegas,
 } from '@/utils/megas'
 
@@ -159,5 +161,61 @@ describe('megaLineOf', () => {
     expect(megaLineOf(ZYGARDE, 10301, null)?.base.pokemonId).toBe(10120)
     expect(megaLineOf(FLOETTE, 670, null)).toBeNull()
     expect(megaLineOf(FLOETTE, 10296, null)?.base.pokemonId).toBe(10061)
+  })
+})
+
+describe('pokemonLabel', () => {
+  it('só as megas ganham o nome com "Mega" na frente', () => {
+    expect(pokemonLabel(10034, 'charizard-mega-x')).toBe('Mega Charizard X')
+    expect(pokemonLabel(10196, 'charizard-gmax')).toBe('Charizard Gmax')
+    expect(pokemonLabel(154, 'meganium')).toBe('Meganium')
+  })
+})
+
+describe('megaEntriesOf', () => {
+  const NAMES: Record<number, string> = {
+    10034: 'charizard-mega-x',
+    10035: 'charizard-mega-y',
+    10057: 'absol-mega',
+    10307: 'absol-mega-z',
+    10278: 'clefable-mega',
+  }
+  const nameOf = (id: number) => NAMES[id]
+
+  it('segue a ordem da Pokédex e leva os números da espécie', () => {
+    const dex = [
+      { id: 359, speciesId: 359, dexNumber: 1 },
+      { id: 25, speciesId: 25, dexNumber: 2 },
+      { id: 6, speciesId: 6, dexNumber: 3 },
+    ]
+    expect(megaEntriesOf(dex, 'legends-za', nameOf)).toEqual([
+      { id: 10057, name: 'absol-mega', speciesId: 359, dexNumber: 1 },
+      { id: 10307, name: 'absol-mega-z', speciesId: 359, dexNumber: 1 },
+      { id: 10034, name: 'charizard-mega-x', speciesId: 6, dexNumber: 3 },
+      { id: 10035, name: 'charizard-mega-y', speciesId: 6, dexNumber: 3 },
+    ])
+  })
+
+  it('só traz as megas que existem no jogo', () => {
+    const dex = [
+      { id: 36, speciesId: 36, dexNumber: 1 },
+      { id: 359, speciesId: 359, dexNumber: 2 },
+    ]
+    expect(megaEntriesOf(dex, 'x-y', nameOf).map((entry) => entry.id)).toEqual([10057])
+    expect(megaEntriesOf(dex, 'sword-shield', nameOf)).toEqual([])
+  })
+
+  it('na Nacional, as formas soltas não repetem as megas da espécie', () => {
+    const national = [{ id: 6 }, { id: 10034 }, { id: 10035 }, { id: 10196 }]
+    const result = megaEntriesOf(national, null, nameOf)
+    expect(result.map((entry) => entry.id)).toEqual([10034, 10035])
+    expect(result[0]?.speciesId).toBe(6)
+    expect(result[0]?.dexNumber).toBeUndefined()
+  })
+
+  it('forma regional na Pokédex conta como a espécie', () => {
+    expect(
+      megaEntriesOf([{ id: 10100, speciesId: 26, dexNumber: 1 }], 'legends-za', () => 'x'),
+    ).toHaveLength(2)
   })
 })

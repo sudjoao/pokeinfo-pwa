@@ -24,13 +24,16 @@ const side = computed(() => props.size ?? 120)
 const loaded = ref(false)
 /** Se o proxy (wsrv.nl) falhar, tenta uma vez o PNG original do repositório de sprites. */
 const fallback = ref(false)
+/** Algumas formas não têm artwork shiny na PokéAPI (ex.: Mega Garchomp Z): usa o normal. */
+const shinyMissing = ref(false)
 /** Nem o PNG original carregou: mostra a Poké Bola no lugar. */
 const failed = ref(false)
 
+const showShiny = computed(() => Boolean(props.shiny) && !shinyMissing.value)
 const src = computed(() =>
   fallback.value
-    ? artworkUrl(props.id, props.shiny)
-    : artworkSrc(props.id, side.value, props.shiny),
+    ? artworkUrl(props.id, showShiny.value)
+    : artworkSrc(props.id, side.value, showShiny.value),
 )
 
 // Reseta ao trocar de Pokémon (ex.: navegação interna entre Pokémon) para repetir a entrada.
@@ -39,13 +42,20 @@ watch(
   () => {
     loaded.value = false
     fallback.value = false
+    shinyMissing.value = false
     failed.value = false
   },
 )
 
 function onError(): void {
-  if (!fallback.value) fallback.value = true
-  else failed.value = true
+  if (!fallback.value) {
+    fallback.value = true
+  } else if (showShiny.value) {
+    shinyMissing.value = true
+    fallback.value = false
+  } else {
+    failed.value = true
+  }
 }
 </script>
 

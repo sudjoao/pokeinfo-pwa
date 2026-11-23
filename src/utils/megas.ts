@@ -64,6 +64,52 @@ export function megaLabel(name: string): string {
   return variant ? `Mega ${base} ${variant.toUpperCase()}` : `Mega ${base}`
 }
 
+/** Nome de exibição de um Pokémon ou forma: "Mega Charizard X" nas megas, o slug formatado no resto. */
+export function pokemonLabel(id: number, name: string): string {
+  return isMega(id) ? megaLabel(name) : formatPokemonName(name)
+}
+
+/** Espécie -> megas dela, em ordem de id (a da PokéAPI: X antes de Y, macho antes de fêmea). */
+const MEGAS_BY_SPECIES = new Map<number, number[]>()
+for (const id of [...DEBUT_OF.keys()].sort((a, b) => a - b)) {
+  const species = speciesIdOf(id)
+  MEGAS_BY_SPECIES.set(species, [...(MEGAS_BY_SPECIES.get(species) ?? []), id])
+}
+
+/** Entrada da lista de megas: a mega com o número (regional e nacional) da espécie. */
+export interface MegaListEntry {
+  id: number
+  name: string
+  speciesId: number
+  dexNumber?: number
+}
+
+/**
+ * Lista de megas de uma Pokédex: as das espécies presentes nela que existem no jogo, na ordem da
+ * Pokédex. `nameOf` resolve o slug pelo índice; uma mega fora dele fica de fora.
+ */
+export function megaEntriesOf(
+  entries: readonly { id: number; speciesId?: number; dexNumber?: number }[],
+  gameSlug: string | null,
+  nameOf: (id: number) => string | undefined,
+): MegaListEntry[] {
+  const result: MegaListEntry[] = []
+  const seen = new Set<number>()
+  for (const entry of entries) {
+    // A Nacional lista as formas soltas (sem `speciesId`): cada espécie entra uma vez só.
+    const speciesId = entry.speciesId ?? speciesIdOf(entry.id)
+    if (seen.has(speciesId)) continue
+    seen.add(speciesId)
+    for (const id of MEGAS_BY_SPECIES.get(speciesId) ?? []) {
+      const name = nameOf(id)
+      if (name && megaExistsIn(id, gameSlug)) {
+        result.push({ id, name, speciesId, dexNumber: entry.dexNumber })
+      }
+    }
+  }
+  return result
+}
+
 /** Formas da espécie sem as megas (que têm seção própria na tela de detalhe). */
 export function withoutMegas(varieties: readonly PokemonVariety[]): PokemonVariety[] {
   return varieties.filter((variety) => !isMega(variety.pokemonId))

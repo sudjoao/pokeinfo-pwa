@@ -25,6 +25,8 @@ const props = defineProps<{
   wide?: boolean
   /** Destino de cada card (vira link); sem ele o card é um botão de seleção (team builder). */
   linkTo?: (pokemon: PokemonListItem) => RouteLocationRaw
+  /** Mostra os artworks shiny. */
+  shiny?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -101,6 +103,7 @@ const intersectOptions = { rootMargin: '0px 0px 1200px 0px' }
           selectable,
           wide,
           linkTo,
+          shiny,
           index,
         ]"
         class="pokemon-grid__cell"
@@ -115,6 +118,7 @@ const intersectOptions = { rootMargin: '0px 0px 1200px 0px' }
           :selected="selectedIds?.has(pokemon.id)"
           :selectable="selectable"
           :link-to="linkTo"
+          :shiny="shiny"
           :priority="index < PRIORITY_CARDS"
           @select="emit('select', $event)"
           @toggle-caught="emit('toggleCaught', $event)"

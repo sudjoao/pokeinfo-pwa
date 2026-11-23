@@ -3,7 +3,8 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { mdiCheckCircle } from '@mdi/js'
 import type { PokemonIndexEntry } from '@/types/pokemon'
-import { formatDexNumber, formatPokemonName } from '@/utils/pokemon'
+import { formatDexNumber } from '@/utils/pokemon'
+import { pokemonLabel } from '@/utils/megas'
 import PokemonAvatar from '@/components/atoms/PokemonAvatar.vue'
 import { prefersReducedMotion } from '@/composables/usePrefersReducedMotion'
 
@@ -20,6 +21,8 @@ const props = defineProps<{
   /** Modo de seleção múltipla: tocar seleciona (ids da forma), em vez de marcar a captura. */
   selecting?: boolean
   selectedIds?: ReadonlySet<number>
+  /** Mostra os artworks shiny. */
+  shiny?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -54,7 +57,7 @@ function isCaught(entry: BoxEntry): boolean {
 function numberOf(entry: BoxEntry): string {
   return entry.dexNumber !== undefined
     ? formatDexNumber(entry.dexNumber, 3)
-    : formatDexNumber(entry.id)
+    : formatDexNumber(speciesOf(entry))
 }
 
 function rangeOf(box: readonly BoxEntry[]): string {
@@ -84,7 +87,7 @@ function pressedOf(entry: BoxEntry): boolean | undefined {
 }
 
 function labelOf(entry: BoxEntry): string {
-  const label = `${numberOf(entry)} ${formatPokemonName(entry.name)}`
+  const label = `${numberOf(entry)} ${pokemonLabel(entry.id, entry.name)}`
   // Selecionando, o aria-pressed fala da seleção: a captura vai no nome.
   return props.selecting && isCaught(entry) ? `${label} (${t('catch.caught')})` : label
 }
@@ -172,6 +175,7 @@ function onCell(entry: BoxEntry, event: MouseEvent): void {
               :id="entry.id"
               :name="entry.name"
               :size="44"
+              :shiny="shiny"
               decorative
               class="pokemon-boxes__avatar"
             />

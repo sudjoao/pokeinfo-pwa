@@ -9,6 +9,8 @@ const props = defineProps<{
   size?: number
   /** O nome já está escrito ao lado: a imagem sai da árvore de acessibilidade (alt vazio). */
   decorative?: boolean
+  /** Versão shiny; sem artwork shiny (algumas formas), cai para o normal. */
+  shiny?: boolean
 }>()
 
 const label = computed(() => formatPokemonName(props.name))
@@ -16,13 +18,29 @@ const side = computed(() => `${props.size ?? 28}px`)
 
 /** Se o proxy (wsrv.nl) falhar, cai para o PNG original, como no PokemonArtwork. */
 const fallback = ref(false)
+const shinyMissing = ref(false)
 watch(
-  () => props.id,
-  () => (fallback.value = false),
+  () => [props.id, props.shiny],
+  () => {
+    fallback.value = false
+    shinyMissing.value = false
+  },
 )
+const showShiny = computed(() => Boolean(props.shiny) && !shinyMissing.value)
 const src = computed(() =>
-  fallback.value ? artworkUrl(props.id) : artworkSrc(props.id, props.size ?? 28),
+  fallback.value
+    ? artworkUrl(props.id, showShiny.value)
+    : artworkSrc(props.id, props.size ?? 28, showShiny.value),
 )
+
+function onError(): void {
+  if (!fallback.value) {
+    fallback.value = true
+  } else if (showShiny.value) {
+    shinyMissing.value = true
+    fallback.value = false
+  }
+}
 </script>
 
 <template>
@@ -37,7 +55,7 @@ const src = computed(() =>
     crossorigin="anonymous"
     class="pokemon-avatar"
     :style="{ width: side, height: side }"
-    @error="fallback = true"
+    @error="onError"
   />
 </template>
 

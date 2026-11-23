@@ -7,6 +7,19 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 
 ## [Não lançado]
 
+### Adicionado
+
+- Listagem: chip **Megas** para ver só as Mega Evoluções da Pokédex atual, com a contagem. Aparece
+  na Pokédex Nacional e nas regiões que têm megas no jogo escolhido, e combina com busca, tipo,
+  captura e os demais filtros.
+- Listagem: chip **Shiny** para mostrar os Pokémon nas cores shiny, nos cards e nas caixas. A
+  escolha vale para todos os jogos e fica salva no aparelho. As poucas formas sem artwork shiny na
+  PokéAPI aparecem na versão normal.
+
+### Alterado
+
+- Na listagem, as megas aparecem como "Mega Charizard X", com o número nacional da espécie.
+
 ## [1.15.0] - 2026-11-15
 
 ### Adicionado

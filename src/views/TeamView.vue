@@ -23,9 +23,12 @@ import VersionPickerSheet from '@/components/organisms/VersionPickerSheet.vue'
 import AdvancedFilterSheet from '@/components/organisms/AdvancedFilterSheet.vue'
 import { usePokemonData } from '@/composables/usePokemonData'
 import { useOverlayFocusReturn } from '@/composables/useOverlayFocusReturn'
+import { useListShiny } from '@/composables/useListShiny'
 import TeamPanel from '@/components/organisms/TeamPanel.vue'
 import TeamTray from '@/components/organisms/TeamTray.vue'
 import TeamOverlays from '@/components/organisms/TeamOverlays.vue'
+
+const { shiny, toggleShiny } = useListShiny()
 
 const {
   query,
@@ -46,6 +49,9 @@ const {
   toggleAvailability,
   clearAvailability,
   availabilityCounts,
+  megaFilter,
+  megaCount,
+  toggleMegaFilter,
   caughtIds,
   caughtCount,
   missingCount,
@@ -137,6 +143,11 @@ function goBack(): void {
         @open-game="pickerOpen = true"
         @open-types="typesOpen = true"
         :advanced-count="advancedCount"
+        :mega-filter="megaFilter"
+        :mega-count="megaCount"
+        :shiny="shiny"
+        @toggle-mega="toggleMegaFilter"
+        @toggle-shiny="toggleShiny"
         @open-versions="versionsOpen = true"
         @open-advanced="openAdvanced"
         @select-dex="setDex"
@@ -181,6 +192,7 @@ function goBack(): void {
           :error-message="errorMessage"
           :caught-ids="game ? caughtIds : undefined"
           :selected-ids="actions.teamIds.value"
+          :shiny="shiny"
           wide
           @load="loadMore"
           @retry="retry"
