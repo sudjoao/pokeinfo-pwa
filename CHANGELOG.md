@@ -7,6 +7,8 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 
 ## [Não lançado]
 
+## [1.16.0] - 2026-11-23
+
 ### Adicionado
 
 - Listagem: chip **Megas** para ver só as Mega Evoluções da Pokédex atual, com a contagem. Aparece
@@ -602,7 +604,8 @@ Primeira versão estável da Pokédex em formato de PWA, consumindo a [PokéAPI]
 - As marcações de captura ficam só no aparelho, sem sincronização entre dispositivos.
 - Os gritos vêm só em `.ogg`; em navegadores sem suporte o botão de som não aparece.
 
-[Não lançado]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.15.0...HEAD
+[Não lançado]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.16.0...HEAD
+[1.16.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.15.0...v1.16.0
 [1.15.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.14.1...v1.15.0
 [1.14.1]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.14.0...v1.14.1
 [1.14.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.13.0...v1.14.0
