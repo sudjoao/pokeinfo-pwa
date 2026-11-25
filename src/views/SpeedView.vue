@@ -11,6 +11,7 @@ import { speciesIdOf } from '@/utils/forms'
 import { hasMegaEvolution } from '@/utils/megas'
 import { formatPokemonName } from '@/utils/pokemon'
 import { speedValues, type SpeedModifiers, type SpeedValues } from '@/utils/speed'
+import { nameMatches, normalizeSearch } from '@/utils/search'
 import DetailLayout from '@/components/templates/DetailLayout.vue'
 import SearchField from '@/components/molecules/SearchField.vue'
 import PokemonAvatar from '@/components/atoms/PokemonAvatar.vue'
@@ -123,10 +124,8 @@ const rows = computed<SpeedRow[]>(() => {
 const teamRows = computed(() => rows.value.filter((row) => team.value.includes(row.id)))
 
 const filtered = computed(() => {
-  const term = (debouncedSearch.value ?? '').trim().toLowerCase()
-  return term
-    ? rows.value.filter((row) => row.name.includes(term.replace(/\s+/g, '-')))
-    : rows.value
+  const term = normalizeSearch(debouncedSearch.value ?? '')
+  return term ? rows.value.filter((row) => nameMatches(row.name, term)) : rows.value
 })
 watch([debouncedSearch, level, game], () => (shown.value = PAGE))
 

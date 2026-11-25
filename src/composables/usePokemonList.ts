@@ -22,6 +22,7 @@ import { useDebouncedRef } from '@/composables/useDebouncedRef'
 import { buildDexList, findGame, resolveDex } from '@/utils/games'
 import { saveGame } from '@/utils/lastGame'
 import { describeError } from '@/utils/errors'
+import { nameMatches, normalizeSearch, searchNumber } from '@/utils/search'
 import { formatHeight, formatWeight, isPokemonType } from '@/utils/pokemon'
 import { exclusiveVersionOf, exclusiveVersions } from '@/utils/exclusives'
 import { hasMegaEvolution, megaEntriesOf } from '@/utils/megas'
@@ -62,17 +63,19 @@ function speciesOf(entry: ListSource): number {
   return entry.speciesId ?? entry.id
 }
 
-/** Predicado de busca já resolvido para a query (número ou trecho do nome). */
+/**
+ * Predicado de busca já resolvido para a query (número ou trecho do nome). O número casa o regional
+ * da Pokédex do jogo e também o nacional ("25" em Sword/Shield acha o #25 de Galar e o Pikachu):
+ * quem decora os números nacionais não precisa saber qual dos dois a lista está mostrando.
+ */
 function matcherFor(query: string): (entry: ListSource) => boolean {
   if (!query) return () => true
-  if (/^\d+$/.test(query)) {
-    const number = Number(query)
-    return (entry) =>
-      entry.dexNumber === undefined
-        ? (entry.speciesId ?? entry.id) === number
-        : entry.dexNumber === number
+  const number = searchNumber(query)
+  if (number !== null) {
+    return (entry) => speciesOf(entry) === number || entry.dexNumber === number
   }
-  return (entry) => entry.name.includes(query)
+  const normalized = normalizeSearch(query)
+  return (entry) => nameMatches(entry.name, normalized)
 }
 
 function queryParam(value: unknown): string | null {

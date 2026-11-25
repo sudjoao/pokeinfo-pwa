@@ -7,6 +7,13 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 
 ## [Não lançado]
 
+### Corrigido
+
+- Busca da Pokédex (e da tela de Velocidade): "mr mime", "Mr. Mime", "flabébé", "farfetch'd",
+  "type: null" e "ho oh" agora acham o Pokémon (a comparação ignora acentos, maiúsculas, espaços,
+  pontos e apóstrofos). "#25" e "nº 25" valem como número. Com um jogo escolhido, o número acha
+  tanto o regional quanto o nacional (antes, "25" em Sword/Shield só achava o #25 de Galar).
+
 ### Adicionado
 
 - Conta: na conta de quem mantém o projeto, cada sincronização concluída pode fazer algumas

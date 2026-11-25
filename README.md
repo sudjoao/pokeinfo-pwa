@@ -7,12 +7,14 @@ na tela inicial do iPhone e funcionar mesmo offline, consumindo dados da [PokéA
 ## Funcionalidades
 
 - Listagem de todos os Pokémon com **scroll infinito** (lotes de 24).
-- **Busca** por nome (parcial, ex.: `pika`) ou por número da Pokédex (ex.: `25`), refletida na URL (`?q=pika`).
+- **Busca** por nome (parcial, ex.: `pika`; sem distinguir acento, espaço, ponto ou apóstrofo:
+  `mr mime`, `flabebe`, `farfetch'd`) ou por número da Pokédex (ex.: `25` ou `#025`), refletida na
+  URL (`?q=pika`).
 - **Pokédex por jogo**: escolha um jogo da série principal (de Red/Blue a Legends: Z-A) e veja a
   Pokédex regional dele na ordem do jogo, com o número regional em destaque e o nacional ao lado.
   Jogos com mais de uma Pokédex (Kalos, ilhas de Alola, DLCs de Galar e Paldea…) ganham chips para
   alternar entre elas. Nas regiões com formas regionais (Alola, Galar, Hisui, Paldea) o card já
-  mostra a forma daquela região. A busca numérica passa a usar o número regional. Tudo fica na URL
+  mostra a forma daquela região. A busca numérica acha o número regional e também o nacional. Tudo fica na URL
   (`?game=sword-shield&dex=crown-tundra&q=snom`). Ao abrir um Pokémon a partir de um jogo, a tela
   de detalhes mostra o número regional e o anterior/próximo seguem a ordem da Pokédex daquele jogo.
 - Cards no padrão **Material Design 3** com artwork oficial, número, nome e tipos traduzidos.
