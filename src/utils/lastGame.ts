@@ -32,13 +32,30 @@ export function saveGame(game: Game | null, dex: GameDex | null): void {
   writeStorage(STORAGE_KEY, value)
 }
 
+/** Últimos jogos escolhidos (slugs, do mais recente ao mais antigo), para o seletor de jogo. */
+const RECENT_KEY = 'pokeinfo:recent-games:v1'
+export const MAX_RECENT_GAMES = 3
+
+export function recentGames(): string[] {
+  const saved = readStorage<unknown[]>(RECENT_KEY)
+  if (!Array.isArray(saved)) return []
+  return saved.filter((slug): slug is string => typeof slug === 'string' && findGame(slug) !== null)
+}
+
+/** Põe o jogo no topo dos recentes (sem repetir); "Todos os jogos" não entra. */
+export function rememberRecentGame(game: Game | null): void {
+  if (!game) return
+  const next = [game.slug, ...recentGames().filter((slug) => slug !== game.slug)]
+  writeStorage(RECENT_KEY, next.slice(0, MAX_RECENT_GAMES))
+}
+
 /**
  * Parâmetros que, em cada tela, não dizem nada sobre o jogo: só com eles na URL (ou sem nenhum) a
  * tela é aberta "do zero" e recebe o jogo salvo. Com qualquer outro (busca, tipo, um link
  * compartilhado com filtros), a URL é respeitada como veio.
  */
 const NEUTRAL_KEYS: Partial<Record<string, readonly string[]>> = {
-  home: ['fav', 'layout'],
+  home: ['fav', 'layout', 'tab'],
   // Um link de time sem jogo é um time da Pokédex nacional: não pode cair no time do jogo salvo.
   team: [],
   moves: ['mode'],

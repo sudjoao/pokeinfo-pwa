@@ -21,6 +21,12 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 - Calculadora de IVs: EV acima de 252 (ou negativo) é corrigido ao digitar, e passar de 510 no total
   mostra o limite.
 - Textos do backup e da conta agora citam times e o Pokémon do dia, que já entravam nos dois.
+- Pokémon do dia, Velocidade, Naturezas e IVs e Quiz: se a tabela de Pokémon não baixar (offline
+  sem cache), aparece um erro com "Tentar novamente" em vez de um esqueleto para sempre; e a
+  tentativa seguinte de fato baixa de novo (uma falha ficava guardada até recarregar a página).
+- Velocidade: erro ao carregar a Pokédex do jogo ganhou "Tentar novamente".
+- Quando copiar para a área de transferência falha (link de backup, time para o Showdown), o texto
+  aparece num diálogo já selecionado para copiar à mão, em vez de um aviso com o texto inteiro.
 - Busca da Pokédex (e da tela de Velocidade): "mr mime", "Mr. Mime", "flabébé", "farfetch'd",
   "type: null" e "ho oh" agora acham o Pokémon (a comparação ignora acentos, maiúsculas, espaços,
   pontos e apóstrofos). "#25" e "nº 25" valem como número. Com um jogo escolhido, o número acha
@@ -28,6 +34,17 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 
 ### Adicionado
 
+- Ficha do Pokémon: botão para pôr (ou tirar) o Pokémon no time do jogo aberto, sem passar pelo
+  team builder.
+- Seletor de jogo: bloco **Recentes** no topo com os últimos jogos usados, e a lista abre já
+  rolada no jogo selecionado (os jogos atuais ficavam no fim de uma lista de ~30).
+- A aba da Home (Pokémon, Time, Rotas, Líderes) vai na URL (`?tab=routes`) e fica salva: o app
+  reabre na última aba usada, e um link leva à aba certa. "Favoritos" no menu e links com busca ou
+  filtros voltam para a aba Pokémon.
+- Pokémon do dia, modo treino: "Revelar a resposta" encerra a partida sem gastar os palpites (não
+  conta nas estatísticas).
+- Quiz: as gerações escolhidas e a sequência atual ficam salvas entre visitas.
+- Rotas: a chave "só os que faltam" fica salva no aparelho.
 - Busca: Esc limpa o campo; com o campo vazio, sai dele.
 - Conta: na conta de quem mantém o projeto, cada sincronização concluída pode fazer algumas
   consultas a mais ao banco (no máximo uma rodada a cada 12 h por aparelho), e um workflow do

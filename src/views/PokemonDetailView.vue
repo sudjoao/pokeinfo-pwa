@@ -17,6 +17,7 @@ import {
   mdiImageOutline,
   mdiLinkVariant,
   mdiShareVariant,
+  mdiSwordCross,
 } from '@mdi/js'
 import { usePokemonDetail, type NeighborEntry } from '@/composables/usePokemonDetail'
 import { useCry } from '@/composables/useCry'
@@ -40,6 +41,7 @@ import { useShareImage } from '@/composables/useShareImage'
 import { useAbilityInfo } from '@/composables/useAbilityInfo'
 import { useEggCompatibility } from '@/composables/useEggCompatibility'
 import { useSwipe } from '@/composables/useSwipe'
+import { useTeam } from '@/composables/useTeam'
 import { useShortcut } from '@/composables/useShortcut'
 import { shareLink } from '@/composables/useShare'
 import DetailLayout from '@/components/templates/DetailLayout.vue'
@@ -274,6 +276,25 @@ useShortcut(['ArrowLeft', 'ArrowRight'], (event) => {
 
 const notice = ref<string | null>(null)
 
+/** Time do jogo da URL (um por jogo, salvo no aparelho): o botão do cabeçalho põe e tira a forma aberta. */
+const team = useTeam(() => context.value?.game)
+const inTeam = computed(() => !!detail.value && team.has(detail.value.id))
+
+function toggleTeam(): void {
+  const current = detail.value
+  const game = context.value?.game
+  if (!current || !game) return
+  const result = team.toggle(current.id)
+  const name = formatPokemonName(current.name)
+  notice.value =
+    result === 'full'
+      ? t('team.full')
+      : t(result === 'added' ? 'team.addedFromDetail' : 'team.removedFromDetail', {
+          name,
+          game: game.title,
+        })
+}
+
 function share(): void {
   if (!detail.value) return
   shareLink(title.value, window.location.href).then((result) => {
@@ -333,6 +354,17 @@ async function sendShareImage(): Promise<void> {
           />
         </v-list>
       </v-menu>
+      <v-btn
+        v-if="detail && context"
+        :icon="mdiSwordCross"
+        :variant="inTeam ? 'flat' : 'text'"
+        :color="inTeam ? 'primary' : undefined"
+        :aria-pressed="inTeam"
+        :aria-label="
+          t(inTeam ? 'team.removeFromDetail' : 'team.addFromDetail', { game: context.game.title })
+        "
+        @click="toggleTeam"
+      />
       <v-btn
         v-if="detail"
         :icon="mdiCompareHorizontal"

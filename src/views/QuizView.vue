@@ -28,8 +28,15 @@ onMounted(() => {
   pokemonData.load().catch(() => {})
 })
 
-/** Gerações do sorteio (vazio = todas). */
-const generations = ref<number[]>([])
+/** Gerações do sorteio (vazio = todas); a escolha e a sequência atual voltam na próxima visita. */
+const GENERATIONS_KEY = 'pokeinfo:quiz-gens:v1'
+const STREAK_KEY = 'pokeinfo:quiz-streak:v1'
+const generations = ref<number[]>(
+  (readStorage<unknown[]>(GENERATIONS_KEY) ?? []).filter((value): value is number =>
+    Number.isInteger(value),
+  ),
+)
+watch(generations, (value) => writeStorage(GENERATIONS_KEY, value))
 
 const pool = computed<PokemonIndexEntry[]>(() => {
   const rows = pokemonData.table.value?.rows
@@ -48,7 +55,8 @@ const answer = ref<PokemonIndexEntry | null>(null)
 const choices = ref<PokemonIndexEntry[]>([])
 const guess = ref<number | null>(null)
 const revealed = computed(() => guess.value !== null)
-const streak = ref(0)
+const streak = ref(readStorage<number>(STREAK_KEY) ?? 0)
+watch(streak, (value) => writeStorage(STREAK_KEY, value))
 const best = ref(readStorage<number>(BEST_KEY) ?? 0)
 
 function next(): void {
@@ -213,7 +221,14 @@ function goBack(): void {
           </div>
         </v-card-text>
       </v-card>
-      <v-skeleton-loader aria-hidden="true" v-else type="image, button@2" />
+      <EmptyState
+        v-else-if="pokemonData.error.value && !pokemonData.table.value"
+        variant="error"
+        :title="t('error.loadTable')"
+        :action-label="t('common.retry')"
+        @action="pokemonData.load().catch(() => {})"
+      />
+      <v-skeleton-loader v-else aria-hidden="true" type="image, button@2" />
     </div>
   </DetailLayout>
 </template>

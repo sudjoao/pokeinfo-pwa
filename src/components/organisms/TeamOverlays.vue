@@ -2,6 +2,7 @@
 import { useI18n } from 'vue-i18n'
 import type { TeamActions } from '@/composables/useTeamActions'
 import AppNotice from '@/components/molecules/AppNotice.vue'
+import CopyTextDialog from '@/components/molecules/CopyTextDialog.vue'
 import ShowdownImportDialog from '@/components/organisms/ShowdownImportDialog.vue'
 import ShareImageDialog from '@/components/organisms/ShareImageDialog.vue'
 
@@ -28,6 +29,7 @@ const a = props.actions
     @close="a.undo.value = null"
   />
   <ShowdownImportDialog v-model="a.importOpen.value" @import="a.pasteShowdown" />
+  <CopyTextDialog v-model="a.copyFallback.value" />
   <ShareImageDialog
     v-model="a.shareImage.open.value"
     :status="a.shareImage.status.value"

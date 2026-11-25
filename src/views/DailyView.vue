@@ -31,6 +31,7 @@ import {
   type TypeClue,
 } from '@/utils/daily'
 import DetailLayout from '@/components/templates/DetailLayout.vue'
+import EmptyState from '@/components/molecules/EmptyState.vue'
 import PokemonArtwork from '@/components/atoms/PokemonArtwork.vue'
 import PokemonAvatar from '@/components/atoms/PokemonAvatar.vue'
 import TypeChip from '@/components/atoms/TypeChip.vue'
@@ -70,6 +71,8 @@ onBeforeUnmount(() => clearInterval(timer))
 
 const practiceAnswer = ref(randomSpecies())
 const practiceGuesses = ref<number[]>([])
+/** No treino, "Revelar" encerra a partida sem gastar os palpites (não conta nas estatísticas). */
+const practiceRevealed = ref(false)
 
 function randomSpecies(): number {
   return 1 + Math.floor(Math.random() * DAILY_SPECIES)
@@ -88,7 +91,10 @@ const guesses = computed(() =>
     : practiceGuesses.value,
 )
 const won = computed(() => guesses.value.includes(answer.value))
-const done = computed(() => won.value || guesses.value.length >= DAILY_MAX_GUESSES)
+const revealed = computed(() => mode.value === 'practice' && practiceRevealed.value)
+const done = computed(
+  () => won.value || revealed.value || guesses.value.length >= DAILY_MAX_GUESSES,
+)
 
 function factsOf(id: number): DailyFacts | null {
   const row = pokemonData.table.value?.rows[id]
@@ -151,6 +157,12 @@ function submit(id: number | null): void {
 function newPractice(): void {
   practiceAnswer.value = randomSpecies()
   practiceGuesses.value = []
+  practiceRevealed.value = false
+}
+
+function revealPractice(): void {
+  practiceRevealed.value = true
+  announce(t('daily.lost', { name: answerName.value }))
 }
 
 watch(mode, () => (selection.value = null))
@@ -230,7 +242,14 @@ function goBack(): void {
 
       <p class="text-body-medium mb-0">{{ t('daily.intro', { n: DAILY_MAX_GUESSES }) }}</p>
 
-      <v-card v-if="!ready">
+      <EmptyState
+        v-if="!ready && pokemonData.error.value"
+        variant="error"
+        :title="t('error.loadTable')"
+        :action-label="t('common.retry')"
+        @action="pokemonData.load().catch(() => {})"
+      />
+      <v-card v-else-if="!ready">
         <v-skeleton-loader aria-hidden="true" type="list-item-two-line@2" />
       </v-card>
 
@@ -246,7 +265,13 @@ function goBack(): void {
             </div>
             <template v-if="done">
               <p class="text-title-medium mb-0" role="status">
-                {{ won ? t('daily.wonTitle', guesses.length) : t('daily.lostTitle') }}
+                {{
+                  won
+                    ? t('daily.wonTitle', guesses.length)
+                    : revealed
+                      ? t('daily.revealedTitle')
+                      : t('daily.lostTitle')
+                }}
               </p>
               <RouterLink :to="{ name: 'pokemon', params: { id: answer } }" class="text-body-large">
                 {{ answerName }}
@@ -278,6 +303,14 @@ function goBack(): void {
             auto-select-first
             @update:model-value="submit"
           />
+          <v-btn
+            v-if="mode === 'practice'"
+            variant="text"
+            class="align-self-start"
+            @click="revealPractice"
+          >
+            {{ t('daily.reveal') }}
+          </v-btn>
           <v-btn
             v-if="cry.supported && wrongCount >= CRY_HINT_AFTER"
             variant="tonal"

@@ -332,6 +332,13 @@ function goBack(): void {
         </v-card>
 
         <v-card v-if="!pokemonId" class="pa-4 opacity-70">{{ t('statsTool.pickPokemon') }}</v-card>
+        <EmptyState
+          v-else-if="!base && pokemonData.error.value"
+          variant="error"
+          :title="t('error.loadTable')"
+          :action-label="t('common.retry')"
+          @action="pokemonData.load().catch(() => {})"
+        />
         <v-card v-else-if="!base">
           <v-skeleton-loader aria-hidden="true" type="table-tbody" />
         </v-card>

@@ -50,6 +50,7 @@ import TypePickerSheet from '@/components/organisms/TypePickerSheet.vue'
 import VersionPickerSheet from '@/components/organisms/VersionPickerSheet.vue'
 import { useMountOnOpen } from '@/composables/useMountOnOpen'
 import { usePokemonData } from '@/composables/usePokemonData'
+import { readStorage, writeStorage } from '@/utils/storage'
 
 // Só usados ao abrir as abas "Rotas" (com ~170 KB de dados), "Líderes" e "Time" e o sheet de filtros
 // (VSelect, VSlider…): ficam fora do carregamento inicial.
@@ -66,6 +67,7 @@ const ExportListSheet = defineAsyncComponent(
 const {
   query,
   games,
+  recentGames,
   game,
   dex,
   setGame,
@@ -160,7 +162,37 @@ type HomeTab = 'pokemon' | 'team' | 'routes' | 'leaders'
  * de encontro selecionado e "leaders" com um jogo que tem ginásios/Elite 4 (Legends: Arceus e Z-A
  * não têm).
  */
-const view = ref<HomeTab>('pokemon')
+const TAB_KEY = 'pokeinfo:home-tab:v1'
+const HOME_TABS: readonly HomeTab[] = ['pokemon', 'team', 'routes', 'leaders']
+function tabParam(value: unknown): HomeTab | null {
+  return typeof value === 'string' && (HOME_TABS as readonly string[]).includes(value)
+    ? (value as HomeTab)
+    : null
+}
+/**
+ * A aba vai na URL (`?tab=routes`, para o link e o recarregar) e fica salva no aparelho: quem joga
+ * pela aba Rotas reabre o app nela. Sem `tab` na URL, vale a salva só na abertura; depois, uma URL
+ * sem `tab` (o "Favoritos" do menu, um link com busca) é a aba Pokémon, onde esses filtros vivem.
+ */
+const view = ref<HomeTab>(
+  tabParam(route.query.tab) ?? tabParam(readStorage<string>(TAB_KEY)) ?? 'pokemon',
+)
+watch(view, (value) => {
+  writeStorage(TAB_KEY, value)
+  const query = { ...route.query }
+  if (value === 'pokemon') delete query.tab
+  else query.tab = value
+  if ((query.tab ?? null) !== (route.query.tab ?? null)) router.replace({ query })
+})
+watch(
+  () => route.query.tab,
+  (value) => {
+    if (route.name !== 'home') return
+    const next = tabParam(value) ?? 'pokemon'
+    if (next !== view.value) view.value = next
+  },
+)
+if (view.value !== 'pokemon') router.replace({ query: { ...route.query, tab: view.value } })
 const hasRoutesTab = computed(() => !!game.value && ROUTE_GAMES.has(game.value.slug))
 const hasLeadersTab = computed(() => !!game.value && hasLeague(game.value.slug))
 // Trocar de jogo mantém a aba (o Time mostra o do jogo novo); só volta para Pokémon se ela sumiu.
@@ -644,6 +676,7 @@ onActivated(() => {
     <GamePickerSheet
       v-model="pickerOpen"
       :games="games"
+      :recent="recentGames"
       :selected="game?.slug ?? null"
       @select="setGame"
     />

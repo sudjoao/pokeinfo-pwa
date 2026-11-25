@@ -20,7 +20,7 @@ import {
 } from '@/utils/advancedFilters'
 import { useDebouncedRef } from '@/composables/useDebouncedRef'
 import { buildDexList, findGame, resolveDex } from '@/utils/games'
-import { saveGame } from '@/utils/lastGame'
+import { recentGames, rememberRecentGame, saveGame } from '@/utils/lastGame'
 import { describeError } from '@/utils/errors'
 import { nameMatches, normalizeSearch, searchNumber } from '@/utils/search'
 import { battleTypes } from '@/utils/typeChart'
@@ -543,6 +543,25 @@ export function usePokemonList() {
   // A escolha de jogo/Pokédex vale para a próxima visita (o router a devolve à URL).
   watch([() => game.value?.slug, () => dex.value?.slug], () => saveGame(game.value, dex.value))
 
+  /** Jogos usados por último (fora o atual), no topo do seletor de jogo. */
+  const recent = ref<string[]>(recentGames())
+  watch(
+    () => game.value?.slug,
+    () => {
+      rememberRecentGame(game.value)
+      recent.value = recentGames()
+    },
+    { immediate: true },
+  )
+  const recentGameList = computed<Game[]>(() =>
+    recent.value
+      .filter((slug) => slug !== game.value?.slug)
+      .flatMap((slug) => {
+        const found = findGame(slug)
+        return found ? [found] : []
+      }),
+  )
+
   // Qualquer filtro novo reinicia a lista e volta ao topo (a URL muda por replace, que não rola).
   watch(
     [
@@ -565,6 +584,7 @@ export function usePokemonList() {
   return {
     query,
     games: GAMES,
+    recentGames: recentGameList,
     game,
     dex,
     setGame,

@@ -16,6 +16,7 @@
     "signInTitle": "Entrar · PokeInfo"
   },
   "common": {
+    "copyManually": "Não deu para copiar automaticamente. Selecione o texto e copie:",
     "retry": "Tentar novamente",
     "back": "Voltar",
     "national": "Nac.",
@@ -44,6 +45,7 @@
     "searchLabel": "Buscar Pokémon",
     "gameFilterLabel": "Filtros da lista",
     "allGames": "Todos os jogos",
+    "recentGames": "Recentes",
     "nationalDex": "Pokédex Nacional",
     "pickGame": "Filtrar por jogo",
     "chooseGame": "Escolher jogo",
@@ -296,7 +298,8 @@
   "error": {
     "network": "Sem conexão com a PokéAPI. Confira a internet e tente de novo.",
     "http": "A PokéAPI está com problemas (erro {status}). Tente de novo em instantes.",
-    "loadDex": "Não foi possível carregar a Pokédex."
+    "loadDex": "Não foi possível carregar a Pokédex.",
+    "loadTable": "Não foi possível carregar a tabela de Pokémon."
   },
   "typeFilter": {
     "chip": "Tipo",
@@ -349,7 +352,11 @@
     "suggestionsFull": "Time completo: remova um Pokémon para adicionar uma sugestão.",
     "share": "Compartilhar time",
     "cleared": "Time limpo.",
-    "removed": "{name} saiu do time."
+    "removed": "{name} saiu do time.",
+    "addFromDetail": "Adicionar ao time de {game}",
+    "removeFromDetail": "Tirar do time de {game}",
+    "addedFromDetail": "{name} entrou no time de {game}.",
+    "removedFromDetail": "{name} saiu do time de {game}."
   },
   "versionFilter": {
     "chip": "Versão",
@@ -1034,6 +1041,8 @@
     "lost": "Acabaram os palpites. Era {name}.",
     "wonTitle": "Acertou em {n} palpite! | Acertou em {n} palpites!",
     "lostTitle": "Não foi desta vez. Era:",
+    "reveal": "Revelar a resposta",
+    "revealedTitle": "Era:",
     "share": "Compartilhar resultado",
     "again": "Jogar de novo",
     "next": "Próximo Pokémon em {h} h {m} min",

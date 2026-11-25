@@ -33,6 +33,8 @@ export function useTeamActions(team: Team, options: TeamActionsOptions) {
 
   const fullNotice = ref(false)
   const notice = ref<string | null>(null)
+  /** Texto do Showdown para copiar à mão quando o clipboard falha. */
+  const copyFallback = ref<string | null>(null)
   const importOpen = ref(false)
 
   /** Limpar, remover pelo painel ou importar por cima não tem volta pelo navegador: o aviso oferece desfazer. */
@@ -129,7 +131,7 @@ export function useTeamActions(team: Team, options: TeamActionsOptions) {
     navigator.clipboard
       .writeText(text)
       .then(() => (notice.value = t('team.exported')))
-      .catch(() => (notice.value = text))
+      .catch(() => (copyFallback.value = text))
   }
 
   function pasteShowdown(text: string): void {
@@ -146,6 +148,7 @@ export function useTeamActions(team: Team, options: TeamActionsOptions) {
   }
 
   return {
+    copyFallback,
     fullNotice,
     notice,
     importOpen,

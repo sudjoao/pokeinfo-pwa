@@ -16,6 +16,7 @@
     "signInTitle": "Sign in · PokeInfo"
   },
   "common": {
+    "copyManually": "Automatic copy failed. Select the text and copy it:",
     "retry": "Try again",
     "back": "Back",
     "national": "Nat.",
@@ -44,6 +45,7 @@
     "searchLabel": "Search Pokémon",
     "gameFilterLabel": "List filters",
     "allGames": "All games",
+    "recentGames": "Recent",
     "nationalDex": "National Pokédex",
     "pickGame": "Filter by game",
     "chooseGame": "Choose a game",
@@ -296,7 +298,8 @@
   "error": {
     "network": "Couldn't reach the PokéAPI. Check your connection and try again.",
     "http": "The PokéAPI is having trouble (error {status}). Try again in a moment.",
-    "loadDex": "Couldn't load the Pokédex."
+    "loadDex": "Couldn't load the Pokédex.",
+    "loadTable": "Could not load the Pokémon table."
   },
   "typeFilter": {
     "chip": "Type",
@@ -349,7 +352,11 @@
     "suggestionsFull": "Team is full: remove a Pokémon to add a suggestion.",
     "share": "Share team",
     "cleared": "Team cleared.",
-    "removed": "{name} removed from the team."
+    "removed": "{name} removed from the team.",
+    "addFromDetail": "Add to the {game} team",
+    "removeFromDetail": "Remove from the {game} team",
+    "addedFromDetail": "{name} joined the {game} team.",
+    "removedFromDetail": "{name} left the {game} team."
   },
   "versionFilter": {
     "chip": "Version",
@@ -1034,6 +1041,8 @@
     "lost": "Out of guesses. It was {name}.",
     "wonTitle": "Got it in {n} guess! | Got it in {n} guesses!",
     "lostTitle": "Not this time. It was:",
+    "reveal": "Reveal the answer",
+    "revealedTitle": "It was:",
     "share": "Share result",
     "again": "Play again",
     "next": "Next Pokémon in {h} h {m} min",

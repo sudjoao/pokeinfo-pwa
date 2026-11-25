@@ -26,8 +26,10 @@ const props = defineProps<{
 }>()
 const emit = defineEmits<{ select: [id: number]; toggleCaught: [speciesId: number] }>()
 
-/** Esconde nas rotas abertas os Pokémon já capturados. */
-const onlyMissing = ref(false)
+/** Esconde nas rotas abertas os Pokémon já capturados (a escolha fica salva no aparelho). */
+const ONLY_MISSING_KEY = 'pokeinfo:routes-only-missing:v1'
+const onlyMissing = ref(readStorage<boolean>(ONLY_MISSING_KEY) === true)
+watch(onlyMissing, (value) => writeStorage(ONLY_MISSING_KEY, value))
 
 function isCaught(pokemon: RoutePokemon): boolean {
   return props.caughtIds?.has(speciesIdOf(pokemon.id)) ?? false

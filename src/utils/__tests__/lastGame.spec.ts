@@ -1,6 +1,12 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { findGame } from '@/utils/games'
-import { queryWithSavedGame, saveGame, savedGame } from '@/utils/lastGame'
+import {
+  queryWithSavedGame,
+  recentGames,
+  rememberRecentGame,
+  saveGame,
+  savedGame,
+} from '@/utils/lastGame'
 
 const disk = new Map<string, string>()
 Object.assign(globalThis, {
@@ -12,6 +18,27 @@ Object.assign(globalThis, {
 })
 
 const sv = findGame('scarlet-violet')!
+
+describe('jogos recentes', () => {
+  beforeEach(() => disk.clear())
+
+  it('guarda os 3 últimos, o mais recente primeiro e sem repetir', () => {
+    rememberRecentGame(findGame('red-blue'))
+    rememberRecentGame(findGame('sword-shield'))
+    rememberRecentGame(sv)
+    rememberRecentGame(findGame('red-blue'))
+    expect(recentGames()).toEqual(['red-blue', 'scarlet-violet', 'sword-shield'])
+    rememberRecentGame(findGame('gold-silver'))
+    expect(recentGames()).toEqual(['gold-silver', 'red-blue', 'scarlet-violet'])
+    rememberRecentGame(null)
+    expect(recentGames()).toHaveLength(3)
+  })
+
+  it('ignora slugs que não existem mais', () => {
+    localStorage.setItem('pokeinfo:recent-games:v1', JSON.stringify(['pokemon-z', 'red-blue', 7]))
+    expect(recentGames()).toEqual(['red-blue'])
+  })
+})
 
 describe('último jogo escolhido', () => {
   beforeEach(() => disk.clear())

@@ -59,27 +59,26 @@ watch([level, game], () => {
 // Com jogo: só as espécies das Pokédex dele (todas as do jogo, ex.: Paldea + Kitakami + Blueberry).
 const dexSpecies = shallowRef<Set<number> | null>(null)
 const dexStatus = ref<'idle' | 'loading' | 'ready' | 'error'>('idle')
-watch(
-  game,
-  async (slug) => {
-    dexSpecies.value = null
-    const g = findGame(slug)
-    if (!g) {
-      dexStatus.value = 'idle'
-      return
-    }
-    dexStatus.value = 'loading'
-    try {
-      const lists = await Promise.all(g.dexes.map((dex) => pokedex.ensureDexEntries(dex.slug)))
-      if (slug !== game.value) return
-      dexSpecies.value = new Set(lists.flat().map((entry) => entry.speciesId))
-      dexStatus.value = 'ready'
-    } catch {
-      dexStatus.value = 'error'
-    }
-  },
-  { immediate: true },
-)
+/** Espécies das Pokédex do jogo (a tabela mostra só elas); "tentar de novo" chama outra vez. */
+async function loadDex(slug = game.value): Promise<void> {
+  dexSpecies.value = null
+  const g = findGame(slug)
+  if (!g) {
+    dexStatus.value = 'idle'
+    return
+  }
+  dexStatus.value = 'loading'
+  try {
+    const lists = await Promise.all(g.dexes.map((dex) => pokedex.ensureDexEntries(dex.slug)))
+    if (slug !== game.value) return
+    dexSpecies.value = new Set(lists.flat().map((entry) => entry.speciesId))
+    dexStatus.value = 'ready'
+  } catch {
+    dexStatus.value = 'error'
+  }
+}
+
+watch(game, (slug) => loadDex(slug), { immediate: true })
 
 interface SpeedRow extends SpeedValues {
   id: number
@@ -236,13 +235,26 @@ function goBack(): void {
         density="compact"
       />
 
-      <v-card>
+      <EmptyState
+        v-if="!pokemonData.table.value && pokemonData.error.value"
+        variant="error"
+        :title="t('error.loadTable')"
+        :action-label="t('common.retry')"
+        @action="pokemonData.load().catch(() => {})"
+      />
+      <EmptyState
+        v-else-if="dexStatus === 'error'"
+        variant="error"
+        :title="t('speed.loadError')"
+        :action-label="t('common.retry')"
+        @action="loadDex"
+      />
+      <v-card v-else>
         <v-skeleton-loader
           v-if="!pokemonData.table.value || dexStatus === 'loading' || !pokedex.index.length"
           aria-hidden="true"
           type="table-tbody"
         />
-        <v-card-text v-else-if="dexStatus === 'error'">{{ t('speed.loadError') }}</v-card-text>
         <template v-else>
           <v-table density="compact" class="speed-table">
             <caption class="d-sr-only">

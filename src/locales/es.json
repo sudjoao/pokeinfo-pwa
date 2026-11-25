@@ -16,6 +16,7 @@
     "signInTitle": "Iniciar sesión · PokeInfo"
   },
   "common": {
+    "copyManually": "No se pudo copiar automáticamente. Selecciona el texto y cópialo:",
     "retry": "Reintentar",
     "back": "Volver",
     "national": "Nac.",
@@ -44,6 +45,7 @@
     "searchLabel": "Buscar Pokémon",
     "gameFilterLabel": "Filtros de la lista",
     "allGames": "Todos los juegos",
+    "recentGames": "Recientes",
     "nationalDex": "Pokédex Nacional",
     "pickGame": "Filtrar por juego",
     "chooseGame": "Elegir juego",
@@ -296,7 +298,8 @@
   "error": {
     "network": "No se pudo conectar con la PokéAPI. Revisa tu conexión e inténtalo de nuevo.",
     "http": "La PokéAPI tiene problemas (error {status}). Inténtalo de nuevo en un momento.",
-    "loadDex": "No se pudo cargar la Pokédex."
+    "loadDex": "No se pudo cargar la Pokédex.",
+    "loadTable": "No se pudo cargar la tabla de Pokémon."
   },
   "typeFilter": {
     "chip": "Tipo",
@@ -349,7 +352,11 @@
     "suggestionsFull": "Equipo completo: quita un Pokémon para añadir una sugerencia.",
     "share": "Compartir equipo",
     "cleared": "Equipo vaciado.",
-    "removed": "{name} salió del equipo."
+    "removed": "{name} salió del equipo.",
+    "addFromDetail": "Añadir al equipo de {game}",
+    "removeFromDetail": "Quitar del equipo de {game}",
+    "addedFromDetail": "{name} se unió al equipo de {game}.",
+    "removedFromDetail": "{name} salió del equipo de {game}."
   },
   "versionFilter": {
     "chip": "Versión",
@@ -1034,6 +1041,8 @@
     "lost": "Se acabaron los intentos. Era {name}.",
     "wonTitle": "¡Acertaste en {n} intento! | ¡Acertaste en {n} intentos!",
     "lostTitle": "Esta vez no. Era:",
+    "reveal": "Revelar la respuesta",
+    "revealedTitle": "Era:",
     "share": "Compartir resultado",
     "again": "Jugar otra vez",
     "next": "Próximo Pokémon en {h} h {m} min",

@@ -9,6 +9,7 @@ import { useOnline } from '@/composables/useOnline'
 import { summarize, useBackup, type BackupSummary } from '@/composables/useBackup'
 import { announcement } from '@/composables/useAnnouncer'
 import AppNotice from '@/components/molecules/AppNotice.vue'
+import CopyTextDialog from '@/components/molecules/CopyTextDialog.vue'
 import { decodeBackupParam, MAX_BACKUP_BYTES, parseBackup, type Backup } from '@/utils/backup'
 import type { ImportMode } from '@/stores/gameSet'
 import { useMountOnOpen } from '@/composables/useMountOnOpen'
@@ -151,11 +152,13 @@ async function openRandom(): Promise<void> {
   router.push({ name: 'pokemon', params: { id } })
 }
 
+/** Sem clipboard (permissão, navegador antigo), o link aparece num diálogo para copiar à mão. */
+const copyFallback = ref<string | null>(null)
 function copyBackupLink(): void {
   navigator.clipboard
     .writeText(backup.link())
     .then(() => (notice.value = t('backup.linkCopied')))
-    .catch(() => (notice.value = backup.link()))
+    .catch(() => (copyFallback.value = backup.link()))
 }
 
 function shareBackupLink(): void {
@@ -310,6 +313,7 @@ function skipToContent(): void {
       @close="offlineOpen = false"
     />
     <AppNotice :text="notice" @close="notice = null" />
+    <CopyTextDialog v-model="copyFallback" />
     <p class="d-sr-only" aria-live="polite" aria-atomic="true">{{ announcement }}</p>
   </v-app>
 </template>
