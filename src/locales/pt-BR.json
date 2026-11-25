@@ -576,7 +576,7 @@
   },
   "backup": {
     "title": "Backup dos dados",
-    "intro": "Capturados, shinies, favoritos e caçadas ficam neste aparelho (e na sua conta, se você entrar com o Google). Exporte para guardar uma cópia ou passar a outro aparelho sem conta.",
+    "intro": "Capturados, shinies, favoritos, caçadas, times e o Pokémon do dia ficam neste aparelho (e na sua conta, se você entrar com o Google). Exporte para guardar uma cópia ou passar a outro aparelho sem conta.",
     "summary": "Capturados: {caught} · Jogos: {games} · Shinies: {shiny} · Favoritos: {favorites} · Caçadas: {hunts} · Times: {teams}",
     "download": "Baixar arquivo",
     "copyLink": "Copiar link",
@@ -962,6 +962,7 @@
     "actualFor": "{stat} no jogo",
     "ivFor": "IV de {stat}",
     "evTotal": "Total de EVs: {n} de 510",
+    "evLimit": "No máximo 252 por stat e 510 no total.",
     "openCalculator": "Calcular IVs",
     "baseValue": "base {n}"
   },
@@ -1107,7 +1108,7 @@
   "account": {
     "title": "Conta",
     "menuSignIn": "Entrar com o Google",
-    "intro": "Entre com o Google para guardar capturados, shinies, favoritos, caçadas e o Pokémon do dia na sua conta e ver tudo igual em todos os seus aparelhos.",
+    "intro": "Entre com o Google para guardar capturados, shinies, favoritos, caçadas, times e o Pokémon do dia na sua conta e ver tudo igual em todos os seus aparelhos.",
     "privacy": "Ficam salvos só o seu e-mail, nome e foto do Google e o que você marca no app. Tudo continua neste aparelho e funciona sem internet; a conta recebe uma cópia quando houver conexão.",
     "signIn": "Continuar com o Google",
     "signInOffline": "Conecte-se à internet para entrar.",

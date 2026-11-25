@@ -47,6 +47,15 @@ function blurInput(event: KeyboardEvent): void {
   if (window.matchMedia('(pointer: coarse)').matches) (event.target as HTMLElement).blur()
 }
 
+/** Esc: com texto, limpa a busca; vazio, sai do campo (e fecha o menu de buscas recentes). */
+function onEscape(event: KeyboardEvent): void {
+  if (model.value) {
+    model.value = ''
+    return
+  }
+  ;(event.target as HTMLElement).blur()
+}
+
 // O blur vem antes do clique no item: ao sair do campo, espera um instante para o clique contar.
 function onFocused(value: boolean): void {
   if (value) focused.value = true
@@ -72,6 +81,7 @@ function onFocused(value: boolean): void {
       hide-details
       @update:focused="onFocused"
       @keydown.enter="blurInput"
+      @keydown.esc="onEscape"
     />
     <RecentSearchMenu
       v-if="menuMounted && recent?.length"

@@ -9,6 +9,18 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 
 ### Corrigido
 
+- "Pokémon aleatório" (menu) sorteia da Pokédex do jogo salvo e abre a ficha com o jogo (número
+  regional, captura e "Onde encontrar"); sem jogo salvo, continua sorteando entre as 1.025 espécies.
+- "Comparar com este" leva o jogo da ficha para a comparação, e de lá os nomes e o "Voltar" mantêm
+  o jogo.
+- A ficha abre com o artwork shiny quando a lista está no modo Shiny.
+- Seleção múltipla: ao mudar a busca ou um filtro, os Pokémon que saíram da tela saem da seleção
+  ("Selecionar todos" e a marcação em lote valiam para cards escondidos, e a contagem não batia).
+- Trocar para um jogo de geração anterior tira do filtro os tipos que não existem nele (Fairy antes
+  da 6ª geração, Dark e Steel na 1ª), em vez de mostrar uma lista vazia.
+- Calculadora de IVs: EV acima de 252 (ou negativo) é corrigido ao digitar, e passar de 510 no total
+  mostra o limite.
+- Textos do backup e da conta agora citam times e o Pokémon do dia, que já entravam nos dois.
 - Busca da Pokédex (e da tela de Velocidade): "mr mime", "Mr. Mime", "flabébé", "farfetch'd",
   "type: null" e "ho oh" agora acham o Pokémon (a comparação ignora acentos, maiúsculas, espaços,
   pontos e apóstrofos). "#25" e "nº 25" valem como número. Com um jogo escolhido, o número acha
@@ -16,6 +28,7 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 
 ### Adicionado
 
+- Busca: Esc limpa o campo; com o campo vazio, sai dele.
 - Conta: na conta de quem mantém o projeto, cada sincronização concluída pode fazer algumas
   consultas a mais ao banco (no máximo uma rodada a cada 12 h por aparelho), e um workflow do
   GitHub consulta o banco duas vezes por dia. O plano Free do Supabase pausa projetos com uma

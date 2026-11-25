@@ -576,7 +576,7 @@
   },
   "backup": {
     "title": "Copia de seguridad",
-    "intro": "Capturados, variocolor, favoritos y cacerías se guardan en este dispositivo (y en tu cuenta, si inicias sesión con Google). Expórtalos para guardar una copia o pasarlos a otro dispositivo sin cuenta.",
+    "intro": "Capturados, variocolor, favoritos, cacerías, equipos y el Pokémon del día se guardan en este dispositivo (y en tu cuenta, si inicias sesión con Google). Expórtalos para guardar una copia o pasarlos a otro dispositivo sin cuenta.",
     "summary": "Capturados: {caught} · Juegos: {games} · Variocolor: {shiny} · Favoritos: {favorites} · Cacerías: {hunts} · Equipos: {teams}",
     "download": "Descargar archivo",
     "copyLink": "Copiar enlace",
@@ -962,6 +962,7 @@
     "actualFor": "{stat} en el juego",
     "ivFor": "IV de {stat}",
     "evTotal": "EV totales: {n} de 510",
+    "evLimit": "Como máximo 252 por estadística y 510 en total.",
     "openCalculator": "Calcular IV",
     "baseValue": "base {n}"
   },
@@ -1107,7 +1108,7 @@
   "account": {
     "title": "Cuenta",
     "menuSignIn": "Iniciar sesión con Google",
-    "intro": "Inicia sesión con Google para guardar capturados, variocolor, favoritos, cacerías y el Pokémon del día en tu cuenta y ver lo mismo en todos tus dispositivos.",
+    "intro": "Inicia sesión con Google para guardar capturados, variocolor, favoritos, cacerías, equipos y el Pokémon del día en tu cuenta y ver lo mismo en todos tus dispositivos.",
     "privacy": "Solo se guardan tu correo, nombre y foto de Google y lo que marcas en la app. Todo sigue en este dispositivo y funciona sin conexión; la cuenta recibe una copia cuando hay internet.",
     "signIn": "Continuar con Google",
     "signInOffline": "Conéctate a internet para iniciar sesión.",

@@ -23,6 +23,7 @@ import { buildDexList, findGame, resolveDex } from '@/utils/games'
 import { saveGame } from '@/utils/lastGame'
 import { describeError } from '@/utils/errors'
 import { nameMatches, normalizeSearch, searchNumber } from '@/utils/search'
+import { battleTypes } from '@/utils/typeChart'
 import { formatHeight, formatWeight, isPokemonType } from '@/utils/pokemon'
 import { exclusiveVersionOf, exclusiveVersions } from '@/utils/exclusives'
 import { hasMegaEvolution, megaEntriesOf } from '@/utils/megas'
@@ -266,6 +267,14 @@ export function usePokemonList() {
     dexSlug.value = null
     caughtFilter.value = null
     availability.value = []
+    // Fairy antes da 6ª geração (ou Dark/Steel na 1ª) deixaria a lista vazia sem explicar.
+    const next = findGame(slug)
+    if (!next) return
+    const types = battleTypes(next.generation)
+    if (typeFilter.value.some((type) => !types.includes(type)))
+      typeFilter.value = typeFilter.value.filter((type) => types.includes(type))
+    if (advanced.value.weakTo && !types.includes(advanced.value.weakTo))
+      advanced.value = { ...advanced.value, weakTo: null }
   }
 
   function toggleAvailability(key: string): void {

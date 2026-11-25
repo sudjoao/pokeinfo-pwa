@@ -348,6 +348,13 @@ watch([() => game.value?.slug, () => dex.value?.slug, megaFilter], () =>
   exitSelection({ silent: true }),
 )
 watch(view, (value) => value !== 'pokemon' && exitSelection({ silent: true }))
+// Busca ou filtro novo esconde cards: o que sumiu sai da seleção. Senão "Selecionar todos" e a
+// marcação em lote pegariam Pokémon que não estão na tela, e a contagem da barra não bateria.
+watch(filtered, (list) => {
+  if (!selectedIds.size) return
+  const visible = new Set(list.map((entry) => entry.id))
+  for (const id of selectedIds) if (!visible.has(id)) selectedIds.delete(id)
+})
 
 function onExportCopied(count: number): void {
   notice.value = t('export.copied', count)

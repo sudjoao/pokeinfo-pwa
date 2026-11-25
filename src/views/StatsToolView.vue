@@ -102,6 +102,17 @@ const characteristicItems = computed(() =>
 
 const clampLevel = computed(() => Math.min(100, Math.max(1, Math.round(level.value || 1))))
 const evTotal = computed(() => STAT_NAMES.reduce((sum, name) => sum + (evs[name] || 0), 0))
+/** Limites dos jogos: o campo aceita qualquer número, então o valor é corrigido ao digitar. */
+const MAX_EV = 252
+const MAX_EV_TOTAL = 510
+watch(evs, () => {
+  for (const name of STAT_NAMES) {
+    const value = evs[name]
+    if (typeof value !== 'number' || Number.isNaN(value)) continue
+    if (value > MAX_EV) evs[name] = MAX_EV
+    else if (value < 0) evs[name] = 0
+  }
+})
 
 /** Modo IV: faixa possível de cada stat (com a característica aplicada, se houver). */
 const ivResults = computed<Record<StatName, number[] | null> | null>(() => {
@@ -393,8 +404,9 @@ function goBack(): void {
             </tbody>
           </v-table>
           <v-card-text class="pt-2">
-            <p class="text-body-small mb-0" :class="{ 'text-error': evTotal > 510 }">
+            <p class="text-body-small mb-0" :class="{ 'text-error': evTotal > MAX_EV_TOTAL }">
               {{ t('statsTool.evTotal', { n: evTotal }) }}
+              <span v-if="evTotal > MAX_EV_TOTAL" role="alert">{{ t('statsTool.evLimit') }}</span>
             </p>
           </v-card-text>
         </v-card>

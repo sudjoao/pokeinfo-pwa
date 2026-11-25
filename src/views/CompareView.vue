@@ -8,6 +8,7 @@ import {
   type ComponentPublicInstance,
 } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { gameContextFromQuery, gameContextQuery } from '@/utils/games'
 import { useI18n } from 'vue-i18n'
 import { mdiClose } from '@mdi/js'
 import { usePokedexStore } from '@/stores/pokedex'
@@ -41,8 +42,13 @@ const ids = computed(() => {
   return [...new Set(valid)].slice(0, MAX_COMPARE)
 })
 
+/** Jogo vindo da ficha (`?game=`): volta com ele para as fichas e para a lista. */
+const contextQuery = computed(() => gameContextQuery(gameContextFromQuery(route.query)))
+
 function setIds(next: number[]): void {
-  router.replace({ query: next.length ? { ids: next.join(',') } : {} })
+  router.replace({
+    query: { ...contextQuery.value, ...(next.length ? { ids: next.join(',') } : {}) },
+  })
 }
 
 const columns = computed(() =>
@@ -129,7 +135,7 @@ function remove(id: number): void {
 
 function goBack(): void {
   if (window.history.state?.back) router.back()
-  else router.push({ name: 'home' })
+  else router.push({ name: 'home', query: contextQuery.value })
 }
 </script>
 
@@ -182,7 +188,7 @@ function goBack(): void {
                   />
                   <PokemonArtwork :id="column.id" alt="" :size="88" />
                   <RouterLink
-                    :to="{ name: 'pokemon', params: { id: column.id } }"
+                    :to="{ name: 'pokemon', params: { id: column.id }, query: contextQuery }"
                     class="compare__name"
                   >
                     {{ column.name }}

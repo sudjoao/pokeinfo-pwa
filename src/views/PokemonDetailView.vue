@@ -28,6 +28,7 @@ import { useHuntsStore, useShinyCaughtStore } from '@/stores/shiny'
 import { hasShinies } from '@/utils/shiny'
 import ShinyHuntCard from '@/components/organisms/ShinyHuntCard.vue'
 import { useDexLabel } from '@/composables/useDexLabel'
+import { useListShiny } from '@/composables/useListShiny'
 import { gameContextFromQuery, gameContextQuery } from '@/utils/games'
 import { exclusiveVersionOf } from '@/utils/exclusives'
 import { withoutMegas } from '@/utils/megas'
@@ -216,8 +217,11 @@ function goBack(): void {
 const formVarieties = computed(() => withoutMegas(species.value?.varieties ?? []))
 const showVarieties = computed(() => formVarieties.value.length > 1)
 
-/** Artwork shiny no hero; continua ligado ao navegar entre Pokémon (para comparar shinies). */
-const shiny = ref(false)
+/**
+ * Artwork shiny no hero: começa como a lista está (a preferência "Shiny" dos cards) e continua
+ * ligado ao navegar entre Pokémon (para comparar shinies). Trocar aqui não muda a lista.
+ */
+const shiny = ref(useListShiny().shiny.value)
 
 const favorites = useFavoritesStore()
 
@@ -333,7 +337,7 @@ async function sendShareImage(): Promise<void> {
         v-if="detail"
         :icon="mdiCompareHorizontal"
         :aria-label="t('compare.withThis')"
-        :to="{ name: 'compare', query: { ids: String(detail.id) } }"
+        :to="{ name: 'compare', query: { ids: String(detail.id), ...gameContextQuery(context) } }"
       />
     </template>
 

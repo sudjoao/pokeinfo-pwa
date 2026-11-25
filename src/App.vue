@@ -17,6 +17,9 @@ import { useSyncStatusText } from '@/composables/useSyncStatusText'
 import { useAccountStore, type FirstSyncChoice } from '@/stores/account'
 import { storeToRefs } from 'pinia'
 import { nativePageTransition } from '@/router/viewTransition'
+import { savedGame } from '@/utils/lastGame'
+import { buildDexList, findGame, gameContextQuery, resolveDex } from '@/utils/games'
+import { usePokedexStore } from '@/stores/pokedex'
 
 // O menu lateral (ícones, VList e VNavigationDrawer) não aparece na abertura: sai do JS inicial e é
 // montado no primeiro toque. O chunk é pedido quando o navegador fica ocioso, para esse primeiro
@@ -121,8 +124,29 @@ function chooseFirstSync(choice: FirstSyncChoice): void {
 const notice = ref<string | null>(null)
 const canShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function'
 
-/** "Surpreenda-me": uma espécie qualquer (1..1025), como o botão da Pokédex oficial. */
-function openRandom(): void {
+/**
+ * "Surpreenda-me": um Pokémon da Pokédex do jogo salvo (a ficha abre com o número regional, a
+ * captura e o "Onde encontrar" dele); sem jogo, uma espécie qualquer (1..1025), como o botão da
+ * Pokédex oficial.
+ */
+async function openRandom(): Promise<void> {
+  const saved = savedGame()
+  const game = findGame(saved?.game ?? null)
+  if (game) {
+    const dex = resolveDex(game, saved?.dex ?? null)
+    const store = usePokedexStore()
+    const entries = await store.ensureDexEntries(dex.slug).catch(() => null)
+    const list = entries ? buildDexList(entries, dex, store.regionalForms) : []
+    const entry = list[Math.floor(Math.random() * list.length)]
+    if (entry) {
+      router.push({
+        name: 'pokemon',
+        params: { id: entry.id },
+        query: gameContextQuery({ game, dex }),
+      })
+      return
+    }
+  }
   const id = 1 + Math.floor(Math.random() * 1025)
   router.push({ name: 'pokemon', params: { id } })
 }
