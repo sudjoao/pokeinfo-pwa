@@ -228,10 +228,13 @@ export function usePokemonList() {
   // (a Home fica em KeepAlive). Só reage na própria rota: a Home em cache continua observando a
   // URL enquanto o team builder está aberto.
   const ownRoute = route.name
+  /** A última query que este composable escreveu: ao vê-la de volta, não há o que reprocessar. */
+  let written = ''
   watch(
     () => route.query,
     (query) => {
       if (route.name !== ownRoute) return
+      if (JSON.stringify(query) === written) return
       const parsed = parseAdvanced(query)
       const same =
         JSON.stringify(advancedToQuery(parsed)) === JSON.stringify(advancedToQuery(advanced.value))
@@ -413,9 +416,14 @@ export function usePokemonList() {
   /** Ids de espécie capturados no jogo atual (reativo por id: só o card tocado re-renderiza). */
   const caughtIds = computed(() => caughtStore.caughtIn(game.value?.slug))
 
-  /** Capturados e faltantes dentro da Pokédex atual (o conjunto do jogo pode ter espécies de outras dexes). */
+  /**
+   * Capturados e faltantes dentro da Pokédex atual (o conjunto do jogo pode ter espécies de outras
+   * dexes). Lê o conjunto sem rastrear cada id: a dependência é a revisão do store (uma por toque),
+   * não ~1.300 chaves.
+   */
   const caughtCount = computed(() => {
-    const ids = caughtIds.value
+    void caughtStore.revision
+    const ids = caughtStore.caughtInRaw(game.value?.slug)
     let count = 0
     for (const entry of source.value) if (ids.has(speciesOf(entry))) count++
     return count
@@ -534,7 +542,9 @@ export function usePokemonList() {
       advanced,
     ],
     () => {
-      router.replace({ query: { ...foreignQuery(route.query), ...buildQuery() } })
+      const query = { ...foreignQuery(route.query), ...buildQuery() }
+      written = JSON.stringify(query)
+      router.replace({ query })
     },
   )
 

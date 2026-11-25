@@ -43,6 +43,10 @@ export function useDragSelect(options: DragSelectOptions) {
   /** Último item tocado: âncora do Shift+clique. */
   let anchor: number | null = null
   let pointer = { x: 0, y: 0 }
+  /** Último item sob o ponteiro: o pointermove chega a 120 Hz e quase sempre no mesmo card. */
+  let lastId: number | null = null
+  /** Insets lidos uma vez por arrasto (getBoundingClientRect a cada quadro forçava layout). */
+  let insets = { top: 0, bottom: 0 }
   let pending: { id: number; x: number; y: number } | null = null
   let pressTimer: ReturnType<typeof setTimeout> | undefined
   let scrollFrame = 0
@@ -55,7 +59,9 @@ export function useDragSelect(options: DragSelectOptions) {
       id,
     )
     anchor = id
+    lastId = id
     suppressClick = true
+    insets = { top: options.topInset(), bottom: options.bottomInset() }
     autoScroll()
   }
 
@@ -64,7 +70,8 @@ export function useDragSelect(options: DragSelectOptions) {
     const container = options.container.value
     if (!range || !container) return
     const id = itemAt(x, y, container)
-    if (id !== null) {
+    if (id !== null && id !== lastId) {
+      lastId = id
       range.update(id)
       anchor = id
     }
@@ -76,6 +83,7 @@ export function useDragSelect(options: DragSelectOptions) {
     cancelAnimationFrame(scrollFrame)
     const dragged = range !== null
     range = null
+    lastId = null
     // O clique sai logo depois do pointerup/touchend; se não vier (soltou fora), libera depois.
     if (dragged) setTimeout(() => (suppressClick = false), 400)
     document.removeEventListener('pointermove', onPointerMove)
@@ -88,8 +96,8 @@ export function useDragSelect(options: DragSelectOptions) {
     cancelAnimationFrame(scrollFrame)
     scrollFrame = requestAnimationFrame(() => {
       if (!range) return
-      const top = options.topInset()
-      const bottom = window.innerHeight - options.bottomInset()
+      const top = insets.top
+      const bottom = window.innerHeight - insets.bottom
       let speed = 0
       if (pointer.y < top + EDGE) speed = -MAX_SPEED * Math.min(1, (top + EDGE - pointer.y) / EDGE)
       else if (pointer.y > bottom - EDGE)

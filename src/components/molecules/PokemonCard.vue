@@ -7,7 +7,7 @@ import {
   mdiStarFourPoints,
 } from '@mdi/js'
 import { useI18n } from 'vue-i18n'
-import type { RouteLocationRaw } from 'vue-router'
+import { START_LOCATION, useRouter, type RouteLocationRaw } from 'vue-router'
 import type { PokemonListItem } from '@/types/pokemon'
 import { CARD_ARTWORK_SIZE, formatDexNumber, TYPE_COLORS } from '@/utils/pokemon'
 import { pokemonLabel } from '@/utils/megas'
@@ -49,8 +49,15 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+const router = useRouter()
 
 const to = computed(() => props.linkTo?.(props.pokemon))
+/**
+ * Link resolvido uma vez por card, a partir da rota inicial (não da atual): um RouterLink por
+ * card recalculava o destino de todos os cards montados (até ~1.300) a cada navegação, inclusive
+ * com a Home escondida no KeepAlive.
+ */
+const href = computed(() => (to.value ? router.resolve(to.value, START_LOCATION).href : undefined))
 const name = computed(() => pokemonLabel(props.pokemon.id, props.pokemon.name))
 const accent = computed(() => TYPE_COLORS[props.pokemon.types[0] ?? 'unknown'])
 
@@ -60,32 +67,33 @@ const nationalLabel = computed(() => formatDexNumber(props.pokemon.speciesId ?? 
 const speciesId = computed(() => props.pokemon.speciesId ?? props.pokemon.id)
 
 /**
- * O link navega sozinho; o `select` avisa a view para tocar o grito ainda dentro do gesto (iOS).
- * Clique com modificador abre em outra aba/janela: aí não há grito nem navegação nesta tela.
+ * O `select` avisa a view para tocar o grito ainda dentro do gesto (iOS); a navegação é pelo router
+ * (o `<a>` é um link de verdade, então clique com modificador ou botão do meio abre em outra
+ * aba/janela: aí não há grito nem navegação nesta tela).
  */
 function onLinkClick(event: MouseEvent): void {
   if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return
+  event.preventDefault()
   emit('select', props.pokemon)
+  if (to.value) router.push(to.value)
 }
 </script>
 
 <template>
   <!--
-    `link` só dá o visual de clicável; o clique e o foco ficam no link/botão do nome (stretched).
-    A lista chega a mais de mil cards, então o card evita componentes que não precisa: o `#loader`
-    vazio tira a barra de progresso que o v-card monta mesmo sem `loading` (com um
-    IntersectionObserver por card), e item/título/texto são o mesmo HTML que v-card-item,
-    v-card-title e v-card-text gerariam, sem uma instância de componente cada.
+    O mesmo HTML e as mesmas classes que `<v-card hover link rounded="lg" elevation="1">` gera
+    (overlay do hover, underlay, ripple), sem a instância do VCard: a lista chega a mais de mil
+    cards, e cada VCard criava um useLink, um loader com IntersectionObserver e dezenas de
+    computeds. O clique e o foco ficam no link/botão do nome (stretched); item/título/texto são o
+    HTML de v-card-item, v-card-title e v-card-text, sem uma instância de componente cada.
   -->
-  <v-card
-    class="pokemon-card stretched-host"
+  <div
+    v-ripple
+    class="v-card v-card--hover v-card--link v-card--density-default v-card--variant-elevated rounded-lg elevation-1 pokemon-card stretched-host"
     :class="{ 'pokemon-card--selected': selected }"
     :style="{ '--accent': accent }"
     :data-pokemon-id="pokemon.id"
-    hover
-    link
   >
-    <template #loader />
     <div class="pokemon-card__art pa-2">
       <PokemonArtwork
         :id="pokemon.id"
@@ -128,9 +136,9 @@ function onLinkClick(event: MouseEvent): void {
           {{ pokemon.sortLabel }}
         </span>
         <div class="v-card-title text-title-medium pa-0">
-          <RouterLink v-if="to" :to="to" class="stretched-action" @click="onLinkClick">
+          <a v-if="href" :href="href" class="stretched-action" @click="onLinkClick">
             {{ name }}
-          </RouterLink>
+          </a>
           <button
             v-else
             type="button"
@@ -154,7 +162,9 @@ function onLinkClick(event: MouseEvent): void {
     <div class="v-card-text d-flex flex-wrap ga-1 pt-0">
       <TypeChip v-for="type in pokemon.types" :key="type" :type="type" />
     </div>
-  </v-card>
+    <span class="v-card__overlay" />
+    <span class="v-card__underlay" />
+  </div>
 </template>
 
 <style scoped>

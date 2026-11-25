@@ -15,8 +15,10 @@ const DAY = 60 * 60 * 24
 
 /** Só o que o plugin abaixo usa da Cache API (o config roda no Node, sem os tipos do DOM). */
 declare const caches: {
+  keys(): Promise<string[]>
   match(request: Request, options: { cacheName: string }): Promise<Response | undefined>
 }
+declare const self: { __offlinePacks?: { at: number; names: Promise<string[]> } }
 
 /**
  * Pacotes do "Usar offline" (src/utils/offline.ts, OFFLINE_CACHES): quando o cache da regra não
@@ -33,11 +35,18 @@ const offlineFallback = {
     cachedResponse?: Response
   }) => {
     if (cachedResponse) return cachedResponse
-    for (const cacheName of [
-      'pokeinfo-offline-data-v1',
-      'pokeinfo-offline-images-v1',
-      'pokeinfo-offline-cries-v1',
-    ]) {
+    // Quem nunca baixou um pacote não paga três consultas ao Cache Storage por imagem nova: a
+    // lista de caches existentes fica em memória por um minuto (um pacote pode ser baixado depois).
+    const now = Date.now()
+    if (!self.__offlinePacks || now - self.__offlinePacks.at > 60_000) {
+      self.__offlinePacks = {
+        at: now,
+        names: caches
+          .keys()
+          .then((names) => names.filter((n) => n.startsWith('pokeinfo-offline-'))),
+      }
+    }
+    for (const cacheName of await self.__offlinePacks.names) {
       const hit = await caches.match(request, { cacheName })
       if (hit) return hit
     }
@@ -258,7 +267,9 @@ export default defineConfig({
             options: {
               cacheName: 'pokemon-artwork-webp',
               plugins: [offlineFallback],
-              expiration: { maxEntries: 400, maxAgeSeconds: 30 * DAY },
+              // A Nacional rolada até o fim passa de 1.300 cards (~13 KB cada): com 400 entradas,
+              // cada imagem nova expulsava outra e os primeiros cards sumiam do cache offline.
+              expiration: { maxEntries: 1500, maxAgeSeconds: 30 * DAY },
               cacheableResponse: { statuses: [200] },
             },
           },

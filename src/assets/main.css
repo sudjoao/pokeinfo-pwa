@@ -197,7 +197,7 @@ body {
  * desenho dela. No WebKit da Apple (main.ts) as células são sempre desenhadas.
  */
 .apple-webkit .pokemon-grid__cell,
-.apple-webkit .pokemon-boxes__box {
+.apple-webkit .pokemon-box {
   content-visibility: visible !important;
 }
 

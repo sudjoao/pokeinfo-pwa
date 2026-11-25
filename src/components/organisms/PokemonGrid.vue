@@ -87,13 +87,15 @@ const intersectOptions = { rootMargin: '0px 0px 1200px 0px' }
 
 <template>
   <div class="pokemon-grid">
-    <v-row density="compact">
-      <!--
-        v-memo: marcar um capturado (ou chegar um lote novo) re-renderiza a grade; sem ele o Vue
-        recriaria os vnodes de todas as centenas de células para comparar. Só a célula cujo estado
-        mudou é refeita. `linkTo` é estável; o card calcula o destino (e reage ao jogo) sozinho.
-      -->
-      <v-col
+    <!--
+      Grade em CSS, sem v-row/v-col: a lista passa de mil células, e cada VCol é uma instância de
+      componente a mais por card. Os breakpoints são os do Vuetify (sm 600, md 960, lg 1280).
+      v-memo: marcar um capturado (ou chegar um lote novo) re-renderiza a grade; sem ele o Vue
+      recriaria os vnodes de todas as centenas de células para comparar. Só a célula cujo estado
+      mudou é refeita. `linkTo` é estável; o card calcula o destino (e reage ao jogo) sozinho.
+    -->
+    <div class="pokemon-grid__cells" :class="{ 'pokemon-grid__cells--wide': wide }">
+      <div
         v-for="(pokemon, index) in items"
         :key="pokemon.id"
         v-memo="[
@@ -107,10 +109,6 @@ const intersectOptions = { rootMargin: '0px 0px 1200px 0px' }
           index,
         ]"
         class="pokemon-grid__cell"
-        cols="6"
-        sm="4"
-        :md="wide ? 4 : 3"
-        :lg="wide ? 3 : 2"
       >
         <PokemonCard
           :pokemon="pokemon"
@@ -123,8 +121,8 @@ const intersectOptions = { rootMargin: '0px 0px 1200px 0px' }
           @select="emit('select', $event)"
           @toggle-caught="emit('toggleCaught', $event)"
         />
-      </v-col>
-    </v-row>
+      </div>
+    </div>
 
     <div
       v-intersect="{ handler: onIntersect, options: intersectOptions }"
@@ -132,18 +130,15 @@ const intersectOptions = { rootMargin: '0px 0px 1200px 0px' }
       aria-hidden="true"
     />
 
-    <v-row v-if="status === 'loading'" density="compact" class="mt-1">
-      <v-col
-        v-for="n in skeletonCount ?? 6"
-        :key="n"
-        cols="6"
-        sm="4"
-        :md="wide ? 4 : 3"
-        :lg="wide ? 3 : 2"
-      >
+    <div
+      v-if="status === 'loading'"
+      class="pokemon-grid__cells mt-1"
+      :class="{ 'pokemon-grid__cells--wide': wide }"
+    >
+      <div v-for="n in skeletonCount ?? 6" :key="n" class="pokemon-grid__cell">
         <PokemonCardSkeleton />
-      </v-col>
-    </v-row>
+      </div>
+    </div>
 
     <div v-else-if="status === 'error'" class="text-center py-6">
       <p class="text-body-medium mb-3">{{ errorMessage ?? t('home.loadMoreError') }}</p>
@@ -162,6 +157,37 @@ const intersectOptions = { rootMargin: '0px 0px 1200px 0px' }
 </template>
 
 <style scoped>
+/* Mesmas colunas e espaçamento (8 px) do v-row compacto com v-col cols=6 sm=4 md=3 lg=2. */
+.pokemon-grid__cells {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+@media (min-width: 600px) {
+  .pokemon-grid__cells {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 960px) {
+  .pokemon-grid__cells {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .pokemon-grid__cells--wide {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .pokemon-grid__cells {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+  .pokemon-grid__cells--wide {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
 /*
  * O navegador pula layout e pintura dos cards fora da tela (a lista inteira pode passar de mil
  * cards ao rolar até o fim); `auto` lembra a altura real depois do primeiro desenho.

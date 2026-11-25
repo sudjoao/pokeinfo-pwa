@@ -1,4 +1,4 @@
-import { ref, watch, type Ref } from 'vue'
+import { shallowRef, watch, type Ref } from 'vue'
 import type { Game } from '@/data/games'
 import type { RoutePokemon } from '@/types/pokemon'
 import { usePokedexStore } from '@/stores/pokedex'
@@ -15,9 +15,11 @@ const AREA_CONCURRENCY = 4
 export function useRouteEncounters(game: Readonly<Ref<Game>>) {
   const pokedexStore = usePokedexStore()
 
-  const results = ref<Record<string, RoutePokemon[]>>({})
-  const loading = ref<Record<string, boolean>>({})
-  const failed = ref<Record<string, boolean>>({})
+  // shallowRef: cada registro é trocado inteiro (spread); um ref profundo embrulharia em proxies
+  // todas as listas de Pokémon (com métodos e variantes) a cada leitura.
+  const results = shallowRef<Record<string, RoutePokemon[]>>({})
+  const loading = shallowRef<Record<string, boolean>>({})
+  const failed = shallowRef<Record<string, boolean>>({})
 
   /** Troca de jogo: os resultados são específicos do jogo, então não podem sobreviver à troca. */
   watch(

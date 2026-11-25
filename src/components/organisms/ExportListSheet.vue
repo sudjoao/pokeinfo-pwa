@@ -78,6 +78,9 @@ function speciesOf(entry: BoxEntry): number {
 
 /** Dados de cada linha (os tipos já traduzidos), na ordem da lista. */
 const rows = computed<ExportEntry[]>(() => {
+  // O sheet continua montado depois de fechar: sem isto cada captura marcada na lista refaria as
+  // ~1.300 linhas (com duas traduções cada) para uma tela que não está aberta.
+  if (!open.value) return []
   const ids = props.caughtIds
   const gameSlug = props.game?.slug
   return props.entries.map((entry) => ({

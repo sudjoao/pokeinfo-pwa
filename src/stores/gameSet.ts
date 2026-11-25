@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { reactive, toRaw } from 'vue'
+import { reactive, ref, toRaw } from 'vue'
 import { decodeBitset, encodeBitset } from '@/utils/bitset'
 import { readStorage, writeStorage } from '@/utils/storage'
 import { notifyLocalChange } from '@/utils/localChanges'
@@ -39,8 +39,12 @@ export function defineGameSetStore(id: string, storageKey: string) {
       return payload
     }
 
+    /** Sobe a cada mudança: quem conta o conjunto inteiro depende disto, não de cada id. */
+    const revision = ref(0)
+
     let persistTimer: ReturnType<typeof setTimeout> | undefined
     function schedulePersist(): void {
+      revision.value++
       clearTimeout(persistTimer)
       persistTimer = setTimeout(flush, 300)
       notifyLocalChange()
@@ -128,6 +132,7 @@ export function defineGameSetStore(id: string, storageKey: string) {
     }
 
     return {
+      revision,
       caughtIn,
       caughtInRaw,
       isCaught,

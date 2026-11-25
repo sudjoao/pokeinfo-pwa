@@ -46,6 +46,18 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 - Quiz: as gerações escolhidas e a sequência atual ficam salvas entre visitas.
 - Rotas: a chave "só os que faltam" fica salva no aparelho.
 - Busca: Esc limpa o campo; com o campo vazio, sai dele.
+
+### Alterado
+
+- Desempenho da listagem em listas longas (a Nacional rolada até o fim passa de 1.300 cards):
+  cada card deixou de ser um componente VCard dentro de um VCol com um RouterLink (três instâncias
+  e um link que recalculava o destino de todos os cards a cada navegação) e virou o mesmo HTML
+  com as mesmas classes; o visual é idêntico. Nas caixas (living dex), marcar uma célula
+  re-renderiza só a caixa dela, não as ~44. A seleção por arrasto só reprocessa quando o dedo muda
+  de card e só a diferença do intervalo. A contagem de Capturados/Faltam, a tela de exportar (já
+  fechada) e a aba Rotas deixaram de refazer trabalho a cada captura marcada.
+- Offline: o cache dos artworks da lista passou de 400 para 1.500 imagens (a Nacional inteira
+  cabe), e o service worker só procura nos pacotes "Usar offline" quando algum foi baixado.
 - Conta: na conta de quem mantém o projeto, cada sincronização concluída pode fazer algumas
   consultas a mais ao banco (no máximo uma rodada a cada 12 h por aparelho), e um workflow do
   GitHub consulta o banco duas vezes por dia. O plano Free do Supabase pausa projetos com uma

@@ -23,21 +23,32 @@ export function createDragRange(options: DragRangeOptions, startId: number): Dra
   const selecting = !options.isSelected(startId)
   /** Estado de cada item antes de o arrasto passar por ele. */
   const before = new Map<number, boolean>()
-  let current = new Set<number>()
+  /** Intervalo atual, como índices na ordem da lista. */
+  let current: [number, number] | null = null
 
+  /** Só a diferença entre o intervalo antigo e o novo muda de estado (o arrasto chega a 120 Hz). */
   function update(id: number): void {
     const end = index.get(id)
     if (start < 0 || end === undefined) return
-    const [from, to] = start <= end ? [start, end] : [end, start]
-    const next = new Set(options.order.slice(from, to + 1))
-    for (const item of current) {
-      if (!next.has(item)) options.apply(item, before.get(item) ?? false)
+    const from = Math.min(start, end)
+    const to = Math.max(start, end)
+    if (current && current[0] === from && current[1] === to) return
+    const inside = (i: number, span: [number, number] | null) =>
+      span !== null && i >= span[0] && i <= span[1]
+    if (current) {
+      for (let i = current[0]; i <= current[1]; i++) {
+        if (inside(i, [from, to])) continue
+        const item = options.order[i]!
+        options.apply(item, before.get(item) ?? false)
+      }
     }
-    for (const item of next) {
+    for (let i = from; i <= to; i++) {
+      if (inside(i, current)) continue
+      const item = options.order[i]!
       if (!before.has(item)) before.set(item, options.isSelected(item))
       options.apply(item, selecting)
     }
-    current = next
+    current = [from, to]
   }
 
   update(startId)
