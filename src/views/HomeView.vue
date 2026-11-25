@@ -192,9 +192,15 @@ watch(
     if (next !== view.value) view.value = next
   },
 )
-if (view.value !== 'pokemon') router.replace({ query: { ...route.query, tab: view.value } })
 const hasRoutesTab = computed(() => !!game.value && ROUTE_GAMES.has(game.value.slug))
 const hasLeadersTab = computed(() => !!game.value && hasLeague(game.value.slug))
+// A aba salva pode não existir neste jogo (ou sem jogo): volta para Pokémon antes de ir à URL.
+if (
+  (view.value === 'routes' && !hasRoutesTab.value) ||
+  (view.value === 'leaders' && !hasLeadersTab.value)
+)
+  view.value = 'pokemon'
+if (view.value !== 'pokemon') router.replace({ query: { ...route.query, tab: view.value } })
 // Trocar de jogo mantém a aba (o Time mostra o do jogo novo); só volta para Pokémon se ela sumiu.
 watch([hasRoutesTab, hasLeadersTab], ([routes, leaders]) => {
   if ((view.value === 'routes' && !routes) || (view.value === 'leaders' && !leaders))
