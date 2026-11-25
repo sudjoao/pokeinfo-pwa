@@ -28,7 +28,12 @@ import { formatHeight, formatWeight, isPokemonType } from '@/utils/pokemon'
 import { exclusiveVersionOf, exclusiveVersions } from '@/utils/exclusives'
 import { hasMegaEvolution, megaEntriesOf } from '@/utils/megas'
 import type { ExclusiveVersion } from '@/data/exclusives'
-import type { PokemonIndexEntry, PokemonListItem, PokemonType } from '@/types/pokemon'
+import type {
+  PokemonIndexEntry,
+  PokemonListItem,
+  PokemonSummary,
+  PokemonType,
+} from '@/types/pokemon'
 
 export const PAGE_SIZE = 24
 
@@ -364,7 +369,11 @@ export function usePokemonList() {
    * O de tipo exige que o Pokémon tenha todos os tipos escolhidos (lê o mapa de tipos, que já
    * está pronto antes de a lista aparecer). A lista só reaplica os filtros quando eles mudam.
    */
-  const filtered = computed(() => filterSource(game.value ? caughtFilter.value : null))
+  const filterRevision = ref(0)
+  const filtered = computed(() => {
+    void filterRevision.value
+    return filterSource(game.value ? caughtFilter.value : null)
+  })
 
   /** A fonte com a busca e os filtros, e o de captura só quando `status` não é null. */
   function filterSource(status: CaughtFilter): ListSource[] {
@@ -477,19 +486,7 @@ export function usePokemonList() {
     try {
       const summaries = await store.ensureSummaries(batch)
       if (current !== generation) return status.value
-      items.value = [
-        ...items.value,
-        ...summaries.map((summary, i) => {
-          const entry = batch[i]
-          return {
-            ...summary,
-            dexNumber: entry?.dexNumber,
-            speciesId: entry?.speciesId,
-            exclusiveTo: entry ? exclusiveVersionOf(gameKey, speciesOf(entry))?.title : undefined,
-            sortLabel: sortLabelOf(summary.id, advanced.value.sort),
-          }
-        }),
-      ]
+      items.value = [...items.value, ...toListItems(batch, summaries, gameKey)]
       status.value = hasMore.value ? 'idle' : 'done'
     } catch (error) {
       if (current !== generation) return status.value
@@ -497,6 +494,51 @@ export function usePokemonList() {
       status.value = 'error'
     }
     return status.value
+  }
+
+  /** Itens da lista a partir das entradas da fonte e dos resumos carregados. */
+  function toListItems(
+    batch: readonly ListSource[],
+    summaries: readonly PokemonSummary[],
+    gameKey: string | undefined,
+  ): PokemonListItem[] {
+    return summaries.map((summary, i) => {
+      const entry = batch[i]
+      return {
+        ...summary,
+        dexNumber: entry?.dexNumber,
+        speciesId: entry?.speciesId,
+        exclusiveTo: entry ? exclusiveVersionOf(gameKey, speciesOf(entry))?.title : undefined,
+        sortLabel: sortLabelOf(summary.id, advanced.value.sort),
+      }
+    })
+  }
+
+  /**
+   * Reaplica o filtro de captura ao voltar para a lista (do detalhe, onde também se marca): os
+   * cards que não cabem mais no filtro saem e os que voltaram entram, no lugar certo, sem reiniciar
+   * a lista nem perder a rolagem. Marcar na própria grade continua não mexendo na lista.
+   */
+  async function refresh(): Promise<void> {
+    if (!game.value || !caughtFilter.value) return
+    filterRevision.value++
+    const next = filtered.value
+    const count = Math.min(items.value.length, next.length)
+    const batch = next.slice(0, count)
+    if (
+      batch.length === items.value.length &&
+      batch.every((entry, i) => entry.id === items.value[i]?.id)
+    )
+      return
+    const current = ++generation
+    try {
+      const summaries = await store.ensureSummaries(batch)
+      if (current !== generation) return
+      items.value = toListItems(batch, summaries, game.value?.slug)
+      if (status.value !== 'loading') status.value = hasMore.value ? 'idle' : 'done'
+    } catch {
+      // Os resumos já estavam em memória; se algo falhar, a lista fica como estava.
+    }
   }
 
   function reset(): void {
@@ -634,6 +676,7 @@ export function usePokemonList() {
     sourceLoading,
     sourceError,
     loadMore,
+    refresh,
     retry,
   }
 }

@@ -14,6 +14,9 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 - "Comparar com este" leva o jogo da ficha para a comparação, e de lá os nomes e o "Voltar" mantêm
   o jogo.
 - A ficha abre com o artwork shiny quando a lista está no modo Shiny.
+- Filtro "Faltam"/"Capturados": ao voltar do detalhe (onde também se marca a captura), a lista
+  passa a refletir as marcações sem voltar ao topo (os cards marcados ficavam em "Faltam" até
+  reaplicar o filtro).
 - Seleção múltipla: ao mudar a busca ou um filtro, os Pokémon que saíram da tela saem da seleção
   ("Selecionar todos" e a marcação em lote valiam para cards escondidos, e a contagem não batia).
 - Trocar para um jogo de geração anterior tira do filtro os tipos que não existem nele (Fairy antes

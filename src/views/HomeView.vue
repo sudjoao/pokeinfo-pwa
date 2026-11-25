@@ -106,6 +106,7 @@ const {
   sourceLoading,
   sourceError,
   loadMore,
+  refresh,
   retry,
 } = usePokemonList()
 
@@ -478,6 +479,8 @@ function openPokemonId(id: number): void {
 // A Home fica em KeepAlive: ao voltar do detalhe, devolve o foco ao card que foi aberto (sem rolar,
 // a posição já é restaurada pelo router) em vez de mandar quem usa teclado para o topo da página.
 onActivated(() => {
+  // Marcou (ou desmarcou) no detalhe: "Faltam"/"Capturados" passam a refletir isso.
+  void refresh()
   const id = lastOpenedId
   if (id === null) return
   lastOpenedId = null
