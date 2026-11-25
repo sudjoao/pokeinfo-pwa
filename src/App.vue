@@ -237,7 +237,11 @@ function skipToContent(): void {
       @open-about="menu.aboutOpen.value = true"
       @random="openRandom"
     />
-    <!-- A Home fica em KeepAlive para preservar o scroll infinito e a busca ao voltar do detalhe. -->
+    <!--
+      A Home fica em KeepAlive para preservar o scroll infinito e a busca ao voltar do detalhe;
+      Golpes, Itens e Velocidade também (voltar de /move ou /item mantinha só o começo da lista).
+      Cada uma relê a URL ao ser reativada (onActivated), então um link ou o menu ainda mandam.
+    -->
     <!--
       Transition fica fora do KeepAlive (ordem exigida pelo Vue Router). Sem mode="out-in": nessa
       versão do vue-router, out-in trava a navegação para as rotas com import() (detalhe e time) —
@@ -252,7 +256,7 @@ function skipToContent(): void {
     <RouterView v-slot="{ Component }">
       <!-- Lista ↔ detalhe com View Transition: a troca é imediata e o navegador anima (viewTransition.ts). -->
       <Transition name="page" :css="!nativePageTransition">
-        <KeepAlive :include="['HomeView']">
+        <KeepAlive :include="['HomeView', 'MovesView', 'ItemsView', 'SpeedView']">
           <component :is="Component" />
         </KeepAlive>
       </Transition>

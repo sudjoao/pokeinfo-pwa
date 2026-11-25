@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
-import { mdiDna, mdiShimmer } from '@mdi/js'
+import { mdiDna } from '@mdi/js'
 import type { Game, GameDex } from '@/data/games'
 import type { CaughtFilter } from '@/composables/usePokemonList'
 import type { ExclusiveVersion } from '@/data/exclusives'
@@ -33,8 +33,6 @@ defineProps<{
   megaFilter: boolean
   /** Megas da Pokédex atual; zero esconde a chip (região sem megas). */
   megaCount: number
-  /** Listas com os artworks shiny. */
-  shiny: boolean
 }>()
 
 const emit = defineEmits<{
@@ -45,7 +43,6 @@ const emit = defineEmits<{
   openVersions: []
   openAdvanced: []
   toggleMega: []
-  toggleShiny: []
 }>()
 
 const { t } = useI18n()
@@ -74,12 +71,6 @@ const { t } = useI18n()
         :active="megaFilter"
         :count="megaCount || undefined"
         @click="emit('toggleMega')"
-      />
-      <ListToggleChip
-        :label="t('home.shinyToggle')"
-        :icon="mdiShimmer"
-        :active="shiny"
-        @click="emit('toggleShiny')"
       />
     </template>
     <template v-if="game && dex && game.dexes.length > 1">

@@ -16,6 +16,7 @@
     "signInTitle": "Sign in · PokeInfo"
   },
   "common": {
+    "copied": "Copied.",
     "copyManually": "Automatic copy failed. Select the text and copy it:",
     "retry": "Try again",
     "back": "Back",
@@ -59,6 +60,9 @@
     "noneCaughtMessage": "Tap the Poké Ball on a card to mark what you have already caught in {game}.",
     "completeTitle": "Pokédex complete!",
     "completeMessage": "You have caught every Pokémon in the {dex} Pokédex in {game}.",
+    "completeCount": "{total} of {total} caught in the {dex} Pokédex in {game}.",
+    "completeShare": "{dex} Pokédex complete in {game}: {total} of {total} caught! 🎉 {url}",
+    "viewCaught": "View caught",
     "loadErrorTitle": "Could not load the Pokédex",
     "loadMoreError": "Couldn't load more Pokémon.",
     "endOfList": "You have reached the end of the list.",
@@ -72,7 +76,7 @@
     "resultsCount": "No Pokémon found | 1 Pokémon found | {n} Pokémon found",
     "clearFilters": "Clear filters",
     "megaFilter": "Megas",
-    "shinyToggle": "Shiny",
+    "shinyToggle": "Shiny artwork",
     "noFavoritesTitle": "No favorites yet",
     "noFavoritesMessage": "Tap the heart at the top of a Pokémon's page to keep it here."
   },
@@ -614,7 +618,7 @@
     "box": "Box {n}",
     "caught": "{caught}/{total}",
     "caughtLong": "{caught} of {total} caught",
-    "hint": "Tap a Pokémon to mark it as caught or not. To open its page, switch to the card list."
+    "hint": "Tap a Pokémon to mark it as caught or not. Hold (or right-click) to open its page."
   },
   "filters": {
     "chip": "Filters",

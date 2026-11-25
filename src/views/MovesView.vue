@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, shallowRef, watch } from 'vue'
+import { computed, onActivated, ref, shallowRef, watch } from 'vue'
 import { useRoute, useRouter, type LocationQueryRaw } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { GAMES } from '@/data/games'
@@ -44,26 +44,39 @@ const BATTLE_TYPES = POKEMON_TYPES.filter((type) => type !== 'unknown' && type !
 const queryString = (key: string) =>
   typeof route.query[key] === 'string' ? (route.query[key] as string) : ''
 
-// Estado inicial vindo da URL (`/moves?game=scarlet-violet&type=fire&sort=power`).
-const mode = ref<Mode>(route.query.mode === 'learn' ? 'learn' : 'list')
-const game = ref<string | null>(findGame(queryString('game'))?.slug ?? null)
-const search = ref(queryString('q'))
+const mode = ref<Mode>('list')
+const game = ref<string | null>(null)
+const search = ref('')
 const debouncedSearch = useDebouncedRef(search, 250)
-const type = ref<PokemonType | null>(
-  isPokemonType(queryString('type')) ? (queryString('type') as PokemonType) : null,
-)
-const category = ref<MoveCategory | null>(
-  (CATEGORIES as readonly string[]).includes(queryString('cat'))
-    ? (queryString('cat') as MoveCategory)
-    : null,
-)
-const sort = ref<MoveSort>(
-  (SORTS as readonly string[]).includes(queryString('sort'))
-    ? (queryString('sort') as MoveSort)
-    : 'name',
-)
-const learn = ref<string[]>(queryString('learn').split(',').filter(Boolean).slice(0, MAX_LEARN))
+const type = ref<PokemonType | null>(null)
+const category = ref<MoveCategory | null>(null)
+const sort = ref<MoveSort>('name')
+const learn = ref<string[]>([])
 const shown = ref(PAGE)
+
+/**
+ * Estado vindo da URL (`/moves?game=scarlet-violet&type=fire&sort=power`). A tela fica em
+ * KeepAlive (voltar de um golpe mantém a lista e a rolagem), então a URL é relida ao reativar:
+ * voltando, ela é a que a própria tela escreveu (nada muda); por um link ou pelo menu, ela manda.
+ */
+function readFromRoute(): void {
+  mode.value = route.query.mode === 'learn' ? 'learn' : 'list'
+  game.value = findGame(queryString('game'))?.slug ?? null
+  search.value = queryString('q')
+  type.value = isPokemonType(queryString('type')) ? (queryString('type') as PokemonType) : null
+  category.value = (CATEGORIES as readonly string[]).includes(queryString('cat'))
+    ? (queryString('cat') as MoveCategory)
+    : null
+  sort.value = (SORTS as readonly string[]).includes(queryString('sort'))
+    ? (queryString('sort') as MoveSort)
+    : 'name'
+  const nextLearn = queryString('learn').split(',').filter(Boolean).slice(0, MAX_LEARN)
+  if (nextLearn.join() !== learn.value.join()) learn.value = nextLearn
+}
+readFromRoute()
+onActivated(() => {
+  if (route.name === 'moves') readFromRoute()
+})
 
 /** No "quem aprende" o jogo é obrigatório (os learnsets são por jogo). */
 const learnGame = computed(

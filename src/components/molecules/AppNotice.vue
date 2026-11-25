@@ -7,6 +7,7 @@ import { noticeTimeout } from '@/utils/notice'
 const props = defineProps<{
   /** Texto do aviso; null fecha. */
   text: string | null
+  /** Padrão: topo. No celular, embaixo disputa com a bandeja do time e a barra de seleção. */
   location?: 'top' | 'bottom'
   color?: string
   /** Padrão: 4 s, ou até fechar quando o texto é longo (ver noticeTimeout). */
@@ -32,7 +33,7 @@ watch(
   <v-snackbar
     :model-value="text !== null"
     :timeout="timeout ?? (actionLabel ? 6000 : noticeTimeout(text))"
-    :location="location"
+    :location="location ?? 'top'"
     :color="color"
     @update:model-value="(open: boolean) => !open && emit('close')"
   >

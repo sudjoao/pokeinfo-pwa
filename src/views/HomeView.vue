@@ -17,6 +17,9 @@ import {
   mdiClipboardListOutline,
   mdiFilterRemoveOutline,
   mdiPackageVariantClosed,
+  mdiPokeball,
+  mdiShareVariant,
+  mdiShimmer,
   mdiViewGridOutline,
 } from '@mdi/js'
 import { gameContextQuery } from '@/utils/games'
@@ -28,6 +31,7 @@ import { useDexLabel } from '@/composables/useDexLabel'
 import { useShortcut } from '@/composables/useShortcut'
 import { useDragSelect } from '@/composables/useDragSelect'
 import { announce } from '@/composables/useAnnouncer'
+import { shareText } from '@/composables/useShare'
 import { useCaughtStore } from '@/stores/caught'
 import SelectionBar from '@/components/organisms/SelectionBar.vue'
 import type { PokemonSummary } from '@/types/pokemon'
@@ -413,6 +417,34 @@ const noFavorites = computed(
   () => advanced.value.favorites && advancedCount.value === 1 && !query.value.trim(),
 )
 
+/** Filtro "Faltam" sem mais nada e nenhum faltante: a Pokédex do jogo está completa. */
+const dexComplete = computed(
+  () =>
+    isEmpty.value &&
+    !!game.value &&
+    !!dex.value &&
+    caughtFilter.value === 'missing' &&
+    !query.value.trim() &&
+    !typeFilter.value.length &&
+    !availability.value.length &&
+    !megaFilter.value &&
+    !advancedCount.value &&
+    source.value.length > 0,
+)
+
+async function shareComplete(): Promise<void> {
+  if (!game.value || !dex.value) return
+  const text = t('home.completeShare', {
+    dex: dexLabel(dex.value),
+    game: game.value.title,
+    total: source.value.length,
+    url: `${window.location.origin}/?game=${game.value.slug}`,
+  })
+  const result = await shareText(text)
+  if (result === 'copied') notice.value = t('common.copied')
+  else if (result === 'failed') notice.value = t('common.shareFailed')
+}
+
 const emptyTitle = computed(() => {
   if (noFavorites.value) return t('home.noFavoritesTitle')
   if (
@@ -512,9 +544,7 @@ onActivated(() => {
         :advanced-count="advancedCount"
         :mega-filter="megaFilter"
         :mega-count="megaCount"
-        :shiny="shiny"
         @toggle-mega="toggleMegaFilter"
-        @toggle-shiny="toggleShiny"
         @open-versions="versionsOpen = true"
         @open-advanced="openAdvanced"
         @select-dex="setDex"
@@ -557,7 +587,7 @@ onActivated(() => {
       />
       <ResultsAnnouncer :count="filtered.length" :ready="!sourceLoading && !sourceError" />
 
-      <div class="d-flex align-center ga-2 mb-2">
+      <div class="d-flex align-center flex-wrap ga-2 mb-2">
         <v-btn
           variant="tonal"
           :prepend-icon="mdiClipboardListOutline"
@@ -579,6 +609,17 @@ onActivated(() => {
           {{ t('select.action') }}
         </v-btn>
         <v-spacer />
+        <!-- Arte shiny é exibição, não filtro: fica junto de Cards/Caixas (entre as chips parecia "só shinies"). -->
+        <v-btn
+          :icon="mdiShimmer"
+          :variant="shiny ? 'flat' : 'tonal'"
+          :color="shiny ? 'secondary' : undefined"
+          density="comfortable"
+          :aria-pressed="shiny"
+          :aria-label="t('home.shinyToggle')"
+          :title="t('home.shinyToggle')"
+          @click="toggleShiny"
+        />
         <v-btn-toggle
           :model-value="layout"
           mandatory
@@ -630,6 +671,28 @@ onActivated(() => {
         :action-label="t('common.retry')"
         @action="retry"
       />
+
+      <section v-else-if="dexComplete" class="dex-complete text-center py-8" aria-live="polite">
+        <v-icon :icon="mdiPokeball" size="72" color="primary" class="dex-complete__icon" />
+        <h2 class="text-headline-small mt-4 mb-2">{{ t('home.completeTitle') }}</h2>
+        <p class="text-body-medium mb-6">
+          {{
+            t('home.completeCount', {
+              total: source.length,
+              dex: dex ? dexLabel(dex) : '',
+              game: game?.title,
+            })
+          }}
+        </p>
+        <div class="d-flex flex-wrap justify-center ga-2">
+          <v-btn color="primary" :prepend-icon="mdiShareVariant" @click="shareComplete">
+            {{ t('common.share') }}
+          </v-btn>
+          <v-btn variant="tonal" @click="setCaughtFilter('caught')">
+            {{ t('home.viewCaught') }}
+          </v-btn>
+        </div>
+      </section>
 
       <EmptyState
         v-else-if="isEmpty"
@@ -745,6 +808,33 @@ onActivated(() => {
 </template>
 
 <style scoped>
+/* Pokédex completa: a Poké Bola dá dois pulinhos (não repete, e some com movimento reduzido). */
+.dex-complete__icon {
+  animation: dex-complete-bounce 0.9s ease-in-out 2;
+}
+
+@keyframes dex-complete-bounce {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  30% {
+    transform: translateY(-18px) rotate(-12deg);
+  }
+  60% {
+    transform: translateY(0) rotate(0deg);
+  }
+  80% {
+    transform: translateY(-6px) rotate(6deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dex-complete__icon {
+    animation: none;
+  }
+}
+
 /*
  * Selecionando, segurar e arrastar escolhe vários: sem seleção de texto, sem o menu de "salvar
  * imagem" do iOS e sem arrastar a imagem do card como arquivo.

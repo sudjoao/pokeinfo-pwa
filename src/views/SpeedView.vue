@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, shallowRef, watch } from 'vue'
+import { computed, onActivated, onMounted, reactive, ref, shallowRef, watch } from 'vue'
 import { useRoute, useRouter, type LocationQueryRaw } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { GAMES } from '@/data/games'
@@ -34,8 +34,18 @@ const WIDE_ONLY = new Set(['min', 'neutral'])
 /** Megas e formas Primal: só existem nos jogos com Mega Evolução. */
 const MEGA_FORM = /-(mega|primal)(-|$)/
 
-const level = ref<50 | 100>(route.query.level === '100' ? 100 : 50)
-const game = ref<string | null>(findGame(String(route.query.game ?? ''))?.slug ?? null)
+const level = ref<50 | 100>(50)
+const game = ref<string | null>(null)
+
+/** Estado vindo da URL; relido ao reativar (a tela fica em KeepAlive, como a Home). */
+function readFromRoute(): void {
+  level.value = route.query.level === '100' ? 100 : 50
+  game.value = findGame(String(route.query.game ?? ''))?.slug ?? null
+}
+readFromRoute()
+onActivated(() => {
+  if (route.name === 'speed') readFromRoute()
+})
 const team = computed(() =>
   String(route.query.team ?? '')
     .split(',')

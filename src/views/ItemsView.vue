@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, onActivated, ref, watch } from 'vue'
 import { useRoute, useRouter, type LocationQueryRaw } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useDebouncedRef } from '@/composables/useDebouncedRef'
@@ -16,14 +16,25 @@ const { t, te, locale } = useI18n()
 /** Itens por vez na lista (são ~1.600): "Mostrar mais" adiciona outro lote. */
 const PAGE = 60
 
-const search = ref(typeof route.query.q === 'string' ? route.query.q : '')
+const search = ref('')
 const debouncedSearch = useDebouncedRef(search, 250)
-const pocket = ref<ItemPocket | null>(
-  (ITEM_POCKETS as readonly string[]).includes(String(route.query.pocket))
-    ? (route.query.pocket as ItemPocket)
-    : null,
-)
+const pocket = ref<ItemPocket | null>(null)
 const shown = ref(PAGE)
+
+/**
+ * Estado vindo da URL. A tela fica em KeepAlive (voltar de um item mantém a lista e a rolagem),
+ * então a URL é relida ao reativar: voltando, é a que a tela escreveu; por um link, ela manda.
+ */
+function readFromRoute(): void {
+  search.value = typeof route.query.q === 'string' ? route.query.q : ''
+  pocket.value = (ITEM_POCKETS as readonly string[]).includes(String(route.query.pocket))
+    ? (route.query.pocket as ItemPocket)
+    : null
+}
+readFromRoute()
+onActivated(() => {
+  if (route.name === 'items') readFromRoute()
+})
 
 watch([debouncedSearch, pocket], () => {
   shown.value = PAGE

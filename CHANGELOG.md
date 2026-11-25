@@ -49,9 +49,19 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 - Quiz: as gerações escolhidas e a sequência atual ficam salvas entre visitas.
 - Rotas: a chave "só os que faltam" fica salva no aparelho.
 - Busca: Esc limpa o campo; com o campo vazio, sai dele.
+- Caixas (living dex) com jogo: segurar um Pokémon (ou botão direito, ou Shift+Enter) abre a ficha
+  dele; o toque simples continua marcando a captura.
+- Pokédex completa: com o filtro "Faltam" e nenhum faltante, a tela comemora ("{n} de {n}") com
+  botão para compartilhar e para ver os capturados, no lugar do estado vazio genérico.
+- Golpes, Itens e Velocidade ficam vivas ao abrir um golpe ou item: voltar mantém a busca, os
+  filtros, o "Mostrar mais" e a rolagem (antes a lista recomeçava do início).
 
 ### Alterado
 
+- O botão de arte shiny saiu das chips de filtro (parecia "só shinies") e foi para junto de
+  Cards/Caixas na Pokédex e acima da lista no team builder, com o rótulo "Arte shiny".
+- Os avisos (snackbars) aparecem sempre no topo da tela, em todas as telas (ficavam ora no topo,
+  ora embaixo, disputando com a bandeja do time e a barra de seleção).
 - Desempenho da listagem em listas longas (a Nacional rolada até o fim passa de 1.300 cards):
   cada card deixou de ser um componente VCard dentro de um VCol com um RouterLink (três instâncias
   e um link que recalculava o destino de todos os cards a cada navegação) e virou o mesmo HTML

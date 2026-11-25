@@ -85,7 +85,66 @@ function labelOf(entry: BoxEntry): string {
   return props.selecting && isCaught(entry) ? `${label} (${t('catch.caught')})` : label
 }
 
+/*
+ * Com jogo, o toque marca a captura; segurar um instante (ou botão direito, ou Shift+Enter) abre
+ * a ficha, sem precisar trocar para os cards. No modo de seleção vale só a seleção.
+ */
+const HOLD_MS = 450
+const HOLD_SLOP = 10
+let hold: { x: number; y: number; timer: ReturnType<typeof setTimeout> } | null = null
+/** O clique que o navegador dispara ao soltar depois de segurar não pode marcar a captura. */
+let suppressClick = false
+
+function canOpenByHold(): boolean {
+  return !props.selecting && props.caughtIds !== undefined
+}
+
+function cancelHold(): void {
+  if (!hold) return
+  clearTimeout(hold.timer)
+  hold = null
+}
+
+function openByHold(id: number): void {
+  cancelHold()
+  suppressClick = true
+  setTimeout(() => (suppressClick = false), 400)
+  navigator.vibrate?.(10)
+  emit('open', id)
+}
+
+function onPointerDown(entry: BoxEntry, event: PointerEvent): void {
+  if (!canOpenByHold() || event.button !== 0) return
+  cancelHold()
+  hold = {
+    x: event.clientX,
+    y: event.clientY,
+    timer: setTimeout(() => openByHold(entry.id), HOLD_MS),
+  }
+}
+
+function onPointerMove(event: PointerEvent): void {
+  if (hold && Math.hypot(event.clientX - hold.x, event.clientY - hold.y) > HOLD_SLOP) cancelHold()
+}
+
+function onContextMenu(entry: BoxEntry, event: Event): void {
+  if (!canOpenByHold()) return
+  event.preventDefault()
+  // O Android dispara o menu de contexto ao segurar: se o timer já abriu a ficha, não abre de novo.
+  if (!suppressClick) openByHold(entry.id)
+}
+
+function onKeydown(entry: BoxEntry, event: KeyboardEvent): void {
+  if (!canOpenByHold() || event.key !== 'Enter' || !event.shiftKey) return
+  event.preventDefault()
+  emit('open', entry.id)
+}
+
 function onCell(entry: BoxEntry, event: MouseEvent): void {
+  if (suppressClick) {
+    suppressClick = false
+    return
+  }
   if (props.selecting) {
     emit('select', entry.id)
     return
@@ -148,6 +207,13 @@ function onCell(entry: BoxEntry, event: MouseEvent): void {
           :aria-label="labelOf(entry)"
           :title="labelOf(entry)"
           @click="onCell(entry, $event)"
+          @pointerdown="onPointerDown(entry, $event)"
+          @pointermove="onPointerMove"
+          @pointerup="cancelHold"
+          @pointercancel="cancelHold"
+          @pointerleave="cancelHold"
+          @contextmenu="onContextMenu(entry, $event)"
+          @keydown="onKeydown(entry, $event)"
         >
           <v-icon
             v-if="selecting && isSelected(entry)"
@@ -214,6 +280,10 @@ function onCell(entry: BoxEntry, event: MouseEvent): void {
   background: color-mix(in srgb, rgb(var(--v-theme-primary)) 12%, transparent);
   cursor: pointer;
   transition: background 0.15s ease;
+  /* Segurar abre a ficha: sem o menu "salvar imagem" do iOS nem seleção de texto. */
+  -webkit-touch-callout: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .pokemon-box__cell:focus-visible {

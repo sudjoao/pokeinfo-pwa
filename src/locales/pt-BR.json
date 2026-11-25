@@ -16,6 +16,7 @@
     "signInTitle": "Entrar · PokeInfo"
   },
   "common": {
+    "copied": "Copiado.",
     "copyManually": "Não deu para copiar automaticamente. Selecione o texto e copie:",
     "retry": "Tentar novamente",
     "back": "Voltar",
@@ -59,6 +60,9 @@
     "noneCaughtMessage": "Toque na Poké Bola de um card para marcar o que você já capturou em {game}.",
     "completeTitle": "Pokédex completa!",
     "completeMessage": "Você já capturou todos os Pokémon da Pokédex de {dex} em {game}.",
+    "completeCount": "{total} de {total} capturados na Pokédex de {dex} em {game}.",
+    "completeShare": "Pokédex de {dex} completa em {game}: {total} de {total} capturados! 🎉 {url}",
+    "viewCaught": "Ver capturados",
     "loadErrorTitle": "Não foi possível carregar a Pokédex",
     "loadMoreError": "Não foi possível carregar mais Pokémon.",
     "endOfList": "Você chegou ao fim da lista.",
@@ -72,7 +76,7 @@
     "resultsCount": "Nenhum Pokémon encontrado | 1 Pokémon encontrado | {n} Pokémon encontrados",
     "clearFilters": "Limpar filtros",
     "megaFilter": "Megas",
-    "shinyToggle": "Shiny",
+    "shinyToggle": "Arte shiny",
     "noFavoritesTitle": "Nenhum favorito ainda",
     "noFavoritesMessage": "Toque no coração no topo da página de um Pokémon para guardá-lo aqui."
   },
@@ -614,7 +618,7 @@
     "box": "Caixa {n}",
     "caught": "{caught}/{total}",
     "caughtLong": "{caught} de {total} capturados",
-    "hint": "Toque num Pokémon para marcar ou desmarcar a captura. Para abrir a ficha, use a lista em cards."
+    "hint": "Toque num Pokémon para marcar ou desmarcar a captura. Segure (ou clique com o botão direito) para abrir a ficha."
   },
   "filters": {
     "chip": "Filtros",

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { mdiFilterRemoveOutline } from '@mdi/js'
+import { mdiFilterRemoveOutline, mdiShimmer } from '@mdi/js'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useDisplay } from 'vuetify'
@@ -145,9 +145,7 @@ function goBack(): void {
         :advanced-count="advancedCount"
         :mega-filter="megaFilter"
         :mega-count="megaCount"
-        :shiny="shiny"
         @toggle-mega="toggleMegaFilter"
-        @toggle-shiny="toggleShiny"
         @open-versions="versionsOpen = true"
         @open-advanced="openAdvanced"
         @select-dex="setDex"
@@ -157,7 +155,19 @@ function goBack(): void {
 
     <v-row class="team-view" :class="{ 'team-view--tray': !mdAndUp }">
       <v-col cols="12" md="8">
-        <p class="text-body-small opacity-70 mb-3">{{ t('team.pickHint') }}</p>
+        <div class="d-flex align-center ga-2 mb-3">
+          <p class="text-body-small opacity-70 mb-0 flex-grow-1">{{ t('team.pickHint') }}</p>
+          <v-btn
+            :icon="mdiShimmer"
+            :variant="shiny ? 'flat' : 'tonal'"
+            :color="shiny ? 'secondary' : undefined"
+            density="comfortable"
+            :aria-pressed="shiny"
+            :aria-label="t('home.shinyToggle')"
+            :title="t('home.shinyToggle')"
+            @click="toggleShiny"
+          />
+        </div>
         <ResultsAnnouncer :count="filtered.length" :ready="!sourceLoading && !sourceError" />
 
         <v-row v-if="sourceLoading" density="compact">
