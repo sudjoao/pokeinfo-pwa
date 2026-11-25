@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { computed, ref, shallowRef } from 'vue'
-import type { AuthChangeEvent, Session, User } from '@supabase/supabase-js'
+import type { AuthChangeEvent, Session, SupabaseClient, User } from '@supabase/supabase-js'
 import { useBackup } from '@/composables/useBackup'
 import {
   cloudEnabled,
@@ -16,6 +16,7 @@ import {
   type RemoteCollection,
 } from '@/services/cloud/collection.service'
 import { safeNextPath } from '@/utils/authRedirect'
+import { isOwnerEmail, keepAlive } from '@/services/cloud/keepAlive'
 import { whenIdle } from '@/utils/idle'
 import { parseBackupData, type BackupData } from '@/utils/backup'
 import { onLocalChange, withoutNotify } from '@/utils/localChanges'
@@ -303,7 +304,7 @@ export const useAccountStore = defineStore('account', () => {
           const version = await createCollection(client, userId, local)
           if (version === null) continue
           writeState(userId, version, local)
-          return finish()
+          return finish(client, userId)
         }
 
         const merged = mergeData(base, local, remote.data)
@@ -320,7 +321,7 @@ export const useAccountStore = defineStore('account', () => {
           version = saved
         }
         writeState(userId, version, merged)
-        return finish()
+        return finish(client, userId)
       }
       throw new Error('Too many concurrent writes')
     } catch {
@@ -330,9 +331,31 @@ export const useAccountStore = defineStore('account', () => {
     }
   }
 
-  function finish(): void {
+  function finish(client: SupabaseClient, userId: string): void {
     retries = 0
     status.value = 'synced'
+    void afterSync(client, userId)
+  }
+
+  /** Resultado do teste de dono por e-mail (um hash SHA-256; calculado uma vez por conta). */
+  let ownerCheck: { email: string; owner: Promise<boolean> } | null = null
+  function isOwner(): Promise<boolean> {
+    const email = user.value?.email ?? ''
+    if (ownerCheck?.email !== email) ownerCheck = { email, owner: isOwnerEmail(email) }
+    return ownerCheck.owner
+  }
+
+  /**
+   * Na conta de quem mantém o projeto, cada sincronização concluída pode render uma rodada de
+   * consultas a mais (keepAlive.ts): o plano Free do Supabase pausa o projeto sem atividade no
+   * banco por uma semana. Fora do caminho da sincronização; erros ficam por lá.
+   */
+  async function afterSync(client: SupabaseClient, userId: string): Promise<void> {
+    try {
+      if (user.value?.id === userId && (await isOwner())) await keepAlive(client, userId)
+    } catch {
+      // Só conveniência: nunca muda o estado da sincronização.
+    }
   }
 
   /** Resposta da pessoa no diálogo da primeira sincronização. */

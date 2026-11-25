@@ -7,6 +7,13 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 
 ## [Não lançado]
 
+### Adicionado
+
+- Conta: na conta de quem mantém o projeto, cada sincronização concluída pode fazer algumas
+  consultas a mais ao banco (no máximo uma rodada a cada 12 h por aparelho), e um workflow do
+  GitHub consulta o banco duas vezes por dia. O plano Free do Supabase pausa projetos com uma
+  semana de pouca atividade, e com um só usuário os dias sem abrir o app contavam.
+
 ## [1.16.0] - 2026-11-23
 
 ### Adicionado

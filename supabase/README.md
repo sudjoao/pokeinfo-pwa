@@ -53,7 +53,8 @@ versão, trocar o dono da linha, payload grande, acesso anônimo, exclusão em c
 
 1. Crie um projeto em [supabase.com/dashboard](https://supabase.com/dashboard) (região
    **South America (São Paulo)** para menor latência).
-2. Aplique a migration `migrations/20261025000000_user_collections.sql`:
+2. Aplique as migrations de `migrations/` (`20261025000000_user_collections.sql` e
+   `20261125000000_keep_alive.sql`):
    - pelo **SQL Editor** (colar o arquivo e rodar), ou
    - pela CLI: `npx supabase login`, `npx supabase link --project-ref <ref>` e `npx supabase db push`.
 3. Em **Authentication > Sign In / Providers**, desligue **Email** e **Anonymous** (o app só usa o
@@ -92,6 +93,23 @@ Em **Project Settings > API Keys** copie a URL do projeto e a **publishable key*
 - **Vercel** (Settings > Environment Variables, Production e Preview): `VITE_SUPABASE_URL` e
   `VITE_SUPABASE_PUBLISHABLE_KEY`. Faça um novo deploy (o Vite embute as variáveis no build).
 - **Local**: copie `.env.example` para `.env.local` e preencha.
+
+### 5. Manter o projeto Free ativo (keep-alive)
+
+O Supabase pausa projetos do plano Free com uma semana de pouca atividade no banco (avisa por
+e-mail uns dias antes; "a few requests to the database each day" bastam). Com um só usuário, os dias
+sem abrir o app contam como inatividade. Duas coisas evitam a pausa:
+
+- **No app**: na conta de quem mantém o projeto (e-mails identificados por hash SHA-256 em
+  `src/services/cloud/keepAlive.ts`), cada sincronização concluída pode render uma rodada de 4
+  consultas leves à própria linha, no máximo a cada 12 h por aparelho. Só roda quando o app é aberto.
+- **No GitHub**: `.github/workflows/keepalive.yml` chama a função `keep_alive()` (migration
+  `20261125000000_keep_alive.sql`, que só devolve a hora do servidor) 3 vezes, duas vezes por dia.
+  Para ligar: aplique a migration (SQL Editor ou `npx supabase db push`) e, no repositório, em
+  **Settings > Secrets and variables > Actions**, crie a variável `SUPABASE_URL` e o secret
+  `SUPABASE_PUBLISHABLE_KEY` (os mesmos valores da Vercel). Sem a variável o job não roda. Dá para
+  testar em **Actions > Supabase keep-alive > Run workflow**. O GitHub desliga agendamentos de
+  repositórios sem commits por 60 dias e avisa por e-mail; basta reativar.
 
 ## Desenvolvimento local
 

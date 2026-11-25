@@ -1,0 +1,49 @@
+name: Supabase keep-alive
+
+# O plano Free do Supabase pausa o projeto depois de uma semana com pouca atividade no banco; com um
+# só usuário, os dias sem abrir o app contam. Duas vezes por dia este job faz algumas consultas à
+# função `keep_alive()` (migration 20261125000000) com a chave publicável, a mesma que vai no
+# bundle. Complementa o keep-alive do próprio app (src/services/cloud/keepAlive.ts), que só roda
+# quando o dono abre o app.
+#
+# Precisa de `SUPABASE_URL` (Settings > Secrets and variables > Actions > Variables) e
+# `SUPABASE_PUBLISHABLE_KEY` (Secrets). Sem a variável, o job não roda. Atenção: o GitHub desliga
+# os agendamentos de repositórios públicos sem commits por 60 dias (um aviso chega por e-mail).
+
+on:
+  schedule:
+    - cron: '23 5,17 * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    if: vars.SUPABASE_URL != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Consultas ao banco
+        env:
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          set -u
+          if [ -z "$SUPABASE_KEY" ]; then
+            echo "::error::SUPABASE_PUBLISHABLE_KEY não configurada"
+            exit 1
+          fi
+          for attempt in 1 2 3; do
+            code=$(curl -sS --max-time 20 -o response.txt -w '%{http_code}' \
+              -X POST "$SUPABASE_URL/rest/v1/rpc/keep_alive" \
+              -H "apikey: $SUPABASE_KEY" \
+              -H "Authorization: Bearer $SUPABASE_KEY" \
+              -H "Content-Type: application/json" \
+              -d '{}')
+            if [ "$code" != "200" ]; then
+              echo "::error::keep_alive devolveu HTTP $code: $(cat response.txt)"
+              exit 1
+            fi
+            echo "ok ($attempt): $(cat response.txt)"
+            sleep 2
+          done
