@@ -857,7 +857,9 @@
       "trap": "trapping",
       "leech-seed": "leech seed",
       "yawn": "drowsiness"
-    }
+    },
+    "combine": "Combine with other moves",
+    "noneAtAll": "PokéAPI lists no Pokémon that learn this move."
   },
   "itemsPage": {
     "title": "Items",

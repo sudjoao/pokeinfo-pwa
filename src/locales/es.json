@@ -857,7 +857,9 @@
       "trap": "atrapar",
       "leech-seed": "drenar cada turno",
       "yawn": "dar sueño"
-    }
+    },
+    "combine": "Combinar con otros movimientos",
+    "noneAtAll": "PokéAPI no lista Pokémon que aprendan este movimiento."
   },
   "itemsPage": {
     "title": "Objetos",

@@ -857,7 +857,9 @@
       "trap": "prender",
       "leech-seed": "drenar a cada turno",
       "yawn": "deixar sonolento"
-    }
+    },
+    "combine": "Combinar com outros golpes",
+    "noneAtAll": "A PokéAPI não lista Pokémon que aprendem este golpe."
   },
   "itemsPage": {
     "title": "Itens",
