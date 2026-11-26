@@ -4,6 +4,8 @@ import {
   defineAsyncComponent,
   h,
   nextTick,
+  onActivated,
+  onBeforeUnmount,
   ref,
   shallowRef,
   useTemplateRef,
@@ -45,12 +47,14 @@ import { useEggCompatibility } from '@/composables/useEggCompatibility'
 import { useSwipe } from '@/composables/useSwipe'
 import { useTeam } from '@/composables/useTeam'
 import { useShortcut } from '@/composables/useShortcut'
+import { prefersReducedMotion } from '@/composables/usePrefersReducedMotion'
 import { shareLink } from '@/composables/useShare'
 import DetailLayout from '@/components/templates/DetailLayout.vue'
 import AppNotice from '@/components/molecules/AppNotice.vue'
 import BackToTop from '@/components/atoms/BackToTop.vue'
 import CardSkeleton from '@/components/molecules/CardSkeleton.vue'
 import NeighborNav, { type NeighborLink } from '@/components/molecules/NeighborNav.vue'
+import SectionNav, { type PageSection } from '@/components/molecules/SectionNav.vue'
 import EmptyState from '@/components/molecules/EmptyState.vue'
 import PokemonHero from '@/components/molecules/PokemonHero.vue'
 import AboutGrid from '@/components/molecules/AboutGrid.vue'
@@ -322,6 +326,76 @@ useShortcut(['ArrowLeft', 'ArrowRight'], (event) => {
 
 const notice = ref<string | null>(null)
 
+/*
+ * Atalhos para as seções (chips grudados sob o cabeçalho); a lista é curta de propósito. A rolagem
+ * para abaixo do cabeçalho e dos chips pelo scroll-padding-top do <html> (main.css).
+ */
+const SECTION_IDS = ['defenses', 'about', 'stats', 'evolution', 'moves', 'locations'] as const
+const sections = computed<PageSection[]>(() =>
+  SECTION_IDS.map((id) => ({ id, label: t(`detail.sections.${id}`) })),
+)
+const activeSection = ref<string | null>(null)
+let sectionObserver: IntersectionObserver | null = null
+
+/** Observa as seções: a que cruza a faixa logo abaixo do cabeçalho fica marcada nos chips. */
+function watchSections(): void {
+  sectionObserver?.disconnect()
+  sectionObserver = null
+  if (typeof IntersectionObserver === 'undefined') return
+  const visible = new Map<string, number>()
+  sectionObserver = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) visible.set(entry.target.id, entry.boundingClientRect.top)
+        else visible.delete(entry.target.id)
+      }
+      // Entre as visíveis, a mais alta na tela.
+      let best: string | null = null
+      let top = Infinity
+      for (const [id, y] of visible) {
+        if (y < top) {
+          top = y
+          best = id
+        }
+      }
+      if (best) activeSection.value = best
+    },
+    { rootMargin: '-140px 0px -45% 0px' },
+  )
+  for (const { id } of sections.value) {
+    const el = document.getElementById(id)
+    if (el) sectionObserver.observe(el)
+  }
+}
+
+function goToSection(id: string): void {
+  const el = document.getElementById(id)
+  if (!el) return
+  router.replace({ query: route.query, hash: `#${id}` })
+  el.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'start' })
+  activeSection.value = id
+}
+
+// Com a ficha pronta, começa a observar (as seções existem só então); um link com #seção (ou
+// trocar de Pokémon com o hash na URL) rola até ela.
+watch(
+  () => [status.value, detail.value?.id] as const,
+  ([state]) => {
+    if (state !== 'ready') return
+    nextTick(() => {
+      watchSections()
+      const hash = route.hash.slice(1)
+      if (hash && SECTION_IDS.includes(hash as (typeof SECTION_IDS)[number])) {
+        document.getElementById(hash)?.scrollIntoView({ block: 'start' })
+        activeSection.value = hash
+      }
+    })
+  },
+  { flush: 'post' },
+)
+onActivated(() => nextTick(watchSections))
+onBeforeUnmount(() => sectionObserver?.disconnect())
+
 /** Time do jogo da URL (um por jogo, salvo no aparelho): o botão do cabeçalho põe e tira a forma aberta. */
 const team = useTeam(() => context.value?.game)
 const inTeam = computed(() => !!detail.value && team.has(detail.value.id))
@@ -441,6 +515,12 @@ async function sendShareImage(): Promise<void> {
 
       <template v-else>
         <NeighborNav class="mb-3" :previous="previousLink" :next="nextLink" @select="goTo" />
+        <SectionNav
+          class="mb-3"
+          :sections="sections"
+          :active="activeSection"
+          @select="goToSection"
+        />
 
         <v-row>
           <v-col cols="12" md="5">
@@ -470,7 +550,8 @@ async function sendShareImage(): Promise<void> {
               @select="goTo"
             />
             <TypeDefenses
-              class="mt-4"
+              id="defenses"
+              class="mt-4 detail-section"
               :pokemon-id="detail.id"
               :types="detail.types"
               :abilities="detail.abilities"
@@ -489,9 +570,14 @@ async function sendShareImage(): Promise<void> {
               :game="context?.game ?? null"
             />
 
-            <AboutGrid :pokemon="detail" :species="species" />
+            <AboutGrid id="about" class="detail-section" :pokemon="detail" :species="species" />
             <AbilityList :abilities="detail.abilities" @open="ability.show" />
-            <StatsList :stats="detail.stats" :pokemon-id="detail.id" />
+            <StatsList
+              id="stats"
+              class="detail-section"
+              :stats="detail.stats"
+              :pokemon-id="detail.id"
+            />
           </v-col>
 
           <v-col cols="12" md="6">
@@ -532,7 +618,7 @@ async function sendShareImage(): Promise<void> {
             />
           </v-col>
 
-          <v-col cols="12">
+          <v-col id="evolution" cols="12" class="detail-section">
             <v-card v-if="chainStatus === 'loading'">
               <v-card-title tag="h2" class="text-title-medium">{{
                 t('detail.evolution')
@@ -593,7 +679,7 @@ async function sendShareImage(): Promise<void> {
             />
           </v-col>
 
-          <v-col cols="12">
+          <v-col id="moves" cols="12" class="detail-section">
             <MovesCard
               :moves="detail.moves"
               :types="detail.types"
@@ -601,7 +687,7 @@ async function sendShareImage(): Promise<void> {
             />
           </v-col>
 
-          <v-col cols="12">
+          <v-col id="locations" cols="12" class="detail-section">
             <LocationList
               v-intersect="{ handler: onLocationsNear, options: { rootMargin: '400px 0px' } }"
               :encounters="encounters"
