@@ -677,7 +677,9 @@
     "attacker": "Ataque",
     "defender": "Defesa",
     "summaryDefense": "Fraquezas: {weak}. Resistências: {resist}. Imunidades: {immune}.",
-    "summaryAttack": "Super efetivo: {weak}. Pouco efetivo: {resist}. Sem efeito: {immune}."
+    "summaryAttack": "Super efetivo: {weak}. Pouco efetivo: {resist}. Sem efeito: {immune}.",
+    "viewPokemon": "Ver Pokémon desse tipo | Ver Pokémon desses tipos",
+    "viewMoves": "Ver golpes do tipo {type}"
   },
   "compare": {
     "title": "Comparar",
@@ -687,7 +689,8 @@
     "remove": "Remover {name} da comparação",
     "withThis": "Comparar com outro Pokémon",
     "bestHint": "Em destaque: o maior valor de cada linha.",
-    "best": "maior"
+    "best": "maior",
+    "moveLeft": "Mover {name} para a esquerda"
   },
   "quiz": {
     "title": "Quem é esse Pokémon?",
@@ -700,7 +703,9 @@
     "streak": "Sequência: {n}",
     "best": "Recorde: {n}",
     "rightAnswer": "resposta certa",
-    "yourAnswer": "sua resposta"
+    "yourAnswer": "sua resposta",
+    "open": "Ver ficha",
+    "allGenerations": "Todas"
   },
   "shiny": {
     "title": "Shiny em {game}",
@@ -801,7 +806,10 @@
     "learnIntro": "Escolha até {n} golpes e um jogo para ver quais Pokémon aprendem todos eles.",
     "learnMoves": "Golpes",
     "learnEmpty": "Escolha pelo menos um golpe.",
-    "learnResults": "Nenhum Pokémon aprende todos | {n} Pokémon aprende todos | {n} Pokémon aprendem todos"
+    "learnResults": "Nenhum Pokémon aprende todos | {n} Pokémon aprende todos | {n} Pokémon aprendem todos",
+    "emptyTitle": "Nenhum golpe encontrado",
+    "sortAsc": "Ordem crescente (toque para inverter)",
+    "sortDesc": "Ordem decrescente (toque para inverter)"
   },
   "movePage": {
     "notFound": "Golpe não encontrado.",
@@ -859,7 +867,9 @@
       "trap": "prender",
       "leech-seed": "drenar a cada turno",
       "yawn": "deixar sonolento"
-    }
+    },
+    "combine": "Combinar com outros golpes",
+    "noneAtAll": "A PokéAPI não lista Pokémon que aprendem este golpe."
   },
   "itemsPage": {
     "title": "Itens",
@@ -900,7 +910,8 @@
       "baking-only": "Só para culinária",
       "effort-drop": "Reduz EVs",
       "other": "Outras berries"
-    }
+    },
+    "emptyTitle": "Nenhum item encontrado"
   },
   "itemPage": {
     "notFound": "Item não encontrado.",
@@ -928,7 +939,8 @@
     "naturalGiftPower": "poder {n}",
     "flavors": "Sabores",
     "heldBy": "Quem segura na natureza",
-    "heldByNone": "A PokéAPI não lista Pokémon selvagens com este item neste jogo."
+    "heldByNone": "A PokéAPI não lista Pokémon selvagens com este item neste jogo.",
+    "berryError": "Não foi possível carregar os dados da berry."
   },
   "flavor": {
     "spicy": "picante",
@@ -978,7 +990,8 @@
     "evTotal": "Total de EVs: {n} de 510",
     "evLimit": "No máximo 252 por stat e 510 no total.",
     "openCalculator": "Calcular IVs",
-    "baseValue": "base {n}"
+    "baseValue": "base {n}",
+    "useNature": "Usar na calculadora"
   },
   "capture": {
     "open": "Calcular chance de captura",
@@ -1032,7 +1045,12 @@
     },
     "inTeam": "(no seu time)",
     "fromTeam": "Velocidade do time",
-    "legend": "Mín: 0 IV, 0 EV, natureza que reduz. Neutro: 31 IV, 0 EV. Máx: 31 IV, 252 EV. Máx+: com natureza que aumenta (Jolly, Timid). O número cinza ao lado do nome é a base."
+    "legend": "Mín: 0 IV, 0 EV, natureza que reduz. Neutro: 31 IV, 0 EV. Máx: 31 IV, 252 EV. Máx+: com natureza que aumenta (Jolly, Timid). O número cinza ao lado do nome é a base.",
+    "paralysis": "Paralisado (×{n})",
+    "trickRoom": "Trick Room (mais lento primeiro)",
+    "empty": "Nenhum Pokémon com esse nome na lista.",
+    "results": "Nenhum Pokémon | 1 Pokémon | {n} Pokémon",
+    "captionTrickRoom": "Velocidade no nível {level}, sob Trick Room (do mais lento ao mais rápido)"
   },
   "daily": {
     "title": "Pokémon do dia",

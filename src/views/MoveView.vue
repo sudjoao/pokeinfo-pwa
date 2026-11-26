@@ -2,7 +2,9 @@
 import { computed, ref, shallowRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { mdiShareVariant } from '@mdi/js'
 import { GAMES } from '@/data/games'
+import { shareLink } from '@/composables/useShare'
 import type { MoveDetail } from '@/services/pokeapi/move.service'
 import { useReferenceStore } from '@/stores/reference'
 import { usePokedexStore } from '@/stores/pokedex'
@@ -21,6 +23,7 @@ import DetailLayout from '@/components/templates/DetailLayout.vue'
 import InfoTile from '@/components/atoms/InfoTile.vue'
 import TypeChip from '@/components/atoms/TypeChip.vue'
 import PokemonButtonGrid from '@/components/molecules/PokemonButtonGrid.vue'
+import AppNotice from '@/components/molecules/AppNotice.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -111,8 +114,9 @@ const secondary = computed(() => {
   return lines
 })
 
-// TM/TR/HM do jogo selecionado: uma requisição pequena só para ele.
-const machine = ref<string | null>(null)
+// TM/TR/HM do jogo selecionado: uma requisição pequena só para ele. O slug ("tm24") é o do item,
+// então o rótulo vira link para a página dele.
+const machine = ref<{ slug: string; label: string } | null>(null)
 watch(
   [detail, game],
   async ([d, g]) => {
@@ -120,7 +124,8 @@ watch(
     const url = d && g ? d.machines[g] : undefined
     if (!url) return
     const item = await reference.ensureMachineItem(url).catch(() => null)
-    if (detail.value === d && game.value === g) machine.value = item?.toUpperCase() ?? null
+    if (detail.value === d && game.value === g && item)
+      machine.value = { slug: item, label: item.toUpperCase() }
   },
   { immediate: true },
 )
@@ -135,31 +140,30 @@ const history = computed(() => moveHistory(slug.value))
 const learners = shallowRef<LearnersByMethod | null>(null)
 const learnersStatus = ref<'loading' | 'ready' | 'error' | 'none'>('loading')
 
-watch(
-  [slug, game],
-  async ([move, g]) => {
-    learners.value = null
-    if (!g) {
-      learnersStatus.value = 'ready'
-      return
-    }
-    const promise = loadLearnset(g)
-    if (!promise) {
-      learnersStatus.value = 'none'
-      return
-    }
-    learnersStatus.value = 'loading'
-    try {
-      const learnset = await promise
-      if (move !== slug.value || g !== game.value) return
-      learners.value = learnersByMethod(decodeLearners(learnset[move]))
-      learnersStatus.value = 'ready'
-    } catch {
-      learnersStatus.value = 'error'
-    }
-  },
-  { immediate: true },
-)
+async function loadLearners(): Promise<void> {
+  const move = slug.value
+  const g = game.value
+  learners.value = null
+  if (!g) {
+    learnersStatus.value = 'ready'
+    return
+  }
+  const promise = loadLearnset(g)
+  if (!promise) {
+    learnersStatus.value = 'none'
+    return
+  }
+  learnersStatus.value = 'loading'
+  try {
+    const learnset = await promise
+    if (move !== slug.value || g !== game.value) return
+    learners.value = learnersByMethod(decodeLearners(learnset[move]))
+    learnersStatus.value = 'ready'
+  } catch {
+    if (move === slug.value && g === game.value) learnersStatus.value = 'error'
+  }
+}
+watch([slug, game], loadLearners, { immediate: true })
 
 const METHODS: readonly LearnMethod[] = ['L', 'M', 'E', 'T', 'O']
 const tab = ref<LearnMethod>('L')
@@ -218,11 +222,23 @@ function goBack(): void {
   else router.push({ name: 'moves' })
 }
 
+const notice = ref<string | null>(null)
+
+function share(): void {
+  shareLink(title.value, window.location.href).then((result) => {
+    if (result === 'copied') notice.value = t('common.linkCopied')
+    else if (result === 'failed') notice.value = t('common.shareFailed')
+  })
+}
+
 const dash = '—'
 </script>
 
 <template>
   <DetailLayout :title="title" @back="goBack">
+    <template #actions>
+      <v-btn v-if="info" :icon="mdiShareVariant" :aria-label="t('common.share')" @click="share" />
+    </template>
     <div class="d-flex flex-column ga-4">
       <v-card v-if="!info" class="pa-4">
         <p class="mb-3">{{ t('movePage.notFound') }}</p>
@@ -247,7 +263,13 @@ const dash = '—'
             <div class="d-flex align-center flex-wrap ga-2 mb-4">
               <TypeChip :type="info.type" />
               <span class="text-body-medium">{{ t(`moves.${info.category}`) }}</span>
-              <span v-if="machine" class="text-label-large ms-auto">{{ machine }}</span>
+              <RouterLink
+                v-if="machine"
+                :to="{ name: 'item', params: { slug: machine.slug }, query: { game } }"
+                class="move-page__machine text-label-large ms-auto"
+              >
+                {{ machine.label }}
+              </RouterLink>
             </div>
             <div class="move-page__tiles">
               <InfoTile :label="t('moves.power')" :value="String(info.power ?? dash)" />
@@ -345,8 +367,19 @@ const dash = '—'
               aria-hidden="true"
               type="list-item@4"
             />
-            <div v-else-if="learnersStatus === 'error'" class="d-flex flex-column align-start ga-2">
-              <span>{{ t('movesPage.loadError') }}</span>
+            <div
+              v-else-if="learnersStatus === 'error' || (!game && status === 'error')"
+              class="d-flex flex-column align-start ga-2"
+            >
+              <span>{{ t(game ? 'movesPage.loadError' : 'movePage.loadError') }}</span>
+              <v-btn
+                color="primary"
+                variant="tonal"
+                size="small"
+                @click="game ? loadLearners() : load()"
+              >
+                {{ t('common.retry') }}
+              </v-btn>
             </div>
             <template v-else-if="game">
               <p v-if="!tabs.length" class="opacity-70 mb-0">
@@ -359,22 +392,41 @@ const dash = '—'
                   </v-tab>
                 </v-tabs>
                 <PokemonButtonGrid :items="tabItems" @select="openPokemon" />
+                <v-btn
+                  variant="tonal"
+                  size="small"
+                  class="mt-3"
+                  :to="{ name: 'moves', query: { mode: 'learn', learn: slug, game } }"
+                >
+                  {{ t('movePage.combine') }}
+                </v-btn>
               </template>
             </template>
             <template v-else>
               <p class="text-body-small opacity-70">{{ t('movePage.allGamesHint') }}</p>
-              <PokemonButtonGrid :items="allLearners" @select="openPokemon" />
+              <p v-if="!allLearners.length" class="opacity-70 mb-0">
+                {{ t('movePage.noneAtAll') }}
+              </p>
+              <PokemonButtonGrid v-else :items="allLearners" @select="openPokemon" />
             </template>
           </v-card-text>
         </v-card>
       </template>
     </div>
+    <AppNotice :text="notice" :timeout="2500" @close="notice = null" />
   </DetailLayout>
 </template>
 
 <style scoped>
 .move-page__game {
   max-width: 360px;
+}
+
+.move-page__machine {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: rgba(var(--v-theme-on-surface), 0.4);
+  text-underline-offset: 3px;
 }
 
 .move-page__tiles {

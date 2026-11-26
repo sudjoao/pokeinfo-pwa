@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
+import { mdiBookOpenVariant, mdiLightningBolt, mdiShareVariant } from '@mdi/js'
 import { announce } from '@/composables/useAnnouncer'
+import { shareLink } from '@/composables/useShare'
 import { useRoute, useRouter, type LocationQueryRaw } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import type { PokemonType } from '@/types/pokemon'
@@ -10,6 +12,7 @@ import DetailLayout from '@/components/templates/DetailLayout.vue'
 import TypeToggle from '@/components/atoms/TypeToggle.vue'
 import MultiplierBadge from '@/components/atoms/MultiplierBadge.vue'
 import MultiplierGroups from '@/components/molecules/MultiplierGroups.vue'
+import AppNotice from '@/components/molecules/AppNotice.vue'
 
 type Mode = 'defense' | 'attack' | 'chart'
 
@@ -91,6 +94,27 @@ function abbreviation(type: PokemonType): string {
   return t(`type.${type}`).slice(0, 3)
 }
 
+/** Os tipos escolhidos levam à Pokédex (defesa: Pokémon desses tipos) ou aos golpes (ataque). */
+const pokemonLink = computed(() =>
+  mode.value === 'defense' && selected.value.length
+    ? { name: 'home', query: { type: selected.value.join(',') } }
+    : null,
+)
+const movesLink = computed(() =>
+  mode.value === 'attack' && selected.value[0]
+    ? { name: 'moves', query: { type: selected.value[0] } }
+    : null,
+)
+
+const notice = ref<string | null>(null)
+
+function share(): void {
+  shareLink(t('types.title'), window.location.href).then((result) => {
+    if (result === 'copied') notice.value = t('common.linkCopied')
+    else if (result === 'failed') notice.value = t('common.shareFailed')
+  })
+}
+
 function goBack(): void {
   if (window.history.state?.back) router.back()
   else router.push({ name: 'home' })
@@ -99,6 +123,9 @@ function goBack(): void {
 
 <template>
   <DetailLayout :title="t('types.title')" @back="goBack">
+    <template #actions>
+      <v-btn :icon="mdiShareVariant" :aria-label="t('common.share')" @click="share" />
+    </template>
     <div class="d-flex flex-column ga-4">
       <v-btn-toggle
         :model-value="mode"
@@ -166,6 +193,26 @@ function goBack(): void {
               :heading-level="2"
               show-neutral
             />
+            <v-btn
+              v-if="pokemonLink"
+              :to="pokemonLink"
+              variant="tonal"
+              size="small"
+              class="mt-4"
+              :prepend-icon="mdiBookOpenVariant"
+            >
+              {{ t('types.viewPokemon', selected.length) }}
+            </v-btn>
+            <v-btn
+              v-else-if="movesLink"
+              :to="movesLink"
+              variant="tonal"
+              size="small"
+              class="mt-4"
+              :prepend-icon="mdiLightningBolt"
+            >
+              {{ t('types.viewMoves', { type: t(`type.${selected[0]}`) }) }}
+            </v-btn>
           </v-card-text>
         </v-card>
       </template>
@@ -220,12 +267,36 @@ function goBack(): void {
         </v-card-text>
       </v-card>
     </div>
+    <AppNotice :text="notice" :timeout="2500" @close="notice = null" />
   </DetailLayout>
 </template>
 
 <style scoped>
 .types-chart {
   overflow-x: auto;
+  /* A tabela rola por dentro: o cabeçalho e a 1ª coluna grudam dentro desta área. */
+  max-height: 80dvh;
+}
+
+/* Rolando para o lado ou para baixo, o tipo do golpe (linha) e o de quem recebe (coluna) ficam à vista. */
+.types-chart__table thead th,
+.types-chart__table thead td {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: rgb(var(--v-theme-surface));
+}
+
+.types-chart__table tbody th {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: rgb(var(--v-theme-surface));
+}
+
+.types-chart__table thead td {
+  left: 0;
+  z-index: 3;
 }
 
 .types-chart:focus-visible {

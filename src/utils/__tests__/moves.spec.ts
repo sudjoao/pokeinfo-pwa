@@ -107,6 +107,30 @@ describe('lista de golpes', () => {
     expect(es.map((m) => m.slug)).toContain('acrobatics')
   })
 
+  it('por nome a ordem é alfabética (e invertida com desc); empate de poder fica alfabético', () => {
+    const moves = moveList(null)
+    const asc = filterMoves(
+      moves,
+      { query: '', type: 'water', category: null, sort: 'name', desc: false },
+      'en',
+    )
+    const names = asc.map((m) => m.slug)
+    expect(names).toEqual([...names].sort((a, b) => a.localeCompare(b)))
+    const desc = filterMoves(
+      moves,
+      { query: '', type: 'water', category: null, sort: 'name', desc: true },
+      'en',
+    )
+    expect(desc.map((m) => m.slug)).toEqual([...names].reverse())
+    const byPower = filterMoves(
+      moves,
+      { query: '', type: null, category: 'physical', sort: 'power', desc: true },
+      'en',
+    )
+    const ties = byPower.filter((m) => m.power === 80).map((m) => m.slug)
+    expect(ties).toEqual([...ties].sort((a, b) => a.localeCompare(b)))
+  })
+
   it('histórico: Karate Chop era Normal antes de Gold/Silver', () => {
     const history = moveHistory('karate-chop')
     expect(history.some((h) => h.before === 'gold-silver' && h.type === 'normal')).toBe(true)

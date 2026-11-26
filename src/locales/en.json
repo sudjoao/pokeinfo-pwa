@@ -677,7 +677,9 @@
     "attacker": "Attack",
     "defender": "Defense",
     "summaryDefense": "Weaknesses: {weak}. Resistances: {resist}. Immunities: {immune}.",
-    "summaryAttack": "Super effective: {weak}. Not very effective: {resist}. No effect: {immune}."
+    "summaryAttack": "Super effective: {weak}. Not very effective: {resist}. No effect: {immune}.",
+    "viewPokemon": "See Pokémon of this type | See Pokémon of these types",
+    "viewMoves": "See {type}-type moves"
   },
   "compare": {
     "title": "Compare",
@@ -687,7 +689,8 @@
     "remove": "Remove {name} from comparison",
     "withThis": "Compare with another Pokémon",
     "bestHint": "Highlighted: the highest value in each row.",
-    "best": "highest"
+    "best": "highest",
+    "moveLeft": "Move {name} to the left"
   },
   "quiz": {
     "title": "Who's that Pokémon?",
@@ -700,7 +703,9 @@
     "streak": "Streak: {n}",
     "best": "Best: {n}",
     "rightAnswer": "right answer",
-    "yourAnswer": "your answer"
+    "yourAnswer": "your answer",
+    "open": "Open page",
+    "allGenerations": "All"
   },
   "shiny": {
     "title": "Shiny in {game}",
@@ -801,7 +806,10 @@
     "learnIntro": "Pick up to {n} moves and a game to see which Pokémon learn all of them.",
     "learnMoves": "Moves",
     "learnEmpty": "Pick at least one move.",
-    "learnResults": "No Pokémon learns all of them | {n} Pokémon learns all of them | {n} Pokémon learn all of them"
+    "learnResults": "No Pokémon learns all of them | {n} Pokémon learns all of them | {n} Pokémon learn all of them",
+    "emptyTitle": "No moves found",
+    "sortAsc": "Ascending order (tap to reverse)",
+    "sortDesc": "Descending order (tap to reverse)"
   },
   "movePage": {
     "notFound": "Move not found.",
@@ -859,7 +867,9 @@
       "trap": "trapping",
       "leech-seed": "leech seed",
       "yawn": "drowsiness"
-    }
+    },
+    "combine": "Combine with other moves",
+    "noneAtAll": "PokéAPI lists no Pokémon that learn this move."
   },
   "itemsPage": {
     "title": "Items",
@@ -900,7 +910,8 @@
       "baking-only": "Baking only",
       "effort-drop": "EV drop",
       "other": "Other berries"
-    }
+    },
+    "emptyTitle": "No items found"
   },
   "itemPage": {
     "notFound": "Item not found.",
@@ -928,7 +939,8 @@
     "naturalGiftPower": "power {n}",
     "flavors": "Flavors",
     "heldBy": "Held by wild Pokémon",
-    "heldByNone": "PokéAPI lists no wild Pokémon holding this item in this game."
+    "heldByNone": "PokéAPI lists no wild Pokémon holding this item in this game.",
+    "berryError": "Could not load the berry data."
   },
   "flavor": {
     "spicy": "spicy",
@@ -978,7 +990,8 @@
     "evTotal": "Total EVs: {n} of 510",
     "evLimit": "At most 252 per stat and 510 in total.",
     "openCalculator": "Calculate IVs",
-    "baseValue": "base {n}"
+    "baseValue": "base {n}",
+    "useNature": "Use in the calculator"
   },
   "capture": {
     "open": "Calculate catch chance",
@@ -1032,7 +1045,12 @@
     },
     "inTeam": "(in your team)",
     "fromTeam": "Team speed tiers",
-    "legend": "Min: 0 IV, 0 EV, hindering nature. Neutral: 31 IV, 0 EV. Max: 31 IV, 252 EV. Max+: with a boosting nature (Jolly, Timid). The grey number next to the name is the base stat."
+    "legend": "Min: 0 IV, 0 EV, hindering nature. Neutral: 31 IV, 0 EV. Max: 31 IV, 252 EV. Max+: with a boosting nature (Jolly, Timid). The grey number next to the name is the base stat.",
+    "paralysis": "Paralyzed (×{n})",
+    "trickRoom": "Trick Room (slowest first)",
+    "empty": "No Pokémon with that name in the list.",
+    "results": "No Pokémon | 1 Pokémon | {n} Pokémon",
+    "captionTrickRoom": "Speed at level {level} under Trick Room (slowest to fastest)"
   },
   "daily": {
     "title": "Pokémon of the day",

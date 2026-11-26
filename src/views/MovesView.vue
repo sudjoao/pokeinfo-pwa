@@ -2,6 +2,7 @@
 import { computed, onActivated, ref, shallowRef, watch } from 'vue'
 import { useRoute, useRouter, type LocationQueryRaw } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { mdiFilterRemoveOutline, mdiSortAscending, mdiSortDescending } from '@mdi/js'
 import { GAMES } from '@/data/games'
 import { POKEMON_TYPES, type PokemonType } from '@/types/pokemon'
 import { usePokedexStore } from '@/stores/pokedex'
@@ -21,6 +22,7 @@ import {
 } from '@/utils/moves'
 import DetailLayout from '@/components/templates/DetailLayout.vue'
 import SearchField from '@/components/molecules/SearchField.vue'
+import EmptyState from '@/components/molecules/EmptyState.vue'
 import PokemonButtonGrid from '@/components/molecules/PokemonButtonGrid.vue'
 import TypeChip from '@/components/atoms/TypeChip.vue'
 
@@ -51,6 +53,8 @@ const debouncedSearch = useDebouncedRef(search, 250)
 const type = ref<PokemonType | null>(null)
 const category = ref<MoveCategory | null>(null)
 const sort = ref<MoveSort>('name')
+/** Sentido da ordenação; null = o padrão do critério (nome crescente, números decrescentes). */
+const direction = ref<'asc' | 'desc' | null>(null)
 const learn = ref<string[]>([])
 const shown = ref(PAGE)
 
@@ -70,6 +74,8 @@ function readFromRoute(): void {
   sort.value = (SORTS as readonly string[]).includes(queryString('sort'))
     ? (queryString('sort') as MoveSort)
     : 'name'
+  const dir = queryString('dir')
+  direction.value = dir === 'asc' || dir === 'desc' ? dir : null
   const nextLearn = queryString('learn').split(',').filter(Boolean).slice(0, MAX_LEARN)
   if (nextLearn.join() !== learn.value.join()) learn.value = nextLearn
 }
@@ -83,9 +89,30 @@ const learnGame = computed(
   () => (game.value && hasLearnset(game.value) ? game.value : LEARN_GAMES[0]?.slug) ?? null,
 )
 
+/** Sentido padrão: decrescente nos números (mais forte primeiro), crescente no nome. */
+const defaultDesc = computed(() => sort.value !== 'name')
+const desc = computed(() => (direction.value ? direction.value === 'desc' : defaultDesc.value))
+
+function toggleDirection(): void {
+  direction.value = desc.value ? 'asc' : 'desc'
+}
+
+// Trocar o critério volta ao sentido padrão dele.
+watch(sort, () => (direction.value = null))
+
+function clearFilters(): void {
+  search.value = ''
+  type.value = null
+  category.value = null
+  game.value = null
+}
+
+// Só na própria rota: a busca tem atraso, e um toque num golpe nesse intervalo levaria a query
+// para a URL da página do golpe (a tela continua viva no KeepAlive).
 watch(
-  [mode, game, debouncedSearch, type, category, sort, learn],
+  [mode, game, debouncedSearch, type, category, sort, direction, learn],
   () => {
+    if (route.name !== 'moves') return
     const query: LocationQueryRaw = {}
     if (mode.value === 'learn') query.mode = 'learn'
     if (game.value) query.game = game.value
@@ -94,6 +121,7 @@ watch(
     if (type.value) query.type = type.value
     if (category.value) query.cat = category.value
     if (sort.value !== 'name') query.sort = sort.value
+    if (direction.value && desc.value !== defaultDesc.value) query.dir = direction.value
     if (learn.value.length) query.learn = learn.value.join(',')
     router.replace({ query })
   },
@@ -145,7 +173,7 @@ const filtered = computed(() =>
       type: type.value,
       category: category.value,
       sort: sort.value,
-      desc: sort.value !== 'name',
+      desc: desc.value,
     },
     locale.value,
   ),
@@ -267,14 +295,25 @@ const dash = '—'
             variant="outlined"
             hide-details
           />
-          <v-select
-            v-model="sort"
-            :items="sortItems"
-            :label="t('movesPage.sortLabel')"
-            density="compact"
-            variant="outlined"
-            hide-details
-          />
+          <div class="d-flex align-center ga-2">
+            <v-select
+              v-model="sort"
+              :items="sortItems"
+              :label="t('movesPage.sortLabel')"
+              density="compact"
+              variant="outlined"
+              hide-details
+              class="flex-grow-1"
+            />
+            <v-btn
+              :icon="desc ? mdiSortDescending : mdiSortAscending"
+              variant="tonal"
+              density="comfortable"
+              :aria-label="t(desc ? 'movesPage.sortDesc' : 'movesPage.sortAsc')"
+              :title="t(desc ? 'movesPage.sortDesc' : 'movesPage.sortAsc')"
+              @click="toggleDirection"
+            />
+          </div>
         </div>
         <v-chip-group
           v-model="category"
@@ -309,9 +348,14 @@ const dash = '—'
               {{ t('common.retry') }}
             </v-btn>
           </v-card-text>
-          <v-card-text v-else-if="!filtered.length" class="opacity-70">{{
-            t('movesPage.empty')
-          }}</v-card-text>
+          <EmptyState
+            v-else-if="!filtered.length"
+            :title="t('movesPage.emptyTitle')"
+            :message="t('movesPage.empty')"
+            :action-label="t('home.clearFilters')"
+            :action-icon="mdiFilterRemoveOutline"
+            @action="clearFilters"
+          />
           <template v-else>
             <v-table density="compact">
               <caption class="d-sr-only">

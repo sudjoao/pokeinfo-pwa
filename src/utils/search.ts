@@ -1,3 +1,5 @@
+import { formatPokemonName } from './pokemon'
+
 /**
  * Normalização das buscas por nome de Pokémon. Os nomes do índice são os slugs da PokéAPI
  * ("mr-mime", "flabebe", "ho-oh"), mas a pessoa digita como vê na tela ("Mr Mime", "Flabébé",
@@ -29,4 +31,13 @@ export function nameMatches(name: string, normalizedQuery: string): boolean {
   if (!normalizedQuery) return true
   if (name.includes(normalizedQuery)) return true
   return !normalizedQuery.includes('-') && name.replaceAll('-', '').includes(normalizedQuery)
+}
+
+/**
+ * Rótulo de um Pokémon num seletor com busca ("#25 Pikachu"): o número entra no texto para a busca
+ * do campo achar tanto pelo nome quanto pelo número. Formas (id acima de 10000) ficam só com o nome.
+ */
+export function pickerLabel(id: number, name: string): string {
+  const label = formatPokemonName(name)
+  return id <= 1025 ? `#${id} ${label}` : label
 }

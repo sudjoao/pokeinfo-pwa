@@ -677,7 +677,9 @@
     "attacker": "Ataque",
     "defender": "Defensa",
     "summaryDefense": "Debilidades: {weak}. Resistencias: {resist}. Inmunidades: {immune}.",
-    "summaryAttack": "Superefectivo: {weak}. Poco efectivo: {resist}. Sin efecto: {immune}."
+    "summaryAttack": "Superefectivo: {weak}. Poco efectivo: {resist}. Sin efecto: {immune}.",
+    "viewPokemon": "Ver Pokémon de este tipo | Ver Pokémon de estos tipos",
+    "viewMoves": "Ver movimientos de tipo {type}"
   },
   "compare": {
     "title": "Comparar",
@@ -687,7 +689,8 @@
     "remove": "Quitar {name} de la comparación",
     "withThis": "Comparar con otro Pokémon",
     "bestHint": "Resaltado: el valor más alto de cada fila.",
-    "best": "mayor"
+    "best": "mayor",
+    "moveLeft": "Mover {name} a la izquierda"
   },
   "quiz": {
     "title": "¿Quién es ese Pokémon?",
@@ -700,7 +703,9 @@
     "streak": "Racha: {n}",
     "best": "Récord: {n}",
     "rightAnswer": "respuesta correcta",
-    "yourAnswer": "tu respuesta"
+    "yourAnswer": "tu respuesta",
+    "open": "Ver ficha",
+    "allGenerations": "Todas"
   },
   "shiny": {
     "title": "Variocolor en {game}",
@@ -801,7 +806,10 @@
     "learnIntro": "Elige hasta {n} movimientos y un juego para ver qué Pokémon aprenden todos.",
     "learnMoves": "Movimientos",
     "learnEmpty": "Elige al menos un movimiento.",
-    "learnResults": "Ningún Pokémon aprende todos | {n} Pokémon aprende todos | {n} Pokémon aprenden todos"
+    "learnResults": "Ningún Pokémon aprende todos | {n} Pokémon aprende todos | {n} Pokémon aprenden todos",
+    "emptyTitle": "Ningún movimiento encontrado",
+    "sortAsc": "Orden ascendente (toca para invertir)",
+    "sortDesc": "Orden descendente (toca para invertir)"
   },
   "movePage": {
     "notFound": "Movimiento no encontrado.",
@@ -859,7 +867,9 @@
       "trap": "atrapar",
       "leech-seed": "drenar cada turno",
       "yawn": "dar sueño"
-    }
+    },
+    "combine": "Combinar con otros movimientos",
+    "noneAtAll": "PokéAPI no lista Pokémon que aprendan este movimiento."
   },
   "itemsPage": {
     "title": "Objetos",
@@ -900,7 +910,8 @@
       "baking-only": "Solo repostería",
       "effort-drop": "Reduce EV",
       "other": "Otras bayas"
-    }
+    },
+    "emptyTitle": "Ningún objeto encontrado"
   },
   "itemPage": {
     "notFound": "Objeto no encontrado.",
@@ -928,7 +939,8 @@
     "naturalGiftPower": "potencia {n}",
     "flavors": "Sabores",
     "heldBy": "Lo llevan en estado salvaje",
-    "heldByNone": "La PokéAPI no registra Pokémon salvajes con este objeto en este juego."
+    "heldByNone": "La PokéAPI no registra Pokémon salvajes con este objeto en este juego.",
+    "berryError": "No se pudieron cargar los datos de la baya."
   },
   "flavor": {
     "spicy": "picante",
@@ -978,7 +990,8 @@
     "evTotal": "EV totales: {n} de 510",
     "evLimit": "Como máximo 252 por estadística y 510 en total.",
     "openCalculator": "Calcular IV",
-    "baseValue": "base {n}"
+    "baseValue": "base {n}",
+    "useNature": "Usar en la calculadora"
   },
   "capture": {
     "open": "Calcular probabilidad de captura",
@@ -1032,7 +1045,12 @@
     },
     "inTeam": "(en tu equipo)",
     "fromTeam": "Velocidad del equipo",
-    "legend": "Mín: 0 IV, 0 EV, naturaleza que reduce. Neutra: 31 IV, 0 EV. Máx: 31 IV, 252 EV. Máx+: con naturaleza que aumenta (Alegre, Miedosa). El número gris junto al nombre es la base."
+    "legend": "Mín: 0 IV, 0 EV, naturaleza que reduce. Neutra: 31 IV, 0 EV. Máx: 31 IV, 252 EV. Máx+: con naturaleza que aumenta (Alegre, Miedosa). El número gris junto al nombre es la base.",
+    "paralysis": "Paralizado (×{n})",
+    "trickRoom": "Espacio Raro (el más lento primero)",
+    "empty": "Ningún Pokémon con ese nombre en la lista.",
+    "results": "Ningún Pokémon | 1 Pokémon | {n} Pokémon",
+    "captionTrickRoom": "Velocidad en el nivel {level} bajo Espacio Raro (del más lento al más rápido)"
   },
   "daily": {
     "title": "Pokémon del día",

@@ -17,9 +17,25 @@ export interface SpeedModifiers {
   tailwind: boolean
   /** Estágios de Velocidade (−6 a +6): +1 = ×1,5, −1 = ×2/3. */
   stage: number
+  /** Paralisado: ×0,5 (×0,25 até a 6ª geração). */
+  paralysis?: boolean
+  /** Geração do jogo (muda a conta da paralisia); sem ela, a mais recente. */
+  generation?: number
 }
 
-export const NO_MODIFIERS: SpeedModifiers = { scarf: false, tailwind: false, stage: 0 }
+export const NO_MODIFIERS: SpeedModifiers = {
+  scarf: false,
+  tailwind: false,
+  stage: 0,
+  paralysis: false,
+}
+
+/** Primeira geração em que a paralisia corta a Velocidade pela metade (antes, a um quarto). */
+const PARALYSIS_HALF_SINCE = 7
+
+export function paralysisMultiplier(generation?: number): number {
+  return (generation ?? PARALYSIS_HALF_SINCE) >= PARALYSIS_HALF_SINCE ? 0.5 : 0.25
+}
 
 export function stageMultiplier(stage: number): number {
   const s = Math.max(-6, Math.min(6, Math.round(stage)))
@@ -28,7 +44,10 @@ export function stageMultiplier(stage: number): number {
 
 export function speedMultiplier(modifiers: SpeedModifiers): number {
   return (
-    (modifiers.scarf ? 1.5 : 1) * (modifiers.tailwind ? 2 : 1) * stageMultiplier(modifiers.stage)
+    (modifiers.scarf ? 1.5 : 1) *
+    (modifiers.tailwind ? 2 : 1) *
+    stageMultiplier(modifiers.stage) *
+    (modifiers.paralysis ? paralysisMultiplier(modifiers.generation) : 1)
   )
 }
 

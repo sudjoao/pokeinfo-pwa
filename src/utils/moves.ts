@@ -114,6 +114,53 @@ function normalize(text: string): string {
   return text.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
 }
 
+const collators = new Map<string, Intl.Collator>()
+
+/** Um Intl.Collator por idioma: `localeCompare` cria um a cada comparação (~900 golpes x log n). */
+export function collatorFor(locale: string): Intl.Collator {
+  let collator = collators.get(locale)
+  if (!collator) {
+    collator = new Intl.Collator(locale, { sensitivity: 'base' })
+    collators.set(locale, collator)
+  }
+  return collator
+}
+
+/** Nome normalizado para a busca, por idioma e slug (calculado uma vez, não a cada tecla). */
+const searchNames = new Map<string, Map<string, string>>()
+
+function searchName(move: MoveInfo, locale: string): string {
+  let byLocale = searchNames.get(locale)
+  if (!byLocale) {
+    byLocale = new Map()
+    searchNames.set(locale, byLocale)
+  }
+  let name = byLocale.get(move.slug)
+  if (name === undefined) {
+    name = `${normalize(moveName(move, locale))}|${normalize(move.slug.replace(/-/g, ' '))}`
+    byLocale.set(move.slug, name)
+  }
+  return name
+}
+
+/** A mesma lista ordenada por nome, uma vez por idioma (a ordem base dos filtros por nome). */
+const sortedByName = new WeakMap<readonly MoveInfo[], Map<string, readonly MoveInfo[]>>()
+
+function byName(moves: readonly MoveInfo[], locale: string): readonly MoveInfo[] {
+  let byLocale = sortedByName.get(moves)
+  if (!byLocale) {
+    byLocale = new Map()
+    sortedByName.set(moves, byLocale)
+  }
+  let sorted = byLocale.get(locale)
+  if (!sorted) {
+    const collator = collatorFor(locale)
+    sorted = [...moves].sort((a, b) => collator.compare(moveName(a, locale), moveName(b, locale)))
+    byLocale.set(locale, sorted)
+  }
+  return sorted
+}
+
 export type MoveSort = 'name' | 'power' | 'accuracy' | 'pp'
 
 export interface MoveListFilter {
@@ -154,29 +201,28 @@ export function moveList(
   })
 }
 
+/**
+ * Filtra e ordena. Parte da lista já ordenada por nome (guardada por idioma): filtrar mantém a
+ * ordem, então por nome não há ordenação nenhuma por tecla; pelos números, o empate já vem em
+ * ordem alfabética (o sort é estável).
+ */
 export function filterMoves(
   moves: readonly MoveInfo[],
   filter: MoveListFilter,
   locale: string,
 ): MoveInfo[] {
   const term = normalize(filter.query.trim())
-  const list = moves.filter(
+  const list = byName(moves, locale).filter(
     (move) =>
       (!filter.type || move.type === filter.type) &&
       (!filter.category || move.category === filter.category) &&
-      (!term ||
-        normalize(moveName(move, locale)).includes(term) ||
-        normalize(move.slug.replace(/-/g, ' ')).includes(term)),
+      (!term || searchName(move, locale).includes(term)),
   )
-  const byName = (a: MoveInfo, b: MoveInfo) =>
-    moveName(a, locale).localeCompare(moveName(b, locale), locale)
-  const value = (move: MoveInfo) => (filter.sort === 'name' ? 0 : (move[filter.sort] ?? -1))
   const direction = filter.desc ? -1 : 1
-  return list.sort((a, b) =>
-    filter.sort === 'name'
-      ? direction * byName(a, b)
-      : direction * (value(a) - value(b)) || byName(a, b),
-  )
+  if (filter.sort === 'name') return filter.desc ? list.reverse() : list
+  const key: Exclude<MoveSort, 'name'> = filter.sort
+  const value = (move: MoveInfo) => move[key] ?? -1
+  return list.sort((a, b) => direction * (value(a) - value(b)))
 }
 
 /** Versão de cada mudança do golpe: valores que valiam antes do grupo de versões `before`. */

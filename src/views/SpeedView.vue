@@ -6,6 +6,7 @@ import { GAMES } from '@/data/games'
 import { usePokedexStore } from '@/stores/pokedex'
 import { usePokemonData } from '@/composables/usePokemonData'
 import { useDebouncedRef } from '@/composables/useDebouncedRef'
+import { announce } from '@/composables/useAnnouncer'
 import { findGame } from '@/utils/games'
 import { speciesIdOf } from '@/utils/forms'
 import { hasMegaEvolution } from '@/utils/megas'
@@ -37,11 +38,28 @@ const MEGA_FORM = /-(mega|primal)(-|$)/
 
 const level = ref<50 | 100>(50)
 const game = ref<string | null>(null)
+const modifiers = reactive<SpeedModifiers>({
+  scarf: false,
+  tailwind: false,
+  stage: 0,
+  paralysis: false,
+})
+/** Trick Room: por 5 turnos, o mais lento age primeiro (a lista vira de cabeça para baixo). */
+const trickRoom = ref(false)
 
-/** Estado vindo da URL; relido ao reativar (a tela fica em KeepAlive, como a Home). */
+/**
+ * Estado vindo da URL (`?level=100&game=…&scarf=1&tw=1&par=1&stage=2&tr=1`): dá para compartilhar
+ * o cenário. Relido ao reativar (a tela fica em KeepAlive, como a Home).
+ */
 function readFromRoute(): void {
   level.value = route.query.level === '100' ? 100 : 50
   game.value = findGame(String(route.query.game ?? ''))?.slug ?? null
+  modifiers.scarf = route.query.scarf === '1'
+  modifiers.tailwind = route.query.tw === '1'
+  modifiers.paralysis = route.query.par === '1'
+  const stage = Number(route.query.stage)
+  modifiers.stage = Number.isInteger(stage) ? Math.max(-6, Math.min(6, stage)) : 0
+  trickRoom.value = route.query.tr === '1'
 }
 readFromRoute()
 onActivated(() => {
@@ -53,15 +71,28 @@ const team = computed(() =>
     .map(Number)
     .filter((id) => Number.isInteger(id) && id > 0),
 )
-const modifiers = reactive<SpeedModifiers>({ scarf: false, tailwind: false, stage: 0 })
+/** A paralisia tira um quarto até a 6ª geração: a conta segue o jogo escolhido. */
+watch(game, (slug) => (modifiers.generation = findGame(slug)?.generation), { immediate: true })
 const search = ref('')
 const debouncedSearch = useDebouncedRef(search, 250)
 const shown = ref(PAGE)
 
-watch([level, game], () => {
+watch([level, game, modifiers, trickRoom], () => {
+  if (route.name !== 'speed') return
   const query: LocationQueryRaw = { ...route.query }
-  if (level.value === 100) query.level = '100'
-  else delete query.level
+  const flags: [string, boolean][] = [
+    ['level', level.value === 100],
+    ['scarf', modifiers.scarf],
+    ['tw', modifiers.tailwind],
+    ['par', modifiers.paralysis === true],
+    ['tr', trickRoom.value],
+  ]
+  for (const [key, on] of flags) {
+    if (on) query[key] = key === 'level' ? '100' : '1'
+    else delete query[key]
+  }
+  if (modifiers.stage) query.stage = String(modifiers.stage)
+  else delete query.stage
   if (game.value) query.game = game.value
   else delete query.game
   router.replace({ query })
@@ -123,7 +154,9 @@ const rows = computed<SpeedRow[]>(() => {
       ...speedValues(base, level.value, modifiers),
     })
   }
-  list.sort((a, b) => b.maxPlus - a.maxPlus || b.base - a.base || a.id - b.id)
+  // Trick Room inverte: o mais lento vem primeiro (e é o 1º da fila).
+  const first = trickRoom.value ? -1 : 1
+  list.sort((a, b) => first * (b.maxPlus - a.maxPlus || b.base - a.base) || a.id - b.id)
   let rank = 0
   return list.map((row, index) => {
     if (index === 0 || row.maxPlus !== list[index - 1]!.maxPlus) rank = index + 1
@@ -138,6 +171,13 @@ const filtered = computed(() => {
   return term ? rows.value.filter((row) => nameMatches(row.name, term)) : rows.value
 })
 watch([debouncedSearch, level, game], () => (shown.value = PAGE))
+watch(
+  () => filtered.value.length,
+  (count) => {
+    if (pokemonData.table.value && dexStatus.value !== 'loading')
+      announce(t('speed.results', count))
+  },
+)
 
 const gameItems = computed(() => [
   { value: null, title: t('speed.national') },
@@ -194,6 +234,24 @@ function goBack(): void {
         <v-switch
           v-model="modifiers.tailwind"
           :label="t('speed.tailwind')"
+          color="primary"
+          density="compact"
+          hide-details
+        />
+        <v-switch
+          v-model="modifiers.paralysis"
+          :label="
+            t('speed.paralysis', {
+              n: modifiers.generation && modifiers.generation < 7 ? '¼' : '½',
+            })
+          "
+          color="primary"
+          density="compact"
+          hide-details
+        />
+        <v-switch
+          v-model="trickRoom"
+          :label="t('speed.trickRoom')"
           color="primary"
           density="compact"
           hide-details
@@ -266,11 +324,14 @@ function goBack(): void {
           aria-hidden="true"
           type="table-tbody"
         />
+        <v-card-text v-else-if="!filtered.length" class="opacity-70">
+          {{ t('speed.empty') }}
+        </v-card-text>
         <template v-else>
           <v-table density="compact" class="speed-table">
             <caption class="d-sr-only">
               {{
-                t('speed.caption', { level })
+                t(trickRoom ? 'speed.captionTrickRoom' : 'speed.caption', { level })
               }}
             </caption>
             <thead>
