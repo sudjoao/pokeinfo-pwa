@@ -21,6 +21,8 @@ export interface RegionalNumber {
 
 const props = defineProps<{
   pokemon: PokemonDetail
+  /** Nome de exibição já resolvido pela view (megas, idioma); sem ele, o da espécie no idioma. */
+  name?: string
   species?: PokemonSpecies | null
   regional?: RegionalNumber | null
   /** Capturado no jogo selecionado; undefined esconde o botão (sem jogo na URL). */
@@ -43,7 +45,9 @@ const emit = defineEmits<{
 
 const { t, locale } = useI18n()
 
-const name = computed(() => speciesDisplayName(props.species, props.pokemon.name, locale.value))
+const name = computed(
+  () => props.name ?? speciesDisplayName(props.species, props.pokemon.name, locale.value),
+)
 const genus = computed(() => speciesGenus(props.species, locale.value))
 const nationalLabel = computed(() => formatDexNumber(props.pokemon.speciesId))
 const accent = computed(() => TYPE_COLORS[props.pokemon.types[0] ?? 'unknown'])
@@ -109,7 +113,8 @@ const caughtLabel = computed(() => {
         <div>
           <div class="d-flex align-baseline flex-wrap ga-1">
             <DexNumber v-if="regional" :id="regional.number" :digits="3" />
-            <DexNumber v-else :id="pokemon.id" />
+            <!-- O número da espécie: uma forma (Raichu de Alola, id 10100) continua sendo o #0026. -->
+            <DexNumber v-else :id="pokemon.speciesId" />
             <span v-if="regional" class="pokemon-hero__national text-label-small">
               {{ t('common.national') }} {{ nationalLabel }}
             </span>

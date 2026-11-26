@@ -32,8 +32,10 @@ import { useDexLabel } from '@/composables/useDexLabel'
 import { useListShiny } from '@/composables/useListShiny'
 import { gameContextFromQuery, gameContextQuery } from '@/utils/games'
 import { exclusiveVersionOf } from '@/utils/exclusives'
-import { withoutMegas } from '@/utils/megas'
-import { formatDexNumber, formatPokemonName } from '@/utils/pokemon'
+import { isMega, megaLabel, pokemonLabel, withoutMegas } from '@/utils/megas'
+import { speciesIdOf } from '@/utils/forms'
+import { formatDexNumber } from '@/utils/pokemon'
+import { speciesDisplayName } from '@/utils/species'
 import { LATEST_GENERATION } from '@/utils/typeChart'
 import { useMountOnOpen } from '@/composables/useMountOnOpen'
 import { useRecentStore } from '@/stores/recent'
@@ -127,11 +129,18 @@ const regional = computed(() =>
     : null,
 )
 
-/** Rótulo dos vizinhos: número regional quando a navegação segue a Pokédex do jogo. */
+/**
+ * Rótulo dos vizinhos: número regional quando a navegação segue a Pokédex do jogo; na Nacional,
+ * o da espécie (uma forma, como o Raichu de Alola, tem id 10100 mas é o #0026).
+ */
 function neighborNumber(entry: NeighborEntry): string {
   return entry.dexNumber === undefined
-    ? formatDexNumber(entry.id)
+    ? formatDexNumber(speciesIdOf(entry.id))
     : formatDexNumber(entry.dexNumber, 3)
+}
+
+function neighborName(entry: NeighborEntry): string {
+  return pokemonLabel(entry.id, entry.name)
 }
 
 const cry = useCry()
@@ -160,14 +169,23 @@ const exclusiveTo = computed(() =>
     : null,
 )
 
-const title = computed(() => (detail.value ? formatPokemonName(detail.value.name) : t('app.name')))
+/**
+ * Nome como a lista mostra: "Mega Charizard X" nas megas (não "Charizard Mega X") e o nome em
+ * espanhol da espécie no idioma `es`. Vale para o título da aba, o h1, o hero e os diálogos.
+ */
+const displayName = computed(() => {
+  const current = detail.value
+  if (!current) return ''
+  return isMega(current.id)
+    ? megaLabel(current.name)
+    : speciesDisplayName(species.value, current.name, locale.value)
+})
+const title = computed(() => displayName.value || t('app.name'))
 
 watch(
-  [detail, locale],
-  ([value]) => {
-    document.title = value
-      ? t('app.detailTitle', { name: formatPokemonName(value.name) })
-      : t('app.dexTitle')
+  [displayName, locale],
+  ([name]) => {
+    document.title = name ? t('app.detailTitle', { name }) : t('app.dexTitle')
   },
   { immediate: true },
 )
@@ -285,7 +303,7 @@ function toggleTeam(): void {
   const game = context.value?.game
   if (!current || !game) return
   const result = team.toggle(current.id)
-  const name = formatPokemonName(current.name)
+  const name = displayName.value
   notice.value =
     result === 'full'
       ? t('team.full')
@@ -405,7 +423,7 @@ async function sendShareImage(): Promise<void> {
             class="text-none"
             @click="goTo(previous.id)"
           >
-            {{ neighborNumber(previous) }} {{ formatPokemonName(previous.name) }}
+            {{ neighborNumber(previous) }} {{ neighborName(previous) }}
           </v-btn>
           <span v-else />
           <v-btn
@@ -415,7 +433,7 @@ async function sendShareImage(): Promise<void> {
             class="text-none"
             @click="goTo(next.id)"
           >
-            {{ formatPokemonName(next.name) }} {{ neighborNumber(next) }}
+            {{ neighborName(next) }} {{ neighborNumber(next) }}
           </v-btn>
         </nav>
 
@@ -423,6 +441,7 @@ async function sendShareImage(): Promise<void> {
           <v-col cols="12" md="5">
             <PokemonHero
               :pokemon="detail"
+              :name="displayName"
               :species="species"
               :regional="regional"
               :caught="caught"
@@ -597,13 +616,13 @@ async function sendShareImage(): Promise<void> {
           v-model="shareImage.open.value"
           :status="shareImage.status.value"
           :url="shareImage.url.value"
-          :alt="t('shareImage.pokemonAlt', { name: formatPokemonName(detail.name) })"
+          :alt="t('shareImage.pokemonAlt', { name: displayName })"
           @share="sendShareImage"
         />
         <CaptureSheet
           v-if="captureMounted && species"
           v-model="captureOpen"
-          :name="formatPokemonName(detail.name)"
+          :name="displayName"
           :capture-rate="species.captureRate"
           :types="detail.types"
           :generation="context?.game.generation ?? LATEST_GENERATION"

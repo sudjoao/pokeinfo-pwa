@@ -7,6 +7,7 @@ import { usePokemonDetailStore } from '@/stores/pokemonDetail'
 import { buildDexList, type GameContext } from '@/utils/games'
 import { describeError } from '@/utils/errors'
 import { megaLineOf } from '@/utils/megas'
+import { speciesIdOf } from '@/utils/forms'
 import { preloadArtwork } from '@/utils/pokemon'
 import type {
   EvolutionChain,
@@ -205,15 +206,21 @@ export function usePokemonDetail(idOrName: Ref<string>, context: Ref<GameContext
     dexPosition.value >= 0 ? (dexList.value?.[dexPosition.value]?.dexNumber ?? null) : null,
   )
 
+  /** Só as espécies do índice nacional: depois da última (#1025) não vem a forma 10001. */
+  const nationalSpecies = computed(() => pokedex.index.filter((entry) => entry.id < 10000))
+
   // Navegação anterior/próximo: pela Pokédex do jogo quando o Pokémon está nela,
-  // senão pelo índice nacional (que já fica em cache).
+  // senão pelo índice nacional (que já fica em cache). Numa forma alternativa (id > 10000) a
+  // posição é a da espécie dela: do Raichu de Alola, "próximo" é o Sandshrew, não a forma 10101.
   const neighbors = computed<{ list: readonly NeighborEntry[]; position: number }>(() => {
     if (dexPosition.value >= 0 && dexList.value) {
       return { list: dexList.value, position: dexPosition.value }
     }
     const id = detail.value?.id
-    const position = id === undefined ? -1 : pokedex.index.findIndex((entry) => entry.id === id)
-    return { list: pokedex.index, position }
+    const species = id === undefined ? undefined : speciesIdOf(id)
+    const list = nationalSpecies.value
+    const position = species === undefined ? -1 : list.findIndex((entry) => entry.id === species)
+    return { list, position }
   })
   const previous = computed<NeighborEntry | null>(() => {
     const { list, position } = neighbors.value
