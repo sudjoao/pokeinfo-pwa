@@ -7,6 +7,77 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 
 ## [Não lançado]
 
+### Corrigido
+
+- Velocidade, Naturezas e IVs e Quiz: o erro com "Tentar novamente" (quando a tabela de Pokémon
+  não baixa) não aparecia: o componente era usado sem import e virava um elemento vazio. O
+  type-check agora acusa componente usado no template sem import.
+- Offline: com a internet fora, qualquer cópia guardada passa a servir, mesmo vencida ou salva só
+  num pacote do "Usar offline" (uma ficha aberta há mais de uma semana parava de abrir sem
+  conexão). Fichas, espécies e locais de encontro ficam guardados por 30 dias (eram 7).
+- "Usar offline": os arquivos baixados não ficam mais em dobro (no cache do pacote e no cache
+  normal, de onde expulsavam o que você tinha navegado).
+- Golpes e Itens: ao tocar num resultado logo depois de digitar, a busca não vai mais parar na URL
+  da página do golpe ou do item.
+- Golpe (página): se a lista de quem aprende falhar, aparece "Tentar novamente" (antes só o texto
+  do erro); sem jogo, um erro ao carregar o golpe não mostra mais uma grade vazia.
+- Item (página): se os dados da berry não carregarem, o card mostra o erro com "Tentar novamente"
+  em vez de sumir.
+- Menu: "Golpes" e "Itens" continuam marcados nas páginas de um golpe e de um item.
+- Filtros: o slider de total de stats mínimo só aplica ao soltar (cada passo reiniciava a lista
+  inteira e gravava a URL; no Safari isso podia passar do limite de gravações por minuto).
+- Ícone do app no Android: o ícone "maskable" ganhou uma versão própria com zona segura (o mesmo
+  PNG servia para os dois usos e era cortado).
+
+### Adicionado
+
+- Nova versão do app: quando há uma versão nova publicada, um aviso com "Atualizar" aparece e a
+  página recarrega já na versão nova. Antes a atualização só entrava quando o app era fechado de
+  verdade em todas as abas, o que no iPhone instalado podia levar dias; ao voltar ao app, ele
+  também confere se há versão nova (no máximo uma vez por hora).
+- "Instalar app" no menu: abre a instalação do navegador (Chrome, Android, desktop) ou, no
+  iPhone, explica o "Adicionar à Tela de Início" do Safari. Some quando o app já está instalado.
+- Compartilhar texto para o PokeInfo (Android, app instalado) abre a Pokédex com esse texto na
+  busca; os atalhos do ícone ganharam ícone próprio e abrem na janela já aberta.
+- Pokédex: com busca ou filtro, a contagem de resultados fica visível ao lado de um "Limpar
+  filtros" (antes só o leitor de tela a ouvia, e limpar exigia chegar ao estado vazio). O botão
+  que fecha o sheet de filtros diz quantos Pokémon sobram ("Mostrar 42").
+- Comparar: linhas de resistências e imunidades, botão para trocar a ordem das colunas, esqueleto
+  enquanto a tabela baixa, erro com "Tentar novamente" e compartilhar o link.
+- Golpe (página): o TM/HM do jogo é um link para o item; "Combinar com outros golpes" abre o
+  "Quem aprende" já com o golpe; compartilhar o link.
+- Golpes: botão para inverter o sentido da ordenação (`?dir=`); lista vazia com "Limpar filtros".
+- Itens: seletor de jogo na lista (vai para o "Quem segura" da página do item) e, ao abrir pelo
+  menu, o jogo salvo; lista vazia com "Limpar filtros"; compartilhar o link da página do item.
+- Calculadora de tipos: botões "Ver Pokémon desse tipo" (defesa) e "Ver golpes do tipo" (ataque);
+  na tabela, a linha de cabeçalho e a coluna dos tipos ficam fixas ao rolar; compartilhar o link.
+- Velocidade: modificadores Paralisado (×½, ou ×¼ até a 6ª geração) e Trick Room (do mais lento
+  ao mais rápido); Scarf, Tailwind, estágios, paralisia e Trick Room vão na URL; aviso quando a
+  busca não acha nada e contagem anunciada ao leitor de tela.
+- Naturezas e IVs: a tela fica viva ao abrir uma ficha (nível, natureza, EVs e valores digitados
+  não se perdem); "Usar na calculadora" na natureza escolhida da tabela; a busca de Pokémon
+  aceita o número ("#25").
+- Quiz: chip "Todas" nas gerações, "Ver ficha" na resposta e a imagem da próxima pergunta já
+  baixa durante a atual.
+
+### Alterado
+
+- Abertura mais leve: o service worker só é registrado quando o navegador fica ocioso (o
+  precache de ~1 MB não disputa a primeira visita com os artworks); os ícones PNG do app foram
+  otimizados (340 KB → 55 KB) e saíram do precache; a limpeza de caches antigos e o pedido de
+  armazenamento persistente também esperam o ocioso.
+- Tema escuro: o fundo já nasce escuro antes de o app montar (não há mais o flash branco a cada
+  abertura), e a cor da barra do navegador acompanha o esquema do sistema.
+- Abas Rotas, Líderes e Time mostram um esqueleto enquanto o código delas baixa na primeira
+  abertura (ficavam em branco).
+- Ordenar por nome usa o nome exibido ("Mr. Mime" e não "mr-mime") e ignora acentos e
+  maiúsculas; ao voltar do detalhe com o filtro de captura, os cards que continuam na lista não
+  são re-renderizados.
+- Golpes e Itens: a lista não é reordenada a cada tecla (a ordem por nome e os nomes normalizados
+  ficam guardados por idioma).
+- Caches de imagens e fichas do service worker são apagados sozinhos se o armazenamento estourar
+  (cota pequena no iOS), em vez de a gravação falhar e ameaçar o precache e os pacotes offline.
+
 ## [1.17.0] - 2026-11-25
 
 ### Corrigido
