@@ -6,9 +6,33 @@ import {
   battleTypes,
   coverageGaps,
   formatMultiplier,
+  hasDefensiveAbility,
   teamThreats,
   typesInGeneration,
+  withAbilityDefense,
 } from '@/utils/typeChart'
+
+describe('withAbilityDefense', () => {
+  it('imunidade, metade e dobro da habilidade sobre o multiplicador dos tipos', () => {
+    expect(withAbilityDefense(2, 'ground', 'levitate')).toBe(0)
+    expect(withAbilityDefense(2, 'fire', 'thick-fat')).toBe(1)
+    expect(withAbilityDefense(0.5, 'fire', 'fluffy')).toBe(1)
+    expect(withAbilityDefense(2, 'water', 'levitate')).toBe(2)
+  })
+
+  it('Wonder Guard deixa passar só o super efetivo', () => {
+    expect(withAbilityDefense(2, 'fire', 'wonder-guard')).toBe(2)
+    expect(withAbilityDefense(1, 'normal', 'wonder-guard')).toBe(0)
+    expect(withAbilityDefense(0.5, 'grass', 'wonder-guard')).toBe(0)
+  })
+
+  it('habilidade desconhecida ou ausente não muda nada', () => {
+    expect(withAbilityDefense(2, 'fire', 'overgrow')).toBe(2)
+    expect(withAbilityDefense(2, 'fire', null)).toBe(2)
+    expect(hasDefensiveAbility('levitate')).toBe(true)
+    expect(hasDefensiveAbility('overgrow')).toBe(false)
+  })
+})
 
 describe('attackMultiplier', () => {
   it('multiplica os dois tipos do defensor', () => {

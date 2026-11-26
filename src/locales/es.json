@@ -196,7 +196,12 @@
     "showShiny": "Ver variocolor",
     "shiny": "Variocolor",
     "abilityOpen": "Ver detalles de {name}",
-    "eggDittoSelf": "Cría con cualquier Pokémon que pueda poner huevos, salvo otro Ditto."
+    "eggDittoSelf": "Cría con cualquier Pokémon que pueda poner huevos, salvo otro Ditto.",
+    "defenseMode": "Defensa",
+    "attackMode": "Ataque (STAB)",
+    "withAbility": "Con {name}",
+    "abilityHint": "Toca una habilidad para aplicarla a la tabla.",
+    "attackHint": "Lo que golpean los movimientos del tipo de este Pokémon (con STAB); con dos tipos, cuenta el mejor."
   },
   "type": {
     "normal": "Normal",

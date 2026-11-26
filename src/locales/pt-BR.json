@@ -196,7 +196,12 @@
     "showShiny": "Ver versão shiny",
     "shiny": "Shiny",
     "abilityOpen": "Ver detalhes de {name}",
-    "eggDittoSelf": "Cruza com qualquer Pokémon que gere ovos, menos outro Ditto."
+    "eggDittoSelf": "Cruza com qualquer Pokémon que gere ovos, menos outro Ditto.",
+    "defenseMode": "Defesa",
+    "attackMode": "Ataque (STAB)",
+    "withAbility": "Com {name}",
+    "abilityHint": "Toque numa habilidade para considerá-la na tabela.",
+    "attackHint": "O que os golpes do tipo deste Pokémon (com STAB) acertam; com dois tipos, vale o melhor."
   },
   "type": {
     "normal": "Normal",

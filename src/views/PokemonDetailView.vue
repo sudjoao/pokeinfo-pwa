@@ -472,6 +472,7 @@ async function sendShareImage(): Promise<void> {
               class="mt-4"
               :pokemon-id="detail.id"
               :types="detail.types"
+              :abilities="detail.abilities"
               :generation="context?.game.generation"
               :game-title="context?.game.title"
             />
