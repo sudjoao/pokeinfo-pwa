@@ -141,6 +141,8 @@ export interface PokemonSpeciesDto {
   genera: GenusEntry[]
   names: NameEntry[]
   varieties: PokemonSpeciesVarietyDto[]
+  /** Número da espécie em cada Pokédex (`/pokedex/{slug}`), inclusive a nacional. */
+  pokedex_numbers?: { entry_number: number; pokedex: NamedApiResource }[]
 }
 
 export interface EvolutionDetailDto {

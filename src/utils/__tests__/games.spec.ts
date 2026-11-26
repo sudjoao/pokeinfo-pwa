@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { findGame, findGameByVersion, gameContextFromQuery, gameContextQuery } from '@/utils/games'
+import {
+  findGame,
+  findGameByVersion,
+  findGameWithDex,
+  gameContextFromQuery,
+  gameContextQuery,
+} from '@/utils/games'
 import { exclusiveVersionOf } from '@/utils/exclusives'
 import { formatAreaName } from '@/utils/encounters'
 
@@ -9,6 +15,12 @@ describe('jogos', () => {
     expect(owner?.game.slug).toBe('sword-shield')
     expect(owner?.version.slug).toBe('sword')
     expect(findGameByVersion('colosseum')).toBeNull()
+  })
+
+  it('acha o jogo mais recente com uma Pokédex', () => {
+    expect(findGameWithDex('galar')?.game.slug).toBe('sword-shield')
+    expect(findGameWithDex('kanto')?.game.slug).toBe('firered-leafgreen')
+    expect(findGameWithDex('conquest-gallery')).toBeNull()
   })
 
   it('contexto de jogo vai e volta pela URL', () => {

@@ -201,7 +201,9 @@
     "attackMode": "Attack (STAB)",
     "withAbility": "With {name}",
     "abilityHint": "Tap an ability to apply it to the chart.",
-    "attackHint": "What this Pokémon's own-type (STAB) moves hit; with two types, the better one counts."
+    "attackHint": "What this Pokémon's own-type (STAB) moves hit; with two types, the better one counts.",
+    "dexNumbers": "Pokédex numbers ({n})",
+    "dexNumbersHide": "Hide numbers"
   },
   "type": {
     "normal": "Normal",

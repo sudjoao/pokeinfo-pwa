@@ -201,7 +201,9 @@
     "attackMode": "Ataque (STAB)",
     "withAbility": "Con {name}",
     "abilityHint": "Toca una habilidad para aplicarla a la tabla.",
-    "attackHint": "Lo que golpean los movimientos del tipo de este Pokémon (con STAB); con dos tipos, cuenta el mejor."
+    "attackHint": "Lo que golpean los movimientos del tipo de este Pokémon (con STAB); con dos tipos, cuenta el mejor.",
+    "dexNumbers": "Números en las Pokédex ({n})",
+    "dexNumbersHide": "Ocultar números"
   },
   "type": {
     "normal": "Normal",

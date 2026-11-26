@@ -161,6 +161,17 @@ export function formatWeight(kilograms: number, locale: string): string {
   return `${decimal(kilograms, locale)} kg`
 }
 
+/** 0.4 -> "1′04″" (pés e polegadas, como a Pokédex dos jogos em inglês). */
+export function formatHeightImperial(meters: number): string {
+  const inches = Math.round(meters * 39.3701)
+  return `${Math.floor(inches / 12)}′${String(inches % 12).padStart(2, '0')}″`
+}
+
+/** 6 -> "13,2 lb" (pt-BR) / "13.2 lb" (en) */
+export function formatWeightImperial(kilograms: number, locale: string): string {
+  return `${decimal(kilograms * 2.20462, locale)} lb`
+}
+
 /** Valor máximo de um stat base na série principal (Blissey, HP 255). */
 export const MAX_BASE_STAT = 255
 
