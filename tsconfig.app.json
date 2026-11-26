@@ -2,6 +2,11 @@
   "extends": "@vue/tsconfig/tsconfig.dom.json",
   "include": ["env.d.ts", "src/**/*", "src/**/*.vue"],
   "exclude": ["src/**/__tests__/*"],
+  "vueCompilerOptions": {
+    // Componente usado no template sem import vira elemento desconhecido (sem erro em runtime).
+    "checkUnknownComponents": true,
+    "checkUnknownDirectives": true
+  },
   "compilerOptions": {
     // Extra safety for array and object lookups, but may have false positives.
     "noUncheckedIndexedAccess": true,

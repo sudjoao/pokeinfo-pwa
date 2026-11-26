@@ -13,6 +13,7 @@ import { readStorage, writeStorage } from '@/utils/storage'
 import type { PokemonIndexEntry } from '@/types/pokemon'
 import DetailLayout from '@/components/templates/DetailLayout.vue'
 import PokemonArtwork from '@/components/atoms/PokemonArtwork.vue'
+import EmptyState from '@/components/molecules/EmptyState.vue'
 
 const BEST_KEY = 'pokeinfo:quiz-best:v1'
 /** Só espécies (formas padrão): as formas alternativas confundem o "quem é". */
