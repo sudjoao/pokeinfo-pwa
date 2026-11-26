@@ -7,6 +7,8 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 
 ## [Não lançado]
 
+## [1.18.1] - 2026-11-26
+
 ### Corrigido
 
 - Pokédex e team builder: um link com outro jogo, Pokédex ou busca do que a tela tinha (um número
@@ -801,6 +803,7 @@ Primeira versão estável da Pokédex em formato de PWA, consumindo a [PokéAPI]
 - Os gritos vêm só em `.ogg`; em navegadores sem suporte o botão de som não aparece.
 
 [Não lançado]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.17.0...HEAD
+[1.18.1]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.18.0...v1.18.1
 [1.18.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.17.0...v1.18.0
 [1.17.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.16.0...v1.17.0
 [1.16.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.15.0...v1.16.0
