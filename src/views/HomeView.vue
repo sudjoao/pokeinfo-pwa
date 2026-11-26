@@ -50,6 +50,7 @@ import PokemonBoxes, { type BoxEntry } from '@/components/organisms/PokemonBoxes
 import AppNotice from '@/components/molecules/AppNotice.vue'
 import BackToTop from '@/components/atoms/BackToTop.vue'
 import TabSkeleton from '@/components/molecules/TabSkeleton.vue'
+import SortMenu from '@/components/molecules/SortMenu.vue'
 import GamePickerSheet from '@/components/organisms/GamePickerSheet.vue'
 import TypePickerSheet from '@/components/organisms/TypePickerSheet.vue'
 import VersionPickerSheet from '@/components/organisms/VersionPickerSheet.vue'
@@ -112,6 +113,7 @@ const {
   advanced,
   advancedCount,
   setAdvanced,
+  setSort,
   clearAdvanced,
   items,
   source,
@@ -642,6 +644,12 @@ onActivated(() => {
         >
           {{ t('select.action') }}
         </v-btn>
+        <SortMenu
+          :sort="advanced.sort"
+          :desc="advanced.desc"
+          :disabled="sourceLoading || !!sourceError"
+          @update="setSort"
+        />
         <v-spacer />
         <!-- Arte shiny é exibição, não filtro: fica junto de Cards/Caixas (entre as chips parecia "só shinies"). -->
         <v-btn

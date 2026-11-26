@@ -46,7 +46,8 @@ describe('URL', () => {
     })
     const query = advancedToQuery(value)
     expect(parseAdvanced(query)).toEqual(value)
-    expect(activeCount(value)).toBe(7)
+    // A ordenação não conta como filtro.
+    expect(activeCount(value)).toBe(6)
   })
 
   it('ignora valores inválidos', () => {

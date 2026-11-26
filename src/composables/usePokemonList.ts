@@ -331,14 +331,18 @@ export function usePokemonList() {
       advancedCount.value > 0,
   )
 
-  /** Saída do estado vazio: tira busca e filtros, mantendo o jogo e a Pokédex. */
+  /** Saída do estado vazio: tira busca e filtros, mantendo o jogo, a Pokédex e a ordenação. */
   function clearFilters(): void {
     query.value = ''
     caughtFilter.value = null
     typeFilter.value = []
     availability.value = []
     megaOnly.value = false
-    advanced.value = { ...EMPTY_ADVANCED }
+    advanced.value = { ...EMPTY_ADVANCED, sort: advanced.value.sort, desc: advanced.value.desc }
+  }
+
+  function setSort(sort: SortKey, desc: boolean): void {
+    advanced.value = { ...advanced.value, sort, desc }
   }
 
   // Carregamento das entradas da Pokédex do jogo (uma requisição por dex, cacheada na store).
@@ -667,6 +671,7 @@ export function usePokemonList() {
     advanced,
     advancedCount,
     setAdvanced,
+    setSort,
     clearAdvanced,
     source,
     filtered,

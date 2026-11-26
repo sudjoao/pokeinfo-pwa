@@ -206,7 +206,16 @@
     "attackHint": "O que os golpes do tipo deste Pokémon (com STAB) acertam; com dois tipos, vale o melhor.",
     "dexNumbers": "Números nas Pokédex ({n})",
     "dexNumbersHide": "Ocultar números",
-    "statsLevelLabel": "Nível para a faixa dos stats"
+    "statsLevelLabel": "Nível para a faixa dos stats",
+    "sectionsLabel": "Seções da ficha",
+    "sections": {
+      "defenses": "Fraquezas",
+      "about": "Sobre",
+      "stats": "Stats",
+      "evolution": "Evolução",
+      "moves": "Golpes",
+      "locations": "Onde encontrar"
+    }
   },
   "type": {
     "normal": "Normal",
@@ -661,7 +670,8 @@
       "baby": "Bebê",
       "regular": "Comum"
     },
-    "show": "Mostrar {n}"
+    "show": "Mostrar {n}",
+    "sortCurrent": "Ordenação: {sort}"
   },
   "favorites": {
     "title": "Favoritos",

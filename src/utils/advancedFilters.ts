@@ -103,10 +103,9 @@ export function advancedToQuery(filters: AdvancedFilters): Record<string, string
   return result
 }
 
-/** Quantos filtros estão ativos (a ordenação conta como um). */
+/** Quantos filtros estão ativos. A ordenação não conta: tem controle próprio na barra da lista. */
 export function activeCount(filters: AdvancedFilters): number {
   return (
-    Number(filters.sort !== 'number' || filters.desc) +
     Number(filters.generations.length > 0) +
     Number(filters.categories.length > 0) +
     Number(filters.weakTo !== null) +

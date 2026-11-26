@@ -206,7 +206,16 @@
     "attackHint": "Lo que golpean los movimientos del tipo de este Pokémon (con STAB); con dos tipos, cuenta el mejor.",
     "dexNumbers": "Números en las Pokédex ({n})",
     "dexNumbersHide": "Ocultar números",
-    "statsLevelLabel": "Nivel para el rango de las estadísticas"
+    "statsLevelLabel": "Nivel para el rango de las estadísticas",
+    "sectionsLabel": "Secciones de la ficha",
+    "sections": {
+      "defenses": "Debilidades",
+      "about": "Datos",
+      "stats": "Stats",
+      "evolution": "Evolución",
+      "moves": "Movimientos",
+      "locations": "Dónde encontrar"
+    }
   },
   "type": {
     "normal": "Normal",
@@ -661,7 +670,8 @@
       "baby": "Bebé",
       "regular": "Común"
     },
-    "show": "Mostrar {n}"
+    "show": "Mostrar {n}",
+    "sortCurrent": "Orden: {sort}"
   },
   "favorites": {
     "title": "Favoritos",

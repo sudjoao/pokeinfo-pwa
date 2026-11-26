@@ -206,7 +206,16 @@
     "attackHint": "What this Pokémon's own-type (STAB) moves hit; with two types, the better one counts.",
     "dexNumbers": "Pokédex numbers ({n})",
     "dexNumbersHide": "Hide numbers",
-    "statsLevelLabel": "Level for the stat range"
+    "statsLevelLabel": "Level for the stat range",
+    "sectionsLabel": "Page sections",
+    "sections": {
+      "defenses": "Weaknesses",
+      "about": "About",
+      "stats": "Stats",
+      "evolution": "Evolution",
+      "moves": "Moves",
+      "locations": "Locations"
+    }
   },
   "type": {
     "normal": "Normal",
@@ -661,7 +670,8 @@
       "baby": "Baby",
       "regular": "Regular"
     },
-    "show": "Show {n}"
+    "show": "Show {n}",
+    "sortCurrent": "Sort: {sort}"
   },
   "favorites": {
     "title": "Favorites",
