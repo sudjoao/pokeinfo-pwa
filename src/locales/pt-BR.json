@@ -203,7 +203,8 @@
     "abilityHint": "Toque numa habilidade para considerá-la na tabela.",
     "attackHint": "O que os golpes do tipo deste Pokémon (com STAB) acertam; com dois tipos, vale o melhor.",
     "dexNumbers": "Números nas Pokédex ({n})",
-    "dexNumbersHide": "Ocultar números"
+    "dexNumbersHide": "Ocultar números",
+    "statsLevelLabel": "Nível para a faixa dos stats"
   },
   "type": {
     "normal": "Normal",
@@ -1215,7 +1216,8 @@
     "bulbapedia": "Ver na Bulbapedia",
     "loadError": "Não foi possível carregar os líderes.",
     "empty": "Ainda não há líderes de {game}.",
-    "source": "Times e observações (em inglês) da Bulbapedia."
+    "source": "Times e observações (em inglês) da Bulbapedia.",
+    "opensNewTab": "(abre em nova aba)"
   },
   "export": {
     "action": "Exportar",
