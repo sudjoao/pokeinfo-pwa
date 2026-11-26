@@ -93,6 +93,9 @@ export interface PokemonGameSprite {
   key: string
   front: string | null
   shiny: string | null
+  /** Fêmea, só nas espécies com diferença visual entre os gêneros (Pikachu, Hippowdon…). */
+  female: string | null
+  shinyFemale: string | null
   /** GIF animado (Crystal, Black/White, Showdown). */
   animated: string | null
   animatedShiny: string | null

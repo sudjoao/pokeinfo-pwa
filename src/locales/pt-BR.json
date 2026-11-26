@@ -771,7 +771,8 @@
     "generation": "{n}ª geração",
     "current": "(jogo selecionado)",
     "showAll": "Mostrar todos ({n})",
-    "showLess": "Mostrar menos"
+    "showLess": "Mostrar menos",
+    "female": "Fêmea"
   },
   "heldItems": {
     "title": "Itens segurados",

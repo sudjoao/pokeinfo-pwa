@@ -53,6 +53,8 @@ function spriteOf(generation: number, key: string, set: PokemonSpriteSetDto): Po
     key,
     front: set.front_default ?? null,
     shiny: set.front_shiny ?? null,
+    female: set.front_female ?? null,
+    shinyFemale: set.front_shiny_female ?? null,
     animated: set.animated?.front_default ?? null,
     animatedShiny: set.animated?.front_shiny ?? null,
   }

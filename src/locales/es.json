@@ -771,7 +771,8 @@
     "generation": "{n}.ª generación",
     "current": "(juego seleccionado)",
     "showAll": "Mostrar todos ({n})",
-    "showLess": "Mostrar menos"
+    "showLess": "Mostrar menos",
+    "female": "Hembra"
   },
   "heldItems": {
     "title": "Objetos equipados",

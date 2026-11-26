@@ -771,7 +771,8 @@
     "generation": "Generation {n}",
     "current": "(selected game)",
     "showAll": "Show all ({n})",
-    "showLess": "Show less"
+    "showLess": "Show less",
+    "female": "Female"
   },
   "heldItems": {
     "title": "Held items",
