@@ -10,7 +10,8 @@ import {
 import { useRoute, useRouter } from 'vue-router'
 import { gameContextFromQuery, gameContextQuery } from '@/utils/games'
 import { useI18n } from 'vue-i18n'
-import { mdiClose } from '@mdi/js'
+import { mdiClose, mdiShareVariant, mdiSwapHorizontal } from '@mdi/js'
+import { shareLink } from '@/composables/useShare'
 import { usePokedexStore } from '@/stores/pokedex'
 import { usePokemonData } from '@/composables/usePokemonData'
 import { focusPageTitle } from '@/composables/usePageFocus'
@@ -22,6 +23,8 @@ import DetailLayout from '@/components/templates/DetailLayout.vue'
 import PokemonArtwork from '@/components/atoms/PokemonArtwork.vue'
 import TypeChip from '@/components/atoms/TypeChip.vue'
 import MultiplierBadge from '@/components/atoms/MultiplierBadge.vue'
+import EmptyState from '@/components/molecules/EmptyState.vue'
+import AppNotice from '@/components/molecules/AppNotice.vue'
 
 const MAX_COMPARE = 3
 
@@ -97,11 +100,47 @@ function abilityNames(column: (typeof columns.value)[number]): string[] {
   return list
 }
 
+function multipliers(types: readonly PokemonType[]) {
+  return battleTypes().map((type) => ({ type, multiplier: attackMultiplier(type, types) }))
+}
+
 function weaknesses(types: readonly PokemonType[]) {
-  return battleTypes()
-    .map((type) => ({ type, multiplier: attackMultiplier(type, types) }))
+  return multipliers(types)
     .filter((entry) => entry.multiplier > 1)
     .sort((a, b) => b.multiplier - a.multiplier)
+}
+
+function resistances(types: readonly PokemonType[]) {
+  return multipliers(types)
+    .filter((entry) => entry.multiplier > 0 && entry.multiplier < 1)
+    .sort((a, b) => a.multiplier - b.multiplier)
+}
+
+function immunities(types: readonly PokemonType[]) {
+  return multipliers(types).filter((entry) => entry.multiplier === 0)
+}
+
+/** Tabela de stats ainda não chegou (e não falhou): esqueleto no lugar dos valores. */
+const tableLoading = computed(
+  () => ids.value.length > 0 && !pokemonData.table.value && !pokemonData.error.value,
+)
+const tableError = computed(() => !pokemonData.table.value && !!pokemonData.error.value)
+
+/** Troca a coluna com a da esquerda (a ordem é a da URL, então o link compartilhado segue igual). */
+function moveLeft(index: number): void {
+  if (index <= 0) return
+  const next = [...ids.value]
+  ;[next[index - 1], next[index]] = [next[index]!, next[index - 1]!]
+  setIds(next)
+}
+
+const notice = ref<string | null>(null)
+
+function share(): void {
+  shareLink(t('compare.title'), window.location.href).then((result) => {
+    if (result === 'copied') notice.value = t('common.linkCopied')
+    else if (result === 'failed') notice.value = t('common.shareFailed')
+  })
 }
 
 // Seletor: busca no índice já em memória (nome ou número).
@@ -141,6 +180,14 @@ function goBack(): void {
 
 <template>
   <DetailLayout :title="t('compare.title')" @back="goBack">
+    <template #actions>
+      <v-btn
+        v-if="ids.length"
+        :icon="mdiShareVariant"
+        :aria-label="t('common.share')"
+        @click="share"
+      />
+    </template>
     <div class="d-flex flex-column ga-4">
       <v-autocomplete
         autocorrect="off"
@@ -161,6 +208,18 @@ function goBack(): void {
 
       <p v-if="!ids.length" class="opacity-70">{{ t('compare.empty') }}</p>
 
+      <EmptyState
+        v-else-if="tableError"
+        variant="error"
+        :title="t('error.loadTable')"
+        :action-label="t('common.retry')"
+        @action="pokemonData.load().catch(() => {})"
+      />
+
+      <v-card v-else-if="tableLoading">
+        <v-skeleton-loader aria-hidden="true" type="table-tbody" />
+      </v-card>
+
       <v-card v-else>
         <v-card-text>
           <!-- Tabela de verdade: o leitor de tela anuncia "Ataque, Charizard: 84" ao navegar. -->
@@ -177,7 +236,12 @@ function goBack(): void {
             <thead>
               <tr>
                 <td />
-                <th v-for="column in columns" :key="column.id" scope="col" class="compare__pokemon">
+                <th
+                  v-for="(column, index) in columns"
+                  :key="column.id"
+                  scope="col"
+                  class="compare__pokemon"
+                >
                   <v-btn
                     :icon="mdiClose"
                     size="small"
@@ -185,6 +249,16 @@ function goBack(): void {
                     class="compare__remove"
                     :aria-label="t('compare.remove', { name: column.name })"
                     @click="remove(column.id)"
+                  />
+                  <v-btn
+                    v-if="index > 0"
+                    :icon="mdiSwapHorizontal"
+                    size="small"
+                    variant="text"
+                    class="compare__swap"
+                    :aria-label="t('compare.moveLeft', { name: column.name })"
+                    :title="t('compare.moveLeft', { name: column.name })"
+                    @click="moveLeft(index)"
                   />
                   <PokemonArtwork :id="column.id" alt="" :size="88" />
                   <RouterLink
@@ -257,6 +331,30 @@ function goBack(): void {
                       <TypeChip :type="entry.type" size="x-small" />
                       <MultiplierBadge :multiplier="entry.multiplier" />
                     </li>
+                    <li v-if="!weaknesses(column.types).length" class="opacity-70">—</li>
+                  </ul>
+                </td>
+              </tr>
+              <tr>
+                <th scope="row" class="compare__label">{{ t('detail.resists') }}</th>
+                <td v-for="column in columns" :key="column.id" class="compare__value">
+                  <ul class="compare__weak">
+                    <li v-for="entry in resistances(column.types)" :key="entry.type">
+                      <TypeChip :type="entry.type" size="x-small" />
+                      <MultiplierBadge :multiplier="entry.multiplier" />
+                    </li>
+                    <li v-if="!resistances(column.types).length" class="opacity-70">—</li>
+                  </ul>
+                </td>
+              </tr>
+              <tr>
+                <th scope="row" class="compare__label">{{ t('detail.immuneTo') }}</th>
+                <td v-for="column in columns" :key="column.id" class="compare__value">
+                  <ul class="compare__weak">
+                    <li v-for="entry in immunities(column.types)" :key="entry.type">
+                      <TypeChip :type="entry.type" size="x-small" />
+                    </li>
+                    <li v-if="!immunities(column.types).length" class="opacity-70">—</li>
                   </ul>
                 </td>
               </tr>
@@ -266,6 +364,7 @@ function goBack(): void {
         </v-card-text>
       </v-card>
     </div>
+    <AppNotice :text="notice" :timeout="2500" @close="notice = null" />
   </DetailLayout>
 </template>
 
@@ -296,6 +395,13 @@ function goBack(): void {
   position: absolute;
   top: 0;
   right: 0;
+  z-index: 1;
+}
+
+.compare__swap {
+  position: absolute;
+  top: 0;
+  left: 0;
   z-index: 1;
 }
 

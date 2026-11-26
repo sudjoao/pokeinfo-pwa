@@ -684,7 +684,8 @@
     "remove": "Remove {name} from comparison",
     "withThis": "Compare with another Pokémon",
     "bestHint": "Highlighted: the highest value in each row.",
-    "best": "highest"
+    "best": "highest",
+    "moveLeft": "Move {name} to the left"
   },
   "quiz": {
     "title": "Who's that Pokémon?",
