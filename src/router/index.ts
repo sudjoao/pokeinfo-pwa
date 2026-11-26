@@ -3,7 +3,7 @@ import { createRouter, createWebHistory, START_LOCATION } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
 import { i18n } from '@/plugins/i18n'
 import { trackInAppNavigation } from '@/composables/usePageFocus'
-import { CARD_ARTWORK_SIZE, preloadArtwork } from '@/utils/pokemon'
+import { CARD_ARTWORK_SIZE, HERO_ARTWORK_SIZE, preloadArtwork } from '@/utils/pokemon'
 import { useListShiny } from '@/composables/useListShiny'
 import { usePokemonDetailStore } from '@/stores/pokemonDetail'
 import { usePokedexStore } from '@/stores/pokedex'
@@ -47,7 +47,8 @@ const router = createRouter({
         const key = String(to.params.id).trim().toLowerCase()
         if (!key) return
         const id = /^\d+$/.test(key) ? Number(key) : key
-        if (typeof id === 'number') preloadArtwork(id)
+        if (typeof id === 'number')
+          preloadArtwork(id, HERO_ARTWORK_SIZE, useListShiny().shiny.value)
         usePokemonDetailStore()
           .ensureDetail(id)
           .catch(() => {})

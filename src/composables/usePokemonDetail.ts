@@ -8,7 +8,8 @@ import { buildDexList, type GameContext } from '@/utils/games'
 import { describeError } from '@/utils/errors'
 import { megaLineOf } from '@/utils/megas'
 import { speciesIdOf } from '@/utils/forms'
-import { preloadArtwork } from '@/utils/pokemon'
+import { whenIdle } from '@/utils/idle'
+import { HERO_ARTWORK_SIZE, preloadArtwork } from '@/utils/pokemon'
 import type {
   EvolutionChain,
   PokemonDetail,
@@ -31,7 +32,12 @@ export interface NeighborEntry extends PokemonIndexEntry {
  * tela), depois espécie + cadeia de evolução e os locais de encontro em paralelo. Reage à troca do id na rota.
  * Com um jogo selecionado (`context`), a navegação anterior/próximo segue a Pokédex dele.
  */
-export function usePokemonDetail(idOrName: Ref<string>, context: Ref<GameContext | null>) {
+export function usePokemonDetail(
+  idOrName: Ref<string>,
+  context: Ref<GameContext | null>,
+  /** O hero está mostrando o shiny: o artwork pré-carregado (deste e dos vizinhos) é o mesmo. */
+  shiny: Ref<boolean> = ref(false),
+) {
   const store = usePokemonDetailStore()
   const pokedex = usePokedexStore()
   const { t } = useI18n()
@@ -131,7 +137,7 @@ export function usePokemonDetail(idOrName: Ref<string>, context: Ref<GameContext
 
     // O artwork é a maior imagem da tela (LCP) e a URL sai do id: começa a baixar junto com o
     // JSON do detalhe (~300 KB) em vez de esperar ele chegar e a tela renderizar.
-    if (/^\d+$/.test(key)) preloadArtwork(Number(key))
+    if (/^\d+$/.test(key)) preloadArtwork(Number(key), HERO_ARTWORK_SIZE, shiny.value)
 
     try {
       const result = await store.ensureDetail(/^\d+$/.test(key) ? Number(key) : key)
@@ -254,6 +260,26 @@ export function usePokemonDetail(idOrName: Ref<string>, context: Ref<GameContext
   })
 
   watch(idOrName, load, { immediate: true })
+
+  /**
+   * Vizinhos prontos antes do toque: o artwork deles começa a baixar já, e a ficha (~300 KB cada)
+   * quando o navegador ficar ocioso, para o deslizar/seta não mostrar o esqueleto inteiro. Não
+   * baixa a ficha com economia de dados ligada; o store deduplica e guarda em cache.
+   */
+  function prefetchNeighbors(): void {
+    const targets = [next.value, previous.value].filter((entry) => entry !== null)
+    for (const entry of targets) preloadArtwork(entry.id, HERO_ARTWORK_SIZE, shiny.value)
+    const connection = (navigator as { connection?: { saveData?: boolean } }).connection
+    if (connection?.saveData) return
+    whenIdle(() => {
+      for (const entry of targets) {
+        if (status.value === 'ready') store.ensureDetail(entry.id).catch(() => {})
+      }
+    })
+  }
+  watch([status, () => next.value?.id, () => previous.value?.id], ([state]) => {
+    if (state === 'ready') prefetchNeighbors()
+  })
 
   return {
     detail,

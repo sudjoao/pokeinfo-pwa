@@ -109,6 +109,12 @@ const idParam = computed(() => String(route.params.id ?? ''))
 /** Jogo selecionado na Home, preservado na URL (`?game=&dex=`). */
 const context = computed(() => gameContextFromQuery(route.query))
 
+/**
+ * Artwork shiny no hero: começa como a lista está (a preferência "Shiny" dos cards) e continua
+ * ligado ao navegar entre Pokémon (para comparar shinies). Trocar aqui não muda a lista.
+ */
+const shiny = ref(useListShiny().shiny.value)
+
 const {
   detail,
   species,
@@ -127,7 +133,7 @@ const {
   next,
   retry,
   requestEncounters,
-} = usePokemonDetail(idParam, context)
+} = usePokemonDetail(idParam, context, shiny)
 
 /**
  * A lista de locais chegou perto da tela: só agora os encontros (resposta grande) são pedidos.
@@ -263,12 +269,6 @@ function goBack(): void {
 /** As megas ficam na seção própria (e só nos jogos em que existem), fora dos chips de formas. */
 const formVarieties = computed(() => withoutMegas(species.value?.varieties ?? []))
 const showVarieties = computed(() => formVarieties.value.length > 1)
-
-/**
- * Artwork shiny no hero: começa como a lista está (a preferência "Shiny" dos cards) e continua
- * ligado ao navegar entre Pokémon (para comparar shinies). Trocar aqui não muda a lista.
- */
-const shiny = ref(useListShiny().shiny.value)
 
 const favorites = useFavoritesStore()
 
