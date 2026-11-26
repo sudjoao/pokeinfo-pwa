@@ -591,7 +591,11 @@ async function sendShareImage(): Promise<void> {
           </v-col>
 
           <v-col cols="12">
-            <MovesCard :moves="detail.moves" :version-group="context?.game.slug ?? null" />
+            <MovesCard
+              :moves="detail.moves"
+              :types="detail.types"
+              :version-group="context?.game.slug ?? null"
+            />
           </v-col>
 
           <v-col cols="12">

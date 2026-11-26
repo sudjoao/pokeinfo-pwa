@@ -548,7 +548,10 @@
     "noneInGame": "La PokéAPI no tiene movimientos de este Pokémon en {game}.",
     "noneAtAll": "La PokéAPI no tiene movimientos de este Pokémon.",
     "hint": "Tipo, potencia, precisión y PP del juego elegido.",
-    "evolveLong": "Lo aprende al evolucionar"
+    "evolveLong": "Lo aprende al evolucionar",
+    "stab": "STAB",
+    "stabLong": "mismo tipo que el Pokémon: 50% más de daño (STAB)",
+    "sortHint": "Toca un encabezado para ordenar."
   },
   "growthRate": {
     "slow": "Lento",

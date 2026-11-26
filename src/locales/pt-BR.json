@@ -548,7 +548,10 @@
     "noneInGame": "A PokéAPI não tem golpes deste Pokémon em {game}.",
     "noneAtAll": "A PokéAPI não tem golpes deste Pokémon.",
     "hint": "Tipo, poder, precisão e PP do jogo escolhido.",
-    "evolveLong": "Aprende ao evoluir"
+    "evolveLong": "Aprende ao evoluir",
+    "stab": "STAB",
+    "stabLong": "mesmo tipo do Pokémon: 50% a mais de dano (STAB)",
+    "sortHint": "Toque num cabeçalho para ordenar."
   },
   "growthRate": {
     "slow": "Lento",

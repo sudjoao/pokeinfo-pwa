@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import type { PokemonMoveLearn } from '@/types/pokemon'
+import { mdiArrowDown, mdiArrowUp } from '@mdi/js'
+import type { PokemonMoveLearn, PokemonType } from '@/types/pokemon'
 import { findGame } from '@/utils/games'
 import { formatVersionGroup } from '@/utils/evolution'
 import { formatPokemonName } from '@/utils/pokemon'
+import { isStab, sortLearnedMoves, type MoveColumn } from '@/utils/detailExtras'
 import {
   MOVE_METHODS,
   movesByMethod,
@@ -16,6 +18,8 @@ import TypeChip from '@/components/atoms/TypeChip.vue'
 
 const props = defineProps<{
   moves: readonly PokemonMoveLearn[]
+  /** Tipos do Pokémon, para marcar os golpes com STAB (mesmo tipo, +50% de dano). */
+  types?: readonly PokemonType[]
   /** Grupo de versões do jogo selecionado (= `Game.slug`); sem jogo, começa no mais recente. */
   versionGroup?: string | null
 }>()
@@ -63,6 +67,50 @@ function moveName(move: LearnedMove): string {
   return (locale.value === 'es' && move.info.nameEs) || formatPokemonName(move.info.slug)
 }
 
+/*
+ * Ordenação pelos cabeçalhos. Padrão: por nível na aba "Por nível", pelo nome exibido nas outras
+ * (o collator do idioma põe os nomes em espanhol em ordem). O primeiro toque num número ordena
+ * do maior para o menor (o que interessa em poder/precisão/PP); o segundo inverte.
+ */
+const sortColumn = ref<MoveColumn>('level')
+const sortDesc = ref(false)
+const defaultColumn = computed<MoveColumn>(() => (tab.value === 'level-up' ? 'level' : 'name'))
+watch(defaultColumn, (column) => {
+  sortColumn.value = column
+  sortDesc.value = false
+})
+
+function sortBy(column: MoveColumn): void {
+  if (sortColumn.value === column) {
+    sortDesc.value = !sortDesc.value
+    return
+  }
+  sortColumn.value = column
+  sortDesc.value = column !== 'level' && column !== 'name'
+}
+
+function ariaSort(column: MoveColumn): 'ascending' | 'descending' | undefined {
+  if (sortColumn.value !== column) return undefined
+  return sortDesc.value ? 'descending' : 'ascending'
+}
+
+const collator = computed(() => new Intl.Collator(locale.value, { sensitivity: 'base' }))
+const rows = computed(() => {
+  const list = byMethod.value?.[tab.value] ?? []
+  return sortLearnedMoves(list, sortColumn.value, sortDesc.value, moveName, collator.value)
+})
+
+/** Colunas numéricas (poder, precisão, PP) e, na aba por nível, o nível. */
+const COLUMNS: readonly { key: MoveColumn; label: string }[] = [
+  { key: 'power', label: 'moves.power' },
+  { key: 'accuracy', label: 'moves.accuracy' },
+  { key: 'pp', label: 'moves.pp' },
+]
+
+function stab(move: LearnedMove): boolean {
+  return isStab(move.info, props.types ?? [])
+}
+
 function levelLabel(move: LearnedMove): string {
   return move.level === 0 ? t('moves.evolve') : String(move.level)
 }
@@ -98,15 +146,50 @@ const dash = '—'
           <v-table v-else density="compact" class="moves-card__table">
             <thead>
               <tr>
-                <th v-if="tab === 'level-up'" scope="col">{{ t('moves.level') }}</th>
-                <th scope="col">{{ t('moves.move') }}</th>
-                <th scope="col" class="text-end">{{ t('moves.power') }}</th>
-                <th scope="col" class="text-end">{{ t('moves.accuracy') }}</th>
-                <th scope="col" class="text-end">{{ t('moves.pp') }}</th>
+                <th v-if="tab === 'level-up'" scope="col" :aria-sort="ariaSort('level')">
+                  <button type="button" class="moves-card__sort" @click="sortBy('level')">
+                    {{ t('moves.level') }}
+                    <v-icon
+                      v-if="sortColumn === 'level'"
+                      :icon="sortDesc ? mdiArrowDown : mdiArrowUp"
+                      size="14"
+                    />
+                  </button>
+                </th>
+                <th scope="col" :aria-sort="ariaSort('name')">
+                  <button type="button" class="moves-card__sort" @click="sortBy('name')">
+                    {{ t('moves.move') }}
+                    <v-icon
+                      v-if="sortColumn === 'name'"
+                      :icon="sortDesc ? mdiArrowDown : mdiArrowUp"
+                      size="14"
+                    />
+                  </button>
+                </th>
+                <th
+                  v-for="column in COLUMNS"
+                  :key="column.key"
+                  scope="col"
+                  class="text-end"
+                  :aria-sort="ariaSort(column.key)"
+                >
+                  <button
+                    type="button"
+                    class="moves-card__sort moves-card__sort--end"
+                    @click="sortBy(column.key)"
+                  >
+                    {{ t(column.label) }}
+                    <v-icon
+                      v-if="sortColumn === column.key"
+                      :icon="sortDesc ? mdiArrowDown : mdiArrowUp"
+                      size="14"
+                    />
+                  </button>
+                </th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="move in byMethod[tab]" :key="`${move.info.slug}-${move.level}`">
+              <tr v-for="move in rows" :key="`${move.info.slug}-${move.level}`">
                 <td
                   v-if="tab === 'level-up'"
                   class="moves-card__num"
@@ -129,10 +212,14 @@ const dash = '—'
                   >
                     {{ moveName(move) }}
                   </RouterLink>
-                  <div class="d-flex align-center ga-1 my-1">
+                  <div class="d-flex align-center flex-wrap ga-1 my-1">
                     <TypeChip :type="move.info.type" size="x-small" />
                     <span class="text-label-small opacity-70">
                       {{ t(`moves.${move.info.category}`) }}
+                    </span>
+                    <span v-if="stab(move)" class="moves-card__stab text-label-small">
+                      <span aria-hidden="true">{{ t('moves.stab') }}</span>
+                      <span class="d-sr-only">{{ t('moves.stabLong') }}</span>
                     </span>
                   </div>
                 </td>
@@ -144,7 +231,9 @@ const dash = '—'
               </tr>
             </tbody>
           </v-table>
-          <p class="text-body-small opacity-70 mt-2 mb-0">{{ t('moves.hint') }}</p>
+          <p class="text-body-small opacity-70 mt-2 mb-0">
+            {{ t('moves.hint') }} {{ t('moves.sortHint') }}
+          </p>
         </template>
       </template>
     </v-card-text>
@@ -171,6 +260,35 @@ const dash = '—'
 
 .moves-card__table {
   background: transparent;
+}
+
+/* Cabeçalho clicável com a mesma cara do texto do cabeçalho (o ícone diz a direção). */
+.moves-card__sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
+  cursor: pointer;
+  min-height: 32px;
+}
+
+.moves-card__sort--end {
+  justify-content: flex-end;
+}
+
+/* Selo "STAB": golpe do tipo do Pokémon, com o bônus de 50%. */
+.moves-card__stab {
+  padding: 0 4px;
+  border-radius: 4px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: rgb(var(--v-theme-secondary));
+  background: rgba(var(--v-theme-secondary), 0.14);
 }
 
 /* Cabe em 360 px de largura: células estreitas e o nome do golpe quebrando linha. */

@@ -548,7 +548,10 @@
     "noneInGame": "PokéAPI has no moves for this Pokémon in {game}.",
     "noneAtAll": "PokéAPI has no moves for this Pokémon.",
     "hint": "Type, power, accuracy and PP from the chosen game.",
-    "evolveLong": "Learned on evolution"
+    "evolveLong": "Learned on evolution",
+    "stab": "STAB",
+    "stabLong": "same type as the Pokémon: 50% more damage (STAB)",
+    "sortHint": "Tap a column header to sort."
   },
   "growthRate": {
     "slow": "Slow",

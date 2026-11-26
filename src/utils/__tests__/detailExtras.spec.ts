@@ -8,7 +8,14 @@ import {
   toSprites,
 } from '@/services/pokeapi/pokemon.service'
 import { findGame } from '@/utils/games'
-import { heldItemsForGame, spriteTitle, spritesForGame } from '@/utils/detailExtras'
+import {
+  heldItemsForGame,
+  isStab,
+  sortLearnedMoves,
+  spriteTitle,
+  spritesForGame,
+} from '@/utils/detailExtras'
+import type { LearnedMove } from '@/utils/moves'
 
 const ref = (name: string) => ({ name, url: '' })
 const gen = (n: string) => ref(`generation-${n}`)
@@ -140,5 +147,43 @@ describe('itens segurados', () => {
       'Black / White',
     ])
     expect(light!.more).toBe(1)
+  })
+})
+
+describe('tabela de golpes da ficha', () => {
+  const move = (
+    slug: string,
+    power: number | null,
+    type = 'normal',
+    nameEs: string | null = null,
+  ) =>
+    ({
+      info: { slug, type, category: 'physical', power, accuracy: 100, pp: 10, nameEs },
+      level: 1,
+      method: 'machine',
+    }) as LearnedMove
+  const collator = new Intl.Collator('es', { sensitivity: 'base' })
+  const nameOf = (m: LearnedMove) => m.info.nameEs ?? m.info.slug
+  const slugs = (list: LearnedMove[]) => list.map((m) => m.info.slug)
+
+  it('STAB: golpe de ataque do tipo do Pokémon', () => {
+    expect(isStab(move('ember', 40, 'fire').info, ['fire', 'flying'])).toBe(true)
+    expect(isStab(move('tackle', 40).info, ['fire'])).toBe(false)
+    const status = { ...move('will-o-wisp', null, 'fire').info, category: 'status' as const }
+    expect(isStab(status, ['fire'])).toBe(false)
+  })
+
+  it('ordena por poder, com "—" no fim nos dois sentidos', () => {
+    const list = [move('a', 40), move('b', null), move('c', 90)]
+    expect(slugs(sortLearnedMoves(list, 'power', true, nameOf, collator))).toEqual(['c', 'a', 'b'])
+    expect(slugs(sortLearnedMoves(list, 'power', false, nameOf, collator))).toEqual(['a', 'c', 'b'])
+  })
+
+  it('ordena pelo nome exibido (espanhol), não pelo slug', () => {
+    const list = [move('tackle', 40, 'normal', 'Placaje'), move('bite', 60, 'dark', 'Mordisco')]
+    expect(slugs(sortLearnedMoves(list, 'name', false, nameOf, collator))).toEqual([
+      'bite',
+      'tackle',
+    ])
   })
 })
