@@ -120,6 +120,7 @@ const {
   species,
   chain,
   chainSummaries,
+  chainForms,
   megaLine,
   megaSummaries,
   encounters,
@@ -553,6 +554,7 @@ async function sendShareImage(): Promise<void> {
               v-else
               :chain="chain"
               :summaries="chainSummaries"
+              :forms="chainForms"
               :current-species-id="detail.speciesId"
               @select="goTo"
             />

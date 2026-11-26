@@ -2,7 +2,7 @@
 import { computed, watch } from 'vue'
 import { useDisplay } from 'vuetify'
 import { useI18n } from 'vue-i18n'
-import type { EvolutionChain, PokemonSummary } from '@/types/pokemon'
+import type { EvolutionChain, PokemonIndexEntry, PokemonSummary } from '@/types/pokemon'
 import { formatItemName } from '@/utils/evolution'
 import { useVocabularyStore } from '@/stores/vocabulary'
 import EvolutionBranch from '@/components/organisms/EvolutionBranch.vue'
@@ -11,6 +11,8 @@ const props = defineProps<{
   chain: EvolutionChain
   summaries: Record<number, PokemonSummary>
   currentSpeciesId: number
+  /** Espécie -> forma regional a mostrar no lugar dela (artwork, tipos e destino do toque). */
+  forms?: Record<number, PokemonIndexEntry>
 }>()
 
 const emit = defineEmits<{ select: [speciesId: number] }>()
@@ -49,6 +51,7 @@ const babyItem = computed(() => {
           <EvolutionBranch
             :node="chain.root"
             :summaries="summaries"
+            :forms="forms"
             :current-species-id="currentSpeciesId"
             :vertical="smAndDown"
             @select="emit('select', $event)"

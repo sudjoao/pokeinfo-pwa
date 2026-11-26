@@ -5,6 +5,7 @@ import { collectSpecies } from '@/services/pokeapi/evolution.service'
 import { usePokedexStore } from '@/stores/pokedex'
 import { usePokemonDetailStore } from '@/stores/pokemonDetail'
 import { buildDexList, type GameContext } from '@/utils/games'
+import type { FormRegion } from '@/data/games'
 import { describeError } from '@/utils/errors'
 import { megaLineOf } from '@/utils/megas'
 import { speciesIdOf } from '@/utils/forms'
@@ -47,7 +48,7 @@ export function usePokemonDetail(
   const species = shallowRef<PokemonSpecies | null>(null)
   const chain = shallowRef<EvolutionChain | null>(null)
   /** Resumos (tipos) das espécies da cadeia, indexados por id da espécie. */
-  const chainSummaries = ref<Record<number, PokemonSummary>>({})
+  const chainBaseSummaries = ref<Record<number, PokemonSummary>>({})
   /** Locais de encontro por jogo (null enquanto carrega ou em erro). */
   const encounters = shallowRef<PokemonEncounters | null>(null)
   /**
@@ -75,7 +76,7 @@ export function usePokemonDetail(
       const result = await store.ensureChain(chainId)
       const summaries = await pokedex.ensureSummaries(collectSpecies(result.root))
       if (current !== generation) return
-      chainSummaries.value = Object.fromEntries(summaries.map((s) => [s.id, s]))
+      chainBaseSummaries.value = Object.fromEntries(summaries.map((s) => [s.id, s]))
       chain.value = result
       chainStatus.value = 'ready'
     } catch {
@@ -126,7 +127,7 @@ export function usePokemonDetail(
     detail.value = null
     species.value = null
     chain.value = null
-    chainSummaries.value = {}
+    chainBaseSummaries.value = {}
     encounters.value = null
 
     const key = idOrName.value.trim().toLowerCase()
@@ -259,6 +260,41 @@ export function usePokemonDetail(
     )
   })
 
+  /**
+   * Região da forma aberta (Raichu de Alola) ou da Pokédex do jogo (Sword/Shield → Galar): a
+   * cadeia de evolução mostra as formas regionais dela, como a lista faz com os cards.
+   */
+  const FORM_REGION = /-(alola|galar|hisui|paldea)(?:-|$)/
+  const formRegion = computed<FormRegion | null>(() => {
+    const match = detail.value ? FORM_REGION.exec(detail.value.name) : null
+    if (match) return match[1] as FormRegion
+    return context.value?.dex.formRegion ?? null
+  })
+
+  /** Espécie da cadeia -> forma regional dela na região atual (só as que têm uma). */
+  const chainForms = computed<Record<number, PokemonIndexEntry>>(() => {
+    const region = formRegion.value
+    const current = chain.value
+    if (!region || !current) return {}
+    const forms = pokedex.regionalForms[region]
+    return Object.fromEntries(
+      collectSpecies(current.root).flatMap((species) => {
+        const form = forms.get(species.name)
+        return form ? [[species.id, form]] : []
+      }),
+    )
+  })
+
+  /** Resumos da cadeia já trocados pela forma regional (artwork e tipos dela), quando houver. */
+  const chainSummaries = computed<Record<number, PokemonSummary>>(() => {
+    const result = { ...chainBaseSummaries.value }
+    for (const [speciesId, form] of Object.entries(chainForms.value)) {
+      const types = pokedex.typesOf(form.id)
+      if (types) result[Number(speciesId)] = { id: form.id, name: form.name, types }
+    }
+    return result
+  })
+
   watch(idOrName, load, { immediate: true })
 
   /**
@@ -286,6 +322,7 @@ export function usePokemonDetail(
     species,
     chain,
     chainSummaries,
+    chainForms,
     megaLine,
     megaSummaries,
     encounters,

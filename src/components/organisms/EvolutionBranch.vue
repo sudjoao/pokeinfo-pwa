@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { EvolutionNode, PokemonSummary } from '@/types/pokemon'
+import type { EvolutionNode, PokemonIndexEntry, PokemonSummary } from '@/types/pokemon'
 import EvolutionStage from '@/components/molecules/EvolutionStage.vue'
 import EvolutionMethod from '@/components/molecules/EvolutionMethod.vue'
 
@@ -11,6 +11,8 @@ import EvolutionMethod from '@/components/molecules/EvolutionMethod.vue'
 const props = defineProps<{
   node: EvolutionNode
   summaries: Record<number, PokemonSummary>
+  /** Espécie -> forma regional no lugar dela (ver EvolutionChain). */
+  forms?: Record<number, PokemonIndexEntry>
   currentSpeciesId: number
   vertical?: boolean
   /** Profundidade na cadeia (0 = base), repassada ao estágio pra escalonar a entrada. */
@@ -30,9 +32,11 @@ const depth = props.depth ?? 0
       'evolution-branch--wide': !vertical && node.evolvesTo.length > 3,
     }"
   >
+    <!-- Com forma regional: o artwork, o nome e o destino são os da forma; o número, o da espécie. -->
     <EvolutionStage
-      :species-id="node.speciesId"
-      :name="node.name"
+      :species-id="forms?.[node.speciesId]?.id ?? node.speciesId"
+      :name="forms?.[node.speciesId]?.name ?? node.name"
+      :dex-number="node.speciesId"
       :summary="summaries[node.speciesId]"
       :current="node.speciesId === currentSpeciesId"
       :is-baby="node.isBaby"
@@ -46,6 +50,7 @@ const depth = props.depth ?? 0
         <EvolutionBranch
           :node="child"
           :summaries="summaries"
+          :forms="forms"
           :current-species-id="currentSpeciesId"
           :vertical="vertical"
           :depth="depth + 1"
