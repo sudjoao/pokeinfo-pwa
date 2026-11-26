@@ -2,17 +2,17 @@
 import {
   computed,
   defineAsyncComponent,
+  h,
   nextTick,
   ref,
   shallowRef,
   useTemplateRef,
   watch,
+  type Component,
 } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import {
-  mdiChevronLeft,
-  mdiChevronRight,
   mdiCompareHorizontal,
   mdiImageOutline,
   mdiLinkVariant,
@@ -48,6 +48,9 @@ import { useShortcut } from '@/composables/useShortcut'
 import { shareLink } from '@/composables/useShare'
 import DetailLayout from '@/components/templates/DetailLayout.vue'
 import AppNotice from '@/components/molecules/AppNotice.vue'
+import BackToTop from '@/components/atoms/BackToTop.vue'
+import CardSkeleton from '@/components/molecules/CardSkeleton.vue'
+import NeighborNav, { type NeighborLink } from '@/components/molecules/NeighborNav.vue'
 import EmptyState from '@/components/molecules/EmptyState.vue'
 import PokemonHero from '@/components/molecules/PokemonHero.vue'
 import AboutGrid from '@/components/molecules/AboutGrid.vue'
@@ -65,22 +68,42 @@ import MegaEvolutionCard from '@/components/organisms/MegaEvolutionCard.vue'
 import LocationList from '@/components/organisms/LocationList.vue'
 import PokemonDetailSkeleton from '@/components/organisms/PokemonDetailSkeleton.vue'
 
-// A tabela de golpes (~16 KB gz) vem num chunk próprio, em paralelo com o resto da tela.
-const MovesCard = defineAsyncComponent(() => import('@/components/organisms/MovesCard.vue'))
-const SpritesCard = defineAsyncComponent(() => import('@/components/organisms/SpritesCard.vue'))
-const HeldItemsCard = defineAsyncComponent(() => import('@/components/organisms/HeldItemsCard.vue'))
 const ShareImageDialog = defineAsyncComponent(
   () => import('@/components/organisms/ShareImageDialog.vue'),
 )
 const CaptureSheet = defineAsyncComponent(() => import('@/components/organisms/CaptureSheet.vue'))
-const GenerationChangesCard = defineAsyncComponent(
-  () => import('@/components/organisms/GenerationChangesCard.vue'),
-)
 
 const route = useRoute()
 const router = useRouter()
 const { t, locale } = useI18n()
 const { dexLabel } = useDexLabel()
+
+/**
+ * Cards carregados sob demanda (a tabela de golpes, ~16 KB gz, vem num chunk próprio, em paralelo
+ * com o resto da tela). Enquanto o chunk baixa, no lugar fica um card com o título e um esqueleto:
+ * sem ele a coluna ficava vazia e a página pulava quando o card chegava (e a lista de locais, que
+ * só é pedida quando chega perto da tela, parecia perto antes da hora).
+ */
+function asyncCard(loader: () => Promise<{ default: Component }>, titleKey: string) {
+  return defineAsyncComponent({
+    loader,
+    loadingComponent: () => h(CardSkeleton, { title: t(titleKey) }),
+    delay: 0,
+  })
+}
+const MovesCard = asyncCard(() => import('@/components/organisms/MovesCard.vue'), 'moves.title')
+const SpritesCard = asyncCard(
+  () => import('@/components/organisms/SpritesCard.vue'),
+  'sprites.title',
+)
+const HeldItemsCard = asyncCard(
+  () => import('@/components/organisms/HeldItemsCard.vue'),
+  'heldItems.title',
+)
+const GenerationChangesCard = asyncCard(
+  () => import('@/components/organisms/GenerationChangesCard.vue'),
+  'changes.title',
+)
 
 const idParam = computed(() => String(route.params.id ?? ''))
 /** Jogo selecionado na Home, preservado na URL (`?game=&dex=`). */
@@ -139,9 +162,13 @@ function neighborNumber(entry: NeighborEntry): string {
     : formatDexNumber(entry.dexNumber, 3)
 }
 
-function neighborName(entry: NeighborEntry): string {
-  return pokemonLabel(entry.id, entry.name)
+function neighborLink(entry: NeighborEntry | null): NeighborLink | null {
+  return entry
+    ? { id: entry.id, number: neighborNumber(entry), name: pokemonLabel(entry.id, entry.name) }
+    : null
 }
+const previousLink = computed(() => neighborLink(previous.value))
+const nextLink = computed(() => neighborLink(next.value))
 
 const cry = useCry()
 
@@ -412,30 +439,7 @@ async function sendShareImage(): Promise<void> {
       />
 
       <template v-else>
-        <nav
-          class="d-flex justify-space-between align-center mb-3"
-          :aria-label="t('detail.neighborsLabel')"
-        >
-          <v-btn
-            v-if="previous"
-            variant="text"
-            :prepend-icon="mdiChevronLeft"
-            class="text-none"
-            @click="goTo(previous.id)"
-          >
-            {{ neighborNumber(previous) }} {{ neighborName(previous) }}
-          </v-btn>
-          <span v-else />
-          <v-btn
-            v-if="next"
-            variant="text"
-            :append-icon="mdiChevronRight"
-            class="text-none"
-            @click="goTo(next.id)"
-          >
-            {{ neighborName(next) }} {{ neighborNumber(next) }}
-          </v-btn>
-        </nav>
+        <NeighborNav class="mb-3" :previous="previousLink" :next="nextLink" @select="goTo" />
 
         <v-row>
           <v-col cols="12" md="5">
@@ -454,6 +458,15 @@ async function sendShareImage(): Promise<void> {
               @play-cry="cry.listen(detail.id, detail.cryUrl ?? undefined)"
               @toggle-caught="toggleCaught"
               @toggle-shiny="shiny = !shiny"
+            />
+            <!-- As formas (regional, Gigantamax…) são navegação: ficam junto do hero, não no fim da página. -->
+            <VarietyChips
+              v-if="showVarieties && species"
+              class="mt-4"
+              :varieties="formVarieties"
+              :species-name="species.name"
+              :current-id="detail.id"
+              @select="goTo"
             />
             <TypeDefenses
               class="mt-4"
@@ -590,16 +603,16 @@ async function sendShareImage(): Promise<void> {
               @retry="retry"
             />
           </v-col>
-
-          <v-col v-if="showVarieties && species" cols="12">
-            <VarietyChips
-              :varieties="formVarieties"
-              :species-name="species.name"
-              :current-id="detail.id"
-              @select="goTo"
-            />
-          </v-col>
         </v-row>
+
+        <!-- A página é longa (golpes, locais): os vizinhos de novo no fim, para seguir sem voltar ao topo. -->
+        <NeighborNav
+          v-if="previousLink || nextLink"
+          class="mt-4"
+          :previous="previousLink"
+          :next="nextLink"
+          @select="goTo"
+        />
 
         <AbilitySheet
           v-model="ability.open.value"
@@ -638,6 +651,7 @@ async function sendShareImage(): Promise<void> {
         />
       </template>
     </div>
+    <BackToTop />
     <AppNotice :text="notice" :timeout="2500" @close="notice = null" />
     <AppNotice
       :text="undoHuntReset ? t('shiny.resetDone') : null"
