@@ -60,6 +60,7 @@ const NEUTRAL_KEYS: Partial<Record<string, readonly string[]>> = {
   team: [],
   moves: ['mode'],
   move: [],
+  items: [],
   item: [],
   speed: ['level', 'team'],
 }

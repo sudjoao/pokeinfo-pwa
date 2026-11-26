@@ -2,7 +2,9 @@
 import { computed, ref, shallowRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { mdiShareVariant } from '@mdi/js'
 import { GAMES } from '@/data/games'
+import { shareLink } from '@/composables/useShare'
 import type { BerryDetail, ItemDetail } from '@/services/pokeapi/item.service'
 import { useReferenceStore } from '@/stores/reference'
 import { usePokedexStore } from '@/stores/pokedex'
@@ -14,6 +16,7 @@ import DetailLayout from '@/components/templates/DetailLayout.vue'
 import InfoTile from '@/components/atoms/InfoTile.vue'
 import TypeChip from '@/components/atoms/TypeChip.vue'
 import PokemonButtonGrid from '@/components/molecules/PokemonButtonGrid.vue'
+import AppNotice from '@/components/molecules/AppNotice.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -39,27 +42,51 @@ const gameItems = computed(() => [
 const detail = shallowRef<ItemDetail | null>(null)
 const berry = shallowRef<BerryDetail | null>(null)
 const status = ref<'loading' | 'ready' | 'error'>('loading')
+/** Dados de berry (requisição própria); 'idle' quando o item não é berry. */
+const berryStatus = ref<'idle' | 'loading' | 'ready' | 'error'>('idle')
+
+async function loadBerry(): Promise<void> {
+  const current = slug.value
+  if (!entry.value?.berry) {
+    berryStatus.value = 'idle'
+    return
+  }
+  berryStatus.value = 'loading'
+  try {
+    const result = await reference.ensureBerry(current)
+    if (current !== slug.value) return
+    berry.value = result
+    berryStatus.value = 'ready'
+  } catch {
+    if (current === slug.value) berryStatus.value = 'error'
+  }
+}
 
 async function load(): Promise<void> {
   const current = slug.value
   status.value = 'loading'
   berry.value = null
+  berryStatus.value = 'idle'
   try {
     const result = await reference.ensureItem(current)
     if (current !== slug.value) return
     detail.value = result
     status.value = 'ready'
-    if (entry.value?.berry) {
-      reference
-        .ensureBerry(current)
-        .then((b) => current === slug.value && (berry.value = b))
-        .catch(() => {})
-    }
+    void loadBerry()
   } catch {
     if (current === slug.value) status.value = 'error'
   }
 }
 watch(slug, load, { immediate: true })
+
+const notice = ref<string | null>(null)
+
+function share(): void {
+  shareLink(title.value, window.location.href).then((result) => {
+    if (result === 'copied') notice.value = t('common.linkCopied')
+    else if (result === 'failed') notice.value = t('common.shareFailed')
+  })
+}
 
 const effect = computed(() => {
   const d = detail.value
@@ -111,6 +138,9 @@ function goBack(): void {
 
 <template>
   <DetailLayout :title="title" @back="goBack">
+    <template #actions>
+      <v-btn v-if="entry" :icon="mdiShareVariant" :aria-label="t('common.share')" @click="share" />
+    </template>
     <div class="d-flex flex-column ga-4">
       <v-card v-if="!entry" class="pa-4">
         <p class="mb-3">{{ t('itemPage.notFound') }}</p>
@@ -173,7 +203,16 @@ function goBack(): void {
           </v-card-text>
         </v-card>
 
-        <v-card v-if="berry">
+        <v-card v-if="berryStatus === 'error'">
+          <v-card-title tag="h2" class="text-title-medium">{{ t('itemPage.berry') }}</v-card-title>
+          <v-card-text class="d-flex flex-column align-start ga-2">
+            <span>{{ t('itemPage.berryError') }}</span>
+            <v-btn color="primary" variant="tonal" size="small" @click="loadBerry">
+              {{ t('common.retry') }}
+            </v-btn>
+          </v-card-text>
+        </v-card>
+        <v-card v-else-if="berry">
           <v-card-title tag="h2" class="text-title-medium">{{ t('itemPage.berry') }}</v-card-title>
           <v-card-text>
             <div class="item-page__tiles">
@@ -229,6 +268,7 @@ function goBack(): void {
         </v-card>
       </template>
     </div>
+    <AppNotice :text="notice" :timeout="2500" @close="notice = null" />
   </DetailLayout>
 </template>
 

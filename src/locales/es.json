@@ -900,7 +900,8 @@
       "baking-only": "Solo repostería",
       "effort-drop": "Reduce EV",
       "other": "Otras bayas"
-    }
+    },
+    "emptyTitle": "Ningún objeto encontrado"
   },
   "itemPage": {
     "notFound": "Objeto no encontrado.",
@@ -928,7 +929,8 @@
     "naturalGiftPower": "potencia {n}",
     "flavors": "Sabores",
     "heldBy": "Lo llevan en estado salvaje",
-    "heldByNone": "La PokéAPI no registra Pokémon salvajes con este objeto en este juego."
+    "heldByNone": "La PokéAPI no registra Pokémon salvajes con este objeto en este juego.",
+    "berryError": "No se pudieron cargar los datos de la baya."
   },
   "flavor": {
     "spicy": "picante",

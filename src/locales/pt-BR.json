@@ -900,7 +900,8 @@
       "baking-only": "Só para culinária",
       "effort-drop": "Reduz EVs",
       "other": "Outras berries"
-    }
+    },
+    "emptyTitle": "Nenhum item encontrado"
   },
   "itemPage": {
     "notFound": "Item não encontrado.",
@@ -928,7 +929,8 @@
     "naturalGiftPower": "poder {n}",
     "flavors": "Sabores",
     "heldBy": "Quem segura na natureza",
-    "heldByNone": "A PokéAPI não lista Pokémon selvagens com este item neste jogo."
+    "heldByNone": "A PokéAPI não lista Pokémon selvagens com este item neste jogo.",
+    "berryError": "Não foi possível carregar os dados da berry."
   },
   "flavor": {
     "spicy": "picante",

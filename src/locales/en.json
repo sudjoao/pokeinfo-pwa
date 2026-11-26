@@ -900,7 +900,8 @@
       "baking-only": "Baking only",
       "effort-drop": "EV drop",
       "other": "Other berries"
-    }
+    },
+    "emptyTitle": "No items found"
   },
   "itemPage": {
     "notFound": "Item not found.",
@@ -928,7 +929,8 @@
     "naturalGiftPower": "power {n}",
     "flavors": "Flavors",
     "heldBy": "Held by wild Pokémon",
-    "heldByNone": "PokéAPI lists no wild Pokémon holding this item in this game."
+    "heldByNone": "PokéAPI lists no wild Pokémon holding this item in this game.",
+    "berryError": "Could not load the berry data."
   },
   "flavor": {
     "spicy": "spicy",
