@@ -18,6 +18,7 @@ import {
 } from '@/utils/natures'
 import DetailLayout from '@/components/templates/DetailLayout.vue'
 import PokemonAvatar from '@/components/atoms/PokemonAvatar.vue'
+import EmptyState from '@/components/molecules/EmptyState.vue'
 
 type Tab = 'natures' | 'iv'
 type Mode = 'iv' | 'stats'

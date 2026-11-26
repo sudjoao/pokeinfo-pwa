@@ -15,6 +15,7 @@ import { nameMatches, normalizeSearch } from '@/utils/search'
 import DetailLayout from '@/components/templates/DetailLayout.vue'
 import SearchField from '@/components/molecules/SearchField.vue'
 import PokemonAvatar from '@/components/atoms/PokemonAvatar.vue'
+import EmptyState from '@/components/molecules/EmptyState.vue'
 
 const route = useRoute()
 const router = useRouter()
