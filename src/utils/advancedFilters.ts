@@ -6,8 +6,12 @@ import {
   type PokemonType,
   type StatName,
 } from '@/types/pokemon'
+import { pokemonLabel } from '@/utils/megas'
 import { isPokemonType } from '@/utils/pokemon'
 import { attackMultiplier, typesInGeneration } from '@/utils/typeChart'
+
+/** Ordem alfabética sem distinguir acento ou caixa; números em ordem numérica. */
+const NAME_COLLATOR = new Intl.Collator(undefined, { sensitivity: 'base', numeric: true })
 
 export const SORT_KEYS = ['number', 'name', 'total', ...STAT_NAMES, 'height', 'weight'] as const
 export type SortKey = (typeof SORT_KEYS)[number]
@@ -185,7 +189,10 @@ export function applyAdvanced<T extends PokemonIndexEntry>(
 
   const direction = filters.desc ? -1 : 1
   if (filters.sort === 'name') {
-    result.sort((a, b) => a.name.localeCompare(b.name) * direction)
+    // Pelo nome exibido ("Mr. Mime" e não "mr-mime"), com um collator só: localeCompare por par
+    // criava um por comparação (~14 mil numa lista de 1.350).
+    const label = new Map(result.map((entry) => [entry.id, pokemonLabel(entry.id, entry.name)]))
+    result.sort((a, b) => NAME_COLLATOR.compare(label.get(a.id)!, label.get(b.id)!) * direction)
   } else if (filters.sort !== 'number' && rows) {
     // Empate: mantém a ordem da Pokédex (sort é estável).
     result.sort((a, b) => {

@@ -49,6 +49,7 @@ import PokemonGrid from '@/components/organisms/PokemonGrid.vue'
 import PokemonBoxes, { type BoxEntry } from '@/components/organisms/PokemonBoxes.vue'
 import AppNotice from '@/components/molecules/AppNotice.vue'
 import BackToTop from '@/components/atoms/BackToTop.vue'
+import TabSkeleton from '@/components/molecules/TabSkeleton.vue'
 import GamePickerSheet from '@/components/organisms/GamePickerSheet.vue'
 import TypePickerSheet from '@/components/organisms/TypePickerSheet.vue'
 import VersionPickerSheet from '@/components/organisms/VersionPickerSheet.vue'
@@ -58,9 +59,22 @@ import { readStorage, writeStorage } from '@/utils/storage'
 
 // Só usados ao abrir as abas "Rotas" (com ~170 KB de dados), "Líderes" e "Time" e o sheet de filtros
 // (VSelect, VSlider…): ficam fora do carregamento inicial.
-const RouteList = defineAsyncComponent(() => import('@/components/organisms/RouteList.vue'))
-const LeagueList = defineAsyncComponent(() => import('@/components/organisms/LeagueList.vue'))
-const TeamTab = defineAsyncComponent(() => import('@/components/organisms/TeamTab.vue'))
+// Enquanto o chunk da aba baixa (só na primeira abertura), um esqueleto no lugar do vazio.
+const RouteList = defineAsyncComponent({
+  loader: () => import('@/components/organisms/RouteList.vue'),
+  loadingComponent: TabSkeleton,
+  delay: 150,
+})
+const LeagueList = defineAsyncComponent({
+  loader: () => import('@/components/organisms/LeagueList.vue'),
+  loadingComponent: TabSkeleton,
+  delay: 150,
+})
+const TeamTab = defineAsyncComponent({
+  loader: () => import('@/components/organisms/TeamTab.vue'),
+  loadingComponent: TabSkeleton,
+  delay: 150,
+})
 const AdvancedFilterSheet = defineAsyncComponent(
   () => import('@/components/organisms/AdvancedFilterSheet.vue'),
 )
@@ -587,6 +601,26 @@ onActivated(() => {
       />
       <ResultsAnnouncer :count="filtered.length" :ready="!sourceLoading && !sourceError" />
 
+      <!-- Com busca ou filtro, a contagem fica visível e dá para limpar sem chegar ao estado vazio. -->
+      <div
+        v-if="hasFilters && !sourceLoading && !sourceError && !isEmpty"
+        class="d-flex align-center flex-wrap ga-2 mb-2 text-body-small"
+      >
+        <span class="opacity-70" aria-hidden="true">{{
+          t('home.resultsCount', filtered.length)
+        }}</span>
+        <v-btn
+          variant="text"
+          size="small"
+          density="comfortable"
+          :prepend-icon="mdiFilterRemoveOutline"
+          class="text-none"
+          @click="clearFilters"
+        >
+          {{ t('home.clearFilters') }}
+        </v-btn>
+      </div>
+
       <div class="d-flex align-center flex-wrap ga-2 mb-2">
         <v-btn
           variant="tonal"
@@ -801,6 +835,7 @@ onActivated(() => {
       v-model="advancedOpen"
       :filters="advanced"
       :abilities="pokemonData.table.value?.abilities ?? null"
+      :count="sourceLoading || sourceError ? undefined : filtered.length"
       @update="setAdvanced"
       @clear="clearAdvanced"
     />

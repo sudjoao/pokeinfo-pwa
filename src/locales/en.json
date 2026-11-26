@@ -647,7 +647,8 @@
       "mythical": "Mythical",
       "baby": "Baby",
       "regular": "Regular"
-    }
+    },
+    "show": "Show {n}"
   },
   "favorites": {
     "title": "Favorites",

@@ -534,7 +534,11 @@ export function usePokemonList() {
     try {
       const summaries = await store.ensureSummaries(batch)
       if (current !== generation) return
-      items.value = toListItems(batch, summaries, game.value?.slug)
+      // Os cards que continuam na lista mantêm o mesmo objeto (o v-memo da grade não os refaz);
+      // só os que entraram ganham um item novo.
+      const previous = new Map(items.value.map((item) => [item.id, item]))
+      const fresh = toListItems(batch, summaries, game.value?.slug)
+      items.value = fresh.map((item) => previous.get(item.id) ?? item)
       if (status.value !== 'loading') status.value = hasMore.value ? 'idle' : 'done'
     } catch {
       // Os resumos já estavam em memória; se algo falhar, a lista fica como estava.

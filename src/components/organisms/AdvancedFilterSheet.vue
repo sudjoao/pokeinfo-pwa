@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { BATTLE_TYPES } from '@/data/typeChart'
 import {
@@ -17,6 +17,8 @@ const props = defineProps<{
   filters: AdvancedFilters
   /** [slug, nome em espanhol] de todas as habilidades; null enquanto a tabela não carregou. */
   abilities: readonly (readonly [string, string])[] | null
+  /** Quantos Pokémon passam pelos filtros atuais (o botão de fechar mostra o número). */
+  count?: number
 }>()
 
 const open = defineModel<boolean>({ required: true })
@@ -49,6 +51,21 @@ const abilityItems = computed(() =>
     }))
     .sort((a, b) => a.title.localeCompare(b.title)),
 )
+
+/**
+ * O slider só aplica ao soltar: cada passo reiniciava a lista inteira (e um `replaceState` na URL,
+ * que o Safari limita a ~100 por minuto). O rótulo acompanha o arrasto por esta cópia local.
+ */
+const minTotal = ref(props.filters.minTotal ?? 0)
+watch(
+  () => props.filters.minTotal,
+  (value) => (minTotal.value = value ?? 0),
+)
+
+function applyMinTotal(value: number): void {
+  if ((value > 0 ? value : null) !== props.filters.minTotal)
+    set('minTotal', value > 0 ? value : null)
+}
 
 /** Ao escolher um stat/total, o padrão útil é do maior para o menor. */
 function setSort(key: SortKey): void {
@@ -178,24 +195,26 @@ function setSort(key: SortKey): void {
 
         <div>
           <div id="advanced-min-total" class="text-label-large">
-            {{ t('filters.minTotal', { n: filters.minTotal ?? 0 }) }}
+            {{ t('filters.minTotal', { n: minTotal }) }}
           </div>
           <v-slider
-            :model-value="filters.minTotal ?? 0"
+            v-model="minTotal"
             :min="0"
             :max="720"
             :step="10"
             color="primary"
             hide-details
             aria-labelledby="advanced-min-total"
-            @update:model-value="set('minTotal', $event > 0 ? $event : null)"
+            @end="applyMinTotal"
           />
         </div>
       </v-card-text>
       <v-card-actions>
         <v-btn @click="emit('clear')">{{ t('common.clear') }}</v-btn>
         <v-spacer />
-        <v-btn color="primary" variant="flat" @click="open = false">{{ t('common.done') }}</v-btn>
+        <v-btn color="primary" variant="flat" @click="open = false">
+          {{ count === undefined ? t('common.done') : t('filters.show', count) }}
+        </v-btn>
       </v-card-actions>
     </v-card>
   </v-bottom-sheet>

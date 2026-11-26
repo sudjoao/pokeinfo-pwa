@@ -92,3 +92,20 @@ describe('applyAdvanced', () => {
     expect(ids({ desc: true })[0]).toBe(172)
   })
 })
+
+describe('ordenação por nome', () => {
+  it('usa o nome exibido, sem distinguir acento ou caixa', () => {
+    const entries = [
+      { id: 122, name: 'mr-mime' },
+      { id: 439, name: 'mime-jr' },
+      { id: 866, name: 'mr-rime' },
+      { id: 669, name: 'flabebe' },
+      { id: 29, name: 'nidoran-f' },
+    ]
+    const sorted = applyAdvanced(entries, filters({ sort: 'name' }), {
+      ...context,
+      typesOf: () => undefined,
+    })
+    expect(sorted.map((entry) => entry.id)).toEqual([669, 439, 122, 866, 29])
+  })
+})
