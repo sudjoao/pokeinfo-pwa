@@ -7,6 +7,8 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 
 ## [Não lançado]
 
+## [1.18.0] - 2026-11-26
+
 ### Corrigido
 
 - Velocidade, Naturezas e IVs e Quiz: o erro com "Tentar novamente" (quando a tabela de Pokémon
@@ -78,6 +80,14 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
   jogo) e mostra altura e peso também em pés/polegadas e libras.
 - Ficha: chave "Fêmea" nos sprites das espécies com diferença visual entre os gêneros.
 - Ficha: botão "Voltar ao topo" e os botões anterior/próximo repetidos no fim da página.
+- Ficha: atalhos para as seções (Fraquezas, Sobre, Stats, Evolução, Golpes, Onde encontrar) numa
+  linha de chips grudada sob o cabeçalho; cada chip é um link `#seção` que dá para compartilhar, e
+  a seção visível fica marcada.
+- Pokédex: a ordenação ficou visível na barra de Cards/Caixas, com um botão que diz a ordem atual
+  e um menu para trocar o critério ou o sentido (antes só dentro de "Filtros", contando como um
+  filtro). "Limpar filtros" passa a preservar a ordenação.
+- iPhone: o app instalado abre com uma tela de abertura (clara ou escura, conforme o sistema) em
+  vez de uma tela em branco até o app montar.
 
 ### Alterado
 
@@ -94,6 +104,9 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
   são re-renderizados.
 - Golpes e Itens: a lista não é reordenada a cada tecla (a ordem por nome e os nomes normalizados
   ficam guardados por idioma).
+- Desempenho da Pokédex em listas longas: os cards a mais de duas telas de distância saem da
+  página e viram um espaçador da mesma altura, voltando ao se aproximar (a Nacional rolada até o
+  fim tinha mais de 1.300 cards montados; agora ficam cerca de 50).
 - Caches de imagens e fichas do service worker são apagados sozinhos se o armazenamento estourar
   (cota pequena no iOS), em vez de a gravação falhar e ameaçar o precache e os pacotes offline.
 - Ficha: os cards carregados sob demanda (golpes, sprites, itens segurados, mudanças entre
@@ -776,6 +789,7 @@ Primeira versão estável da Pokédex em formato de PWA, consumindo a [PokéAPI]
 - Os gritos vêm só em `.ogg`; em navegadores sem suporte o botão de som não aparece.
 
 [Não lançado]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.17.0...HEAD
+[1.18.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.17.0...v1.18.0
 [1.17.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.16.0...v1.17.0
 [1.16.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.15.0...v1.16.0
 [1.15.0]: https://github.com/sudjoao/pokeinfo-pwa/compare/v1.14.1...v1.15.0
