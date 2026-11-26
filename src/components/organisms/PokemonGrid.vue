@@ -1,11 +1,20 @@
 <script setup lang="ts">
-import { nextTick, ref, watch } from 'vue'
+import {
+  computed,
+  nextTick,
+  onActivated,
+  onBeforeUnmount,
+  onDeactivated,
+  ref,
+  useTemplateRef,
+  watch,
+} from 'vue'
 import { mdiRefresh } from '@mdi/js'
 import { useI18n } from 'vue-i18n'
 import { announce } from '@/composables/useAnnouncer'
 import type { RouteLocationRaw } from 'vue-router'
 import type { PokemonListItem } from '@/types/pokemon'
-import PokemonCard from '@/components/molecules/PokemonCard.vue'
+import PokemonGridChunk from '@/components/organisms/PokemonGridChunk.vue'
 import PokemonCardSkeleton from '@/components/molecules/PokemonCardSkeleton.vue'
 
 export type GridStatus = 'idle' | 'loading' | 'error' | 'done'
@@ -35,10 +44,6 @@ const emit = defineEmits<{
   select: [pokemon: PokemonListItem]
   toggleCaught: [speciesId: number]
 }>()
-
-function caughtOf(pokemon: PokemonListItem): boolean | undefined {
-  return props.caughtIds?.has(pokemon.speciesId ?? pokemon.id)
-}
 
 const { t } = useI18n()
 
@@ -83,45 +88,135 @@ const PRIORITY_CARDS = 4
 
 // Começa a carregar o próximo lote ~1,5 telas antes do fim da lista.
 const intersectOptions = { rootMargin: '0px 0px 1200px 0px' }
+
+/*
+ * Virtualização por blocos: a lista é dividida em blocos de CHUNK cards (múltiplo de 2, 3, 4 e 6
+ * colunas: só o último bloco pode ter linha incompleta). Um bloco que fica a mais de ~2 telas da
+ * área visível vira um espaçador com a altura que ele media, e volta a renderizar os cards ao se
+ * aproximar: a Nacional rolada até o fim tinha mais de mil cards no DOM. A altura é medida (os
+ * cards variam: nome em duas linhas, selo de exclusivo), então a rolagem não pula.
+ */
+const CHUNK = 24
+const CHUNK_MARGIN = '2000px 0px'
+
+const root = useTemplateRef<HTMLElement>('root')
+const chunks = computed(() => {
+  const list: PokemonListItem[][] = []
+  for (let i = 0; i < props.items.length; i += CHUNK) list.push(props.items.slice(i, i + CHUNK))
+  return list
+})
+/** Altura medida dos blocos que estão longe da tela (só eles têm entrada). */
+const collapsed = ref<Record<number, number>>({})
+let observer: IntersectionObserver | null = null
+const observed = new Set<Element>()
+
+function onChunks(entries: IntersectionObserverEntry[]): void {
+  const next = { ...collapsed.value }
+  let changed = false
+  for (const entry of entries) {
+    const index = Number((entry.target as HTMLElement).dataset.chunk)
+    if (!Number.isFinite(index)) continue
+    if (entry.isIntersecting) {
+      if (index in next) {
+        delete next[index]
+        changed = true
+      }
+    } else if (!(index in next)) {
+      // Sem altura ainda (acabou de montar fora da tela): não dá para trocar por espaçador.
+      const height = (entry.target as HTMLElement).offsetHeight
+      if (height > 0) {
+        next[index] = height
+        changed = true
+      }
+    }
+  }
+  if (changed) collapsed.value = next
+}
+
+function observeChunks(): void {
+  if (!root.value) return
+  if (!observer) {
+    if (typeof IntersectionObserver === 'undefined') return
+    observer = new IntersectionObserver(onChunks, { rootMargin: CHUNK_MARGIN })
+  }
+  for (const el of root.value.querySelectorAll('[data-chunk]')) {
+    if (observed.has(el)) continue
+    observed.add(el)
+    observer.observe(el)
+  }
+}
+
+function stopObserving(): void {
+  observer?.disconnect()
+  observer = null
+  observed.clear()
+}
+
+// Os blocos existem só depois do primeiro lote; a cada bloco novo, entra na observação.
+watch(
+  () => chunks.value.length,
+  () => nextTick(observeChunks),
+  { immediate: true },
+)
+
+// Outra largura (girar o aparelho) muda a altura dos blocos: expande todos e mede de novo.
+let lastWidth = typeof window === 'undefined' ? 0 : window.innerWidth
+function onResize(): void {
+  if (window.innerWidth === lastWidth) return
+  lastWidth = window.innerWidth
+  collapsed.value = {}
+}
+
+// A Home fica em KeepAlive: escondida, não observa nem escuta a janela.
+onActivated(() => {
+  window.addEventListener('resize', onResize)
+  nextTick(observeChunks)
+})
+onDeactivated(() => {
+  window.removeEventListener('resize', onResize)
+  stopObserving()
+})
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', onResize)
+  stopObserving()
+})
 </script>
 
 <template>
-  <div class="pokemon-grid">
+  <div ref="root" class="pokemon-grid">
     <!--
       Grade em CSS, sem v-row/v-col: a lista passa de mil células, e cada VCol é uma instância de
       componente a mais por card. Os breakpoints são os do Vuetify (sm 600, md 960, lg 1280).
       v-memo: marcar um capturado (ou chegar um lote novo) re-renderiza a grade; sem ele o Vue
       recriaria os vnodes de todas as centenas de células para comparar. Só a célula cujo estado
       mudou é refeita. `linkTo` é estável; o card calcula o destino (e reage ao jogo) sozinho.
+      Um bloco longe da tela é só um espaçador com a altura medida (ver CHUNK no script).
     -->
-    <div class="pokemon-grid__cells" :class="{ 'pokemon-grid__cells--wide': wide }">
-      <div
-        v-for="(pokemon, index) in items"
-        :key="pokemon.id"
-        v-memo="[
-          pokemon,
-          caughtOf(pokemon),
-          selectedIds?.has(pokemon.id),
-          selectable,
-          wide,
-          linkTo,
-          shiny,
-          index,
-        ]"
-        class="pokemon-grid__cell"
-      >
-        <PokemonCard
-          :pokemon="pokemon"
-          :caught="caughtOf(pokemon)"
-          :selected="selectedIds?.has(pokemon.id)"
-          :selectable="selectable"
-          :link-to="linkTo"
-          :shiny="shiny"
-          :priority="index < PRIORITY_CARDS"
-          @select="emit('select', $event)"
-          @toggle-caught="emit('toggleCaught', $event)"
-        />
-      </div>
+    <div
+      v-for="(chunk, chunkIndex) in chunks"
+      :key="chunkIndex"
+      :data-chunk="chunkIndex"
+      class="pokemon-grid__cells"
+      :class="{
+        'pokemon-grid__cells--wide': wide,
+        'pokemon-grid__cells--spacer': chunkIndex in collapsed,
+      }"
+      :style="chunkIndex in collapsed ? { height: `${collapsed[chunkIndex]}px` } : undefined"
+      :aria-hidden="chunkIndex in collapsed ? 'true' : undefined"
+    >
+      <PokemonGridChunk
+        v-if="!(chunkIndex in collapsed)"
+        :items="chunk"
+        :caught-ids="caughtIds"
+        :selected-ids="selectedIds"
+        :selectable="selectable"
+        :wide="wide"
+        :link-to="linkTo"
+        :shiny="shiny"
+        :priority-count="chunkIndex === 0 ? PRIORITY_CARDS : 0"
+        @select="emit('select', $event)"
+        @toggle-caught="emit('toggleCaught', $event)"
+      />
     </div>
 
     <div
@@ -188,11 +283,20 @@ const intersectOptions = { rootMargin: '0px 0px 1200px 0px' }
   }
 }
 
+/* Blocos seguidos com o mesmo espaçamento das linhas; o espaçador mantém a altura do bloco. */
+.pokemon-grid__cells + .pokemon-grid__cells {
+  margin-top: 8px;
+}
+
+.pokemon-grid__cells--spacer {
+  display: block;
+}
+
 /*
  * O navegador pula layout e pintura dos cards fora da tela (a lista inteira pode passar de mil
  * cards ao rolar até o fim); `auto` lembra a altura real depois do primeiro desenho.
  */
-.pokemon-grid__cell {
+.pokemon-grid :deep(.pokemon-grid__cell) {
   content-visibility: auto;
   contain-intrinsic-size: auto 280px;
 }
