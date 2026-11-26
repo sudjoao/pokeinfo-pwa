@@ -13,7 +13,9 @@
     "statsTitle": "Naturezas e IVs · PokeInfo",
     "speedTitle": "Velocidade · PokeInfo",
     "dailyTitle": "Pokémon do dia · PokeInfo",
-    "signInTitle": "Entrar · PokeInfo"
+    "signInTitle": "Entrar · PokeInfo",
+    "updateAvailable": "Nova versão do PokeInfo disponível.",
+    "update": "Atualizar"
   },
   "common": {
     "copied": "Copiado.",
@@ -1118,6 +1120,14 @@
     "cleared": "Dados offline apagados.",
     "clearConfirm": "Tocar de novo para apagar",
     "progressLabel": "Progresso do download"
+  },
+  "install": {
+    "title": "Instalar app",
+    "menu": "Instalar app",
+    "iosIntro": "No iPhone, o PokeInfo é instalado pelo Safari:",
+    "iosStep1": "Toque em Compartilhar (o quadrado com a seta) na barra do Safari.",
+    "iosStep2": "Escolha \"Adicionar à Tela de Início\" e confirme.",
+    "failed": "Não foi possível abrir a instalação."
   },
   "account": {
     "title": "Conta",

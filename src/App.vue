@@ -19,6 +19,8 @@ import { useAccountStore, type FirstSyncChoice } from '@/stores/account'
 import { storeToRefs } from 'pinia'
 import { nativePageTransition } from '@/router/viewTransition'
 import { savedGame } from '@/utils/lastGame'
+import { useServiceWorker } from '@/composables/useServiceWorker'
+import { useInstallPrompt } from '@/composables/useInstallPrompt'
 import { buildDexList, findGame, gameContextQuery, resolveDex } from '@/utils/games'
 import { usePokedexStore } from '@/stores/pokedex'
 
@@ -44,6 +46,7 @@ const AccountSheet = defineAsyncComponent(() => import('@/components/organisms/A
 const FirstSyncDialog = defineAsyncComponent(
   () => import('@/components/organisms/FirstSyncDialog.vue'),
 )
+const InstallSheet = defineAsyncComponent(() => import('@/components/organisms/InstallSheet.vue'))
 
 const { t } = useI18n()
 const route = useRoute()
@@ -124,6 +127,20 @@ function chooseFirstSync(choice: FirstSyncChoice): void {
 
 const notice = ref<string | null>(null)
 const canShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function'
+
+// Versão nova instalada pelo service worker: só assume quando a pessoa toca em "Atualizar".
+const { needRefresh, applyUpdate } = useServiceWorker()
+
+// "Instalar app" no menu: prompt nativo (Chrome/Android/desktop) ou as instruções do iPhone.
+const install = useInstallPrompt()
+const installOpen = ref(false)
+const installMounted = useMountOnOpen(installOpen)
+function openInstall(): void {
+  if (install.mode.value === 'ios') installOpen.value = true
+  else if (install.mode.value === 'prompt') {
+    install.promptInstall().catch(() => (notice.value = t('install.failed')))
+  }
+}
 
 /**
  * "Surpreenda-me": um Pokémon da Pokédex do jogo salvo (a ficha abre com o número regional, a
@@ -235,6 +252,8 @@ function skipToContent(): void {
       @open-backup="menu.backupOpen.value = true"
       @open-offline="menu.offlineOpen.value = true"
       @open-about="menu.aboutOpen.value = true"
+      :install="install.mode.value"
+      @install="openInstall"
       @random="openRandom"
     />
     <!--
@@ -317,6 +336,14 @@ function skipToContent(): void {
       @close="offlineOpen = false"
     />
     <AppNotice :text="notice" @close="notice = null" />
+    <AppNotice
+      :text="needRefresh ? t('app.updateAvailable') : null"
+      :timeout="-1"
+      :action-label="t('app.update')"
+      @action="applyUpdate"
+      @close="needRefresh = false"
+    />
+    <InstallSheet v-if="installMounted" v-model="installOpen" />
     <CopyTextDialog v-model="copyFallback" />
     <p class="d-sr-only" aria-live="polite" aria-atomic="true">{{ announcement }}</p>
   </v-app>

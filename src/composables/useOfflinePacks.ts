@@ -46,7 +46,9 @@ async function refreshStatus(): Promise<void> {
 async function store(cache: Cache, url: string, signal: AbortSignal): Promise<Response | null> {
   const cached = await cache.match(url)
   if (cached) return cached
-  const response = await fetch(url, { signal })
+  // `reload`: o service worker vê o modo e não guarda a resposta também no cache da regra
+  // (ver `skipPackDownloads` em vite.config.ts); o pacote é o único dono dela.
+  const response = await fetch(url, { signal, cache: 'reload' })
   if (!response.ok) throw new Error(`HTTP ${response.status}`)
   await cache.put(url, response.clone())
   return response

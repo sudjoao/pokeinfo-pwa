@@ -17,11 +17,17 @@ import {
   mdiSpeedometer,
   mdiCalendarStar,
   mdiCloudDownloadOutline,
+  mdiCellphoneArrowDown,
 } from '@mdi/js'
 import { useRoute, type RouteLocationNormalizedLoaded, type RouteLocationRaw } from 'vue-router'
 import type { ThemePreference } from '@/composables/useThemePreference'
+import type { InstallMode } from '@/composables/useInstallPrompt'
 
-defineProps<{ theme: ThemePreference }>()
+defineProps<{
+  theme: ThemePreference
+  /** Como dá para instalar o app (null esconde o item: já instalado ou navegador sem suporte). */
+  install?: InstallMode
+}>()
 
 const open = defineModel<boolean>({ required: true })
 
@@ -32,6 +38,7 @@ const emit = defineEmits<{
   openOffline: []
   openAbout: []
   random: []
+  install: []
 }>()
 
 const { t } = useI18n()
@@ -147,6 +154,15 @@ function then(action: () => void): void {
     </div>
     <!-- Itens de ação: botões num grupo (como listitem o leitor não diz que são clicáveis). -->
     <v-list nav density="comfortable" role="group">
+      <v-list-item
+        v-if="install"
+        :prepend-icon="mdiCellphoneArrowDown"
+        :title="t('install.menu')"
+        role="button"
+        :aria-haspopup="install === 'ios' ? 'dialog' : undefined"
+        rounded="lg"
+        @click="then(() => emit('install'))"
+      />
       <v-list-item
         :prepend-icon="mdiDiceMultipleOutline"
         :title="t('menu.random')"

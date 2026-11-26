@@ -8,12 +8,42 @@
 
     <title>PokeInfo</title>
 
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="PokeInfo" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
-    <meta name="theme-color" content="#dc2626" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#dc2626" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#ef4444" />
+    <meta name="color-scheme" content="light dark" />
+
+    <!--
+      Fundo da página antes de o JS montar o app (o CSS do tema só chega com ele): sem isto quem
+      usa o tema escuro via um flash branco a cada abertura. O script lê o tema salvo no aparelho
+      (a mesma chave de useThemePreference.ts); sem escolha salva, vale o do sistema.
+    -->
+    <style>
+      html {
+        background: #f6f6f8;
+      }
+      html.theme-dark {
+        background: #121212;
+      }
+      @media (prefers-color-scheme: dark) {
+        html:not(.theme-light) {
+          background: #121212;
+        }
+      }
+    </style>
+    <script>
+      try {
+        var theme = JSON.parse(localStorage.getItem('pokeinfo:theme:v1'))
+        if (theme === 'dark' || theme === 'light') {
+          document.documentElement.classList.add('theme-' + theme)
+        }
+      } catch (e) {}
+    </script>
 
     <!--
       As primeiras requisições (índice da PokéAPI e artwork pelo wsrv.nl) só saem depois do JS

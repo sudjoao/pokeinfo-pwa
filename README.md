@@ -329,9 +329,9 @@ O objetivo é funcionar offline sem inflar o armazenamento do usuário:
 | `localStorage` | capturados por jogo (`pokeinfo:caught:v1`), um bitset em base64 por jogo | ~170 bytes por jogo (~4 KB no total) |
 | Service worker `pokeapi-index` | resposta do índice (conferência semanal) | 3 entradas, 7 dias |
 | Service worker `pokeapi-pokedex` | Pokédex regionais por jogo (12 a 45 KB) | 12 entradas, 30 dias |
-| Service worker `pokeapi-species` | espécies e cadeias de evolução (~2 a 50 KB) | 100 entradas, 7 dias |
-| Service worker `pokeapi-detail` | respostas de detalhe da PokéAPI (~300 KB cada) | 60 entradas, 7 dias |
-| Service worker `pokeapi-encounters` | locais de encontro por Pokémon (1 a 10 KB comprimidos) | 60 entradas, 7 dias |
+| Service worker `pokeapi-species` | espécies e cadeias de evolução (~2 a 50 KB) | 100 entradas, 30 dias |
+| Service worker `pokeapi-detail` | respostas de detalhe da PokéAPI (~300 KB cada) | 60 entradas, 30 dias |
+| Service worker `pokeapi-encounters` | locais de encontro por Pokémon (1 a 10 KB comprimidos) | 60 entradas, 30 dias |
 | Service worker `pokemon-artwork-webp` | artworks em WebP via wsrv.nl (~13 KB no card, ~40 KB no detalhe) | 1.500 entradas, 30 dias |
 | Service worker `pokeapi-artwork-v2` | PNG original, só quando o proxy falha (~120 KB cada) | 30 entradas, 30 dias |
 | Service worker `pokeapi-cries-v2` | gritos dos Pokémon (~7 KB cada) | 60 entradas, 30 dias |

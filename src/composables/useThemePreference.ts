@@ -21,6 +21,11 @@ export function useThemePreference() {
     preference.value = next
     writeStorage(THEME_KEY, next)
     vuetify.theme.change(next)
+    // Classe que o script inline do index.html põe no boot: o fundo do <html> (visível no
+    // "bounce" da rolagem no iOS) acompanha a troca.
+    const root = document.documentElement.classList
+    root.remove('theme-dark', 'theme-light')
+    if (next !== 'system') root.add(`theme-${next}`)
   }
 
   return { preference, setPreference }
@@ -31,8 +36,10 @@ export function applyInitialTheme(): void {
   vuetify.theme.change(preference.value)
   // A barra do navegador (Chrome no Android, aba do Safari) acompanha o cabeçalho, que no tema
   // escuro é outro vermelho: com a cor fixa do index.html ficava uma emenda entre os dois.
-  const meta = document.querySelector('meta[name="theme-color"]')
-  watchEffect(() =>
-    meta?.setAttribute('content', String(vuetify.theme.current.value.colors.primary)),
-  )
+  // Há um <meta> por esquema (media) para a cor valer antes do JS; aqui os dois seguem o tema.
+  const metas = document.querySelectorAll('meta[name="theme-color"]')
+  watchEffect(() => {
+    const color = String(vuetify.theme.current.value.colors.primary)
+    metas.forEach((meta) => meta.setAttribute('content', color))
+  })
 }

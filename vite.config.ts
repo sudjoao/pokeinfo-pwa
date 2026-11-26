@@ -16,7 +16,7 @@ const DAY = 60 * 60 * 24
 /** Só o que o plugin abaixo usa da Cache API (o config roda no Node, sem os tipos do DOM). */
 declare const caches: {
   keys(): Promise<string[]>
-  match(request: Request, options: { cacheName: string }): Promise<Response | undefined>
+  match(request: Request, options?: { cacheName: string }): Promise<Response | undefined>
 }
 declare const self: { __offlinePacks?: { at: number; names: Promise<string[]> } }
 
@@ -52,6 +52,23 @@ const offlineFallback = {
     }
     return null
   },
+  /**
+   * A rede falhou (offline): serve qualquer cópia guardada, mesmo vencida pelo ExpirationPlugin
+   * (que devolve null para a entrada velha e mandava o pedido à rede) ou só num pacote offline.
+   * Sem isto, uma ficha aberta há mais de uma semana parava de abrir sem internet.
+   */
+  handlerDidError: async ({ request }: { request: Request }) =>
+    (await caches.match(request)) ?? undefined,
+}
+
+/**
+ * Os pacotes do "Usar offline" pedem as mesmas URLs com `cache: 'reload'`
+ * (src/composables/useOfflinePacks.ts) e guardam a resposta no cache do pacote: não entra também
+ * no cache da regra, senão cada arquivo ficava em dobro e expulsava o que a pessoa tinha navegado.
+ */
+const skipPackDownloads = {
+  cacheWillUpdate: async ({ request, response }: { request: Request; response: Response }) =>
+    request.cache === 'reload' ? null : response,
 }
 
 // https://vite.dev/config/
@@ -71,18 +88,26 @@ export default defineConfig({
       dropMessageCompiler: true,
     }),
     VitePWA({
-      registerType: 'autoUpdate',
-      // Com 'auto' o registerSW.js entra no <head> sem defer e segura a primeira pintura.
-      injectRegister: 'script-defer',
+      // O registro é feito pelo app (src/composables/useServiceWorker.ts), quando o navegador fica
+      // ocioso, e a versão nova espera a pessoa tocar em "Atualizar" no aviso.
+      registerType: 'prompt',
+      injectRegister: false,
       includeAssets: ['favicon.ico', 'apple-touch-icon.png'],
+      // Os ícones do manifesto só servem na instalação: fora do precache (eram ~1/3 dele).
+      includeManifestIcons: false,
       manifest: {
         name: 'PokeInfo',
         short_name: 'PokeInfo',
         description: 'Pokédex PWA para consultar informações sobre Pokémon',
         lang: 'pt-BR',
+        id: '/',
         theme_color: '#dc2626',
-        background_color: '#ffffff',
+        background_color: '#f6f6f8',
         display: 'standalone',
+        // Atalhos e links abrem na janela já aberta em vez de outra (desktop e Android).
+        launch_handler: { client_mode: 'navigate-existing' },
+        // Compartilhar um texto de outro app para o PokeInfo (Android) abre a busca com ele.
+        share_target: { action: '/', method: 'GET', params: { text: 'q', title: 'q' } },
         // Sem travar a orientação: quem usa o aparelho fixo na horizontal (suporte de cadeira de
         // rodas, tablet no teclado) precisa conseguir usar o app (WCAG 1.3.4).
         orientation: 'any',
@@ -98,20 +123,26 @@ export default defineConfig({
             type: 'image/png',
           },
           {
-            src: '/android-chrome-512x512.png',
+            // Com zona segura (o ícone a 80% sobre o vermelho do app): o Android recorta em círculo
+            // ou "squircle". O mesmo PNG com purpose "any maskable" era cortado nos dois usos.
+            src: '/maskable-icon-512x512.png',
             sizes: '512x512',
             type: 'image/png',
-            purpose: 'any maskable',
+            purpose: 'maskable',
           },
         ],
         // Atalhos do ícone instalado (pressionar e segurar no Android; menu de contexto no desktop).
+        // Sem ícone próprio o Android mostra um genérico em cada atalho.
         shortcuts: [
           { name: 'Montar time', short_name: 'Time', url: '/team' },
           { name: 'Calculadora de tipos', short_name: 'Tipos', url: '/types' },
           { name: 'Favoritos', short_name: 'Favoritos', url: '/?fav=1' },
           { name: 'Pokémon do dia', short_name: 'Do dia', url: '/daily' },
           { name: 'Quem é esse Pokémon?', short_name: 'Quiz', url: '/quiz' },
-        ],
+        ].map((shortcut) => ({
+          ...shortcut,
+          icons: [{ src: '/icon-96x96.png', sizes: '96x96', type: 'image/png' }],
+        })),
         // Capturas para a tela de instalação mais rica (Chrome/Android e desktop).
         screenshots: [
           {
@@ -138,6 +169,9 @@ export default defineConfig({
         ],
       },
       workbox: {
+        // A versão nova (depois do "Atualizar") assume também a aba que ainda não era controlada
+        // (a primeira visita): sem isto o recarregar prometido pelo aviso não acontecia nela.
+        clientsClaim: true,
         // Learnsets (um chunk por jogo, ~920 KB gz no total) ficam fora do precache: só o jogo
         // aberto é baixado, e fica no cache `generated-learnsets` abaixo. O SDK do Supabase
         // (~55 KB gz) também: só quem entra na conta baixa, e ele fica no cache `supabase-sdk`.
@@ -169,13 +203,14 @@ export default defineConfig({
           },
           {
             // Índice completo de nomes: o app já traz um no build e só confere este uma vez por
-            // semana, atrás de Pokémon mais novos (stores/pokedex.ts).
+            // semana, atrás de Pokémon mais novos (stores/pokedex.ts). Só 200: o fetch é CORS e
+            // nunca dá resposta opaca (status 0), e uma opaca contaria ~7 MB na cota do Chrome.
             urlPattern: /^https:\/\/pokeapi\.co\/api\/v2\/pokemon\?limit=/i,
             handler: 'StaleWhileRevalidate',
             options: {
               cacheName: 'pokeapi-index',
               expiration: { maxEntries: 3, maxAgeSeconds: 7 * DAY },
-              cacheableResponse: { statuses: [0, 200] },
+              cacheableResponse: { statuses: [200] },
             },
           },
           {
@@ -185,7 +220,7 @@ export default defineConfig({
             options: {
               cacheName: 'pokeapi-pokedex',
               expiration: { maxEntries: 12, maxAgeSeconds: 30 * DAY },
-              cacheableResponse: { statuses: [0, 200] },
+              cacheableResponse: { statuses: [200] },
             },
           },
           {
@@ -194,9 +229,9 @@ export default defineConfig({
             handler: 'CacheFirst',
             options: {
               cacheName: 'pokeapi-species',
-              plugins: [offlineFallback],
-              expiration: { maxEntries: 100, maxAgeSeconds: 7 * DAY },
-              cacheableResponse: { statuses: [0, 200] },
+              plugins: [skipPackDownloads, offlineFallback],
+              expiration: { maxEntries: 100, maxAgeSeconds: 30 * DAY },
+              cacheableResponse: { statuses: [200] },
             },
           },
           {
@@ -205,8 +240,9 @@ export default defineConfig({
             handler: 'CacheFirst',
             options: {
               cacheName: 'pokeapi-encounters',
-              expiration: { maxEntries: 60, maxAgeSeconds: 7 * DAY },
-              cacheableResponse: { statuses: [0, 200] },
+              plugins: [offlineFallback],
+              expiration: { maxEntries: 60, maxAgeSeconds: 30 * DAY },
+              cacheableResponse: { statuses: [200] },
             },
           },
           {
@@ -216,8 +252,9 @@ export default defineConfig({
             handler: 'CacheFirst',
             options: {
               cacheName: 'pokeapi-locations',
+              plugins: [offlineFallback],
               expiration: { maxEntries: 200, maxAgeSeconds: 30 * DAY },
-              cacheableResponse: { statuses: [0, 200] },
+              cacheableResponse: { statuses: [200] },
             },
           },
           {
@@ -230,8 +267,9 @@ export default defineConfig({
             handler: 'CacheFirst',
             options: {
               cacheName: 'pokeapi-vocabulary',
+              plugins: [offlineFallback],
               expiration: { maxEntries: 300, maxAgeSeconds: 30 * DAY },
-              cacheableResponse: { statuses: [0, 200] },
+              cacheableResponse: { statuses: [200] },
             },
           },
           {
@@ -240,9 +278,11 @@ export default defineConfig({
             handler: 'CacheFirst',
             options: {
               cacheName: 'pokeapi-detail',
-              plugins: [offlineFallback],
-              expiration: { maxEntries: 60, maxAgeSeconds: 7 * DAY },
-              cacheableResponse: { statuses: [0, 200] },
+              plugins: [skipPackDownloads, offlineFallback],
+              // purgeOnQuotaError: estourando a cota (pequena no iOS), este cache (refazível) é
+              // apagado em vez de a gravação falhar e ameaçar o precache e os pacotes offline.
+              expiration: { maxEntries: 60, maxAgeSeconds: 30 * DAY, purgeOnQuotaError: true },
+              cacheableResponse: { statuses: [200] },
             },
           },
           {
@@ -253,7 +293,7 @@ export default defineConfig({
             handler: 'CacheFirst',
             options: {
               cacheName: 'pokeapi-cries-v2',
-              plugins: [offlineFallback],
+              plugins: [skipPackDownloads, offlineFallback],
               expiration: { maxEntries: 60, maxAgeSeconds: 30 * DAY },
               cacheableResponse: { statuses: [200] },
             },
@@ -266,10 +306,10 @@ export default defineConfig({
             handler: 'CacheFirst',
             options: {
               cacheName: 'pokemon-artwork-webp',
-              plugins: [offlineFallback],
+              plugins: [skipPackDownloads, offlineFallback],
               // A Nacional rolada até o fim passa de 1.300 cards (~13 KB cada): com 400 entradas,
               // cada imagem nova expulsava outra e os primeiros cards sumiam do cache offline.
-              expiration: { maxEntries: 1500, maxAgeSeconds: 30 * DAY },
+              expiration: { maxEntries: 1500, maxAgeSeconds: 30 * DAY, purgeOnQuotaError: true },
               cacheableResponse: { statuses: [200] },
             },
           },
@@ -282,7 +322,8 @@ export default defineConfig({
             handler: 'CacheFirst',
             options: {
               cacheName: 'pokeapi-sprites',
-              expiration: { maxEntries: 400, maxAgeSeconds: 30 * DAY },
+              plugins: [offlineFallback],
+              expiration: { maxEntries: 400, maxAgeSeconds: 30 * DAY, purgeOnQuotaError: true },
               cacheableResponse: { statuses: [200] },
             },
           },
@@ -293,7 +334,7 @@ export default defineConfig({
             handler: 'CacheFirst',
             options: {
               cacheName: 'pokeapi-artwork-v2',
-              expiration: { maxEntries: 30, maxAgeSeconds: 30 * DAY },
+              expiration: { maxEntries: 30, maxAgeSeconds: 30 * DAY, purgeOnQuotaError: true },
               cacheableResponse: { statuses: [200] },
             },
           },
