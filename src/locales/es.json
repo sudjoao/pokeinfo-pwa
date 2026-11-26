@@ -978,7 +978,8 @@
     "evTotal": "EV totales: {n} de 510",
     "evLimit": "Como máximo 252 por estadística y 510 en total.",
     "openCalculator": "Calcular IV",
-    "baseValue": "base {n}"
+    "baseValue": "base {n}",
+    "useNature": "Usar en la calculadora"
   },
   "capture": {
     "open": "Calcular probabilidad de captura",

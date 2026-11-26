@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, onActivated, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter, type LocationQueryRaw } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { STAT_NAMES, type StatName } from '@/types/pokemon'
 import { usePokedexStore } from '@/stores/pokedex'
 import { usePokemonData } from '@/composables/usePokemonData'
 import { formatPokemonName } from '@/utils/pokemon'
+import { pickerLabel } from '@/utils/search'
 import { applyCharacteristic, possibleIvs, statValue } from '@/utils/stats'
 import {
   CHARACTERISTIC_LIST,
@@ -33,9 +34,24 @@ onMounted(() => {
   pokemonData.load().catch(() => {})
 })
 
-const tab = ref<Tab>(route.query.tab === 'iv' || route.query.id ? 'iv' : 'natures')
+const tab = ref<Tab>('natures')
 const mode = ref<Mode>('iv')
-const pokemonId = ref<number | null>(Number(route.query.id) || null)
+const pokemonId = ref<number | null>(null)
+
+/**
+ * Estado vindo da URL (`/stats?tab=iv&id=25`, o link "Calcular IVs" da ficha). A tela fica em
+ * KeepAlive: voltar mantém nível, natureza, EVs e valores digitados. Ao reativar, a URL é relida:
+ * a aba segue a URL e o Pokémon só muda se a URL trouxer um (abrir pelo menu não limpa a conta).
+ */
+function readFromRoute(): void {
+  const id = Number(route.query.id) || null
+  tab.value = route.query.tab === 'iv' || id ? 'iv' : 'natures'
+  if (id) pokemonId.value = id
+}
+readFromRoute()
+onActivated(() => {
+  if (route.name === 'stats') readFromRoute()
+})
 const level = ref(50)
 const natureSlug = ref<string>('hardy')
 const characteristic = ref<number | null>(null)
@@ -51,6 +67,7 @@ const ivs = reactive(
 )
 
 watch([tab, pokemonId], () => {
+  if (route.name !== 'stats') return
   const query: LocationQueryRaw = {}
   if (tab.value === 'iv') query.tab = 'iv'
   if (pokemonId.value) query.id = String(pokemonId.value)
@@ -61,6 +78,13 @@ watch([tab, pokemonId], () => {
 
 const selectedNature = ref<string | null>(null)
 const highlighted = computed(() => findNature(selectedNature.value))
+
+/** Leva a natureza escolhida na tabela para a calculadora. */
+function useNature(): void {
+  if (!highlighted.value) return
+  natureSlug.value = highlighted.value.slug
+  tab.value = 'iv'
+}
 
 function statShort(stat: StatName): string {
   return t(`statShort.${stat}`)
@@ -73,8 +97,9 @@ function flavorLabel(flavor: string | null): string {
 
 // ---- Calculadora --------------------------------------------------------------------------------
 
+// "#25 Pikachu": o número também acha o Pokémon (como na comparação).
 const pokemonItems = computed(() =>
-  pokedex.index.map((entry) => ({ value: entry.id, title: formatPokemonName(entry.name) })),
+  pokedex.index.map((entry) => ({ value: entry.id, title: pickerLabel(entry.id, entry.name) })),
 )
 
 const base = computed<Record<StatName, number> | null>(() => {
@@ -259,6 +284,9 @@ function goBack(): void {
               </template>
               <template v-else>{{ t('statsTool.neutralLong') }}</template>
             </p>
+            <v-btn v-if="highlighted" variant="tonal" size="small" class="mt-3" @click="useNature">
+              {{ t('statsTool.useNature') }}
+            </v-btn>
           </v-card-text>
         </v-card>
       </template>
@@ -344,7 +372,7 @@ function goBack(): void {
           <v-skeleton-loader aria-hidden="true" type="table-tbody" />
         </v-card>
         <v-card v-else>
-          <v-table density="compact">
+          <v-table density="compact" class="stats-tool__table">
             <caption class="d-sr-only">
               {{
                 t('statsTool.calculator')

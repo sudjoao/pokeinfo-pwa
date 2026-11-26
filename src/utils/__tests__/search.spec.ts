@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { nameMatches, normalizeSearch, searchNumber } from '@/utils/search'
+import { nameMatches, normalizeSearch, pickerLabel, searchNumber } from '@/utils/search'
 
 describe('normalizeSearch', () => {
   it('tira acentos e maiúsculas', () => {
@@ -43,5 +43,12 @@ describe('nameMatches', () => {
   it('não casa o que não está no nome', () => {
     expect(nameMatches('pikachu', 'raichu')).toBe(false)
     expect(nameMatches('mr-mime', 'mr-rime')).toBe(false)
+  })
+})
+
+describe('pickerLabel', () => {
+  it('põe o número antes do nome; formas só o nome', () => {
+    expect(pickerLabel(25, 'pikachu')).toBe('#25 Pikachu')
+    expect(pickerLabel(10100, 'raichu-alola')).toBe('Raichu Alola')
   })
 })

@@ -18,6 +18,7 @@ import { focusPageTitle } from '@/composables/usePageFocus'
 import { STAT_NAMES, type PokemonType } from '@/types/pokemon'
 import { formatHeight, formatPokemonName, formatWeight } from '@/utils/pokemon'
 import { rowTotal } from '@/utils/advancedFilters'
+import { pickerLabel } from '@/utils/search'
 import { attackMultiplier, battleTypes } from '@/utils/typeChart'
 import DetailLayout from '@/components/templates/DetailLayout.vue'
 import PokemonArtwork from '@/components/atoms/PokemonArtwork.vue'
@@ -150,7 +151,7 @@ const options = computed(() =>
     .filter((entry) => !ids.value.includes(entry.id))
     .map((entry) => ({
       value: entry.id,
-      title: `${entry.id <= 1025 ? `#${entry.id} ` : ''}${formatPokemonName(entry.name)}`,
+      title: pickerLabel(entry.id, entry.name),
     })),
 )
 

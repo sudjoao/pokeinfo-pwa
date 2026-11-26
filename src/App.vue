@@ -239,7 +239,8 @@ function skipToContent(): void {
     />
     <!--
       A Home fica em KeepAlive para preservar o scroll infinito e a busca ao voltar do detalhe;
-      Golpes, Itens e Velocidade também (voltar de /move ou /item mantinha só o começo da lista).
+      Golpes, Itens e Velocidade também (voltar de /move ou /item mantinha só o começo da lista), e
+      Naturezas e IVs (a conta digitada não se perde ao abrir uma ficha).
       Cada uma relê a URL ao ser reativada (onActivated), então um link ou o menu ainda mandam.
     -->
     <!--
@@ -256,7 +257,7 @@ function skipToContent(): void {
     <RouterView v-slot="{ Component }">
       <!-- Lista ↔ detalhe com View Transition: a troca é imediata e o navegador anima (viewTransition.ts). -->
       <Transition name="page" :css="!nativePageTransition">
-        <KeepAlive :include="['HomeView', 'MovesView', 'ItemsView', 'SpeedView']">
+        <KeepAlive :include="['HomeView', 'MovesView', 'ItemsView', 'SpeedView', 'StatsToolView']">
           <component :is="Component" />
         </KeepAlive>
       </Transition>

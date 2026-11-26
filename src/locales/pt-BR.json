@@ -978,7 +978,8 @@
     "evTotal": "Total de EVs: {n} de 510",
     "evLimit": "No máximo 252 por stat e 510 no total.",
     "openCalculator": "Calcular IVs",
-    "baseValue": "base {n}"
+    "baseValue": "base {n}",
+    "useNature": "Usar na calculadora"
   },
   "capture": {
     "open": "Calcular chance de captura",
