@@ -2,13 +2,13 @@
 import { computed, nextTick, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { mdiCheck, mdiClose, mdiVolumeHigh } from '@mdi/js'
+import { mdiCheck, mdiClose, mdiOpenInNew, mdiVolumeHigh } from '@mdi/js'
 import { usePokedexStore } from '@/stores/pokedex'
 import { useCry } from '@/composables/useCry'
 import { useShortcut } from '@/composables/useShortcut'
 import { usePokemonData } from '@/composables/usePokemonData'
 import { GENERATIONS } from '@/utils/advancedFilters'
-import { formatPokemonName } from '@/utils/pokemon'
+import { formatPokemonName, preloadArtwork } from '@/utils/pokemon'
 import { readStorage, writeStorage } from '@/utils/storage'
 import type { PokemonIndexEntry } from '@/types/pokemon'
 import DetailLayout from '@/components/templates/DetailLayout.vue'
@@ -60,10 +60,22 @@ const streak = ref(readStorage<number>(STREAK_KEY) ?? 0)
 watch(streak, (value) => writeStorage(STREAK_KEY, value))
 const best = ref(readStorage<number>(BEST_KEY) ?? 0)
 
+/** Tamanho do artwork da pergunta (o mesmo do pré-carregamento do próximo). */
+const ART_SIZE = 220
+/** Próxima resposta, já sorteada: a imagem baixa durante a pergunta atual e "Próximo" é imediato. */
+let upcoming: PokemonIndexEntry | null = null
+
+function prepareUpcoming(list: readonly PokemonIndexEntry[], current: number): void {
+  let candidate = pick(list)
+  if (candidate.id === current && list.length > 1) candidate = pick(list)
+  upcoming = candidate
+  preloadArtwork(candidate.id, ART_SIZE)
+}
+
 function next(): void {
   const list = pool.value
   if (list.length < 4) return
-  const target = pick(list)
+  const target = upcoming && list.some((entry) => entry.id === upcoming!.id) ? upcoming : pick(list)
   const others = new Set<PokemonIndexEntry>()
   while (others.size < 3) {
     const candidate = pick(list)
@@ -72,6 +84,7 @@ function next(): void {
   answer.value = target
   choices.value = [target, ...others].sort(() => Math.random() - 0.5)
   guess.value = null
+  prepareUpcoming(list, target.id)
 }
 
 function choose(entry: PokemonIndexEntry): void {
@@ -115,8 +128,12 @@ function hint(): void {
 }
 
 watch([() => store.index.length, generations, () => pokemonData.table.value], () => {
+  upcoming = null
   if (!answer.value || !pool.value.some((entry) => entry.id === answer.value?.id)) next()
 })
+
+/** Nenhuma geração marcada = todas; a chip "Todas" mostra isso e limpa a escolha. */
+const allGenerations = computed(() => generations.value.length === 0)
 onMounted(next)
 
 const correct = computed(() => revealed.value && guess.value === answer.value?.id)
@@ -132,20 +149,42 @@ function goBack(): void {
     <div class="quiz d-flex flex-column ga-4">
       <fieldset class="quiz__generations">
         <legend class="text-label-large mb-1">{{ t('filters.generation') }}</legend>
-        <v-chip-group v-model="generations" multiple column selected-class="text-primary-safe">
+        <div class="d-flex align-start flex-wrap">
+          <!-- Fora do grupo: dentro dele o toque também mexeria na seleção das gerações. -->
           <v-chip
-            v-for="gen in GENERATIONS"
-            :key="gen"
-            :value="gen"
             filter
             variant="outlined"
             size="small"
             role="button"
-            :aria-pressed="generations.includes(gen)"
+            class="ma-1"
+            :class="{ 'text-primary-safe': allGenerations }"
+            :model-value="allGenerations"
+            :aria-pressed="allGenerations"
+            @click="generations = []"
           >
-            {{ gen }}
+            {{ t('quiz.allGenerations') }}
           </v-chip>
-        </v-chip-group>
+          <v-chip-group
+            v-model="generations"
+            multiple
+            column
+            selected-class="text-primary-safe"
+            class="flex-grow-1"
+          >
+            <v-chip
+              v-for="gen in GENERATIONS"
+              :key="gen"
+              :value="gen"
+              filter
+              variant="outlined"
+              size="small"
+              role="button"
+              :aria-pressed="generations.includes(gen)"
+            >
+              {{ gen }}
+            </v-chip>
+          </v-chip-group>
+        </div>
       </fieldset>
 
       <v-card v-if="answer" class="quiz__card">
@@ -153,7 +192,7 @@ function goBack(): void {
           <PokemonArtwork
             :id="answer.id"
             :alt="revealed ? formatPokemonName(answer.name) : t('quiz.silhouette')"
-            :size="220"
+            :size="ART_SIZE"
           />
         </div>
         <v-card-text class="d-flex flex-column ga-3">
@@ -212,6 +251,14 @@ function goBack(): void {
               @click="hint"
             >
               {{ t('quiz.hint') }}
+            </v-btn>
+            <v-btn
+              v-if="revealed"
+              variant="text"
+              :prepend-icon="mdiOpenInNew"
+              :to="{ name: 'pokemon', params: { id: answer.id } }"
+            >
+              {{ t('quiz.open') }}
             </v-btn>
             <v-btn v-if="revealed" color="primary" @click="nextQuestion">{{
               t('quiz.next')

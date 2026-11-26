@@ -75,8 +75,19 @@ const NAV_GROUPS: readonly { title: string; items: readonly NavItem[] }[] = [
   {
     title: 'menu.groupTools',
     items: [
-      { icon: mdiLightningBolt, title: 'menu.moves', to: { name: 'moves' } },
-      { icon: mdiBagPersonalOutline, title: 'menu.items', to: { name: 'items' } },
+      // As páginas de um golpe e de um item são rotas irmãs: o item do menu continua marcado nelas.
+      {
+        icon: mdiLightningBolt,
+        title: 'menu.moves',
+        to: { name: 'moves' },
+        isActive: (route) => route.name === 'moves' || route.name === 'move',
+      },
+      {
+        icon: mdiBagPersonalOutline,
+        title: 'menu.items',
+        to: { name: 'items' },
+        isActive: (route) => route.name === 'items' || route.name === 'item',
+      },
       { icon: mdiCalculatorVariantOutline, title: 'menu.stats', to: { name: 'stats' } },
       { icon: mdiSpeedometer, title: 'menu.speed', to: { name: 'speed' } },
       { icon: mdiShieldHalfFull, title: 'menu.types', to: { name: 'types' } },

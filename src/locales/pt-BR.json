@@ -700,7 +700,9 @@
     "streak": "Sequência: {n}",
     "best": "Recorde: {n}",
     "rightAnswer": "resposta certa",
-    "yourAnswer": "sua resposta"
+    "yourAnswer": "sua resposta",
+    "open": "Ver ficha",
+    "allGenerations": "Todas"
   },
   "shiny": {
     "title": "Shiny em {game}",
@@ -801,7 +803,10 @@
     "learnIntro": "Escolha até {n} golpes e um jogo para ver quais Pokémon aprendem todos eles.",
     "learnMoves": "Golpes",
     "learnEmpty": "Escolha pelo menos um golpe.",
-    "learnResults": "Nenhum Pokémon aprende todos | {n} Pokémon aprende todos | {n} Pokémon aprendem todos"
+    "learnResults": "Nenhum Pokémon aprende todos | {n} Pokémon aprende todos | {n} Pokémon aprendem todos",
+    "emptyTitle": "Nenhum golpe encontrado",
+    "sortAsc": "Ordem crescente (toque para inverter)",
+    "sortDesc": "Ordem decrescente (toque para inverter)"
   },
   "movePage": {
     "notFound": "Golpe não encontrado.",

@@ -700,7 +700,9 @@
     "streak": "Racha: {n}",
     "best": "Récord: {n}",
     "rightAnswer": "respuesta correcta",
-    "yourAnswer": "tu respuesta"
+    "yourAnswer": "tu respuesta",
+    "open": "Ver ficha",
+    "allGenerations": "Todas"
   },
   "shiny": {
     "title": "Variocolor en {game}",
@@ -801,7 +803,10 @@
     "learnIntro": "Elige hasta {n} movimientos y un juego para ver qué Pokémon aprenden todos.",
     "learnMoves": "Movimientos",
     "learnEmpty": "Elige al menos un movimiento.",
-    "learnResults": "Ningún Pokémon aprende todos | {n} Pokémon aprende todos | {n} Pokémon aprenden todos"
+    "learnResults": "Ningún Pokémon aprende todos | {n} Pokémon aprende todos | {n} Pokémon aprenden todos",
+    "emptyTitle": "Ningún movimiento encontrado",
+    "sortAsc": "Orden ascendente (toca para invertir)",
+    "sortDesc": "Orden descendente (toca para invertir)"
   },
   "movePage": {
     "notFound": "Movimiento no encontrado.",

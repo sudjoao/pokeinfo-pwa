@@ -700,7 +700,9 @@
     "streak": "Streak: {n}",
     "best": "Best: {n}",
     "rightAnswer": "right answer",
-    "yourAnswer": "your answer"
+    "yourAnswer": "your answer",
+    "open": "Open page",
+    "allGenerations": "All"
   },
   "shiny": {
     "title": "Shiny in {game}",
@@ -801,7 +803,10 @@
     "learnIntro": "Pick up to {n} moves and a game to see which Pokémon learn all of them.",
     "learnMoves": "Moves",
     "learnEmpty": "Pick at least one move.",
-    "learnResults": "No Pokémon learns all of them | {n} Pokémon learns all of them | {n} Pokémon learn all of them"
+    "learnResults": "No Pokémon learns all of them | {n} Pokémon learns all of them | {n} Pokémon learn all of them",
+    "emptyTitle": "No moves found",
+    "sortAsc": "Ascending order (tap to reverse)",
+    "sortDesc": "Descending order (tap to reverse)"
   },
   "movePage": {
     "notFound": "Move not found.",
