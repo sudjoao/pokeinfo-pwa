@@ -28,6 +28,14 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
   inteira e gravava a URL; no Safari isso podia passar do limite de gravações por minuto).
 - Ícone do app no Android: o ícone "maskable" ganhou uma versão própria com zona segura (o mesmo
   PNG servia para os dois usos e era cortado).
+- Ficha do Pokémon: o nome segue o da lista ("Mega Charizard X", e não "Charizard Mega X"; em
+  espanhol o título da aba e o h1 também traduzem), e uma forma alternativa (Raichu de Alola)
+  mostra o número da espécie (#0026) em vez do id interno (#10100). Na Pokédex Nacional,
+  anterior/próximo de uma forma segue a espécie dela, e a última espécie não leva à forma 10001.
+- Ficha: o artwork pré-carregado respeita a preferência de arte shiny (antes baixava a imagem
+  normal e a shiny só começava depois).
+- Ficha: a calculadora de captura limita o nível a 1–100, e uma bola ou item segurado sem sprite
+  não mostra mais o ícone de imagem quebrada.
 
 ### Adicionado
 
@@ -59,6 +67,17 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
   aceita o número ("#25").
 - Quiz: chip "Todas" nas gerações, "Ver ficha" na resposta e a imagem da próxima pergunta já
   baixa durante a atual.
+- Ficha: "Fraquezas e resistências" ganhou chips com as habilidades que mudam a tabela (Levitate,
+  Thick Fat, Water Absorb, Wonder Guard…) e o modo "Ataque (STAB)", que mostra o que os golpes do
+  tipo do Pokémon acertam.
+- Ficha: a tabela de golpes ordena pelos cabeçalhos (nível, nome, poder, precisão, PP) e marca com
+  "STAB" os golpes do tipo do Pokémon.
+- Ficha: a cadeia de evolução mostra as formas regionais (abrindo uma forma de
+  Alola/Galar/Hisui/Paldea ou com um jogo dessas regiões), e tocar num estágio abre a forma.
+- Ficha: "Sobre" lista os números da espécie em cada Pokédex regional (com link para a lista do
+  jogo) e mostra altura e peso também em pés/polegadas e libras.
+- Ficha: chave "Fêmea" nos sprites das espécies com diferença visual entre os gêneros.
+- Ficha: botão "Voltar ao topo" e os botões anterior/próximo repetidos no fim da página.
 
 ### Alterado
 
@@ -77,6 +96,16 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
   ficam guardados por idioma).
 - Caches de imagens e fichas do service worker são apagados sozinhos se o armazenamento estourar
   (cota pequena no iOS), em vez de a gravação falhar e ameaçar o precache e os pacotes offline.
+- Ficha: os cards carregados sob demanda (golpes, sprites, itens segurados, mudanças entre
+  gerações) mostram título e esqueleto enquanto baixam, em vez de deixar a coluna vazia e empurrar
+  a página; as formas (regional, Gigantamax…) saíram do fim da página para logo abaixo do hero.
+- Ficha: com a página pronta, o artwork do anterior e do próximo começa a baixar, e a ficha deles
+  é baixada com o navegador ocioso (não com economia de dados), para deslizar/setas não mostrarem
+  o esqueleto inteiro.
+- Acessibilidade: nas abas TM/Ovo/Tutor os golpes ficam em ordem pelo nome exibido (em espanhol
+  pareciam embaralhados); as chips de luta e variação dos Líderes dizem qual está escolhida, o
+  link da Bulbapedia avisa que abre em nova aba, e o seletor Base/Nv. 50/Nv. 100 dos stats tem
+  nome acessível.
 
 ## [1.17.0] - 2026-11-25
 
