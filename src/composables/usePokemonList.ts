@@ -229,28 +229,55 @@ export function usePokemonList() {
     advanced.value = { ...EMPTY_ADVANCED }
   }
 
+  /** Lê os parâmetros próprios da URL, como na abertura: um link com outro jogo ou busca manda. */
+  function readOwnQuery(next: LocationQuery): void {
+    const q = queryParam(next.q) ?? ''
+    query.value = q
+    // Sem esperar o debounce: a lista e a URL já saem com a busca do link.
+    debouncedQuery.value = q
+    gameSlug.value = queryParam(next.game)
+    dexSlug.value = queryParam(next.dex)
+    caughtFilter.value = caughtFilterParam(next.caught)
+    typeFilter.value = typeFilterParam(next.type)
+    availability.value = listParam(next.versions)
+    megaOnly.value = next.mega === '1'
+    advanced.value = parseAdvanced(next)
+  }
+
   // Links de fora da lista (ex.: "Favoritos" no menu, `/?fav=1`) mudam a URL com a tela já viva
-  // (a Home fica em KeepAlive). Só reage na própria rota: a Home em cache continua observando a
-  // URL enquanto o team builder está aberto.
+  // (a Home e o team builder ficam em KeepAlive). Só reage na própria rota: a Home em cache
+  // continua observando a URL enquanto o team builder está aberto.
   const ownRoute = route.name
   /** A última query que este composable escreveu: ao vê-la de volta, não há o que reprocessar. */
   let written = ''
   watch(
     () => route.query,
-    (query) => {
+    (next) => {
       if (route.name !== ownRoute) return
-      if (JSON.stringify(query) === written) return
-      const parsed = parseAdvanced(query)
+      if (JSON.stringify(next) === written) return
+      const parsed = parseAdvanced(next)
       const same =
         JSON.stringify(advancedToQuery(parsed)) === JSON.stringify(advancedToQuery(advanced.value))
       if (!same) {
         advanced.value = parsed
         return
       }
-      // "Pokédex" no menu (`/`) com a lista já aberta num jogo: a URL volta a dizer o jogo e os
-      // filtros que estão na tela (senão um recarregar ou compartilhar perderia o contexto).
-      const canonical = { ...foreignQuery(query), ...buildQuery() }
-      if (JSON.stringify(canonical) !== JSON.stringify({ ...query }))
+      const own = buildQuery()
+      // A URL diz outro jogo, busca ou filtro do que a tela tem (o team builder aberto pela aba
+      // Time depois de trocar de jogo na Home, um número regional na ficha, "Ver Pokémon desse
+      // tipo"): o link manda, como se a tela abrisse agora.
+      const conflict = OWN_QUERY_KEYS.some(
+        (key) => key in next && String(next[key]) !== String(own[key] ?? ''),
+      )
+      if (conflict) {
+        readOwnQuery(next)
+        return
+      }
+      // "Pokédex" no menu (`/`) com a lista já aberta num jogo: a URL só deixou de dizer o que a
+      // tela tem, e volta a dizer o jogo e os filtros (senão um recarregar ou compartilhar perderia
+      // o contexto).
+      const canonical = { ...foreignQuery(next), ...own }
+      if (JSON.stringify(canonical) !== JSON.stringify({ ...next }))
         router.replace({ query: canonical })
     },
   )

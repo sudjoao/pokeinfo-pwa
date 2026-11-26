@@ -7,6 +7,18 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e 
 
 ## [Não lançado]
 
+### Corrigido
+
+- Pokédex e team builder: um link com outro jogo, Pokédex ou busca do que a tela tinha (um número
+  regional na ficha, "Ver Pokémon desse tipo", o team builder aberto pela aba Time depois de trocar
+  de jogo) passa a valer. A tela viva reescrevia a URL de volta para o que mostrava.
+
+### Adicionado
+
+- Team builder: a tela fica viva ao abrir a ficha de um membro: voltar mantém a busca, os filtros,
+  o "Mostrar mais" e a rolagem (antes a lista recomeçava do início). Um link com `?team=` carrega
+  o time mesmo com a tela já aberta.
+
 ## [1.18.0] - 2026-11-26
 
 ### Corrigido

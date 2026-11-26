@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { mdiFilterRemoveOutline, mdiShimmer } from '@mdi/js'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useDisplay } from 'vuetify'
 import { gameContextQuery } from '@/utils/games'
@@ -74,6 +74,7 @@ const {
 
 const team = useTeam(() => game.value)
 
+const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
 /** Desktop (≥ 960 px): painel lateral fixo. Abaixo disso: bandeja no rodapé + sheet. */
@@ -103,9 +104,22 @@ const actions = useTeamActions(team, {
   candidates: () => filtered.value,
 })
 
-// Link compartilhado: o time dele vira o salvo do jogo, com desfazer se havia outro.
-const previous = team.takeFromLink()
-if (previous) actions.offerUndo(t('team.fromLink'), previous)
+// Link compartilhado: o time dele vira o salvo do jogo, com desfazer se havia outro. A tela fica
+// em KeepAlive (voltar da ficha de um membro mantém a lista e a rolagem), então um link aberto
+// com ela já viva precisa passar por aqui de novo; o jogo e os filtros da URL já são relidos pelo
+// composable da lista.
+function takeTeamFromLink(): void {
+  const previous = team.takeFromLink()
+  if (previous) actions.offerUndo(t('team.fromLink'), previous)
+}
+takeTeamFromLink()
+// Cobre a reativação (a URL muda junto) e um link aberto com a tela já na frente.
+watch(
+  () => route.query.team,
+  () => {
+    if (route.name === 'team') takeTeamFromLink()
+  },
+)
 
 /** Altura do cabeçalho: busca (48) + linha de chips (32) + espaçamentos (igual à Home). */
 const HEADER_EXTENSION_HEIGHT = 108
