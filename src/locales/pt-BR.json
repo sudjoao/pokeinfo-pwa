@@ -674,7 +674,9 @@
     "attacker": "Ataque",
     "defender": "Defesa",
     "summaryDefense": "Fraquezas: {weak}. Resistências: {resist}. Imunidades: {immune}.",
-    "summaryAttack": "Super efetivo: {weak}. Pouco efetivo: {resist}. Sem efeito: {immune}."
+    "summaryAttack": "Super efetivo: {weak}. Pouco efetivo: {resist}. Sem efeito: {immune}.",
+    "viewPokemon": "Ver Pokémon desse tipo | Ver Pokémon desses tipos",
+    "viewMoves": "Ver golpes do tipo {type}"
   },
   "compare": {
     "title": "Comparar",
