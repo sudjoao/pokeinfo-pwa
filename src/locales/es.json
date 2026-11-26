@@ -1037,7 +1037,12 @@
     },
     "inTeam": "(en tu equipo)",
     "fromTeam": "Velocidad del equipo",
-    "legend": "Mín: 0 IV, 0 EV, naturaleza que reduce. Neutra: 31 IV, 0 EV. Máx: 31 IV, 252 EV. Máx+: con naturaleza que aumenta (Alegre, Miedosa). El número gris junto al nombre es la base."
+    "legend": "Mín: 0 IV, 0 EV, naturaleza que reduce. Neutra: 31 IV, 0 EV. Máx: 31 IV, 252 EV. Máx+: con naturaleza que aumenta (Alegre, Miedosa). El número gris junto al nombre es la base.",
+    "paralysis": "Paralizado (×{n})",
+    "trickRoom": "Espacio Raro (el más lento primero)",
+    "empty": "Ningún Pokémon con ese nombre en la lista.",
+    "results": "Ningún Pokémon | 1 Pokémon | {n} Pokémon",
+    "captionTrickRoom": "Velocidad en el nivel {level} bajo Espacio Raro (del más lento al más rápido)"
   },
   "daily": {
     "title": "Pokémon del día",

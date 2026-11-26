@@ -1037,7 +1037,12 @@
     },
     "inTeam": "(no seu time)",
     "fromTeam": "Velocidade do time",
-    "legend": "Mín: 0 IV, 0 EV, natureza que reduz. Neutro: 31 IV, 0 EV. Máx: 31 IV, 252 EV. Máx+: com natureza que aumenta (Jolly, Timid). O número cinza ao lado do nome é a base."
+    "legend": "Mín: 0 IV, 0 EV, natureza que reduz. Neutro: 31 IV, 0 EV. Máx: 31 IV, 252 EV. Máx+: com natureza que aumenta (Jolly, Timid). O número cinza ao lado do nome é a base.",
+    "paralysis": "Paralisado (×{n})",
+    "trickRoom": "Trick Room (mais lento primeiro)",
+    "empty": "Nenhum Pokémon com esse nome na lista.",
+    "results": "Nenhum Pokémon | 1 Pokémon | {n} Pokémon",
+    "captionTrickRoom": "Velocidade no nível {level}, sob Trick Room (do mais lento ao mais rápido)"
   },
   "daily": {
     "title": "Pokémon do dia",

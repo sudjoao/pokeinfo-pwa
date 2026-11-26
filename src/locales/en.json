@@ -1037,7 +1037,12 @@
     },
     "inTeam": "(in your team)",
     "fromTeam": "Team speed tiers",
-    "legend": "Min: 0 IV, 0 EV, hindering nature. Neutral: 31 IV, 0 EV. Max: 31 IV, 252 EV. Max+: with a boosting nature (Jolly, Timid). The grey number next to the name is the base stat."
+    "legend": "Min: 0 IV, 0 EV, hindering nature. Neutral: 31 IV, 0 EV. Max: 31 IV, 252 EV. Max+: with a boosting nature (Jolly, Timid). The grey number next to the name is the base stat.",
+    "paralysis": "Paralyzed (×{n})",
+    "trickRoom": "Trick Room (slowest first)",
+    "empty": "No Pokémon with that name in the list.",
+    "results": "No Pokémon | 1 Pokémon | {n} Pokémon",
+    "captionTrickRoom": "Speed at level {level} under Trick Room (slowest to fastest)"
   },
   "daily": {
     "title": "Pokémon of the day",

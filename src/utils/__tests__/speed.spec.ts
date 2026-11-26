@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { speedValues, stageMultiplier } from '@/utils/speed'
+import { speedMultiplier, speedValues, stageMultiplier } from '@/utils/speed'
 
 describe('speed tiers', () => {
   it('Garchomp (base 102) no nível 50 e 100', () => {
@@ -13,5 +13,18 @@ describe('speed tiers', () => {
     expect(stageMultiplier(1)).toBe(1.5)
     expect(stageMultiplier(-1)).toBeCloseTo(2 / 3)
     expect(stageMultiplier(6)).toBe(4)
+  })
+
+  it('paralisia: metade da 7ª geração em diante, um quarto antes', () => {
+    expect(speedMultiplier({ scarf: false, tailwind: false, stage: 0, paralysis: true })).toBe(0.5)
+    expect(
+      speedMultiplier({ scarf: false, tailwind: false, stage: 0, paralysis: true, generation: 9 }),
+    ).toBe(0.5)
+    expect(
+      speedMultiplier({ scarf: false, tailwind: false, stage: 0, paralysis: true, generation: 6 }),
+    ).toBe(0.25)
+    expect(
+      speedValues(102, 50, { scarf: true, tailwind: false, stage: 0, paralysis: true }).maxPlus,
+    ).toBe(126)
   })
 })
