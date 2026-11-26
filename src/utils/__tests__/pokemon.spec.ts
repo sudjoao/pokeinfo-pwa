@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest'
 import {
   artworkSrc,
   formatDexNumber,
+  formatHeightImperial,
   formatPokemonName,
+  formatWeightImperial,
   generationNumber,
   genderRatio,
   idFromResourceUrl,
@@ -17,6 +19,13 @@ describe('formatação', () => {
 
   it('nome a partir do slug', () => {
     expect(formatPokemonName('mr-mime')).toBe('Mr Mime')
+  })
+
+  it('altura e peso no sistema imperial', () => {
+    expect(formatHeightImperial(0.4)).toBe('1′04″')
+    expect(formatHeightImperial(1.7)).toBe('5′07″')
+    expect(formatWeightImperial(6, 'en')).toBe('13.2 lb')
+    expect(formatWeightImperial(90.5, 'pt-BR')).toBe('199,5 lb')
   })
 
   it('id a partir da URL do recurso', () => {

@@ -1,5 +1,6 @@
 import { GAMES, type Game } from '@/data/games'
-import type { PokemonGameSprite, PokemonHeldItem } from '@/types/pokemon'
+import type { PokemonGameSprite, PokemonHeldItem, PokemonType } from '@/types/pokemon'
+import type { LearnedMove, MoveInfo } from './moves'
 import { findGameByVersion } from './games'
 import { formatPokemonName } from './pokemon'
 
@@ -101,4 +102,42 @@ export function latestGameWith(rarity: Record<string, number>): Game | null {
     }
   }
   return null
+}
+
+// ---- Tabela de golpes da ficha ------------------------------------------------------------------
+
+/** Coluna pela qual a tabela de golpes pode ser ordenada. */
+export type MoveColumn = 'level' | 'name' | 'power' | 'accuracy' | 'pp'
+
+/** Golpe de ataque do mesmo tipo do Pokémon: ganha o bônus de 50% (STAB). */
+export function isStab(move: MoveInfo, types: readonly PokemonType[]): boolean {
+  return move.category !== 'status' && types.includes(move.type)
+}
+
+/**
+ * Golpes ordenados pela coluna. Nomes pelo nome exibido (com collator do idioma: em espanhol a
+ * ordem pelo slug em inglês parecia embaralhada); números sem valor ("—") vão para o fim nos dois
+ * sentidos. Empates mantêm a ordem recebida (o sort é estável).
+ */
+export function sortLearnedMoves(
+  moves: readonly LearnedMove[],
+  column: MoveColumn,
+  desc: boolean,
+  nameOf: (move: LearnedMove) => string,
+  collator: Intl.Collator,
+): LearnedMove[] {
+  const direction = desc ? -1 : 1
+  const value = (move: LearnedMove): number | null => {
+    if (column === 'level') return move.level
+    if (column === 'name') return null
+    return move.info[column]
+  }
+  return [...moves].sort((a, b) => {
+    if (column === 'name') return collator.compare(nameOf(a), nameOf(b)) * direction
+    const va = value(a)
+    const vb = value(b)
+    if (va === null) return vb === null ? 0 : 1
+    if (vb === null) return -1
+    return (va - vb) * direction || collator.compare(nameOf(a), nameOf(b))
+  })
 }

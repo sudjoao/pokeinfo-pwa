@@ -93,6 +93,9 @@ export interface PokemonGameSprite {
   key: string
   front: string | null
   shiny: string | null
+  /** Fêmea, só nas espécies com diferença visual entre os gêneros (Pikachu, Hippowdon…). */
+  female: string | null
+  shinyFemale: string | null
   /** GIF animado (Crystal, Black/White, Showdown). */
   animated: string | null
   animatedShiny: string | null
@@ -165,6 +168,12 @@ export interface PokemonVariety {
   isDefault: boolean
 }
 
+/** Número da espécie numa Pokédex regional (slug de `/pokedex`, ex.: "galar"). */
+export interface PokedexNumber {
+  dex: string
+  number: number
+}
+
 /** Dados da espécie (compartilhados entre as formas de um Pokémon). */
 export interface PokemonSpecies {
   id: number
@@ -198,6 +207,8 @@ export interface PokemonSpecies {
   evolutionChainId: number | null
   evolvesFromSpeciesId: number | null
   varieties: PokemonVariety[]
+  /** Números nas Pokédex regionais (sem a nacional, que é o próprio id), na ordem da API. */
+  pokedexNumbers: PokedexNumber[]
 }
 
 /**

@@ -49,6 +49,9 @@ export interface PokemonMoveDto {
 export interface PokemonSpriteSetDto {
   front_default?: string | null
   front_shiny?: string | null
+  /** Só nas espécies com diferença visual entre os gêneros (a partir da 4ª geração). */
+  front_female?: string | null
+  front_shiny_female?: string | null
   animated?: { front_default?: string | null; front_shiny?: string | null } | null
 }
 
@@ -141,6 +144,8 @@ export interface PokemonSpeciesDto {
   genera: GenusEntry[]
   names: NameEntry[]
   varieties: PokemonSpeciesVarietyDto[]
+  /** Número da espécie em cada Pokédex (`/pokedex/{slug}`), inclusive a nacional. */
+  pokedex_numbers?: { entry_number: number; pokedex: NamedApiResource }[]
 }
 
 export interface EvolutionDetailDto {

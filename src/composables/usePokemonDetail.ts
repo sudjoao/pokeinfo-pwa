@@ -5,9 +5,12 @@ import { collectSpecies } from '@/services/pokeapi/evolution.service'
 import { usePokedexStore } from '@/stores/pokedex'
 import { usePokemonDetailStore } from '@/stores/pokemonDetail'
 import { buildDexList, type GameContext } from '@/utils/games'
+import type { FormRegion } from '@/data/games'
 import { describeError } from '@/utils/errors'
 import { megaLineOf } from '@/utils/megas'
-import { preloadArtwork } from '@/utils/pokemon'
+import { speciesIdOf } from '@/utils/forms'
+import { whenIdle } from '@/utils/idle'
+import { HERO_ARTWORK_SIZE, preloadArtwork } from '@/utils/pokemon'
 import type {
   EvolutionChain,
   PokemonDetail,
@@ -30,7 +33,12 @@ export interface NeighborEntry extends PokemonIndexEntry {
  * tela), depois espécie + cadeia de evolução e os locais de encontro em paralelo. Reage à troca do id na rota.
  * Com um jogo selecionado (`context`), a navegação anterior/próximo segue a Pokédex dele.
  */
-export function usePokemonDetail(idOrName: Ref<string>, context: Ref<GameContext | null>) {
+export function usePokemonDetail(
+  idOrName: Ref<string>,
+  context: Ref<GameContext | null>,
+  /** O hero está mostrando o shiny: o artwork pré-carregado (deste e dos vizinhos) é o mesmo. */
+  shiny: Ref<boolean> = ref(false),
+) {
   const store = usePokemonDetailStore()
   const pokedex = usePokedexStore()
   const { t } = useI18n()
@@ -40,7 +48,7 @@ export function usePokemonDetail(idOrName: Ref<string>, context: Ref<GameContext
   const species = shallowRef<PokemonSpecies | null>(null)
   const chain = shallowRef<EvolutionChain | null>(null)
   /** Resumos (tipos) das espécies da cadeia, indexados por id da espécie. */
-  const chainSummaries = ref<Record<number, PokemonSummary>>({})
+  const chainBaseSummaries = ref<Record<number, PokemonSummary>>({})
   /** Locais de encontro por jogo (null enquanto carrega ou em erro). */
   const encounters = shallowRef<PokemonEncounters | null>(null)
   /**
@@ -68,7 +76,7 @@ export function usePokemonDetail(idOrName: Ref<string>, context: Ref<GameContext
       const result = await store.ensureChain(chainId)
       const summaries = await pokedex.ensureSummaries(collectSpecies(result.root))
       if (current !== generation) return
-      chainSummaries.value = Object.fromEntries(summaries.map((s) => [s.id, s]))
+      chainBaseSummaries.value = Object.fromEntries(summaries.map((s) => [s.id, s]))
       chain.value = result
       chainStatus.value = 'ready'
     } catch {
@@ -119,7 +127,7 @@ export function usePokemonDetail(idOrName: Ref<string>, context: Ref<GameContext
     detail.value = null
     species.value = null
     chain.value = null
-    chainSummaries.value = {}
+    chainBaseSummaries.value = {}
     encounters.value = null
 
     const key = idOrName.value.trim().toLowerCase()
@@ -130,7 +138,7 @@ export function usePokemonDetail(idOrName: Ref<string>, context: Ref<GameContext
 
     // O artwork é a maior imagem da tela (LCP) e a URL sai do id: começa a baixar junto com o
     // JSON do detalhe (~300 KB) em vez de esperar ele chegar e a tela renderizar.
-    if (/^\d+$/.test(key)) preloadArtwork(Number(key))
+    if (/^\d+$/.test(key)) preloadArtwork(Number(key), HERO_ARTWORK_SIZE, shiny.value)
 
     try {
       const result = await store.ensureDetail(/^\d+$/.test(key) ? Number(key) : key)
@@ -205,15 +213,21 @@ export function usePokemonDetail(idOrName: Ref<string>, context: Ref<GameContext
     dexPosition.value >= 0 ? (dexList.value?.[dexPosition.value]?.dexNumber ?? null) : null,
   )
 
+  /** Só as espécies do índice nacional: depois da última (#1025) não vem a forma 10001. */
+  const nationalSpecies = computed(() => pokedex.index.filter((entry) => entry.id < 10000))
+
   // Navegação anterior/próximo: pela Pokédex do jogo quando o Pokémon está nela,
-  // senão pelo índice nacional (que já fica em cache).
+  // senão pelo índice nacional (que já fica em cache). Numa forma alternativa (id > 10000) a
+  // posição é a da espécie dela: do Raichu de Alola, "próximo" é o Sandshrew, não a forma 10101.
   const neighbors = computed<{ list: readonly NeighborEntry[]; position: number }>(() => {
     if (dexPosition.value >= 0 && dexList.value) {
       return { list: dexList.value, position: dexPosition.value }
     }
     const id = detail.value?.id
-    const position = id === undefined ? -1 : pokedex.index.findIndex((entry) => entry.id === id)
-    return { list: pokedex.index, position }
+    const species = id === undefined ? undefined : speciesIdOf(id)
+    const list = nationalSpecies.value
+    const position = species === undefined ? -1 : list.findIndex((entry) => entry.id === species)
+    return { list, position }
   })
   const previous = computed<NeighborEntry | null>(() => {
     const { list, position } = neighbors.value
@@ -246,13 +260,69 @@ export function usePokemonDetail(idOrName: Ref<string>, context: Ref<GameContext
     )
   })
 
+  /**
+   * Região da forma aberta (Raichu de Alola) ou da Pokédex do jogo (Sword/Shield → Galar): a
+   * cadeia de evolução mostra as formas regionais dela, como a lista faz com os cards.
+   */
+  const FORM_REGION = /-(alola|galar|hisui|paldea)(?:-|$)/
+  const formRegion = computed<FormRegion | null>(() => {
+    const match = detail.value ? FORM_REGION.exec(detail.value.name) : null
+    if (match) return match[1] as FormRegion
+    return context.value?.dex.formRegion ?? null
+  })
+
+  /** Espécie da cadeia -> forma regional dela na região atual (só as que têm uma). */
+  const chainForms = computed<Record<number, PokemonIndexEntry>>(() => {
+    const region = formRegion.value
+    const current = chain.value
+    if (!region || !current) return {}
+    const forms = pokedex.regionalForms[region]
+    return Object.fromEntries(
+      collectSpecies(current.root).flatMap((species) => {
+        const form = forms.get(species.name)
+        return form ? [[species.id, form]] : []
+      }),
+    )
+  })
+
+  /** Resumos da cadeia já trocados pela forma regional (artwork e tipos dela), quando houver. */
+  const chainSummaries = computed<Record<number, PokemonSummary>>(() => {
+    const result = { ...chainBaseSummaries.value }
+    for (const [speciesId, form] of Object.entries(chainForms.value)) {
+      const types = pokedex.typesOf(form.id)
+      if (types) result[Number(speciesId)] = { id: form.id, name: form.name, types }
+    }
+    return result
+  })
+
   watch(idOrName, load, { immediate: true })
+
+  /**
+   * Vizinhos prontos antes do toque: o artwork deles começa a baixar já, e a ficha (~300 KB cada)
+   * quando o navegador ficar ocioso, para o deslizar/seta não mostrar o esqueleto inteiro. Não
+   * baixa a ficha com economia de dados ligada; o store deduplica e guarda em cache.
+   */
+  function prefetchNeighbors(): void {
+    const targets = [next.value, previous.value].filter((entry) => entry !== null)
+    for (const entry of targets) preloadArtwork(entry.id, HERO_ARTWORK_SIZE, shiny.value)
+    const connection = (navigator as { connection?: { saveData?: boolean } }).connection
+    if (connection?.saveData) return
+    whenIdle(() => {
+      for (const entry of targets) {
+        if (status.value === 'ready') store.ensureDetail(entry.id).catch(() => {})
+      }
+    })
+  }
+  watch([status, () => next.value?.id, () => previous.value?.id], ([state]) => {
+    if (state === 'ready') prefetchNeighbors()
+  })
 
   return {
     detail,
     species,
     chain,
     chainSummaries,
+    chainForms,
     megaLine,
     megaSummaries,
     encounters,

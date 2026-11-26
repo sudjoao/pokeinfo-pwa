@@ -40,6 +40,7 @@ const ranges = computed(() =>
         variant="outlined"
         divided
         class="align-self-start"
+        :aria-label="t('detail.statsLevelLabel')"
       >
         <v-btn :value="0" size="small" :aria-pressed="level === 0">{{
           t('detail.statsBase')

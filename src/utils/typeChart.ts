@@ -1,9 +1,31 @@
-import { BATTLE_TYPES, TYPE_CHART } from '@/data/typeChart'
+import { ABILITY_DEFENSE, BATTLE_TYPES, TYPE_CHART } from '@/data/typeChart'
 import { PAST_TYPES, TYPE_CHART_PAST } from '@/data/generated/typesPast'
 import type { PokemonType } from '@/types/pokemon'
 
 /** Geração da tabela atual; também o padrão quando não há jogo selecionado. */
 export const LATEST_GENERATION = 9
+
+/** A habilidade muda a tabela de fraquezas (Levitate, Thick Fat, Wonder Guard…)? */
+export function hasDefensiveAbility(ability: string): boolean {
+  return ability in ABILITY_DEFENSE
+}
+
+/**
+ * Multiplicador de um ataque do tipo `attacking` já com a habilidade do defensor aplicada
+ * (Levitate zera Terra, Thick Fat halve Fogo e Gelo, Wonder Guard zera o que não é super efetivo).
+ * Habilidade desconhecida ou nula: o multiplicador dos tipos, sem mudança.
+ */
+export function withAbilityDefense(
+  multiplier: number,
+  attacking: PokemonType,
+  ability: string | null | undefined,
+): number {
+  const rule = ability ? ABILITY_DEFENSE[ability] : undefined
+  if (!rule) return multiplier
+  if (rule.onlySuperEffective) return multiplier > 1 ? multiplier : 0
+  const factor = rule.multipliers?.[attacking]
+  return factor === undefined ? multiplier : multiplier * factor
+}
 
 /** Tipos que existem em batalha na geração: Sombrio e Aço chegam na 2ª, Fada na 6ª. */
 export function battleTypes(generation = LATEST_GENERATION): readonly PokemonType[] {

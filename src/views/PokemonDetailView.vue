@@ -2,17 +2,17 @@
 import {
   computed,
   defineAsyncComponent,
+  h,
   nextTick,
   ref,
   shallowRef,
   useTemplateRef,
   watch,
+  type Component,
 } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import {
-  mdiChevronLeft,
-  mdiChevronRight,
   mdiCompareHorizontal,
   mdiImageOutline,
   mdiLinkVariant,
@@ -32,8 +32,10 @@ import { useDexLabel } from '@/composables/useDexLabel'
 import { useListShiny } from '@/composables/useListShiny'
 import { gameContextFromQuery, gameContextQuery } from '@/utils/games'
 import { exclusiveVersionOf } from '@/utils/exclusives'
-import { withoutMegas } from '@/utils/megas'
-import { formatDexNumber, formatPokemonName } from '@/utils/pokemon'
+import { isMega, megaLabel, pokemonLabel, withoutMegas } from '@/utils/megas'
+import { speciesIdOf } from '@/utils/forms'
+import { formatDexNumber } from '@/utils/pokemon'
+import { speciesDisplayName } from '@/utils/species'
 import { LATEST_GENERATION } from '@/utils/typeChart'
 import { useMountOnOpen } from '@/composables/useMountOnOpen'
 import { useRecentStore } from '@/stores/recent'
@@ -46,6 +48,9 @@ import { useShortcut } from '@/composables/useShortcut'
 import { shareLink } from '@/composables/useShare'
 import DetailLayout from '@/components/templates/DetailLayout.vue'
 import AppNotice from '@/components/molecules/AppNotice.vue'
+import BackToTop from '@/components/atoms/BackToTop.vue'
+import CardSkeleton from '@/components/molecules/CardSkeleton.vue'
+import NeighborNav, { type NeighborLink } from '@/components/molecules/NeighborNav.vue'
 import EmptyState from '@/components/molecules/EmptyState.vue'
 import PokemonHero from '@/components/molecules/PokemonHero.vue'
 import AboutGrid from '@/components/molecules/AboutGrid.vue'
@@ -63,32 +68,59 @@ import MegaEvolutionCard from '@/components/organisms/MegaEvolutionCard.vue'
 import LocationList from '@/components/organisms/LocationList.vue'
 import PokemonDetailSkeleton from '@/components/organisms/PokemonDetailSkeleton.vue'
 
-// A tabela de golpes (~16 KB gz) vem num chunk próprio, em paralelo com o resto da tela.
-const MovesCard = defineAsyncComponent(() => import('@/components/organisms/MovesCard.vue'))
-const SpritesCard = defineAsyncComponent(() => import('@/components/organisms/SpritesCard.vue'))
-const HeldItemsCard = defineAsyncComponent(() => import('@/components/organisms/HeldItemsCard.vue'))
 const ShareImageDialog = defineAsyncComponent(
   () => import('@/components/organisms/ShareImageDialog.vue'),
 )
 const CaptureSheet = defineAsyncComponent(() => import('@/components/organisms/CaptureSheet.vue'))
-const GenerationChangesCard = defineAsyncComponent(
-  () => import('@/components/organisms/GenerationChangesCard.vue'),
-)
 
 const route = useRoute()
 const router = useRouter()
 const { t, locale } = useI18n()
 const { dexLabel } = useDexLabel()
 
+/**
+ * Cards carregados sob demanda (a tabela de golpes, ~16 KB gz, vem num chunk próprio, em paralelo
+ * com o resto da tela). Enquanto o chunk baixa, no lugar fica um card com o título e um esqueleto:
+ * sem ele a coluna ficava vazia e a página pulava quando o card chegava (e a lista de locais, que
+ * só é pedida quando chega perto da tela, parecia perto antes da hora).
+ */
+function asyncCard(loader: () => Promise<{ default: Component }>, titleKey: string) {
+  return defineAsyncComponent({
+    loader,
+    loadingComponent: () => h(CardSkeleton, { title: t(titleKey) }),
+    delay: 0,
+  })
+}
+const MovesCard = asyncCard(() => import('@/components/organisms/MovesCard.vue'), 'moves.title')
+const SpritesCard = asyncCard(
+  () => import('@/components/organisms/SpritesCard.vue'),
+  'sprites.title',
+)
+const HeldItemsCard = asyncCard(
+  () => import('@/components/organisms/HeldItemsCard.vue'),
+  'heldItems.title',
+)
+const GenerationChangesCard = asyncCard(
+  () => import('@/components/organisms/GenerationChangesCard.vue'),
+  'changes.title',
+)
+
 const idParam = computed(() => String(route.params.id ?? ''))
 /** Jogo selecionado na Home, preservado na URL (`?game=&dex=`). */
 const context = computed(() => gameContextFromQuery(route.query))
+
+/**
+ * Artwork shiny no hero: começa como a lista está (a preferência "Shiny" dos cards) e continua
+ * ligado ao navegar entre Pokémon (para comparar shinies). Trocar aqui não muda a lista.
+ */
+const shiny = ref(useListShiny().shiny.value)
 
 const {
   detail,
   species,
   chain,
   chainSummaries,
+  chainForms,
   megaLine,
   megaSummaries,
   encounters,
@@ -102,7 +134,7 @@ const {
   next,
   retry,
   requestEncounters,
-} = usePokemonDetail(idParam, context)
+} = usePokemonDetail(idParam, context, shiny)
 
 /**
  * A lista de locais chegou perto da tela: só agora os encontros (resposta grande) são pedidos.
@@ -127,12 +159,23 @@ const regional = computed(() =>
     : null,
 )
 
-/** Rótulo dos vizinhos: número regional quando a navegação segue a Pokédex do jogo. */
+/**
+ * Rótulo dos vizinhos: número regional quando a navegação segue a Pokédex do jogo; na Nacional,
+ * o da espécie (uma forma, como o Raichu de Alola, tem id 10100 mas é o #0026).
+ */
 function neighborNumber(entry: NeighborEntry): string {
   return entry.dexNumber === undefined
-    ? formatDexNumber(entry.id)
+    ? formatDexNumber(speciesIdOf(entry.id))
     : formatDexNumber(entry.dexNumber, 3)
 }
+
+function neighborLink(entry: NeighborEntry | null): NeighborLink | null {
+  return entry
+    ? { id: entry.id, number: neighborNumber(entry), name: pokemonLabel(entry.id, entry.name) }
+    : null
+}
+const previousLink = computed(() => neighborLink(previous.value))
+const nextLink = computed(() => neighborLink(next.value))
 
 const cry = useCry()
 
@@ -160,14 +203,23 @@ const exclusiveTo = computed(() =>
     : null,
 )
 
-const title = computed(() => (detail.value ? formatPokemonName(detail.value.name) : t('app.name')))
+/**
+ * Nome como a lista mostra: "Mega Charizard X" nas megas (não "Charizard Mega X") e o nome em
+ * espanhol da espécie no idioma `es`. Vale para o título da aba, o h1, o hero e os diálogos.
+ */
+const displayName = computed(() => {
+  const current = detail.value
+  if (!current) return ''
+  return isMega(current.id)
+    ? megaLabel(current.name)
+    : speciesDisplayName(species.value, current.name, locale.value)
+})
+const title = computed(() => displayName.value || t('app.name'))
 
 watch(
-  [detail, locale],
-  ([value]) => {
-    document.title = value
-      ? t('app.detailTitle', { name: formatPokemonName(value.name) })
-      : t('app.dexTitle')
+  [displayName, locale],
+  ([name]) => {
+    document.title = name ? t('app.detailTitle', { name }) : t('app.dexTitle')
   },
   { immediate: true },
 )
@@ -218,12 +270,6 @@ function goBack(): void {
 /** As megas ficam na seção própria (e só nos jogos em que existem), fora dos chips de formas. */
 const formVarieties = computed(() => withoutMegas(species.value?.varieties ?? []))
 const showVarieties = computed(() => formVarieties.value.length > 1)
-
-/**
- * Artwork shiny no hero: começa como a lista está (a preferência "Shiny" dos cards) e continua
- * ligado ao navegar entre Pokémon (para comparar shinies). Trocar aqui não muda a lista.
- */
-const shiny = ref(useListShiny().shiny.value)
 
 const favorites = useFavoritesStore()
 
@@ -285,7 +331,7 @@ function toggleTeam(): void {
   const game = context.value?.game
   if (!current || !game) return
   const result = team.toggle(current.id)
-  const name = formatPokemonName(current.name)
+  const name = displayName.value
   notice.value =
     result === 'full'
       ? t('team.full')
@@ -394,35 +440,13 @@ async function sendShareImage(): Promise<void> {
       />
 
       <template v-else>
-        <nav
-          class="d-flex justify-space-between align-center mb-3"
-          :aria-label="t('detail.neighborsLabel')"
-        >
-          <v-btn
-            v-if="previous"
-            variant="text"
-            :prepend-icon="mdiChevronLeft"
-            class="text-none"
-            @click="goTo(previous.id)"
-          >
-            {{ neighborNumber(previous) }} {{ formatPokemonName(previous.name) }}
-          </v-btn>
-          <span v-else />
-          <v-btn
-            v-if="next"
-            variant="text"
-            :append-icon="mdiChevronRight"
-            class="text-none"
-            @click="goTo(next.id)"
-          >
-            {{ formatPokemonName(next.name) }} {{ neighborNumber(next) }}
-          </v-btn>
-        </nav>
+        <NeighborNav class="mb-3" :previous="previousLink" :next="nextLink" @select="goTo" />
 
         <v-row>
           <v-col cols="12" md="5">
             <PokemonHero
               :pokemon="detail"
+              :name="displayName"
               :species="species"
               :regional="regional"
               :caught="caught"
@@ -436,10 +460,20 @@ async function sendShareImage(): Promise<void> {
               @toggle-caught="toggleCaught"
               @toggle-shiny="shiny = !shiny"
             />
+            <!-- As formas (regional, Gigantamax…) são navegação: ficam junto do hero, não no fim da página. -->
+            <VarietyChips
+              v-if="showVarieties && species"
+              class="mt-4"
+              :varieties="formVarieties"
+              :species-name="species.name"
+              :current-id="detail.id"
+              @select="goTo"
+            />
             <TypeDefenses
               class="mt-4"
               :pokemon-id="detail.id"
               :types="detail.types"
+              :abilities="detail.abilities"
               :generation="context?.game.generation"
               :game-title="context?.game.title"
             />
@@ -520,6 +554,7 @@ async function sendShareImage(): Promise<void> {
               v-else
               :chain="chain"
               :summaries="chainSummaries"
+              :forms="chainForms"
               :current-species-id="detail.speciesId"
               @select="goTo"
             />
@@ -559,7 +594,11 @@ async function sendShareImage(): Promise<void> {
           </v-col>
 
           <v-col cols="12">
-            <MovesCard :moves="detail.moves" :version-group="context?.game.slug ?? null" />
+            <MovesCard
+              :moves="detail.moves"
+              :types="detail.types"
+              :version-group="context?.game.slug ?? null"
+            />
           </v-col>
 
           <v-col cols="12">
@@ -571,16 +610,16 @@ async function sendShareImage(): Promise<void> {
               @retry="retry"
             />
           </v-col>
-
-          <v-col v-if="showVarieties && species" cols="12">
-            <VarietyChips
-              :varieties="formVarieties"
-              :species-name="species.name"
-              :current-id="detail.id"
-              @select="goTo"
-            />
-          </v-col>
         </v-row>
+
+        <!-- A página é longa (golpes, locais): os vizinhos de novo no fim, para seguir sem voltar ao topo. -->
+        <NeighborNav
+          v-if="previousLink || nextLink"
+          class="mt-4"
+          :previous="previousLink"
+          :next="nextLink"
+          @select="goTo"
+        />
 
         <AbilitySheet
           v-model="ability.open.value"
@@ -597,13 +636,13 @@ async function sendShareImage(): Promise<void> {
           v-model="shareImage.open.value"
           :status="shareImage.status.value"
           :url="shareImage.url.value"
-          :alt="t('shareImage.pokemonAlt', { name: formatPokemonName(detail.name) })"
+          :alt="t('shareImage.pokemonAlt', { name: displayName })"
           @share="sendShareImage"
         />
         <CaptureSheet
           v-if="captureMounted && species"
           v-model="captureOpen"
-          :name="formatPokemonName(detail.name)"
+          :name="displayName"
           :capture-rate="species.captureRate"
           :types="detail.types"
           :generation="context?.game.generation ?? LATEST_GENERATION"
@@ -619,6 +658,7 @@ async function sendShareImage(): Promise<void> {
         />
       </template>
     </div>
+    <BackToTop />
     <AppNotice :text="notice" :timeout="2500" @close="notice = null" />
     <AppNotice
       :text="undoHuntReset ? t('shiny.resetDone') : null"

@@ -19,15 +19,23 @@ const { t } = useI18n()
 const PREVIEW = 8
 
 const showShiny = ref(props.shiny ?? false)
+/** Sprite da fêmea, nas espécies com diferença entre os gêneros. */
+const showFemale = ref(false)
 const expanded = ref(false)
 /** GIFs só sem "reduzir movimento"; senão o PNG parado do mesmo jogo. */
 const animate = !prefersReducedMotion()
 
 const ordered = computed(() => spritesForGame(props.sprites, props.game))
 const hasShiny = computed(() => props.sprites.some((s) => s.shiny || s.animatedShiny))
+const hasFemale = computed(() => props.sprites.some((s) => s.female || s.shinyFemale))
 const visible = computed(() => (expanded.value ? ordered.value : ordered.value.slice(0, PREVIEW)))
 
 function srcOf(sprite: PokemonGameSprite): string | null {
+  // A fêmea só existe parada; onde o jogo não tem a dela, vale a imagem comum.
+  if (showFemale.value) {
+    const female = showShiny.value ? sprite.shinyFemale : sprite.female
+    if (female) return female
+  }
   const animated = showShiny.value ? sprite.animatedShiny : sprite.animated
   const still = showShiny.value ? sprite.shiny : sprite.front
   return (animate ? animated || still : still || animated) ?? null
@@ -43,6 +51,15 @@ function isCurrent(sprite: PokemonGameSprite): boolean {
     <v-card-title tag="h2" class="text-title-medium d-flex align-center flex-wrap ga-2">
       {{ t('sprites.title') }}
       <v-spacer />
+      <v-switch
+        v-if="hasFemale"
+        v-model="showFemale"
+        :label="t('sprites.female')"
+        color="primary"
+        density="compact"
+        hide-details
+        class="flex-grow-0"
+      />
       <v-switch
         v-if="hasShiny"
         v-model="showShiny"

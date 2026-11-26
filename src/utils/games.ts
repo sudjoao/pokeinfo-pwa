@@ -31,6 +31,16 @@ export function gameContextQuery(context: GameContext | null): Record<string, st
   return query
 }
 
+/** Jogo mais recente da lista que tem a Pokédex com esse slug (ex.: "galar" -> Sword / Shield). */
+export function findGameWithDex(dexSlug: string): GameContext | null {
+  for (let i = GAMES.length - 1; i >= 0; i--) {
+    const game = GAMES[i]!
+    const dex = game.dexes.find((item) => item.slug === dexSlug)
+    if (dex) return { game, dex }
+  }
+  return null
+}
+
 export interface GameGroup {
   generation: number
   games: Game[]

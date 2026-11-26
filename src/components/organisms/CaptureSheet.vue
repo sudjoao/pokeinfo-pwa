@@ -45,11 +45,17 @@ const turns = ref(0)
 const dark = ref(false)
 const water = ref(false)
 
+/** O campo aceita qualquer número; a fórmula só faz sentido de 1 a 100. */
+const clampedLevel = computed(() => Math.min(100, Math.max(1, Math.round(level.value || 1))))
+/** Sem sprite para a bola (algumas das mais novas): o ícone quebrado some. */
+const ballSpriteMissing = ref(false)
+watch(ballSlug, () => (ballSpriteMissing.value = false))
+
 const multiplier = computed(() =>
   ball.value.multiplier({
     generation: formulaGeneration.value,
     types: props.types,
-    level: level.value || 1,
+    level: clampedLevel.value,
     turns: turns.value || 0,
     dark: dark.value,
     water: water.value,
@@ -106,12 +112,15 @@ const multiplierText = computed(() =>
         >
           <template #prepend-inner>
             <img
+              v-if="!ballSpriteMissing"
               :src="itemSpriteUrl(ballSlug)"
               alt=""
               width="24"
               height="24"
               crossorigin="anonymous"
+              decoding="async"
               class="capture-sheet__ball"
+              @error="ballSpriteMissing = true"
             />
           </template>
           <template #append-inner>

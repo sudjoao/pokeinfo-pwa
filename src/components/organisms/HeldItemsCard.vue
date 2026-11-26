@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, reactive } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { Game } from '@/data/games'
 import type { PokemonHeldItem } from '@/types/pokemon'
@@ -15,6 +15,8 @@ const props = defineProps<{
 const { t } = useI18n()
 
 const rows = computed(() => heldItemsForGame(props.items, props.game))
+/** Itens sem sprite no repositório: o ícone de imagem quebrada some, fica só o nome. */
+const missingSprites = reactive(new Set<string>())
 const itemName = useItemName(() => props.items.map((held) => held.item))
 
 function rarityText(rarity: HeldRarity): string {
@@ -33,14 +35,18 @@ function rarityText(rarity: HeldRarity): string {
       <ul v-else class="held-items">
         <li v-for="row in rows" :key="row.item" class="d-flex align-center ga-3">
           <img
+            v-if="!missingSprites.has(row.item)"
             :src="itemSpriteUrl(row.item)"
             alt=""
             width="32"
             height="32"
             loading="lazy"
+            decoding="async"
             crossorigin="anonymous"
             class="held-items__sprite"
+            @error="missingSprites.add(row.item)"
           />
+          <span v-else class="held-items__sprite" aria-hidden="true" />
           <div class="min-width-0">
             <RouterLink
               :to="{

@@ -198,7 +198,15 @@
     "showShiny": "Ver versão shiny",
     "shiny": "Shiny",
     "abilityOpen": "Ver detalhes de {name}",
-    "eggDittoSelf": "Cruza com qualquer Pokémon que gere ovos, menos outro Ditto."
+    "eggDittoSelf": "Cruza com qualquer Pokémon que gere ovos, menos outro Ditto.",
+    "defenseMode": "Defesa",
+    "attackMode": "Ataque (STAB)",
+    "withAbility": "Com {name}",
+    "abilityHint": "Toque numa habilidade para considerá-la na tabela.",
+    "attackHint": "O que os golpes do tipo deste Pokémon (com STAB) acertam; com dois tipos, vale o melhor.",
+    "dexNumbers": "Números nas Pokédex ({n})",
+    "dexNumbersHide": "Ocultar números",
+    "statsLevelLabel": "Nível para a faixa dos stats"
   },
   "type": {
     "normal": "Normal",
@@ -550,7 +558,10 @@
     "noneInGame": "A PokéAPI não tem golpes deste Pokémon em {game}.",
     "noneAtAll": "A PokéAPI não tem golpes deste Pokémon.",
     "hint": "Tipo, poder, precisão e PP do jogo escolhido.",
-    "evolveLong": "Aprende ao evoluir"
+    "evolveLong": "Aprende ao evoluir",
+    "stab": "STAB",
+    "stabLong": "mesmo tipo do Pokémon: 50% a mais de dano (STAB)",
+    "sortHint": "Toque num cabeçalho para ordenar."
   },
   "growthRate": {
     "slow": "Lento",
@@ -768,7 +779,8 @@
     "generation": "{n}ª geração",
     "current": "(jogo selecionado)",
     "showAll": "Mostrar todos ({n})",
-    "showLess": "Mostrar menos"
+    "showLess": "Mostrar menos",
+    "female": "Fêmea"
   },
   "heldItems": {
     "title": "Itens segurados",
@@ -1234,7 +1246,8 @@
     "bulbapedia": "Ver na Bulbapedia",
     "loadError": "Não foi possível carregar os líderes.",
     "empty": "Ainda não há líderes de {game}.",
-    "source": "Times e observações (em inglês) da Bulbapedia."
+    "source": "Times e observações (em inglês) da Bulbapedia.",
+    "opensNewTab": "(abre em nova aba)"
   },
   "export": {
     "action": "Exportar",

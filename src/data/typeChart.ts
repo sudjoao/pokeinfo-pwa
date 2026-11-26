@@ -15,6 +15,39 @@ export const BATTLE_TYPES: readonly PokemonType[] = POKEMON_TYPES.filter(
 
 export type Effectiveness = 0 | 0.5 | 2
 
+/** O que uma habilidade faz com o dano recebido de cada tipo (só as que mudam a tabela). */
+export interface AbilityDefense {
+  /** Multiplicador extra por tipo de ataque (0 = imune, 0.5 = metade, 2 = dobro). */
+  multipliers?: Partial<Record<PokemonType, number>>
+  /** Wonder Guard: só golpes super efetivos acertam. */
+  onlySuperEffective?: boolean
+}
+
+/**
+ * Habilidades que alteram as fraquezas e resistências (slugs da PokéAPI). Lista curta de
+ * propósito: só as que entram na tabela de tipos; as que dependem da situação (Multiscale,
+ * Filter, Solid Rock…) ficam de fora.
+ */
+export const ABILITY_DEFENSE: Readonly<Record<string, AbilityDefense>> = {
+  levitate: { multipliers: { ground: 0 } },
+  'earth-eater': { multipliers: { ground: 0 } },
+  'flash-fire': { multipliers: { fire: 0 } },
+  'well-baked-body': { multipliers: { fire: 0 } },
+  'water-absorb': { multipliers: { water: 0 } },
+  'storm-drain': { multipliers: { water: 0 } },
+  'dry-skin': { multipliers: { water: 0, fire: 1.25 } },
+  'volt-absorb': { multipliers: { electric: 0 } },
+  'lightning-rod': { multipliers: { electric: 0 } },
+  'motor-drive': { multipliers: { electric: 0 } },
+  'sap-sipper': { multipliers: { grass: 0 } },
+  'wind-rider': { multipliers: { flying: 0 } },
+  'thick-fat': { multipliers: { fire: 0.5, ice: 0.5 } },
+  heatproof: { multipliers: { fire: 0.5 } },
+  'purifying-salt': { multipliers: { ghost: 0.5 } },
+  fluffy: { multipliers: { fire: 2 } },
+  'wonder-guard': { onlySuperEffective: true },
+}
+
 /** `TYPE_CHART[atacante][defensor]` = multiplicador do golpe do tipo atacante contra o defensor. */
 export const TYPE_CHART: Partial<Record<PokemonType, Partial<Record<PokemonType, Effectiveness>>>> =
   {

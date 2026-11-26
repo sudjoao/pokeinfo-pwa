@@ -103,6 +103,8 @@ const bulbapediaUrl = computed(
         size="small"
         variant="outlined"
         filter
+        role="button"
+        :aria-pressed="battleIndex === index"
       >
         {{ battleLabel(entry, index) }}
       </v-chip>
@@ -123,6 +125,8 @@ const bulbapediaUrl = computed(
           size="small"
           variant="outlined"
           filter
+          role="button"
+          :aria-pressed="teamIndex === index"
         >
           {{ conditionLabel.short(entry.when) }}
         </v-chip>
@@ -201,6 +205,7 @@ const bulbapediaUrl = computed(
       class="mt-1 px-1"
     >
       {{ t('league.bulbapedia') }}
+      <span class="d-sr-only">{{ t('league.opensNewTab') }}</span>
     </v-btn>
   </div>
 </template>

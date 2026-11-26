@@ -198,7 +198,15 @@
     "showShiny": "Show shiny",
     "shiny": "Shiny",
     "abilityOpen": "See details of {name}",
-    "eggDittoSelf": "Breeds with any Pokémon that can lay eggs, except another Ditto."
+    "eggDittoSelf": "Breeds with any Pokémon that can lay eggs, except another Ditto.",
+    "defenseMode": "Defense",
+    "attackMode": "Attack (STAB)",
+    "withAbility": "With {name}",
+    "abilityHint": "Tap an ability to apply it to the chart.",
+    "attackHint": "What this Pokémon's own-type (STAB) moves hit; with two types, the better one counts.",
+    "dexNumbers": "Pokédex numbers ({n})",
+    "dexNumbersHide": "Hide numbers",
+    "statsLevelLabel": "Level for the stat range"
   },
   "type": {
     "normal": "Normal",
@@ -550,7 +558,10 @@
     "noneInGame": "PokéAPI has no moves for this Pokémon in {game}.",
     "noneAtAll": "PokéAPI has no moves for this Pokémon.",
     "hint": "Type, power, accuracy and PP from the chosen game.",
-    "evolveLong": "Learned on evolution"
+    "evolveLong": "Learned on evolution",
+    "stab": "STAB",
+    "stabLong": "same type as the Pokémon: 50% more damage (STAB)",
+    "sortHint": "Tap a column header to sort."
   },
   "growthRate": {
     "slow": "Slow",
@@ -768,7 +779,8 @@
     "generation": "Generation {n}",
     "current": "(selected game)",
     "showAll": "Show all ({n})",
-    "showLess": "Show less"
+    "showLess": "Show less",
+    "female": "Female"
   },
   "heldItems": {
     "title": "Held items",
@@ -1234,7 +1246,8 @@
     "bulbapedia": "View on Bulbapedia",
     "loadError": "Couldn't load the leaders.",
     "empty": "No leaders for {game} yet.",
-    "source": "Teams and notes from Bulbapedia."
+    "source": "Teams and notes from Bulbapedia.",
+    "opensNewTab": "(opens in a new tab)"
   },
   "export": {
     "action": "Export",

@@ -70,6 +70,9 @@ function toSpecies(dto: PokemonSpeciesDto): PokemonSpecies {
         isDefault: variety.is_default,
       }))
       .filter((variety) => Number.isFinite(variety.pokemonId)),
+    pokedexNumbers: (dto.pokedex_numbers ?? [])
+      .filter((entry) => entry.pokedex.name !== 'national')
+      .map((entry) => ({ dex: entry.pokedex.name, number: entry.entry_number })),
   }
 }
 
